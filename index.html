@@ -2943,6 +2943,7 @@ const POOL_V8=POOL.length;CHAR.filter(c=>!c.ju&&c.id!=='박계원').forEach(c=>P
 const POOL_V9=POOL.length;POOL.push({id:'wl:unnie',tier:'L',kind:'wfx',lg:1,owner:'영규형',wk:'unnie',n:'👊 왕언니 레전드 세트'},{id:'wl:bride',tier:'L',kind:'wfx',lg:1,owner:'박준형',wk:'bride',n:'💔 비련의 신부 레전드 세트'});
 const POOL_V11=POOL.length;POOL.push({id:'m:하도',tier:'M',kind:'mskin',owner:'하도',n:'하도 · 신화 스킨 Ⅰ'},{id:'m3:하도',tier:'M',kind:'mskin',owner:'하도',n:'하도 · 신화 스킨 Ⅱ'},{id:'m:쥬은',tier:'M',kind:'mskin',owner:'쥬은',n:'쥬은 · 신화 스킨 Ⅰ'},{id:'m3:쥬은',tier:'M',kind:'mskin',owner:'쥬은',n:'쥬은 · 신화 스킨 Ⅱ'},{id:'m:재건',tier:'M',kind:'mskin',owner:'재건',n:'짱재 · 신화 스킨 Ⅰ'},{id:'m3:재건',tier:'M',kind:'mskin',owner:'재건',n:'짱재 · 신화 스킨 Ⅱ'});
 const POOL_V13=POOL.length;POOL.push({id:'wl:kisunS',tier:'L',kind:'wfx',lg:1,owner:'재건',wk:'kisun',n:'✨ 끼순이어검술 · 세인트썸띵'},{id:'wl:kisunF',tier:'L',kind:'wfx',lg:1,owner:'재건',wk:'kisun',n:'💗 끼순이어검술 · 페미닌'});
+const POOL_V14=POOL.length;POOL.push({id:'m4:임재영',tier:'M',kind:'tall',owner:'임재영',vid:'ult3/taetae.mp4',role:'intro',n:'태태영 · 신화 입장 연출 Ⅲ'});
 const PBY={};POOL.forEach(p=>PBY[p.id]=p);
 const TIERN={C:'일반',R:'희귀',L:'전설',M:'신화'},TIERC={C:'#e8e8f0',R:'#ffd34d',L:'#ff7ac8',M:'#fff3b0'};
 // ---- save defaults ----
@@ -3166,7 +3167,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)r
 
 /* ================= 저장 코드 (기기 간 이동) =================
    ※ POOL/ACH/AXN/WFX 순서가 코드 해석 순서예요. 새 항목은 반드시 "끝에" 추가하세요. */
-const SC_VER=14;
+const SC_VER=15;
 function scBits(list,has){const out=[];for(let i=0;i<list.length;i+=8){let b=0;for(let j=0;j<8&&i+j<list.length;j++)if(has(list[i+j],i+j))b|=1<<j;out.push(b)}return out}
 function scUnbits(bytes,pos,list,set){for(let i=0;i<list.length;i++){if(bytes[pos+(i>>3)]>>(i&7)&1)set(list[i],i)}return pos+Math.ceil(list.length/8)}
 function scVar(out,n){n=Math.max(0,Math.floor(n||0));do{let b=n&127;n=Math.floor(n/128);if(n)b|=128;out.push(b)}while(n)}
@@ -3201,7 +3202,7 @@ function parseCode(code){
   try{const C=CH12().map(c=>c.id),S={fancy:{},ult:{},cine:{},tallOff:{},best:{},bestH:{},inv:{},skin:{},wfx:{},ach:{},ax:{},xevo:{},achC:{},tix:{R:0,L:0,M:0}};let p=1;
     for(const k of ['fancy','ult','cine','tallOff'])p=scUnbits(body,p,C,id=>S[k][id]=true);
     C.forEach(id=>{const v=body[p++];if(v)S.best[id]=v*10});C.forEach(id=>{const v=body[p++];if(v)S.bestH[id]=v*10});
-    p=scUnbits(body,p,ver>=14?POOL:ver>=13?POOL.slice(0,POOL_V13):ver>=11?POOL.slice(0,POOL_V11):ver>=9?POOL.slice(0,POOL_V9):ver>=8?POOL.slice(0,POOL_V8):ver>=6?POOL.slice(0,POOL_V7):ver>=5?POOL.slice(0,POOL_V5):POOL.slice(0,POOL_V4),it=>S.inv[it.id]=true);
+    p=scUnbits(body,p,ver>=15?POOL:ver>=14?POOL.slice(0,POOL_V14):ver>=13?POOL.slice(0,POOL_V13):ver>=11?POOL.slice(0,POOL_V11):ver>=9?POOL.slice(0,POOL_V9):ver>=8?POOL.slice(0,POOL_V8):ver>=6?POOL.slice(0,POOL_V7):ver>=5?POOL.slice(0,POOL_V5):POOL.slice(0,POOL_V4),it=>S.inv[it.id]=true);
     C.forEach(id=>{const v=body[p++];if(v&&POOL[v-1]&&['color','swim','hanbok','wed','god'].includes(POOL[v-1].kind))S.skin[id]=POOL[v-1].id});
     p=scUnbits(body,p,WK(),k=>S.wfx[k]=false);
     p=scUnbits(body,p,AL,a=>S.ach[a.id]=1);p=scUnbits(body,p,AXK(),k=>S.ax[k]=false);p=scUnbits(body,p,XW(),k=>S.xevo[k]=1);S.achC={};if(ver>=2)p=scUnbits(body,p,AL,a=>S.achC[a.id]=1);else Object.keys(S.ach).forEach(k=>S.achC[k]=1);if(ver>=4){S.cpn={};p=scUnbits(body,p,COUPONS,q=>S.cpn[q.c]=1)}
@@ -3422,7 +3423,7 @@ function previewCv(it,size){const c=document.createElement('canvas');c.width=c.h
   else if(it.kind==='mskin')x.drawImage(mskFrame(it.owner,it.id.startsWith('m:')?1:it.id.startsWith('m3:')?2:3,0),0,0,size,size);else x.drawImage(skinSpr(it.owner,it.id,0),0,0,size,size);return c}
 function showGachaResult(res){
   const {it,tier,dupe,refund}=res,ov=$('#gres');ov.hidden=false;SND.p('t'+tier);
-  ov.innerHTML=`<div class="gcard t${tier}"><div class="gtier">${TIERN[tier]}</div><div class="gprev"></div><h3>${esc(it.n)}</h3><p>${esc(it.kind==='mskin'?CHAR.find(c=>c.id===it.owner).nick+' 전용 신화 스킨 · 옷장에서 입혀요':it.kind==='tall'?CHAR.find(c=>c.id===it.owner).nick+'(으)로 게임을 시작하면 신화 영상이 나와요 · 신화 스킨도 함께 얻었어요 👑':it.kind==='wfx'?(it.lg?(it.wk==='unnie'?'왕언니와 스포츠카 왕언니가 새 모습으로 · 🕶️ 블랙 드레스 버전도 함께 · 옷장 무기 탭에서 골라요':it.wk==='bride'?'비련의 신부와 지옥에서 온 신부가 새 모습으로 · 옷장 무기 탭에서 골라요':it.wk==='kisun'?'끼순이어검술의 날아다니는 검들이 새 모습으로 · 누구나 사용 가능 · 옷장 무기 탭에서 골라요':'진화한 다이아 타워가 화난 얼굴의 「다이아 기갈타워」로 바뀌어요 · 옷장에서 켜고 끌 수 있어요'):(it.hw?HWFX[it.wk].d:WFX[it.wk].d)+' · 누가 들어도 적용'):SKIN_DESC[it.kind]+' · 누구에게나 입힐 수 있어요')}</p>${dupe?`<p class="gdup">이미 있는 보상 → 💰 +${refund}G 환급</p>`:'<p class="gnew">NEW!</p>'}
+  ov.innerHTML=`<div class="gcard t${tier}"><div class="gtier">${TIERN[tier]}</div><div class="gprev"></div><h3>${esc(it.n)}</h3><p>${esc(it.kind==='mskin'?CHAR.find(c=>c.id===it.owner).nick+' 전용 신화 스킨 · 옷장에서 입혀요':it.kind==='tall'?CHAR.find(c=>c.id===it.owner).nick+'(으)로 게임을 시작하면 신화 영상이 나와요'+(it.id.startsWith('m4:')?' 🎬':' · 신화 스킨도 함께 얻었어요 👑'):it.kind==='wfx'?(it.lg?(it.wk==='unnie'?'왕언니와 스포츠카 왕언니가 새 모습으로 · 🕶️ 블랙 드레스 버전도 함께 · 옷장 무기 탭에서 골라요':it.wk==='bride'?'비련의 신부와 지옥에서 온 신부가 새 모습으로 · 옷장 무기 탭에서 골라요':it.wk==='kisun'?'끼순이어검술의 날아다니는 검들이 새 모습으로 · 누구나 사용 가능 · 옷장 무기 탭에서 골라요':'진화한 다이아 타워가 화난 얼굴의 「다이아 기갈타워」로 바뀌어요 · 옷장에서 켜고 끌 수 있어요'):(it.hw?HWFX[it.wk].d:WFX[it.wk].d)+' · 누가 들어도 적용'):SKIN_DESC[it.kind]+' · 누구에게나 입힐 수 있어요')}</p>${dupe?`<p class="gdup">이미 있는 보상 → 💰 +${refund}G 환급</p>`:'<p class="gnew">NEW!</p>'}
   <div class="btns"><button class="big" type="button" id="gAgain" ${SAVE.gold<GACHA_COST?'disabled':''}>한 번 더 · ${GACHA_COST}G</button><button class="ghost" type="button" id="gOk">확인</button></div><small>보유 💰 ${SAVE.gold}G</small></div>`;
   ov.querySelector('.gprev').appendChild(previewCv(it,128));
   $('#gOk').onclick=()=>{ov.hidden=true;openShop()};$('#gAgain').onclick=()=>{ov.hidden=true;doGacha()};

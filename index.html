@@ -530,6 +530,8 @@ let SAVE={fancy:{},ult:{},best:{},cine:{},bestH:{}};
 try{SAVE=Object.assign(SAVE,JSON.parse(localStorage.getItem(SAVE_KEY)||'{}'))}catch(e){}
 if(location.hash==='#unlockall'){CHAR.forEach(c=>{SAVE.fancy[c.id]=true;SAVE.ult[c.id]=true;SAVE.cine[c.id]=true})}
 function persist(){try{localStorage.setItem(SAVE_KEY,JSON.stringify(SAVE))}catch(e){}}
+function fixUlt1(){if(SAVE.fixUlt1)return;SAVE.fixUlt1=1;const got=[];try{for(const c of CHAR){if(c.ju)continue;const id=c.id;if(SAVE.fancy[id]&&!SAVE.ult[id]&&((SAVE.sbU||{})[id]||0)>=2){SAVE.ult[id]=true;got.push(c.nick)}}}catch(e){}persist();
+  if(got.length)setTimeout(()=>{const d=document.createElement('div');d.className='fixUlt';d.innerHTML='💥 <b>필살기 해금 보상</b><br>상봉 어려움 기록으로 필살기가 열렸어요: '+got.map(esc).join(', ')+'<br><small>눌러서 닫기</small>';d.onclick=()=>d.remove();document.body.appendChild(d);setTimeout(()=>d.remove(),12000)},5500)}
 
 /* ================= helpers ================= */
 const $=s=>document.querySelector(s);
@@ -2683,7 +2685,7 @@ $('#pauseBtn').onclick=togglePause;
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&G&&G.running&&!G.paused&&$('#lvov').hidden)togglePause()});
 function checkUnlocks(){
   if(G.tw||G.id==='쥬은')return;const c=CHAR[G.ci];let changed=false;
-  if(!G.hard&&G.t>=UNL){
+  if(G.t>=(G.hard?UNLH:UNL)){
     if(!G.fancy&&!SAVE.fancy[c.id]){SAVE.fancy[c.id]=true;changed=true;G.unlockedNow.push(`👗 ${esc(c.nick)}의 화려한 모습 해금! 다음 판에 선택할 수 있어요`);toast('👗 화려한 모습 해금!','10분 생존 달성 · 계속 버텨보세요',1)}
     if(G.fancy&&!SAVE.ult[c.id]){SAVE.ult[c.id]=true;changed=true;G.unlockedNow.push(`💥 필살기 「${esc(ULT[c.id].n)}」 해금!<br><small style="font-weight:500">${esc(ULT[c.id].type)} · ${esc(ULT[c.id].d)}</small>`);toast(`💥 필살기 「${ULT[c.id].n}」 해금!`,'다음 판부터 사용 가능',1)}
   }
@@ -3607,7 +3609,8 @@ function closeCloset(){clearInterval(CLOT);CLOT=null;$('#closet').hidden=true;to
 function renderCloset(){const hm=anyMyth();if(!hm&&CLO.tab==='video')CLO.tab='skin';const c=CHAR[CLO.ci],id=c.id,fz=!!SAVE.fancy[id],tab=CLO.tab;clearInterval(CLOT);
   const TO={L:0,R:1,C:2},own0=SKINK.flatMap(k=>POOL.filter(p=>p.kind===k)),own=[...own0.filter(p=>SAVE.inv[p.id]),...own0.filter(p=>!SAVE.inv[p.id]).sort((a,b)=>TO[a.tier]-TO[b.tier])];const cur=curSkin(id);
   let body='';
-  if(tab==='skin'){body=`${mskRow(id)}${SAVE.inv['hell:aura']?`<div class="clowrow" style="border-color:#ff3a5a"><span class="wn">🔥 불타는 캐릭터 오라</span><span class="wb"><button type="button" class="wfxb cau" aria-pressed="${SAVE.aura!==false}">${SAVE.aura!==false?'켜짐':'꺼짐'}</button></span><span class="c">어떤 캐릭터든 발밑에서 불꽃이 피어올라요</span></div>`:''}<p class="clonote">${fz?'고른 스킨은 화려한 모습으로 플레이할 때 적용돼요. 스킨은 누구에게나 입힐 수 있어요.':'🔒 '+esc(c.nick)+'은(는) 아직 화려한 모습이 잠겨 있어요. 기본 모습으로 10분을 버티면 스킨을 입힐 수 있어요.'}</p>
+  if(tab==='skin'&&(c.ju||c.x2)){body=`${mskRow(id).replace('Ⅰ·Ⅱ는 신화 입장 연출과 함께, Ⅲ은 신화 뽑기에서 얻어요','신화 뽑기에서 얻어요')||'<p class="clonote">👑 아직 가진 신화 스킨이 없어요. 신화 뽑기·입장 연출로 얻을 수 있어요.</p>'}<p class="clonote">💡 ${esc(c.nick)}: 그림 방식이 달라서 일반 스킨 대신 <b>신화 스킨만</b> 입을 수 있어요.${c.ju?'':(fz?' 신화 스킨은 화려한 모습으로 플레이할 때 적용돼요.':' 🔒 화려한 모습을 해금하면 적용돼요.')}</p>`}
+  else if(tab==='skin'){body=`${mskRow(id)}${SAVE.inv['hell:aura']?`<div class="clowrow" style="border-color:#ff3a5a"><span class="wn">🔥 불타는 캐릭터 오라</span><span class="wb"><button type="button" class="wfxb cau" aria-pressed="${SAVE.aura!==false}">${SAVE.aura!==false?'켜짐':'꺼짐'}</button></span><span class="c">어떤 캐릭터든 발밑에서 불꽃이 피어올라요</span></div>`:''}<p class="clonote">${fz?'고른 스킨은 화려한 모습으로 플레이할 때 적용돼요. 스킨은 누구에게나 입힐 수 있어요.':'🔒 '+esc(c.nick)+'은(는) 아직 화려한 모습이 잠겨 있어요. 기본 모습으로 10분을 버티면 스킨을 입힐 수 있어요.'}</p>
     <div class="clogrid"><button type="button" class="clocard" data-sk="" aria-pressed="${!cur}"><canvas width="32" height="32" data-pv=""></canvas>기본</button>${own.map(p=>SAVE.inv[p.id]?`<button type="button" class="clocard t${p.tier}" data-sk="${p.id}" aria-pressed="${cur===p.id}"><canvas width="32" height="32" data-pv="${p.id}"></canvas>${esc(p.kind==='color'?p.n:p.n.split(' · ')[1]||p.n)}</button>`:`<div class="clocard t${p.tier} lock"><span class="q">❓</span>${esc(TIERN[p.tier])}</div>`).join('')}</div>`}
   else if(tab==='weapon'){const ks=Object.keys(WFX);body=`<p class="clonote">무기 스킨은 누가 그 무기를 들어도 적용돼요. 뽑기에서 얻은 스킨만 고를 수 있어요.</p>${SAVE.inv['hell:wfx']?`<div class="clowrow" style="border-color:#ff3a5a"><span class="wn">🔥 지옥불 (모든 무기)</span><span class="wb"><button type="button" class="wfxb chf" aria-pressed="${SAVE.hellFx!==false}">${SAVE.hellFx!==false?'켜짐':'꺼짐'}</button></span><span class="c">모든 이펙트가 검붉은 불꽃색이 되고 불티가 흩날려요</span></div>`:''}${ks.map(k=>{const s2=wsel(k),hr=!!SAVE.inv['w:'+k],hh=!!SAVE.inv['wh:'+k];return `<div class="clowrow"><canvas width="96" height="64" data-wk="${k}"></canvas><span class="wn">${WP[k].icon} ${esc(WP[k].name)}</span><span class="wb"><button type="button" class="wfxb cws" data-k="${k}" data-v="" aria-pressed="${s2===''}">기본</button><button type="button" class="wfxb cws" data-k="${k}" data-v="r" aria-pressed="${s2==='r'}" ${hr?'':'disabled'}>${hr?esc(WFX[k].n):'🔒 ???'}</button><button type="button" class="wfxb cws" data-k="${k}" data-v="h" aria-pressed="${s2==='h'}" ${hh?'':'disabled'}>${hh?'🎃 '+esc(HWFX[k].n):'🔒 ???'}</button></span></div>`}).join('')}${juClosetRow()}${wsClosetRow()}${kisunRow()}`}
   else{const its=introItems(id),all=POOL.filter(p=>p.kind==='tall'&&p.owner===id).sort((a,b)=>a.n<b.n?-1:1),fx=introFixed(id),off=(SAVE.introOff||{})[id];
@@ -3615,7 +3618,7 @@ function renderCloset(){const hm=anyMyth();if(!hm&&CLO.tab==='video')CLO.tab='sk
     <div class="clogrid">${all.map(p=>SAVE.inv[p.id]?`<div class="clocard tL" ${fx===p?'aria-pressed="true"':''}><span class="q">🎬</span>${esc(p.n.replace(' · 신화 입장 연출',''))}${its.length>1?`<button type="button" class="wfxb cmp" data-i="${p.id}" aria-pressed="${fx===p}">${fx===p?'고정 중':'고정'}</button>`:''}<button type="button" class="wfxb vidb" data-v="${p.vid}">▶ 보기</button></div>`:`<div class="clocard lock"><span class="q">❓</span>신화</div>`).join('')}</div>`}
   $('#closet').innerHTML=`<div class="shead"><button class="ghost" type="button" id="cloBack">← 뒤로</button><h2>👗 옷장</h2><div class="gold">💰 ${SAVE.gold}G</div></div>
   <div class="clo"><div class="clol"><div class="clop"><canvas width="32" height="32" id="cloBig"></canvas></div><b style="text-align:center">${esc(c.nick)} · ${fz&&mskCur(id)?'👑 신화 스킨 '+MSKN[mskCur(id)]:cur?esc(PBY[cur].kind==='color'?PBY[cur].n:PBY[cur].n.split(' · ')[1]):'기본 스킨'}</b>
-  <div class="clochars">${CH12().map((q,i)=>`<button type="button" data-ci="${i}" aria-pressed="${i===CLO.ci}"><canvas width="32" height="32"></canvas>${esc(q.nick)}</button>`).join('')}</div>
+  <div class="clochars">${CHAR.map((q,i)=>[q,i]).filter(([q])=>!q.ju||juUnl('emerald')).map(([q,i])=>`<button type="button" data-ci="${i}" aria-pressed="${i===CLO.ci}"><canvas width="32" height="32"></canvas>${esc(q.nick)}</button>`).join('')}</div>
   <button type="button" class="big" id="cloGo">${esc(c.nick)} 고르기</button></div>
   <div><div class="clotabs" role="tablist"><button type="button" data-tab="skin" aria-pressed="${tab==='skin'}">👗 캐릭터 스킨</button><button type="button" data-tab="weapon" aria-pressed="${tab==='weapon'}">✨ 무기 스킨</button>${hm?`<button type="button" data-tab="video" aria-pressed="${tab==='video'}">🎬 신화 영상</button>`:''}</div>${body}</div></div>`;
   const big=$('#cloBig');
@@ -4434,12 +4437,14 @@ function go(r){const u=me(),meP=(r.ps||{})[u.uid]||{};const ci=CHAR.findIndex(c=
 btn();
 })();</script>
 
-<style>.mlbRes{margin:8px auto;padding:8px 12px;border-radius:12px;background:rgba(90,184,255,.12);border:1px solid rgba(90,184,255,.45);text-align:center;font-size:13px;line-height:1.5}.mlbRes b{color:#9fe0ff}.mlbRes small{opacity:.8}
+<style>.fixUlt{position:fixed;left:50%;top:18px;transform:translateX(-50%);z-index:9999;max-width:min(92vw,420px);padding:12px 16px;border-radius:14px;background:#1a1028;border:2px solid #ffd34d;color:#fff;font-size:14px;line-height:1.5;text-align:center;box-shadow:0 8px 30px rgba(0,0,0,.5);cursor:pointer}.fixUlt b{color:#ffd34d}
+.mlbRes{margin:8px auto;padding:8px 12px;border-radius:12px;background:rgba(90,184,255,.12);border:1px solid rgba(90,184,255,.45);text-align:center;font-size:13px;line-height:1.5}.mlbRes b{color:#9fe0ff}.mlbRes small{opacity:.8}
 #mlbWait{position:fixed;left:50%;top:40%;transform:translate(-50%,-50%);z-index:75;background:rgba(20,10,26,.92);border:2px solid #9fe0ff;color:#fff;font:700 15px 'Noto Sans KR',sans-serif;padding:14px 20px;border-radius:16px}
 #mlbChat{position:fixed;left:8px;right:8px;bottom:calc(8px + env(safe-area-inset-bottom,0px));z-index:72;background:rgba(20,10,26,.9);border:1.5px solid #4a3658;border-radius:16px;padding:8px;display:flex;flex-direction:column;gap:6px;max-width:560px;margin:0 auto;font-family:'Noto Sans KR',sans-serif}
 #mlbChat .mlbCq{display:flex;gap:6px;overflow-x:auto}#mlbChat .mlbCq button{flex:none;border:1.5px solid #4a3658;background:#1e1228;color:#fff;border-radius:999px;padding:8px 12px;font-size:13px;min-height:40px}
 #mlbChat .mlbCf{display:flex;gap:6px}#mlbChat input{flex:1;min-width:0;border-radius:10px;border:1.5px solid #4a3658;background:#0e0914;color:#fff;padding:8px 10px;font-size:16px}#mlbChat .mlbCf button{border:2px solid #ffd6ea;background:#ff6fb5;color:#2a0b26;border-radius:10px;font-weight:900;padding:0 14px}</style>
-<script>/* ===== 멀티 M2: 2인 협동 (방장 기준) ===== */
+<script>try{fixUlt1()}catch(e){console.warn(e)}
+/* ===== 멀티 M2: 2인 협동 (방장 기준) ===== */
 var MPT=null,MPDIE=null,MPXP=null,MPCHEST=null,MPKILL=null,mpDraw=null,MPNF=null;
 (()=>{
 const MP=window.MP;if(!MP)return;

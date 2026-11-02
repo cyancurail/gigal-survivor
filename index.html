@@ -2158,7 +2158,7 @@ function levelUp(){
 function checkLevel(){if(G.xp>=G.next){G.xp-=G.next;G.lvl++;if(!G.bot){const m=pn(90);for(let k=0;k<m;k++){const a=rnd(0,6.283);px(G.p.x+Math.cos(a)*14,G.p.y+Math.sin(a)*8,Math.cos(a)*rnd(20,80),-rnd(120,340),1.1,pick(['#ff5fb8','#ffd34d','#7fd8ff','#8dff3a','#c07bff','#ffffff']),2,3,1.2,280)}}G.next=Math.floor(4+G.lvl*4+1.4*Math.pow(G.lvl,1.8));levelUp()}}
 function openChest(){s2Desc();
   if(!G.rdPass&&!G.tw&&rdReady()){if(G.bot){rdMerge(1)}else{rdAsk(()=>{G.rdPass=1;openChest();G.rdPass=0});return}}
-  G.paused=true;
+  G.paused=true;G.chestBusy=1;
   const ev=G.weapons.find(w=>!w.evo&&w.lvl>=8&&G.items[WP[w.k].evo]);
   const got=[];let tier,evoMsg='';
   if(ev){ev.evo=true;tier=3;if(WP[ev.k].ju&&!G.tw&&!G.bot){SAVE.juEvo=SAVE.juEvo||{};if(!SAVE.juEvo[ev.k]){SAVE.juEvo[ev.k]=1;persist();setTimeoutG(()=>toast('🌙 트와일라잇 보석 해금',WP[ev.k].name+'을(를) 트와일라잇에서 쓸 수 있어요'),2.5)}}if(XW5.includes(ev.k)){SAVE.xevo[ev.k]=1;persist();achCheck()}if(G.weapons.length===6&&G.weapons.every(w=>w.evo))achGet('allevo');got.push({icon:WP[ev.k].icon,txt:`🧬 진화! ${WP[ev.k].name} → ${WP[ev.k].evoName}`,sub:WP[ev.k].ed})}
@@ -2169,7 +2169,7 @@ function openChest(){s2Desc();
   playGacha(tier,got,()=>{
     const hint=G.weapons.filter(w=>!w.evo).map(w=>`${WP[w.k].icon}${w.lvl}/8 + ${IT[WP[w.k].evo].icon}${G.items[WP[w.k].evo]?'✔':'✖'}`).join('  ');
     $('#lvmodal').innerHTML=`<h3>${tier===5?'🌟 친구들이 왔다! 5개 획득!':tier===3?'💖 대박!!!':tier===2?'🎆 2개 획득!':'🎁 보스 상자'}</h3><div class="unlock">${got.map(g=>`${g.icon} ${esc(g.txt)}${g.sub?`<br><small style="font-weight:500">${esc(g.sub)}</small>`:''}`).join('<br>')}</div>${hint?`<p class="c">진화 조건: 무기 8레벨 + 짝 아이템<br>${hint}</p>`:''}<div class="btns"><button type="button" class="big" id="chestOk">계속</button></div>`;
-    $('#lvov').hidden=false;$('#chestOk').onclick=()=>{$('#lvov').hidden=true;G.paused=false;renderHud();checkLevel()};
+    G.paused=true;$('#lvov').hidden=false;$('#chestOk').onclick=()=>{G.chestBusy=0;$('#lvov').hidden=true;G.paused=false;renderHud();checkLevel()};
   });
 }
 /* ===== 보스 상자 5개 연출: 잿빛 하늘을 뚫고 떨어지는 친구별 4개 ===== */
@@ -2291,7 +2291,7 @@ function star5Cine(o,done){
 
 function playGacha(tier,got,done){SND.p(tier===3&&got.some(g=>/진화/.test(g.txt))?'evo':'chest');
   const el=$('#gacha');
-  if(G.bot||RM){done();return}
+  if(G.bot||RM||(window.MP&&window.MP.g&&tier>=3)){done();return}
   if(tier===5&&G.id!=='쥬은'){const fr=CHAR.map(c=>c.id).filter(id=>id!==G.id&&STAR5[id]).sort(()=>Math.random()-.5);star5Cine({id:G.id,form:G.fancy?'fancy':'plain',first:{icon:got[0].icon,txt:got[0].txt},stars:got.slice(1,5).map((g,i)=>({fid:fr[i],icon:g.icon,txt:g.txt}))},done);return}
   el.hidden=false;let fin=false;const TT=[];const st=(fn,ms)=>{TT.push(setTimeout(fn,ms))};const kh=ev=>{if(ev.key===' '||ev.key==='Enter'){ev.preventDefault();finish()}};
   const finish=()=>{if(fin)return;fin=true;TT.forEach(clearTimeout);run=false;el.hidden=true;el.onpointerdown=null;removeEventListener('keydown',kh,true);done()};
@@ -4461,7 +4461,7 @@ MPDIE=()=>{if(!MP.g)return false;const p=G.p;p.dead=1;p.hp=0;p.inv=1e9;MP.g.wsav
  if(!P2.ch||P2.dead){finish(false);return true}
  toast('💀 쓰러졌어요','친구를 응원해 주세요! 아래에서 응원 메시지를 보낼 수 있어요');chatUI(true);return true};
 MPXP=gv=>{if(!isH())return false;G.xp+=gv*G.S.growth*G.xpMul*(G.hev&&G.hev.k==='read'?.5:1);MP.g.xs=(MP.g.xs||0)+gv;return true};
-MPCHEST=()=>{if(!isH())return false;MP.g.cc=(MP.g.cc||0)+1;if(!G.p.dead)setTimeoutG(openChest,.3);return true};
+MPCHEST=()=>{if(!isH())return false;MP.g.cc=(MP.g.cc||0)+1;if(!G.p.dead)MP.g.cq=(MP.g.cq||0)+1;return true};
 MPKILL=(e)=>{if(!isG())return false;e.dead=true;MP.g.tomb.set(e.nid,performance.now());return true};
 // 함수 래핑 (방장이 아닐 때 몬스터 생성·보스 진행은 방장이 담당)
 const wrapSkip=(name)=>{const f=window[name];if(typeof f!=='function')return;window[name]=function(){if(isG())return;return f.apply(this,arguments)};};
@@ -4497,7 +4497,8 @@ function resMP(g){const m=document.getElementById('resmodal');if(!m)return;const
  d.innerHTML='<b>👥 함께한 친구</b><div>'+esc(g.pid||'친구')+(ch?' · '+esc(ch.nick||ch.name||ch.id):'')+' · Lv'+(P2.lv||1)+' · '+(P2.dead?'💀 쓰러짐':'✨ 끝까지 생존')+'</div><small>친구가 준 피해 '+fmtN(P2.td||0)+' · 내가 준 피해 '+fmtN(myDmg())+'</small>';
  if(bt){m.insertBefore(d,bt);const a=m.querySelector('#againB');if(a)a.textContent='혼자 다시 하기';const b=document.createElement('button');b.type='button';b.className='big';b.textContent='👥 다시 같이 하기';b.onclick=()=>{document.getElementById('resov').hidden=true;G=null;toSelect();setTimeout(()=>{const s=document.getElementById('selMP');if(s)s.click()},60)};bt.insertBefore(b,bt.firstChild)}else m.appendChild(d)}
 // ---------- 송신 ----------
-function tx(){if(!MP.g||!G)return;try{(MP.g.host?txHost:txGuest)()}catch(e){console.warn(e)}
+function tx(){if(!MP.g||!G)return;try{stuckCheck()}catch(e){}
+ try{const g=MP.g;if(g.cq>0&&G.running&&!G.paused&&!G.p.dead&&!busyMine()&&!g.plv){if((g.cqT=(g.cqT||0)+1)>=2){g.cqT=0;g.cq--;openChest()}}else g.cqT=0}catch(e){console.warn(e)}try{(MP.g.host?txHost:txGuest)()}catch(e){console.warn(e)}
  if(performance.now()-lastRx>9000&&MP.g&&!MP.g.lost){MP.g.lost=1;toast('📡 친구 연결이 끊겼어요',MP.g.host?'혼자 계속 버텨요':'방장 연결이 끊겨 게임을 마쳐요');
   if(MP.g.host){P2.ch=null}else finish(false)}}
 function txNow(){try{(MP.g&&MP.g.host?txHost:txGuest)()}catch(e){}}
@@ -4540,7 +4541,7 @@ function rxHost(v){const g=MP.g;setP2(v.p);rxFx(v);
  G.enemies=keep;
  G.eb=(v.eb||[]).map(b=>({x:b[0],y:b[1],vx:b[2],vy:b[3],r:b[4],dmg:b[5],c:b[6],life:2}));
  const dx=(v.xs||0)-g.seenXs;if(dx>0){g.seenXs=v.xs;if(!G.p.dead)G.xp+=dx*G.S.growth*G.xpMul*(G.hev&&G.hev.k==='read'?.5:1)}
- while(g.seenCc<(v.cc||0)){g.seenCc++;if(!G.p.dead)setTimeoutG(openChest,.3)}
+ while(g.seenCc<(v.cc||0)){g.seenCc++;if(!G.p.dead)g.cq=(g.cq||0)+1}
  if(v.end){finish(v.end===1);return}
  if(G.p.dead&&P2.dead)finish(false)}
 // ---------- 매 프레임 (update 직전) ----------
@@ -4564,9 +4565,14 @@ const ch=CHAR.find(c=>c.id===P2.ch);if(!ch)return;
 // ---------- 레벨업 동시 멈춤 ----------
 let lvObs=null;
 function lvWatch(){const ov=document.getElementById('lvov');if(!ov||lvObs)return;lvObs=new MutationObserver(()=>{if(!MP.g)return;const open=!ov.hidden;window.MPNET().then(n=>n.set(MP.g.base+'/lv/'+MP.g.uid,open?1:0)).catch(()=>{});holdCheck()});lvObs.observe(ov,{attributes:true,attributeFilter:['hidden']})}
-function holdCheck(){if(!MP.g||!G)return;const ov=document.getElementById('lvov'),mine=ov&&!ov.hidden;let w=document.getElementById('mlbWait');
- if(MP.g.plv&&!mine){if(!G.paused){G.paused=true;MP.g.held=1}if(!w){w=document.createElement('div');w.id='mlbWait';w.textContent='💭 '+(MP.g.pid||'친구')+'님이 카드를 고르는 중…';document.body.appendChild(w)}}
- else{if(w)w.remove();if(MP.g.held&&!mine){MP.g.held=0;G.paused=false}}}
+function ovOpen(ex){return[...document.querySelectorAll('.ov')].some(o=>!o.hidden&&o.id!==ex)}
+function busyMine(){const ov=document.getElementById('lvov');return(ov&&!ov.hidden)||!!G.chestBusy||ovOpen('lvov')||G.escOpen||vis('gacha')||vis('cutin')||vis('cine')||vis('ultvid')}
+function vis(id){const e=document.getElementById(id);return!!e&&!e.hidden}
+function holdCheck(){if(!MP.g||!G)return;const ov=document.getElementById('lvov'),mine=busyMine();if(ov&&!ov.hidden&&G.running)G.paused=true;let w=document.getElementById('mlbWait');
+ if(MP.g.plv&&!mine){MP.g.held=1;G.paused=true;if(!w){w=document.createElement('div');w.id='mlbWait';w.textContent='💭 '+(MP.g.pid||'친구')+'님이 카드를 고르는 중… 잠깐 멈춰요';document.body.appendChild(w)}}
+ else{if(w)w.remove();if(MP.g.held){MP.g.held=0;if(!mine)G.paused=false}}}
+// 멈춤 복구: 내 창도 없고 친구도 고르는 중이 아닌데 1초 넘게 멈춰 있으면 다시 움직이게
+let stuckN=0;function stuckCheck(){if(!MP.g||!G||!G.running){stuckN=0;return}if(vis('lvov')&&!G.paused)G.paused=true;if(G.paused&&!MP.g.plv&&!busyMine()&&!ovOpen()&&!document.getElementById('mlbWait')){if(++stuckN>=6){stuckN=0;MP.g.held=0;G.paused=false}}else stuckN=0}
 // ---------- 응원 채팅 ----------
 const QUICK=['힘내!','살아남아 줘','언니 예뻐요^^','ㅋㅋㅋㅋ','거의 다 왔어!','무룩이년이지'];
 function chatUI(on){let c=document.getElementById('mlbChat');if(!on){if(c)c.remove();return}if(c)return;c=document.createElement('div');c.id='mlbChat';

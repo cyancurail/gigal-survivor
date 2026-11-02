@@ -1,4 +1,4 @@
-# 기갈 서바이버 인수인계 문서 (2026-11-02 기준, 사이트 V93 / claude.ai V87)
+# 기갈 서바이버 인수인계 문서 (2026-11-02 기준, 사이트 V94 / claude.ai V87)
 
 새 대화(또는 프로젝트)에서 이 문서를 먼저 읽고 작업을 이어간다.
 
@@ -30,6 +30,7 @@
 | 홍보 이미지 캔버스 | https://claude.ai/artifact/CMEttteZbaj4VHwD5iTHst | 도트 키 비주얼 (참고용) |
 
 - 게임은 **HTML 한 파일**(V81 이후 약 2.4MB 이상). 소스는 claude-artifacts `read_file`에 slug(UUID)와 `paths:["index.html"]`을 주면 파일로 저장된다(대화에 통째로 붙이지 말 것). 수정 후 같은 slug로 publish.
+- **V94 배포 (2026-11-02 23:08, 사이트) — 멀티 M1(대기실)**: 사용자 결정 규칙(M2·M3에 적용): **2인 협동(같은 맵·같은 몬스터)**, 레벨업 시 **둘 다 멈춤**, 경험치 **나눠 받기**, 한 명이 쓰러지면 **관전 + 응원 채팅**(부활 없음), 보상(골드·해금·업적) 그대로, 몬스터 체력 **×1.6**, 상대 공격 이펙트 **반투명/안 보이게** 개인 설정(`SAVE.mpFx` 'half'|'off'), **같은 기기 종류끼리만**(plat = coarse 포인터 && 화면 짧은 변 <900 → mobile, 아니면 pc). 구현: 타이틀 왼쪽 위 `#mlbB` 👥 멀티 → 오버레이 `#mlbOv`(클래스 mlb*). Firebase **Realtime Database** `https://studiosilverbell-default-rtdb.asia-southeast1.firebasedatabase.app`(규칙: rooms/$code auth!=null read/write), SDK firebase-database 10.12.2 동적 import, 앱은 `getApps()[0]`(로그인 모듈이 만든 것). `rooms/{4자리}` = {host uid, plat, map, diff 0~2, st 'lobby'|'go', t, seed, at, ps:{uid:{id,ch,rd,slot}}}; 코드 생성 runTransaction, 방장 onDisconnect로 방 삭제·손님은 자기 ps 삭제. 난이도 해금은 방장 캐릭터 기준(기본 맵: 어려움 SAVE.ult, 헬 hellUnl / 상봉: sbU≥1,2). 쥬은은 juUnl('emerald')일 때만. **M1의 시작은 같은 맵·난이도로 각자 startRun(임시)**, 방장이 4초 뒤 방 삭제. 테스트 목 `window.__RTMOCK`(localStorage+storage 이벤트로 두 탭 공유). 전역 `window.MP`(MP.game={code,host,map,diff,seed}). 다음: M2 = 방장 기준 협동(방장이 몬스터 계산·10Hz 스냅샷, 각자 무기는 로컬에서 돌리고 피해만 방장에 전송, 몬스터는 가까운 플레이어 추적). sw VERSION 'v94'.
 - **V93 배포 (2026-11-02 22:50, 사이트)**: 모바일(폭 ≤760px) 캐릭터 선택 화면 개선 — 상세 창 `#detail`을 처음엔 숨기고, 캐릭터 카드를 누르면 아래에서 올라오는 시트(`.dopen`, 최대 85vh, 시작 버튼 하단 고정)로 표시. ✕ 닫기 `#detX`(renderDetail 래핑으로 매번 추가), 배경 `#detBg` 탭·안드로이드 뒤로 가기(history.pushState/popstate)로 닫힘. 카드 클릭 감지는 capture 단계(toSelect가 그리드를 다시 그려 버블링 시 대상이 분리되기 때문). PC는 기존 sticky 그대로. 사용자 검토 예정: 유령 모드(실시간 A / 기록 유령 B)·랭킹 — 제안만 함, 미정. 설치 안내 포스터 Design 캔버스 https://claude.ai/artifact/P9ei4DMEMvSNcYJz8kzNE3 . sw VERSION 'v93'.
 - **V92 배포 (2026-11-02 22:18, 사이트)**: 서비스 워커가 GitHub Pages HTTP 캐시(max-age 10분)의 옛 index.html을 새 버전 캐시에 넣던 버그 수정 → install 시 `new Request(u,{cache:'reload'})`. (증상: 설치 앱이 V88 이전 화면, 로그인 버튼 없음.) manifest에 `id:'./'` 추가. sw VERSION 'v92'.
 - **V91 배포 (2026-11-02 22:06, 사이트)**: PWA 매니페스트·아이콘 meta가 body 안에 있어서 PC 크롬이 설치 가능 앱으로 인식 못 하던 문제 수정 → `</head>` 앞으로 이동. **index.html은 claude 아티팩트 래퍼 구조라 `<title>`이 body 안에 있음 — head에 넣을 태그는 반드시 `</head>` 앞에.** sw VERSION 'v91'.

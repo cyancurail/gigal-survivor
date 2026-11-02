@@ -4308,6 +4308,129 @@ new MutationObserver(()=>{if(S.hidden&&isOpen())close();else if(!S.hidden&&!isOp
 mq.addEventListener&&mq.addEventListener('change',()=>{if(!mq.matches)close()});
 })();</script>
 
+<style>
+#mlbB{position:fixed;top:calc(10px + env(safe-area-inset-top,0px));left:10px;z-index:60;border:1.5px solid rgba(159,224,255,.75);background:rgba(20,10,26,.85);color:#fff;font:700 13px 'Noto Sans KR',sans-serif;padding:7px 12px;border-radius:999px}
+#mlbOv{position:fixed;inset:0;z-index:80;background:#120a1a;color:#f3eef8;font-family:'Noto Sans KR',sans-serif;overflow-y:auto;-webkit-overflow-scrolling:touch}
+#mlbOv .mlbW{box-sizing:border-box;max-width:720px;margin:0 auto;padding:calc(14px + env(safe-area-inset-top,0px)) 14px calc(24px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:14px}
+#mlbOv .mlbH{display:flex;align-items:center;gap:10px}
+#mlbOv .mlbH h2{margin:0;font-size:20px;flex:1;text-align:center}
+#mlbOv button{font-family:inherit}
+#mlbOv .mlbG{border:1.5px solid #4a3658;background:#1e1228;color:#fff;border-radius:12px;padding:9px 14px;font-weight:700;font-size:14px;min-height:44px}
+#mlbOv .mlbP{border:2px solid #ffd6ea;background:#ff6fb5;color:#2a0b26;border-radius:14px;padding:12px 16px;font-weight:900;font-size:16px;min-height:48px}
+#mlbOv .mlbP:disabled{opacity:.45}
+#mlbOv .mlbBox{background:#1e1228;border:1.5px solid #3a2648;border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:10px}
+#mlbOv .mlbS{margin:0;font-size:13px;color:#cfc6dc;line-height:1.55}
+#mlbOv .mlbE{min-height:1.3em;margin:0;font-size:13px;color:#ff9ab8;text-align:center}
+#mlbOv input{box-sizing:border-box;width:100%;padding:12px;border-radius:12px;border:1.5px solid #4a3658;background:#0e0914;color:#fff;font-size:22px;letter-spacing:8px;text-align:center}
+#mlbOv .mlbCode{font-size:34px;font-weight:900;letter-spacing:10px;text-align:center;color:#ffd98a}
+#mlbOv .mlbSlots{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+#mlbOv .mlbSlot{background:#1e1228;border:2px solid #3a2648;border-radius:16px;padding:12px 8px;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;min-height:190px;box-sizing:border-box}
+#mlbOv .mlbSlot.me{border-color:#ff8cc6}
+#mlbOv .mlbSlot canvas{width:80px;height:80px;image-rendering:pixelated}
+#mlbOv .mlbSlot b{font-size:15px}
+#mlbOv .mlbSlot small{font-size:12px;color:#cfc6dc}
+#mlbOv .mlbTag{font-size:12px;font-weight:700;padding:3px 9px;border-radius:999px;background:#2a1838;color:#fff}
+#mlbOv .mlbTag.ok{background:#1f5b3a;color:#c8ffe0}
+#mlbOv .mlbChars{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px}
+#mlbOv .mlbChars button{flex:none;width:76px;border:2px solid #3a2648;background:#120c1a;border-radius:12px;padding:6px 4px;color:#fff;font-size:11.5px;display:flex;flex-direction:column;align-items:center;gap:2px}
+#mlbOv .mlbChars button[aria-pressed="true"]{border-color:#ffd98a;background:#2a1838}
+#mlbOv .mlbChars canvas{width:48px;height:48px;image-rendering:pixelated}
+#mlbOv .mlbRow{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+#mlbOv .mlbRow .mlbL{font-size:13px;color:#cfc6dc;min-width:64px}
+#mlbOv .mlbRow button[aria-pressed="true"]{border-color:#ffd98a;background:#3a2a10;color:#ffe9b8}
+#mlbOv .mlbRow button:disabled{opacity:.4}
+</style>
+<script>(()=>{
+const DBURL='https://studiosilverbell-default-rtdb.asia-southeast1.firebasedatabase.app';
+const title=document.getElementById('title');if(!title)return;
+const live=location.protocol==='https:'&&window.top===window;
+if(!live&&!window.__RTMOCK)return;
+const plat=(matchMedia('(pointer:coarse)').matches&&Math.min(screen.width,screen.height)<900)?'mobile':'pc';
+const PN={mobile:'📱 모바일',pc:'💻 PC'};
+const E=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+// ---- NET ----
+let NET=window.__RTMOCK||null;
+async function net(){if(NET)return NET;if(!DBURL||DBURL.indexOf('__')===0)throw{code:'nodb'};const b='https://www.gstatic.com/firebasejs/10.12.2/';const[a,d]=await Promise.all([import(b+'firebase-app.js'),import(b+'firebase-database.js')]);
+ const app=a.getApps().length?a.getApps()[0]:null;if(!app)throw{code:'noapp'};const db=d.getDatabase(app,DBURL);const R=p=>d.ref(db,p);
+ NET={get:async p=>{const s=await d.get(R(p));return s.exists()?s.val():null},set:(p,v)=>d.set(R(p),v),update:(p,v)=>d.update(R(p),v),remove:p=>d.remove(R(p)),
+  on:(p,cb)=>d.onValue(R(p),s=>cb(s.exists()?s.val():null)),onDisc:p=>{try{d.onDisconnect(R(p)).remove()}catch(e){}},offDisc:p=>{try{d.onDisconnect(R(p)).cancel()}catch(e){}},
+  claim:async(p,v)=>{const r=await d.runTransaction(R(p),cur=>cur?undefined:v);return r.committed}};return NET}
+// ---- state ----
+const MP=window.MP={code:null,room:null,host:false,unsub:null,ch:null};
+const me=()=>window.ACC&&ACC.user;
+const unlockedChars=()=>CHAR.filter(c=>c.id!=='쥬은'||(typeof juUnl==='function'&&juUnl('emerald')));
+function diffOK(id,map){if(map==='sangbong'){const u=typeof sbU==='function'?sbU(id):0;return[true,u>=1,u>=2]}return[true,!!(SAVE.ult||{})[id],typeof hellUnl==='function'?hellUnl(id):false]}
+function spr(cv,id){try{const x=cv.getContext('2d');x.imageSmoothingEnabled=false;x.clearRect(0,0,cv.width,cv.height);x.drawImage(SPRF(id,(SAVE.fancy||{})[id]?'fancy':'plain',0),0,0,cv.width,cv.height)}catch(e){}}
+function errMsg(e){const c=(e&&e.code)||'';if(c==='nodb')return'멀티 서버가 아직 준비되지 않았어요.';if(c.includes('PERMISSION')||c.includes('permission'))return'서버 규칙이 막고 있어요. (개발자에게 알려 주세요)';return'연결에 문제가 생겼어요. ('+(c||(e&&e.message)||'?')+')'}
+// ---- UI ----
+function btn(){let b=document.getElementById('mlbB');if(!b){b=document.createElement('button');b.type='button';b.id='mlbB';b.textContent='👥 멀티';b.onclick=openMP;title.appendChild(b)}}
+function ov(){let o=document.getElementById('mlbOv');if(!o){o=document.createElement('div');o.id='mlbOv';o.setAttribute('role','dialog');o.setAttribute('aria-label','멀티 모드');document.body.appendChild(o)}return o}
+function closeMP(){const o=document.getElementById('mlbOv');if(o)o.remove()}
+function head(back){return `<div class="mlbH"><button type="button" class="mlbG" id="mlbBack">${back}</button><h2>👥 멀티 모드</h2><span class="mlbTag">${PN[plat]}</span></div>`}
+function openMP(){if(MP.code)return roomUI();const o=ov();
+ if(!me()){o.innerHTML=`<div class="mlbW">${head('← 나가기')}<div class="mlbBox"><p class="mlbS">멀티 모드는 <b>로그인한 사람</b>만 할 수 있어요.<br>타이틀 오른쪽 위 🔑 로그인에서 먼저 로그인해 주세요.</p><button type="button" class="mlbP" id="mlbLog">🔑 로그인하러 가기</button></div></div>`;
+  o.querySelector('#mlbBack').onclick=closeMP;o.querySelector('#mlbLog').onclick=()=>{closeMP();const g=document.getElementById('gaccB');if(g)g.click()};return}
+ o.innerHTML=`<div class="mlbW">${head('← 나가기')}
+ <div class="mlbBox"><b style="font-size:16px">방 만들기</b><p class="mlbS">내가 방장이 돼요. 4자리 방 코드가 나오면 친구에게 보내 주세요.<br>${PN[plat]}끼리만 같이 할 수 있어요.</p><button type="button" class="mlbP" id="mlbNew">방 만들기</button></div>
+ <div class="mlbBox"><b style="font-size:16px">방 코드로 들어가기</b><label class="mlbS" for="mlbIn">친구에게 받은 4자리 코드</label><input id="mlbIn" inputmode="numeric" maxlength="4" autocomplete="off"><button type="button" class="mlbP" id="mlbJoin">들어가기</button></div>
+ <p class="mlbE" id="mlbErr" role="alert"></p></div>`;
+ o.querySelector('#mlbBack').onclick=closeMP;
+ const er=t=>{o.querySelector('#mlbErr').textContent=t};
+ o.querySelector('#mlbNew').onclick=async ev=>{ev.target.disabled=true;er('방을 만드는 중…');try{await create()}catch(e){er(errMsg(e));ev.target.disabled=false}};
+ const inp=o.querySelector('#mlbIn');inp.addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Enter')o.querySelector('#mlbJoin').click()});
+ o.querySelector('#mlbJoin').onclick=async ev=>{const c=inp.value.trim();if(!/^\d{4}$/.test(c)){er('4자리 숫자를 입력해 주세요.');return}ev.target.disabled=true;er('들어가는 중…');try{const m=await join(c);if(m){er(m);ev.target.disabled=false}}catch(e){er(errMsg(e));ev.target.disabled=false}}}
+function myCh(){const L=unlockedChars();const want=MP.ch||(typeof selI==='number'&&CHAR[selI]?CHAR[selI].id:L[0].id);return L.some(c=>c.id===want)?want:L[0].id}
+async function create(){const n=await net(),u=me();MP.ch=myCh();
+ for(let k=0;k<8;k++){const code=String(1000+Math.floor(Math.random()*9000));
+  const data={host:u.uid,plat,map:SAVE.map==='sangbong'?'sangbong':'gigal',diff:0,st:'lobby',t:Date.now(),ps:{[u.uid]:{id:ACC.id||'방장',ch:MP.ch,rd:true,slot:0}}};
+  if(await n.claim('rooms/'+code,data)){n.onDisc('rooms/'+code);MP.host=true;return enter(code)}}
+ throw{code:'방 코드 만들기 실패'}}
+async function join(code){const n=await net(),u=me();const r=await n.get('rooms/'+code);if(!r)return'그런 방이 없어요. 코드를 다시 확인해 주세요.';
+ if(r.plat!==plat)return'이 방은 '+PN[r.plat]+' 전용이에요. 같은 기기 종류끼리만 같이 할 수 있어요.';
+ const ps=r.ps||{};if(!ps[u.uid]&&Object.keys(ps).length>=2)return'방이 꽉 찼어요.';if(r.st!=='lobby')return'이미 게임이 시작된 방이에요.';
+ MP.ch=myCh();await n.update('rooms/'+code+'/ps/'+u.uid,{id:ACC.id||'손님',ch:MP.ch,rd:false,slot:1});n.onDisc('rooms/'+code+'/ps/'+u.uid);MP.host=r.host===u.uid;return enter(code)}
+async function enter(code){const n=await net();MP.code=code;if(MP.unsub)MP.unsub();MP.unsub=n.on('rooms/'+code,r=>{const had=MP.room;MP.room=r;if(!r){if(had&&!MP.host){toast('👥 방이 사라졌어요','방장이 방을 나갔어요')}leaveLocal();return}
+  if(r.st==='go'&&!MP.started){MP.started=1;return go(r)}if(document.getElementById('mlbOv'))roomUI()});roomUI()}
+function leaveLocal(){if(MP.unsub)MP.unsub();MP.unsub=null;MP.code=null;MP.room=null;MP.host=false;MP.started=0;const o=document.getElementById('mlbOv');if(o)openMP()}
+async function leave(){const n=await net(),u=me(),c=MP.code;try{if(MP.host){n.offDisc('rooms/'+c);await n.remove('rooms/'+c)}else{n.offDisc('rooms/'+c+'/ps/'+u.uid);await n.remove('rooms/'+c+'/ps/'+u.uid)}}catch(e){}leaveLocal()}
+function roomUI(){const r=MP.room;if(!r){openMP();return}const o=ov(),u=me(),ps=r.ps||{};const meP=ps[u.uid]||{},other=Object.entries(ps).find(([k])=>k!==u.uid);const op=other&&other[1];
+ const ok=diffOK(meP.ch||'',r.map);const host=MP.host;const ch=CHAR.find(c=>c.id===meP.ch);const och=op&&CHAR.find(c=>c.id===op.ch);
+ const DN=['보통','🔥 어려움','💀 헬'];const fx=SAVE.mpFx||'half';
+ const canStart=host&&op&&op.rd;
+ o.innerHTML=`<div class="mlbW">${head('← 방 나가기')}
+ <div class="mlbBox" style="align-items:center"><span class="mlbS">방 코드</span><div class="mlbCode">${E(MP.code)}</div><span class="mlbS">이 코드를 친구에게 보내 주세요 · ${PN[r.plat]} 전용</span></div>
+ <div class="mlbSlots">
+  <div class="mlbSlot me"><canvas width="64" height="64" id="mlbC0"></canvas><b>${E(meP.id||ACC.id)}</b><small>${E(ch?ch.nick:'')}</small><span class="mlbTag ${host||meP.rd?'ok':''}">${host?'👑 방장':meP.rd?'✅ 준비 완료':'준비 전'}</span></div>
+  <div class="mlbSlot">${op?`<canvas width="64" height="64" id="mlbC1"></canvas><b>${E(op.id)}</b><small>${E(och?och.nick:'')}</small><span class="mlbTag ${op.rd||!host?'ok':''}">${!host?'👑 방장':op.rd?'✅ 준비 완료':'준비 전'}</span>`:`<div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:6px"><b style="color:#cfc6dc">기다리는 중…</b><small>친구가 방 코드로<br>들어오면 여기에 보여요</small></div>`}</div>
+ </div>
+ <div class="mlbBox"><b>내 캐릭터</b><div class="mlbChars" id="mlbChars">${unlockedChars().map(c=>`<button type="button" data-c="${E(c.id)}" aria-pressed="${c.id===meP.ch}"><canvas width="48" height="48"></canvas>${E(c.nick)}</button>`).join('')}</div></div>
+ <div class="mlbBox"><b>방 설정 ${host?'':'<small style="font-weight:400;color:#cfc6dc">(방장이 정해요)</small>'}</b>
+  <div class="mlbRow"><span class="mlbL">맵</span>${[['gigal','🌃 기본 맵'],['sangbong','🎡 상봉']].map(([k,n])=>`<button type="button" class="mlbG" data-map="${k}" aria-pressed="${r.map===k}" ${host?'':'disabled'}>${n}</button>`).join('')}</div>
+  <div class="mlbRow"><span class="mlbL">난이도</span>${DN.map((n,i)=>`<button type="button" class="mlbG" data-df="${i}" aria-pressed="${r.diff===i}" ${host&&ok[i]?'':'disabled'}>${n}</button>`).join('')}</div>
+  ${host?'<p class="mlbS">어려움·헬은 방장 캐릭터가 해금한 경우에만 고를 수 있어요. 몬스터 체력은 2인 기준으로 1.6배예요.</p>':''}</div>
+ <div class="mlbBox"><b>상대 공격 이펙트</b><div class="mlbRow">${[['half','반투명'],['off','안 보이게']].map(([k,n])=>`<button type="button" class="mlbG" data-fx="${k}" aria-pressed="${fx===k}">${n}</button>`).join('')}</div><p class="mlbS">상대 캐릭터는 그대로 보이고, 상대 공격 효과만 바뀌어요. 내 화면에만 적용돼요.</p></div>
+ ${host?`<button type="button" class="mlbP" id="mlbGo" ${canStart?'':'disabled'}>${!op?'친구를 기다리는 중':!op.rd?'친구 준비를 기다리는 중':'▶ 게임 시작'}</button>`:`<button type="button" class="mlbP" id="mlbRd">${meP.rd?'준비 취소':'✅ 준비 완료'}</button>`}
+ <p class="mlbE" id="mlbErr" role="alert"></p></div>`;
+ spr(o.querySelector('#mlbC0'),meP.ch);if(op)spr(o.querySelector('#mlbC1'),op.ch);o.querySelectorAll('#mlbChars button').forEach(b=>spr(b.querySelector('canvas'),b.dataset.c));
+ const n=NET,base='rooms/'+MP.code;const er=e=>{const x=o.querySelector('#mlbErr');if(x)x.textContent=errMsg(e)};
+ o.querySelector('#mlbBack').onclick=()=>{leave()};
+ o.querySelectorAll('#mlbChars button').forEach(b=>b.onclick=()=>{MP.ch=b.dataset.c;const up={ch:b.dataset.c};if(!host)up.rd=false;n.update(base+'/ps/'+u.uid,up).catch(er);if(host){const k=diffOK(b.dataset.c,r.map);if(!k[r.diff])n.update(base,{diff:0}).catch(er)}});
+ if(host){o.querySelectorAll('[data-map]').forEach(b=>b.onclick=()=>{const k=diffOK(meP.ch,b.dataset.map);n.update(base,{map:b.dataset.map,diff:k[r.diff]?r.diff:0}).catch(er)});
+  o.querySelectorAll('[data-df]').forEach(b=>b.onclick=()=>n.update(base,{diff:+b.dataset.df}).catch(er));
+  const g=o.querySelector('#mlbGo');if(g)g.onclick=()=>{g.disabled=true;n.update(base,{st:'go',seed:Math.floor(Math.random()*1e9),at:Date.now()}).catch(er)}}
+ else{const rb=o.querySelector('#mlbRd');rb.onclick=()=>n.update(base+'/ps/'+u.uid,{rd:!meP.rd}).catch(er)}
+ o.querySelectorAll('[data-fx]').forEach(b=>b.onclick=()=>{SAVE.mpFx=b.dataset.fx;persist();roomUI()})}
+function go(r){const u=me(),meP=(r.ps||{})[u.uid]||{};const ci=CHAR.findIndex(c=>c.id===meP.ch);closeMP();
+ MP.game={code:MP.code,host:MP.host,map:r.map,diff:r.diff,seed:r.seed};
+ SAVE.map=r.map;persist();const f=!!(SAVE.fancy||{})[meP.ch];
+ // M1: 같은 설정으로 각자 시작 (M2에서 실제 협동으로 교체)
+ try{startRun(ci<0?0:ci,f,r.diff>=1,r.diff>=2,false)}catch(e){console.warn(e)}
+ setTimeout(()=>{try{toast('👥 멀티 테스트','지금은 같은 맵·난이도로 각자 플레이해요. 함께 싸우기는 다음 업데이트에서!')}catch(e){}},1500);
+ if(MP.unsub)MP.unsub();MP.unsub=null;const c=MP.code;MP.code=null;MP.room=null;MP.started=0;
+ if(MP.host)setTimeout(()=>{NET&&NET.remove('rooms/'+c).catch(()=>{})},4000)}
+btn();
+})();</script>
+
 <style>#updB{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(14px + env(safe-area-inset-bottom,0px));z-index:99998;border:2px solid #ffd6ea;background:rgba(20,10,26,.94);color:#fff;font:700 14px 'Noto Sans KR',sans-serif;padding:10px 18px;border-radius:999px;box-shadow:0 0 18px rgba(255,150,210,.5)}</style>
 <script>(()=>{if(!('serviceWorker' in navigator)||location.protocol!=='https:'||window.top!==window)return;
 navigator.serviceWorker.register('sw.js').then(reg=>{const show=w=>{if(document.getElementById('updB'))return;const b=document.createElement('button');b.id='updB';b.type='button';b.textContent='🌸 새 버전이 있어요! 🔄';b.onclick=()=>{window.__updReq=1;b.textContent='업데이트 중…';w.postMessage('skip')};document.body.appendChild(b)};

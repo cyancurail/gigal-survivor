@@ -4181,7 +4181,7 @@ window.GS={
 };
 </script>
 
-<script>try{s2Desc()}catch(e){}</script><script>(()=>{const B=document.getElementById('boot');if(!B)return;const bl=B.querySelector('.bl'),ld=B.querySelector('.ld'),bar=B.querySelector('.bar i'),tip=B.querySelector('.tip'),tap=B.querySelector('.tap');
+<script>try{s2Desc()}catch(e){}</script><script>(()=>{const B=document.getElementById('boot');if(!B)return;try{if(sessionStorage.getItem('gs_skipboot')){sessionStorage.removeItem('gs_skipboot');B.remove();return}}catch(e){}const bl=B.querySelector('.bl'),ld=B.querySelector('.ld'),bar=B.querySelector('.bar i'),tip=B.querySelector('.tip'),tap=B.querySelector('.tap');
 let seen=false;try{seen=localStorage.getItem('gs_boot')==='1';localStorage.setItem('gs_boot','1')}catch(e){}
 const TIPS=['진화하려면 무기 8레벨 + 짝 아이템, 그리고 보스 상자.','🧬 레벨업 카드 아래 노란 줄이 진화 짝이에요.','상봉의 밤, 보석의 마녀를 만나면 쥬은이 깨어나요.','📈 캐릭터 선택 화면의 강화 버튼으로 스탯을 올릴 수 있어요.','다른 기기로 옮길 땐 저장 코드를 잊지 마세요.','🔀 다시 섞기는 한 판에 8번까지.','테슬라는 언제나 하나 더.'];
 let ti=Math.random()*TIPS.length|0;const nt=()=>{tip.style.opacity=0;setTimeout(()=>{tip.textContent=TIPS[ti++%TIPS.length];tip.style.opacity=1},380)};
@@ -4195,7 +4195,94 @@ const go=()=>{ready=true};if(document.readyState==='complete')setTimeout(go,900)
 const lo=setTimeout(()=>bl.classList.add('on'),2000);ph=1;const lt=setTimeout(loading,4600);
 B.addEventListener('pointerdown',e=>{e.stopPropagation();if(ph===1&&seen){clearTimeout(lt);clearTimeout(lo);loading()}else if(ph===3)done()});
 addEventListener('keydown',e=>{if(ph===3&&B.isConnected)done()});
-})();</script><style>#updB{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(14px + env(safe-area-inset-bottom,0px));z-index:99998;border:2px solid #ffd6ea;background:rgba(20,10,26,.94);color:#fff;font:700 14px 'Noto Sans KR',sans-serif;padding:10px 18px;border-radius:999px;box-shadow:0 0 18px rgba(255,150,210,.5)}</style>
+})();</script><style>
+#gaccB{position:fixed;top:calc(10px + env(safe-area-inset-top,0px));right:10px;z-index:60;border:1.5px solid rgba(255,214,234,.7);background:rgba(20,10,26,.85);color:#fff;font:700 13px 'Noto Sans KR',sans-serif;padding:7px 12px;border-radius:999px;max-width:46vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#gaccB[data-st="on"]{border-color:#8dffcf}
+#gaccOv{box-sizing:border-box;position:fixed;inset:0;z-index:99990;background:rgba(5,3,8,.78);display:grid;place-items:center;padding:16px}
+#gaccOv .gaccM{box-sizing:border-box;width:min(100%,380px);max-height:100%;overflow:auto;background:#1a1022;border:2px solid #ffd6ea;border-radius:18px;padding:18px 16px;color:#fff;font-family:'Noto Sans KR',sans-serif;box-shadow:0 0 30px rgba(255,150,210,.35)}
+#gaccOv h3{margin:0 0 4px;font-size:18px;text-align:center}
+#gaccOv .gaccS{margin:0 0 12px;font-size:12.5px;color:#cfc6dc;text-align:center;line-height:1.5}
+#gaccOv .gaccT{display:flex;gap:6px;margin-bottom:12px}
+#gaccOv .gaccT button{flex:1;padding:8px;border-radius:10px;border:1.5px solid #4a3658;background:#120c1a;color:#cfc6dc;font-weight:700}
+#gaccOv .gaccT button[aria-pressed="true"]{border-color:#ffd6ea;color:#fff;background:#2a1838}
+#gaccOv label{display:block;font-size:12px;color:#cfc6dc;margin:8px 0 4px}
+#gaccOv input{width:100%;box-sizing:border-box;padding:10px 12px;border-radius:10px;border:1.5px solid #4a3658;background:#0e0914;color:#fff;font-size:16px}
+#gaccOv .gaccE{min-height:1.4em;margin:8px 0 0;font-size:12.5px;color:#ff9ab8;text-align:center}
+#gaccOv .gaccBtns{display:flex;gap:8px;margin-top:12px}
+#gaccOv .gaccBtns button{flex:1;padding:11px;border-radius:12px;border:2px solid #ffd6ea;background:#ff6fb5;color:#2a0b26;font-weight:900;font-size:15px}
+#gaccOv .gaccBtns button.sub{background:transparent;color:#ffd6ea}
+#gaccOv .gaccC{display:flex;gap:8px;margin:6px 0}
+#gaccOv .gaccC>div{flex:1;border:1.5px solid #4a3658;border-radius:12px;padding:10px;font-size:12.5px;line-height:1.6;background:#120c1a}
+#gaccOv .gaccC b{display:block;font-size:14px;margin-bottom:4px}
+#gaccOv .gaccN{font-size:11.5px;color:#a99bb8;margin-top:10px;line-height:1.5}
+</style>
+<script>(()=>{
+const CFG={apiKey:"AIzaSyBuRp0Xw9WzMTOTHnvdruX9yC9zKe5kFwU",authDomain:"studiosilverbell.firebaseapp.com",projectId:"studiosilverbell",storageBucket:"studiosilverbell.firebasestorage.app",messagingSenderId:"175142185014",appId:"1:175142185014:web:00ccbfaabdf8eb9d8b5097"};
+if(!(location.protocol==='https:'&&window.top===window)&&!window.__FBMOCK)return;
+const ACC=window.ACC={user:null,id:null,last:0,on:false};const MK='gs_sync';
+const meta=()=>{try{return JSON.parse(localStorage.getItem(MK)||'{}')}catch(e){return{}}},setMeta=m=>{try{localStorage.setItem(MK,JSON.stringify(m))}catch(e){}};
+const norm=id=>id.trim().replace(/[A-Z]/g,c=>c.toLowerCase());
+const enc=id=>'u'+[...new TextEncoder().encode(norm(id))].map(b=>b.toString(16).padStart(2,'0')).join('')+'@gigal.studiosilverbell.app';
+let FB=window.__FBMOCK||null;
+async function load(){if(FB)return FB;const b='https://www.gstatic.com/firebasejs/10.12.2/';const[a,au,fs]=await Promise.all([import(b+'firebase-app.js'),import(b+'firebase-auth.js'),import(b+'firebase-firestore.js')]);
+ const app=a.initializeApp(CFG),auth=au.getAuth(app),db=fs.getFirestore(app);
+ FB={onAuth:cb=>au.onAuthStateChanged(auth,cb),signIn:(e,p)=>au.signInWithEmailAndPassword(auth,e,p),signUp:async(e,p,id)=>{const c=await au.createUserWithEmailAndPassword(auth,e,p);try{await au.updateProfile(c.user,{displayName:id})}catch(x){}return c},signOut:()=>au.signOut(auth),
+  get:async uid=>{const d=await fs.getDoc(fs.doc(db,'saves',uid));return d.exists()?d.data():null},set:(uid,data)=>fs.setDoc(fs.doc(db,'saves',uid),data)};return FB}
+const sum=S=>{S=S||{};const n=o=>Object.values(o||{}).filter(Boolean).length;let best=0;for(const v of Object.values(S.best||{}))best=Math.max(best,+v||0);return{g:S.gold||0,f:n(S.fancy),i:n(S.inv),b:best}};
+const fmtT=ms=>{if(!ms)return'-';const d=new Date(ms);return(d.getMonth()+1)+'/'+d.getDate()+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')};
+const fmtS=t=>Math.floor(t/60)+'분 '+String(Math.floor(t%60)).padStart(2,'0')+'초';
+const isEmpty=S=>{const s=sum(S);return !s.g&&!s.f&&!s.i&&!s.b};
+// ---- UI ----
+function btn(){let b=document.getElementById('gaccB');const t=document.getElementById('title');if(!t)return;if(!b){b=document.createElement('button');b.type='button';b.id='gaccB';b.onclick=()=>ACC.user?accM():loginM();t.appendChild(b)}
+ b.dataset.st=ACC.user?'on':'off';b.textContent=ACC.user?'☁️ '+(ACC.id||'계정'):'🔑 로그인'}
+function ov(html){close();const o=document.createElement('div');o.id='gaccOv';o.innerHTML='<div class="gaccM" role="dialog" aria-modal="true">'+html+'</div>';o.addEventListener('pointerdown',e=>{if(e.target===o&&!o.dataset.lock)close()});document.body.appendChild(o);return o}
+function close(){const o=document.getElementById('gaccOv');if(o)o.remove()}
+const E=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function errMsg(e){const c=(e&&e.code)||'';if(c.includes('email-already-in-use'))return'이미 있는 아이디예요.';if(c.includes('invalid-credential')||c.includes('wrong-password')||c.includes('user-not-found')||c.includes('invalid-login'))return'아이디 또는 비밀번호가 달라요.';if(c.includes('weak-password'))return'비밀번호는 6자 이상이에요.';if(c.includes('too-many-requests'))return'잠시 후 다시 시도해 주세요.';if(c.includes('network'))return'인터넷 연결을 확인해 주세요.';return'문제가 생겼어요. ('+(c||(e&&e.message)||'?')+')'}
+function loginM(mode){mode=mode||'in';const up=mode==='up';const o=ov(`<h3>${up?'🌸 회원가입':'🔑 로그인'}</h3><p class="gaccS">로그인하면 폰·PC 어디서든 같은 기록으로 이어서 할 수 있어요.</p>
+ <div class="gaccT"><button type="button" data-m="in" aria-pressed="${!up}">로그인</button><button type="button" data-m="up" aria-pressed="${up}">회원가입</button></div>
+ <label for="gaccI">아이디 (한글·영문·숫자 2~10자)</label><input id="gaccI" autocomplete="username" maxlength="10">
+ <label for="gaccP">비밀번호 (6자 이상)</label><input id="gaccP" type="password" autocomplete="${up?'new-password':'current-password'}">
+ ${up?'<label for="gaccP2">비밀번호 확인</label><input id="gaccP2" type="password" autocomplete="new-password">':''}
+ <p class="gaccE" id="gaccE" role="alert"></p><div class="gaccBtns"><button type="button" class="sub" id="gaccX">닫기</button><button type="button" id="gaccOk">${up?'가입하기':'로그인'}</button></div>
+ <p class="gaccN">${up?'비밀번호를 잊으면 찾을 수 없어요. 개발자 은방울꽃🌸에게 초기화를 부탁하세요.':'아직 아이디가 없으면 「회원가입」을 눌러 주세요.'}</p>`);
+ o.querySelectorAll('.gaccT button').forEach(b=>b.onclick=()=>loginM(b.dataset.m));o.querySelector('#gaccX').onclick=close;
+ const go=async()=>{const id=o.querySelector('#gaccI').value.trim(),pw=o.querySelector('#gaccP').value,er=o.querySelector('#gaccE'),ok=o.querySelector('#gaccOk');
+  if(!/^[가-힣a-zA-Z0-9_]{2,10}$/.test(id)){er.textContent='아이디는 한글·영문·숫자 2~10자예요.';return}if(pw.length<6){er.textContent='비밀번호는 6자 이상이에요.';return}
+  if(up&&pw!==o.querySelector('#gaccP2').value){er.textContent='비밀번호 확인이 달라요.';return}
+  ok.disabled=true;er.textContent='잠시만요…';try{const fb=await load();ACC.pendingId=id;if(up)await fb.signUp(enc(id),pw,id);else await fb.signIn(enc(id),pw);close()}catch(e){er.textContent=errMsg(e);ok.disabled=false}};
+ o.querySelector('#gaccOk').onclick=go;o.querySelectorAll('input').forEach(i=>i.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();go()}e.stopPropagation()}));setTimeout(()=>o.querySelector('#gaccI').focus(),50)}
+function accM(){const m=meta();const o=ov(`<h3>☁️ ${E(ACC.id||'계정')}</h3><p class="gaccS">기록이 계정에 자동 저장돼요.<br>마지막 저장: ${fmtT(m.at)}${m.dirty?' · 저장 대기 중':''}</p>
+ <p class="gaccE" id="gaccE" role="status"></p><div class="gaccBtns"><button type="button" class="sub" id="gaccLo">로그아웃</button><button type="button" id="gaccSv">지금 저장</button></div>
+ <div class="gaccBtns"><button type="button" class="sub" id="gaccX">닫기</button></div>`);
+ o.querySelector('#gaccX').onclick=close;o.querySelector('#gaccSv').onclick=async()=>{const er=o.querySelector('#gaccE');er.textContent='저장 중…';try{await upload();er.textContent='저장했어요 🌸'}catch(e){er.textContent=errMsg(e)}};
+ o.querySelector('#gaccLo').onclick=async()=>{const er=o.querySelector('#gaccE');try{if(meta().dirty)await upload()}catch(e){}try{await (await load()).signOut()}catch(e){er.textContent=errMsg(e);return}close()}}
+function pickM(local,cloud,cb){const a=sum(local),c=sum(JSON.parse(cloud.save||'{}'));const card=(t,s,at)=>`<div><b>${t}</b>🪙 ${s.g}G<br>✨ 화려한 모습 ${s.f}명<br>🎁 보유 아이템 ${s.i}개<br>⏱ 최고 ${fmtS(s.b)}<br><small>저장 ${fmtT(at)}</small></div>`;
+ const o=ov(`<h3>어느 기록으로 할까요?</h3><p class="gaccS">이 기기 기록과 계정 기록이 달라요.<br>고르지 않은 쪽은 사라져요.</p><div class="gaccC">${card('📱 이 기기',a,meta().lat)}${card('☁️ 계정',c,cloud.at)}</div>
+ <div class="gaccBtns"><button type="button" class="sub" id="gaccA">📱 이 기기</button><button type="button" id="gaccC">☁️ 계정</button></div><p class="gaccN">다른 기기 기록은 그 기기에서 저장 코드로 가져올 수도 있어요.</p>`);o.dataset.lock=1;
+ o.querySelector('#gaccA').onclick=()=>{close();cb('local')};o.querySelector('#gaccC').onclick=()=>{close();cb('cloud')}}
+// ---- sync ----
+let tmr=null,lastUp=0,upBusy=false;
+async function upload(){if(!ACC.user)return;const fb=await load();const at=Date.now(),s=sum(SAVE);upBusy=true;try{await fb.set(ACC.user.uid,{id:ACC.id||'',save:JSON.stringify(SAVE),at,sum:s,ver:'v90'});setMeta({uid:ACC.user.uid,at,dirty:false,lat:at});lastUp=Date.now()}finally{upBusy=false}}
+function schedule(now){if(!ACC.user||!ACC.on)return;clearTimeout(tmr);const wait=now?0:Math.max(5000,20000-(Date.now()-lastUp));tmr=setTimeout(()=>{upload().catch(()=>{})},wait)}
+function apply(cloud){try{localStorage.setItem(SAVE_KEY,cloud.save)}catch(e){}setMeta({uid:ACC.user.uid,at:cloud.at,dirty:false,lat:cloud.at});try{sessionStorage.setItem('gs_skipboot','1')}catch(e){}location.reload()}
+async function reconcile(){const fb=await load(),u=ACC.user;let cloud=null;try{cloud=await fb.get(u.uid)}catch(e){console.warn(e);return}
+ if(cloud&&cloud.id)ACC.id=cloud.id;btn();const m=meta();
+ const done=()=>{ACC.on=true;if(meta().dirty)schedule(true)};
+ if(!cloud||!cloud.save){await upload().catch(()=>{});return done()}
+ if(m.uid===u.uid&&m.at===cloud.at){return done()}
+ if(m.uid===u.uid&&!m.dirty)return apply(cloud);
+ if(isEmpty(SAVE))return apply(cloud);
+ pickM(SAVE,cloud,ch=>{if(ch==='cloud')apply(cloud);else{upload().catch(()=>{});done()}})}
+const P=window.persist;window.persist=function(){P.apply(this,arguments);const m=meta();if(ACC.user&&m.uid===ACC.user.uid){if(!m.dirty){m.dirty=true;setMeta(m)}}else if(!ACC.user){const mm=meta();mm.lat=Date.now();setMeta(mm)}schedule()};
+try{persist=window.persist}catch(e){}
+document.addEventListener('visibilitychange',()=>{if(document.hidden&&meta().dirty)upload().catch(()=>{})});
+addEventListener('pagehide',()=>{if(meta().dirty)upload().catch(()=>{})});
+btn();
+load().then(fb=>fb.onAuth(u=>{ACC.user=u||null;ACC.on=false;if(u){ACC.id=ACC.pendingId||u.displayName||ACC.id;ACC.pendingId=null;reconcile()}else{ACC.id=null;const m=meta();if(m.uid){m.uid=null;m.dirty=false;setMeta(m)}}btn()})).catch(e=>{console.warn('firebase load fail',e);const b=document.getElementById('gaccB');if(b)b.textContent='🔑 로그인(오프라인)'});
+})();</script>
+
+<style>#updB{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(14px + env(safe-area-inset-bottom,0px));z-index:99998;border:2px solid #ffd6ea;background:rgba(20,10,26,.94);color:#fff;font:700 14px 'Noto Sans KR',sans-serif;padding:10px 18px;border-radius:999px;box-shadow:0 0 18px rgba(255,150,210,.5)}</style>
 <script>(()=>{if(!('serviceWorker' in navigator)||location.protocol!=='https:'||window.top!==window)return;
 navigator.serviceWorker.register('sw.js').then(reg=>{const show=w=>{if(document.getElementById('updB'))return;const b=document.createElement('button');b.id='updB';b.type='button';b.textContent='🌸 새 버전이 있어요! 🔄';b.onclick=()=>{window.__updReq=1;b.textContent='업데이트 중…';w.postMessage('skip')};document.body.appendChild(b)};
  if(reg.waiting&&navigator.serviceWorker.controller)show(reg.waiting);

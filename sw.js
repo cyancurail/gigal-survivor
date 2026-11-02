@@ -1,5 +1,5 @@
 // 기갈 서바이버 서비스 워커 — 배포할 때마다 VERSION을 올린다
-const VERSION = 'v89';
+const VERSION = 'v90';
 const CACHE = 'gigal-' + VERSION;
 const ASSETS = ['./', './index.html', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png', './icons/icon-512-maskable.png', './icons/apple-touch-icon.png'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS))); });

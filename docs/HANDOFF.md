@@ -1,4 +1,4 @@
-# 기갈 서바이버 인수인계 문서 (2026-11-02 기준, 사이트 V89 / claude.ai V87)
+# 기갈 서바이버 인수인계 문서 (2026-11-02 기준, 사이트 V90 / claude.ai V87)
 
 새 대화(또는 프로젝트)에서 이 문서를 먼저 읽고 작업을 이어간다.
 
@@ -12,7 +12,7 @@
 - 사용량 절약: 문구·수치 변경은 가볍게 처리하고, 연출·새 기능만 스크린샷/시뮬레이션으로 확인한다.
 - **배포할 때마다 이 프로젝트 문서도 바로 갱신한다**(V85~V87은 세션 안 초안에만 적었다가 세션 종료로 유실되어 대화 기록으로 복원함).
 
-## 0-1. 독립 사이트·앱 이전 계획 (2026-11-02 결정, 진행 전)
+## 0-1. 독립 사이트·앱 이전 (2026-11-02 결정, ①② 완료 V88~V90)
 - 이유: 기기마다 저장 상태가 달라 저장 코드로 옮기는 게 불편 → 아이디·비밀번호 로그인 + 계정 저장 + 멀티플레이를 원함. 친구들은 모바일과 PC를 함께 씀.
 - 결정: **B안** = GitHub 저장소 + 무료 호스팅(GitHub Pages 등) + **PWA**(모바일·PC 모두 앱처럼 설치, 한 번 패치로 전 기기 반영, 「새 버전이 있어요 🔄」 알림으로 강제 새로고침 없음) + **Firebase**(회원가입·로그인, 계정별 저장, 실시간 통신).
 - 업데이트 흐름: 채팅으로 계획 → 승인 → GitHub 저장소에서 수정 → 「패치해줘」 시 push → 1~2분 뒤 자동 반영. 버전 기록·되돌리기 가능.
@@ -30,6 +30,7 @@
 | 홍보 이미지 캔버스 | https://claude.ai/artifact/CMEttteZbaj4VHwD5iTHst | 도트 키 비주얼 (참고용) |
 
 - 게임은 **HTML 한 파일**(V81 이후 약 2.4MB 이상). 소스는 claude-artifacts `read_file`에 slug(UUID)와 `paths:["index.html"]`을 주면 파일로 저장된다(대화에 통째로 붙이지 말 것). 수정 후 같은 slug로 publish.
+- **V90 배포 (2026-11-02 22:02, 사이트) — 2단계: 로그인 + 계정 저장**: Firebase 프로젝트 **StudioSilverbell**(projectId `studiosilverbell`, Spark 무료, Firestore asia-northeast3, Auth 이메일/비밀번호, 승인 도메인 cyancurail.github.io). SDK는 gstatic CDN 10.12.2 동적 import(https·최상위 창에서만, 테스트는 `window.__FBMOCK`). 아이디(한글·영문·숫자 2~10자, 영문 소문자화)를 `'u'+UTF-8 hex+'@gigal.studiosilverbell.app'` 가짜 이메일로 변환 → 비밀번호 분실 시 개발자가 콘솔에서 계정 삭제. 문서 `saves/{uid}` = {id, save:JSON(SAVE), at, sum{g,f,i,b}, ver}. 규칙: saves/{uid}는 본인만 read/write(사용자가 콘솔에 게시). 동기화: `persist()` 래핑 → dirty 표시 + 최대 20초 간격 업로드, visibilitychange/pagehide 시 즉시. 메타 `localStorage gs_sync`={uid,at,dirty,lat}. 로그인 시 `reconcile`: 클라우드 없음→업로드 / 같은 at→그대로 / 같은 uid·로컬 변경 없음→클라우드 적용 / 로컬 비어 있음→클라우드 적용 / 그 외→「어느 기록으로 할까요?」 비교 창(`pickM`). 클라우드 적용은 localStorage 교체 후 reload(`sessionStorage gs_skipboot`로 오프닝 생략). UI: 타이틀 오른쪽 위 `#gaccB`(🔑 로그인 / ☁️ 아이디), 모달 `#gaccOv`(클래스 gacc*). 3단계 멀티플레이는 별도 계획. sw VERSION 'v90'.
 - **V89 배포 (2026-11-02 21:47, 사이트)**: 첫 실행 시 로고 2번 재생 버그 수정(서비스 워커 첫 설치의 clients.claim → controllerchange → reload. 이제 기존 컨트롤러가 있고 사용자가 업데이트 버튼(`window.__updReq`)을 누른 경우만 reload). 오프닝 검은 화면 2초 후 로고(로고 2.0초~, 로딩 4.6초~). sw VERSION 'v89'. 사용자가 Pages 켬, 사이트 정상 확인.
 - **V88 = GitHub 사이트 첫 배포 (2026-11-02 21:40, commit on main)**. **claude.ai 링크에는 V88 패치 안 함(사용자 결정) — 아티팩트는 V87에 고정, 앞으로 배포는 GitHub 사이트로만.** 소스 = 저장소 index.html(다음 작업은 git clone 후 수정 → push). 로딩 화면 키 비주얼은 세로 화면에서 좌우로 천천히 이동(`bpan` 7초 왕복). 내용: ① 레벨업 카드 아이콘을 무기 이모지로 고정(캐릭터 얼굴 canvas 제거, 보석 무기만 `gemIcon`), 모든 카드 `.ic` 같은 틀(`.wi`). ② 카드에 「⬆ 레벨업: …」 줄(`w.lu`, `small.lu` 하늘색) + 「🧬 진화 짝 … → 진화명」 줄 항상 표시(`small.pr` 노랑, 짝 보유 ✔), 아이템 카드는 짝 캐릭터 무기(노랑) + 짝 추가 무기(`small.pr2` 작은 회색), 숨은 진화 제외. ③ 시즌2 문구: `s2Desc()`(optHTML·openChest·newGame·로드 시 1회)가 보석 4종 제외 모든 무기 d/ed와 아이템 16종 d를 새 문구로 덮어씀(보석은 lu만 추가, 로드스터 그대로). 문구 원본은 사용자 승인 표(2026-11-02 대화). 아이콘은 현재 이모지로 확정(사용자 결정). ④ 오프닝 `#boot`(body 맨 앞): 실버벨 로고(사용자 이미지, 워터마크 제거, 500×400 JPEG, 원형 마스크) + 「STUDIO SILVER BELL」 은빛 글자 2.6초(재실행 시 터치로 건너뛰기, `localStorage gs_boot`) → 로딩(키 비주얼 배경, 진행 바, 팁 7종) → 「화면을 터치하세요」 → 터치 시 `SND.bell()` 은방울 종소리 + 페이드. ⑤ 대기방 BGM(`T.title`) 현악 버전: bpm 72, `str:1` 분기(바이올린 2겹 sawtooth 비브라토 멜로디, 비올라 화음 패드, 하프풍 사인 아르페지오, 오보에풍 square 대선율 `ob` ['G4 E4','E4 C4','C4 A3','D4 B3'], 리버브, 버스 `SBUS` gain 1.6), 첼로 제거(사용자 요청), 드럼 없음. `tone()`에 비브라토 깊이 `vd` 옵션. ⑥ PWA: manifest·아이콘(천사 이미지 정사각 크롭 512/192/180 + maskable)·`sw.js`(VERSION 올리면 업데이트, 캐시 우선) + 「🌸 새 버전이 있어요! 🔄」 버튼(`#updB`, https·최상위 창에서만). 저장소 구성: index.html·manifest.webmanifest·sw.js(VERSION 'v88')·icons/·docs/HANDOFF.md·README.md·.nojekyll. 사이트 https://cyancurail.github.io/gigal-survivor/ (GitHub Pages는 프록시가 API를 막아 사용자가 Settings → Pages에서 main/(root)로 직접 켬). **배포 절차: index.html 수정 → sw.js VERSION 올림 → docs/HANDOFF.md 갱신 → commit·push.**
 - **V87 배포 (2026-11-01 23:37)**: 끼순이어검술 전설 무기 스킨 2종 POOL 끝 `wl:kisunS`(✨ 세인트썸띵 요술봉 5종: 별·달·해·꽃·하트, 금빛 파스텔 궤적)·`wl:kisunF`(💗 페미닌 크리스탈 검 5종: 보라·하늘·분홍·민트·피치), wk 'kisun', 누구나 사용, 6자루째부터 반복. 선택 `SAVE.wsel.kisun` ''/'s'/'f'(`jgSkin()`, 이미지 `JG_SK`), 옷장 무기 탭 맨 아래 `kisunRow`(`data-kis`), 미보유 🔒. 뽑기 시 WFX는 건드리지 않음. **SC_VER 14**(v13 이하 POOL은 `POOL.slice(0,POOL_V13)`). 미배포 변경 없음.

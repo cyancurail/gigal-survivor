@@ -4282,6 +4282,32 @@ btn();
 load().then(fb=>fb.onAuth(u=>{ACC.user=u||null;ACC.on=false;if(u){ACC.id=ACC.pendingId||u.displayName||ACC.id;ACC.pendingId=null;reconcile()}else{ACC.id=null;const m=meta();if(m.uid){m.uid=null;m.dirty=false;setMeta(m)}}btn()})).catch(e=>{console.warn('firebase load fail',e);const b=document.getElementById('gaccB');if(b)b.textContent='🔑 로그인(오프라인)'});
 })();</script>
 
+<style>
+#detBg{display:none}
+@media (max-width:760px){
+#select .detail{position:fixed;left:8px;right:8px;bottom:0;z-index:70;max-height:85vh;max-height:85dvh;border-radius:20px 20px 0 0;padding:14px 12px calc(12px + env(safe-area-inset-bottom,0px));margin:0;transform:translateY(110%);transition:transform .28s ease;visibility:hidden}
+#select .detail.dopen{transform:none;visibility:visible}
+#detBg{position:fixed;inset:0;z-index:69;background:rgba(5,3,8,.6);display:block;opacity:0;pointer-events:none;transition:opacity .25s}
+#detBg.dopen{opacity:1;pointer-events:auto}
+#detX{position:absolute;top:8px;right:8px;width:44px;height:44px;border-radius:22px;border:1.5px solid var(--line);background:var(--panel);color:#fff;font-size:20px;line-height:1;z-index:2}
+#select .detail .row{padding-right:48px}
+}
+@media (min-width:761px){#detX{display:none}}
+</style>
+<script>(()=>{const mq=matchMedia('(max-width:760px)');const D=()=>document.getElementById('detail'),S=document.getElementById('select');if(!S)return;
+let bg=document.createElement('div');bg.id='detBg';bg.setAttribute('aria-hidden','true');S.appendChild(bg);
+let pushed=false;const isOpen=()=>!!(D()&&D().classList.contains('dopen'));
+function addX(){const d=D();if(!d||d.querySelector('#detX'))return;const x=document.createElement('button');x.type='button';x.id='detX';x.setAttribute('aria-label','캐릭터 정보 닫기');x.textContent='✕';x.onclick=e=>{e.stopPropagation();close()};d.appendChild(x)}
+function open(){if(!mq.matches)return;const d=D();if(!d)return;addX();d.classList.add('dopen');bg.classList.add('dopen');if(!pushed){try{history.pushState({gsDet:1},'');pushed=true}catch(e){}}}
+function close(fromPop){const d=D();if(d)d.classList.remove('dopen');bg.classList.remove('dopen');if(pushed&&!fromPop){pushed=false;try{history.back()}catch(e){}}if(fromPop)pushed=false}
+bg.addEventListener('click',()=>close());
+addEventListener('popstate',()=>{if(isOpen())close(true);else pushed=false});
+document.addEventListener('click',e=>{const t=e.target;if(!t||!t.closest)return;if(t.closest('#selgrid .pc'))setTimeout(open,0);else if(t.closest('#goB')&&isOpen())close()},true);
+const _rd=window.renderDetail;if(typeof _rd==='function'){window.renderDetail=function(){const r=_rd.apply(this,arguments);addX();return r};try{renderDetail=window.renderDetail}catch(e){}}
+new MutationObserver(()=>{if(S.hidden&&isOpen())close();else if(!S.hidden&&!isOpen()){bg.classList.remove('dopen')}}).observe(S,{attributes:true,attributeFilter:['hidden']});
+mq.addEventListener&&mq.addEventListener('change',()=>{if(!mq.matches)close()});
+})();</script>
+
 <style>#updB{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(14px + env(safe-area-inset-bottom,0px));z-index:99998;border:2px solid #ffd6ea;background:rgba(20,10,26,.94);color:#fff;font:700 14px 'Noto Sans KR',sans-serif;padding:10px 18px;border-radius:999px;box-shadow:0 0 18px rgba(255,150,210,.5)}</style>
 <script>(()=>{if(!('serviceWorker' in navigator)||location.protocol!=='https:'||window.top!==window)return;
 navigator.serviceWorker.register('sw.js').then(reg=>{const show=w=>{if(document.getElementById('updB'))return;const b=document.createElement('button');b.id='updB';b.type='button';b.textContent='🌸 새 버전이 있어요! 🔄';b.onclick=()=>{window.__updReq=1;b.textContent='업데이트 중…';w.postMessage('skip')};document.body.appendChild(b)};

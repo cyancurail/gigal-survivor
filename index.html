@@ -3948,19 +3948,34 @@ function swTick(w,dt){const S=G.S,st=w.st,p=G.p;st.g=st.g||[];const g=st.g,nO=g.
   st.tt=(st.tt||1)-dt;if(st.tt<=0){st.tt=3*S.cd;const n=2+S.amount,r=(10+1.6*8)*S.area*1.4,dmg=30*S.might;
     const tg=G.enemies.filter(e=>!e.dead&&(e.x-p.x)**2+(e.y-p.y)**2<360*360).sort((a,b)=>((a.x-p.x)**2+(a.y-p.y)**2)-((b.x-p.x)**2+(b.y-p.y)**2));
     for(let i=0;i<n;i++){const e=tg[i];const a=e?Math.atan2(e.y-p.y,e.x-p.x):Math.atan2(p.fy,p.fx)+(i-(n-1)/2)*.5,v=58*S.pspeed;shoot({k:'talis',hk:'soulwed',tal:1,x:p.x,y:p.y-6,vx:Math.cos(a)*v,vy:Math.sin(a)*v,life:4.5*S.dur,r,pierce:999,hcd:.3,dmg,id:Math.random(),ev:true,ang:a})}SND.p('paper')}
-  // 엘리트·보스가 나타나면 하객 전원 돌격 → 자폭
-  for(const e of G.enemies){if(e.dead||e.swS||!(e.boss||e.elite))continue;if(Math.abs(e.x-p.x)>VW*.75||Math.abs(e.y-p.y)>VH*.75)continue;e.swS=1;let c=0;for(const q of g)if(q.m==='orb'||q.m==='join'){q.m='dash';q.tg=e;c++}if(c&&!G.bot){G.texts.push({x:p.x,y:p.y-80,v:'하객 여러분, 축의금 내러 가요!',life:2.2,col:'#e6c4ff'})}}
+  // 엘리트·보스 등장: 하객이 주인공에게 모여 spell charge → arcane missiles 20발 → life steal 5알
+  for(const e of G.enemies){if(e.dead||e.swS||!(e.boss||e.elite))continue;if(Math.abs(e.x-p.x)>VW*.75||Math.abs(e.y-p.y)>VH*.75)continue;e.swS=1;
+    if(!st.cast){const c=g.filter(q=>q.m==='orb'||q.m==='join');if(c.length){for(const q of c)q.m='gather';st.cast={t:0,n:20,tg:e};if(!G.bot)G.texts.push({x:p.x,y:p.y-80,v:'하객 여러분, 축의금 내러 가요!',life:2.2,col:'#e6c4ff'})}}}
+  // 하객이 없을 땐 20초마다 5발
+  st.sc=(st.sc===undefined?20:st.sc)-dt;
+  if(!st.cast&&st.sc<=0&&!g.some(q=>q.m==='orb'||q.m==='join')){const tg=swPick();if(tg){st.cast={t:0,n:5,tg};st.sc=20*S.cd}}
+  if(st.cast){const C=st.cast;C.t+=dt;
+    if(C.t>=.9&&!C.vo){C.vo=[];for(let i=0;i<C.n/5;i++)C.vo.push({t:-i*.18,hit:0,o:(i-(C.n/5-1)/2)*.14});if(!G.bot)SND.p('evo')}
+    if(C.vo){const tg=swTg(C);for(const v of C.vo){v.t+=dt;while(v.hit<5&&v.t>=.7+v.hit*.12){v.hit++;if(tg){hurt(tg,320*S.might,'soulwed',{force:1});for(const o of G.enemies)if(!o.dead&&o!==tg&&(o.x-C.lx)**2+(o.y-C.ly)**2<(40+o.r)**2)hurt(o,100*S.might,'soulwed');if(!G.bot)sparks(C.lx,C.ly,8,['#c684ff','#ffffff','#ecc8ff'],200,.3,2)}}}
+      if(!C.ls&&C.vo.every(v=>v.hit>=5))C.ls={t:0,x:C.lx,y:C.ly,h:0}}
+    if(C.ls){C.ls.t+=dt;while(C.ls.h<5&&C.ls.t>=.6+C.ls.h*.12){C.ls.h++;healP(3);if(!G.bot)sparks(p.x,p.y-8,6,['#ff2040','#ff9a8a','#ffffff'],120,.3,2)}if(C.ls.t>=2.2)st.cast=null}
+    if(C.t>12)st.cast=null}
   st.a=(st.a||0)+1.1*dt;let oi=0;
   for(const q of g){q.f+=dt*6;q.t+=dt;
     if(q.m==='orb'||q.m==='join'){const a=st.a+oi*Math.PI*2/Math.max(1,nO+g.filter(z=>z.m==='join').length);oi++;const tx=p.x+Math.cos(a)*(R+8),ty=p.y+Math.sin(a)*(R+8)*.9,dx=tx-q.x,dy=ty-q.y,d=Math.hypot(dx,dy);
       if(q.m==='join'){const v=Math.min(d,320*dt);q.x+=dx/(d||1)*v;q.y+=dy/(d||1)*v;q.dir=dx<0?-1:1;if(d<6)q.m='orb'}else{q.dir=dx<0?-1:1;q.x=tx;q.y=ty}}
-    else if(q.m==='dash'){const e=q.tg;if(!e||e.dead){q.m='die';q.t=0;continue}const dx=e.x-q.x,dy=e.y-q.y,d=Math.hypot(dx,dy)||1,v=560*dt;q.dir=dx<0?-1:1;if(d<=e.r+10||d<v){q.x=e.x;q.y=e.y;q.m='die';q.t=0;
-        hurt(e,320*S.might,'soulwed',{force:1});for(const o of G.enemies)if(!o.dead&&o!==e&&(o.x-q.x)**2+(o.y-q.y)**2<(50+o.r)**2)hurt(o,120*S.might,'soulwed');
-        if(!G.bot){sparks(q.x,q.y,14,['#c07bff','#ffffff','#ff3fd2'],240,.4,2);if(Math.random()<.4)SND.p('boom')}}else{q.x+=dx/d*v;q.y+=dy/d*v}}}
+    else if(q.m==='gather'){const dx=p.x-q.x,dy=p.y-8-q.y,d=Math.hypot(dx,dy)||1,v=520*dt;q.dir=dx<0?-1:1;if(d<=14||d<v){q.x=p.x;q.y=p.y-8;q.m='die';q.t=0}else{q.x+=dx/d*v;q.y+=dy/d*v}}}
   st.g=g.filter(q=>!(q.m==='die'&&q.t>.55));
   if(!G.bot){const k=pn(1.5);for(let i=0;i<k;i++){const a=rnd(0,6.283),rr=Math.sqrt(Math.random())*R;px(p.x+Math.cos(a)*rr,p.y+Math.sin(a)*rr,rnd(-10,10),-rnd(30,70),.8,pick(['#9b3dff','#ff3fd2','#e6c4ff']),2,1,1)}}}
+function swPick(){let b=null,bd=1e18;for(const e of G.enemies){if(!hxVis(e))continue;const d=(e.x-G.p.x)**2+(e.y-G.p.y)**2-((e.boss||e.elite)?1e12:0);if(d<bd){bd=d;b=e}}return b}
+function swTg(C){if(!C.tg||C.tg.dead)C.tg=swPick();if(C.tg){C.lx=C.tg.x;C.ly=C.tg.y}return C.tg}
+function swBeam(k,hx,hy,base,x0,y0,x1,y1,f,al){const S=HXI[k];if(!S||!S.im.complete||!S.im.naturalWidth)return;const d=Math.hypot(x1-x0,y1-y0)||1,sx=Math.max(.6,d/base),sy=Math.min(1.6,Math.max(.9,sx*.8));ctx.save();ctx.imageSmoothingEnabled=false;ctx.globalAlpha=al===undefined?1:al;ctx.translate(x0,y0);ctx.rotate(Math.atan2(y1-y0,x1-x0));ctx.scale(sx,sy);ctx.drawImage(S.im,Math.min(S.n-1,f|0)*S.w,0,S.w,S.h,-hx,-hy,S.w,S.h);ctx.restore()}
+function swCastDraw(st){const C=st.cast;if(!C)return;const p=G.p;
+  if(C.t<1.1){const S=HXI.scharge,sc=1.5;if(S&&S.im.complete&&S.im.naturalWidth){ctx.save();ctx.imageSmoothingEnabled=false;ctx.globalAlpha=Math.min(1,(1.1-C.t)*5);ctx.drawImage(S.im,((C.t*15)%24|0)*S.w,0,S.w,S.h,p.x+10-59*sc,p.y-6-58*sc,S.w*sc,S.h*sc);ctx.restore()}}
+  if(C.vo&&C.lx!==undefined)for(const v of C.vo){if(v.t<0||v.t>=1.75)continue;const a=Math.atan2(C.ly-p.y,C.lx-p.x)+v.o,d=Math.hypot(C.lx-p.x,C.ly-p.y);swBeam('amiss',41,64,137,p.x,p.y-8,p.x+Math.cos(a)*d,p.y-8+Math.sin(a)*d,v.t*20)}
+  if(C.ls)swBeam('lsteal',37,72,103,p.x,p.y-8,C.ls.x,C.ls.y,C.ls.t*15)}
 function swFloor(w){const R=w.st.R||100*G.S.area;hxFrame('rune',G.t*15%60,G.p.x,G.p.y,R/46,.9)}
-function swDraw(w){for(const q of w.st.g||[]){const sc=.62,bob=Math.sin(G.t*3+q.a*5)*2;if(q.m==='die')hxFrame('ghost',4+q.t/.55*4,q.x,q.y-8,sc,1,q.dir<0);else hxFrame('ghost',(q.f|0)%4,q.x,q.y-8+bob,sc,q.m==='join'?.75:1,q.dir<0)}}
+function swDraw(w){swCastDraw(w.st);for(const q of w.st.g||[]){const sc=.62,bob=Math.sin(G.t*3+q.a*5)*2;if(q.m==='die')hxFrame('ghost',4+q.t/.55*4,q.x,q.y-8,sc,1,q.dir<0);else hxFrame('ghost',(q.f|0)%4,q.x,q.y-8+bob,sc,q.m==='join'?.75:1,q.dir<0)}}
 
 Object.assign(WU,{polaris(w,dt){plTick(w,dt)},soulwed(w,dt){swTick(w,dt)}});
 function hxFloor(){for(const w of G.weapons)if(w.k==='soulwed')swFloor(w)}
@@ -3970,7 +3985,7 @@ function hxDraw(){for(const w of G.weapons){if(w.k==='polaris'){plDraw(w);plFlas
 Object.assign(WP,{glass:{name:'요정의 유리정원',icon:'🧊',evo:'stardust',evoName:'요정의 유리정원',hid:1,d:'아름다운 건, 유리 안에서만 시들지 않아요.',ed:'아름다운 건, 유리 안에서만 시들지 않아요.',extra:1}});
 KC.glass='#d8f4ff';
 HX.push({k:'glass',a:'fairy',b:'photo',it:'stardust',q:'이 순간을, 영원히 가둬 둘까요?',col:'#d8f4ff',sub:'🧚 Abracadabra + 📸 어플차단 + 🌟 별가루'});
-[['cubeB',116,112,36,15],['fnova',288,192,42,12]].forEach(([k,w,h,n,fps])=>{const im=new Image();im.src='fx/'+k+'.png';HXI[k]={im,w,h,n,fps}});
+[['cubeB',116,112,36,15],['fnova',288,192,42,12],['scharge',120,86,24,15],['amiss',240,116,36,20],['lsteal',184,100,34,15]].forEach(([k,w,h,n,fps])=>{const im=new Image();im.src='fx/'+k+'.png';HXI[k]={im,w,h,n,fps}});
 
 const GL_REMAP={fairy:'glass',star:'glass',photo:'glass'};
 function PHW(){const p=W('photo');if(p)return p;const g=W('glass');return g&&g.st.sub?g.st.sub.photo:null}

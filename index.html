@@ -3925,10 +3925,13 @@ function plTick(w,dt){const S=G.S,st=w.st,p=G.p;
   else if(st.ph===1){st.t+=dt;st.x=p.x;st.y=p.y-92;if(st.t>=1.6){st.ph=2;st.t=0}}
   else if(st.ph===2){st.t+=dt;if(!st.pop&&st.t>=1.02){st.pop=1;
       for(const e of G.enemies){if(!hxVis(e))continue;hurt(e,110*S.might,'polaris',{force:1});if(e.dead)continue;hxFrzT(e,e.boss||e.elite?1.5:3)}
-      if(!G.bot){st.fl=.35;G.shk=Math.max(G.shk||0,5);SND.p('boom');sparks(st.x,st.y,40,['#ffffff','#bfefff','#58b4ec'],420,.6,3)}}
+      st.nt=0;if(!G.bot){st.fl=.35;SND.p('boom');sparks(st.x,st.y,40,['#ffffff','#bfefff','#58b4ec'],420,.6,3)}}
     if(st.t>=1.7){st.ph=0;st.u=25*S.cd;st.pop=0}}
-  if(st.fl>0)st.fl-=dt}
-function plDraw(w){const st=w.st;if(st.pts)st.pts.forEach(([x,y],i)=>drawEmo(i%2?'💠':'❄️',x,y,20));
+  if(st.fl>0)st.fl-=dt;if(st.nt!==undefined&&st.nt<3.5)st.nt+=dt}
+function plNova(st){if(st.nt===undefined||st.nt>=3.5)return;const S=HXI.fnova;if(!S||!S.im.complete||!S.im.naturalWidth)return;const f=Math.min(S.n-1,(st.nt*12)|0),sc=1.15,w=S.w*sc,h=S.h*sc,ox=144*sc,oy=150*sc,L=G.p.x-VW/2,T=G.p.y-VH/2,R=G.p.x+VW/2,B=G.p.y+VH/2,gap=w*.8;
+  ctx.save();ctx.imageSmoothingEnabled=false;ctx.globalAlpha=.95;const put=(x,y,rot)=>{ctx.save();ctx.translate(x,y);ctx.rotate(rot);ctx.drawImage(S.im,f*S.w,0,S.w,S.h,-ox,-oy,w,h);ctx.restore()};
+  for(let x=L;x<=R+gap;x+=gap){put(x,B,0);put(x,T,Math.PI)}for(let y=T+gap/2;y<=B;y+=gap){put(L,y,Math.PI/2);put(R,y,-Math.PI/2)}ctx.restore()}
+function plDraw(w){plNova(w.st);const st=w.st;if(st.pts)st.pts.forEach(([x,y],i)=>drawEmo(i%2?'💠':'❄️',x,y,20));
   if(st.ph===1)hxFrame('pstar',st.t*15,st.x,st.y,3);
   else if(st.ph===2){hxFrame('pimp',st.t*20,st.x,st.y,2.6);const k=(st.t-1.02)/.5;if(k>=0&&k<1){const a=1-k,R=40+k*Math.max(VW,VH)*.9;ctx.save();ctx.globalCompositeOperation='lighter';const g=ctx.createRadialGradient(st.x,st.y,0,st.x,st.y,R);g.addColorStop(0,`rgba(255,255,255,${a})`);g.addColorStop(.25,`rgba(216,244,255,${.8*a})`);g.addColorStop(.6,`rgba(88,180,236,${.35*a})`);g.addColorStop(1,'rgba(88,180,236,0)');ctx.fillStyle=g;ctx.fillRect(st.x-R,st.y-R,R*2,R*2);ctx.globalAlpha=a;ctx.fillStyle='#ffffff';const L=R*1.3,T=Math.max(2,10*a);ctx.fillRect(st.x-L,st.y-T/2,L*2,T);ctx.fillRect(st.x-T/2,st.y-L,T,L*2);ctx.globalAlpha=a*.6;ctx.save();ctx.translate(st.x,st.y);ctx.rotate(.785);ctx.fillRect(-L*.6,-T/4,L*1.2,T/2);ctx.fillRect(-T/4,-L*.6,T/2,L*1.2);ctx.restore();ctx.restore()}}}
 function plFlash(w){if(w.st.fl>0){ctx.save();ctx.globalAlpha=Math.min(.8,w.st.fl*2.3);ctx.fillStyle='#e8fbff';ctx.fillRect(G.p.x-VW,G.p.y-VH,VW*2,VH*2);ctx.restore()}}
@@ -3967,7 +3970,7 @@ function hxDraw(){for(const w of G.weapons){if(w.k==='polaris'){plDraw(w);plFlas
 Object.assign(WP,{glass:{name:'요정의 유리정원',icon:'🧊',evo:'stardust',evoName:'요정의 유리정원',hid:1,d:'아름다운 건, 유리 안에서만 시들지 않아요.',ed:'아름다운 건, 유리 안에서만 시들지 않아요.',extra:1}});
 KC.glass='#d8f4ff';
 HX.push({k:'glass',a:'fairy',b:'photo',it:'stardust',q:'이 순간을, 영원히 가둬 둘까요?',col:'#d8f4ff',sub:'🧚 Abracadabra + 📸 어플차단 + 🌟 별가루'});
-[['cubeB',116,112,36,15]].forEach(([k,w,h,n,fps])=>{const im=new Image();im.src='fx/'+k+'.png';HXI[k]={im,w,h,n,fps}});
+[['cubeB',116,112,36,15],['fnova',288,192,42,12]].forEach(([k,w,h,n,fps])=>{const im=new Image();im.src='fx/'+k+'.png';HXI[k]={im,w,h,n,fps}});
 
 const GL_REMAP={fairy:'glass',star:'glass',photo:'glass'};
 function PHW(){const p=W('photo');if(p)return p;const g=W('glass');return g&&g.st.sub?g.st.sub.photo:null}

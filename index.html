@@ -653,7 +653,7 @@ function twSetup(){const B=twBuild(),own=CHAR[G.ci].w;
   for(const k of B.i.filter(k=>juAllow(k,G.id)).slice(0,6))G.items[k]=IT[k].max||5;
   recalc();
   for(const w of G.weapons)if(G.items[WP[w.k].evo]&&!(WP[w.k].ju&&!(SAVE.juEvo||{})[w.k]))w.evo=true;
-  if(rdReady())rdMerge(1);recalc();G.p.hp=G.S.maxHp;G.eliteT=20;G.hevT=90}
+  if(rdReady())rdMerge(1);for(const h of HX)if(hxOK(h))hxMerge(h,1);recalc();G.p.hp=G.S.maxHp;G.eliteT=20;G.hevT=90}
 function addWeapon(k){G.weapons.push({k,lvl:1,evo:false,t:0,t0:G.t,st:{}});recalc()}
 function W(k){return G.weapons.find(w=>w.k===k)}
 const owned=()=>G.weapons.map(w=>w.k);
@@ -682,7 +682,7 @@ function hurt(e,amt,key,opts={}){
   if(e.hp<=0)kill(e,key);
 }
 function kill(e,key){if(key==='kkh'&&!e.boss&&!e.guard&&!e.elite&&e.type!=='dtower'){const kw=W('kkheart');juCharm(e,5*(G.S.sdur||1),(16+5*(kw?kw.lvl:1))*G.S.might*(kw&&kw.evo?1.5:1),'kkhA')}if(key==='pearl'&&!e.boss&&!e.guard&&e.type!=='dtower'&&G.id==='쥬은'){const pw=W('pearl');if(pw&&pw.evo&&pw.st.evd)juCharm(e)}
-  if(MPKILL&&MPKILL(e,key))return;e.dead=true;G.kills++;if(!G.bot)SND.p(e.boss?'bosskill':'kill');
+  if(MPKILL&&MPKILL(e,key))return;e.dead=true;G.kills++;if(e.tal>G.t)swGuest(e);if(key==='soulwed')healP(.6);if(!G.bot)SND.p(e.boss?'bosskill':'kill');
   const xpv=e.xp;
   if(!G.tw){const gv=xpv*XPV*(G.hell?1.3:1);if(!(MPXP&&MPXP(gv)))G.gems.push({x:e.x,y:e.y,v:gv,big:xpv>=10})}
   if(e.boss||e.elite){if(!(MPCHEST&&MPCHEST()))G.pickups.push({x:clamp(e.x+10,G.p.x-VW/2+40,G.p.x+VW/2-40),y:clamp(e.y,G.p.y-VH/2+50,G.p.y+VH/2-40),k:'chest'})}
@@ -2161,6 +2161,7 @@ function levelUp(){
 function checkLevel(){if(G.xp>=G.next){G.xp-=G.next;G.lvl++;if(!G.bot){const m=pn(90);for(let k=0;k<m;k++){const a=rnd(0,6.283);px(G.p.x+Math.cos(a)*14,G.p.y+Math.sin(a)*8,Math.cos(a)*rnd(20,80),-rnd(120,340),1.1,pick(['#ff5fb8','#ffd34d','#7fd8ff','#8dff3a','#c07bff','#ffffff']),2,3,1.2,280)}}G.next=Math.floor(4+G.lvl*4+1.4*Math.pow(G.lvl,1.8));levelUp()}}
 function openChest(){s2Desc();
   if(!G.rdPass&&!G.tw&&rdReady()){if(G.bot){rdMerge(1)}else{rdAsk(()=>{G.rdPass=1;openChest();G.rdPass=0});return}}
+  {const h=!G.rdPass&&!G.tw&&hxReady();if(h){if(G.bot)hxMerge(h,1);else{hxAsk(h,()=>{G.rdPass=1;openChest();G.rdPass=0});return}}}
   G.paused=true;G.chestBusy=1;
   const ev=G.weapons.find(w=>!w.evo&&w.lvl>=8&&G.items[WP[w.k].evo]);
   const got=[];let tier,evoMsg='';
@@ -2410,7 +2411,7 @@ function update(dt){
     pr.x+=pr.vx*dt;pr.y+=pr.vy*dt;pr.life-=dt;
     if(!G.bot&&Math.random()<.9*(G.fxi||1))ptrail(pr);
     if(pr.bounce){if(pr.x<p.x-VW/2||pr.x>p.x+VW/2)pr.vx*=-1;if(pr.y<p.y-VH/2||pr.y>p.y+VH/2)pr.vy*=-1;pr.x=clamp(pr.x,p.x-VW/2,p.x+VW/2);pr.y=clamp(pr.y,p.y-VH/2,p.y+VH/2)}
-    for(const e of G.enemies){if(e.dead||pr.life<=0)continue;if((e.x-pr.x)**2+(e.y-pr.y)**2<(e.r+pr.r)**2){const hk=pr.hcd?'p'+pr.k:null;if(pr.hit[e.i]&&!pr.hcd)continue;if(pr.hcd&&!canHit(e,hk+pr.id,pr.hcd))continue;pr.hit[e.i]=1;hurt(e,pr.dmg,pr.k,{critMul:pr.crit||1,critDmg:pr.crit?2.5:2,kb:10});if(pr.frz)freezeE(e,pr.frz);if(!pr.hcd){pr.pierce--;if(pr.pierce<=0)pr.life=0}}}
+    for(const e of G.enemies){if(e.dead||pr.life<=0)continue;if((e.x-pr.x)**2+(e.y-pr.y)**2<(e.r+pr.r)**2){const hk=pr.hcd?'p'+pr.k:null;if(pr.hit[e.i]&&!pr.hcd)continue;if(pr.hcd&&!canHit(e,hk+pr.id,pr.hcd))continue;pr.hit[e.i]=1;if(pr.tal)e.tal=G.t+4;hurt(e,pr.dmg,pr.hk||pr.k,{critMul:pr.crit||1,critDmg:pr.crit?2.5:2,kb:10});if(pr.frz)freezeE(e,pr.frz);if(!pr.hcd){pr.pierce--;if(pr.pierce<=0)pr.life=0}}}
   }
   G.projs=G.projs.filter(pr=>pr.life>0);
   // zones
@@ -2518,6 +2519,7 @@ function draw(){
     else if(h%7===0){const [sx,sy]=W2S(tx*T+(h>>4)%40,ty*T+(h>>9)%40);ctx.globalAlpha=.25+.35*Math.abs(Math.sin(G.t*1.5+h));ctx.fillStyle=h&1?'#cfe0ff':'#ffd6f5';ctx.fillRect(sx,sy,2*Z,2*Z);ctx.globalAlpha=1;ctx.fillStyle=c2}}}
   {const g=ctx.createRadialGradient(innerWidth/2,innerHeight/2,0,innerWidth/2,innerHeight/2,170*Z);g.addColorStop(0,'rgba(140,170,255,.16)');g.addColorStop(1,'rgba(140,170,255,0)');ctx.fillStyle=g;ctx.fillRect(0,0,innerWidth,innerHeight)}
   ctx.save();ctx.translate(innerWidth/2,innerHeight/2);ctx.scale(Z,Z);{const sk=G.shk>0?G.shk:0;ctx.translate(-G.p.x+(sk?rnd(-sk,sk):0),-G.p.y+(sk?rnd(-sk,sk):0))}
+  hxFloor();
   // zones
   for(const z of G.zones){gf(z.gx);
     if(z.k==='poison'){const hg=HW('poison');ctx.globalAlpha=.45*Math.min(1,z.life);ctx.fillStyle=hg?'#3a4a3a':wfxOn('poison')?'#b04cff':'#4cff00';ctx.beginPath();ctx.ellipse(z.x,z.y,z.r,z.r*.7,0,0,7);ctx.fill();ctx.globalAlpha=1;
@@ -2619,7 +2621,7 @@ function draw(){
     else if(f.bigslash){}
     else{ctx.globalAlpha=Math.min(1,f.life*3);ctx.fillStyle=f.c;ctx.fillRect(f.x,f.y,f.s,f.s);ctx.globalAlpha=1}
   }
-  gf(false);pxDraw();skDraw();bfDraw();drawSummons();juDraw();juDraw2();jgDraw();hdDraw();jgNailDraw();kkDraw();jrDraw();drawDust();drawPhoto();
+  gf(false);pxDraw();skDraw();bfDraw();drawSummons();juDraw();juDraw2();jgDraw();hdDraw();jgNailDraw();kkDraw();jrDraw();drawDust();drawPhoto();hxDraw();
   drawArena();drawHellWorld();if(G.map==='sangbong')s2World();
   // player
   if(auraOn()){const p0=G.p;ctx.globalAlpha=.32+.1*Math.sin(G.t*8);ctx.fillStyle='#ff4a10';ctx.beginPath();ctx.ellipse(p0.x,p0.y+16,22,7,0,0,7);ctx.fill();ctx.globalAlpha=1;if(!G.bot){for(let k=0;k<2;k++)px(p0.x+rnd(-14,14),p0.y+rnd(4,16),rnd(-10,10),-rnd(60,130),rnd(.4,.8),pick(['#ff3a1a','#ff8a1a','#ffd34d','#fff0a0']),pick([2,3]),1,1)}}
@@ -3886,6 +3888,81 @@ function wsClosetRow(){const row=(k,nm)=>{const has=!!SAVE.inv['wl:'+k],v=(SAVE.
 function kisunRow(){const hs=!!SAVE.inv['wl:kisunS'],hf=!!SAVE.inv['wl:kisunF'],v=jgSkin();const b=(val,lab,own)=>own?`<button type="button" class="wfxb" data-kis="${val}" aria-pressed="${v===val}">${lab}</button>`:`<button type="button" class="wfxb" disabled>🔒 ???</button>`;return `<div class="clowrow"><span class="wn">🗡️ 끼순이어검술</span><span class="wb">${b('','기본',true)}${b('s','✨ 세인트썸띵',hs)}${b('f','💗 페미닌',hf)}</span></div>`}
 document.addEventListener('click',e=>{const b=e.target&&e.target.closest&&e.target.closest('[data-kis]');if(!b)return;SAVE.wsel=SAVE.wsel||{};SAVE.wsel.kisun=b.dataset.kis;persist();SND.p('click');if(typeof renderCloset==='function')renderCloset()});
 function wsBind(){$('#closet').querySelectorAll('canvas[data-wsk]').forEach(cv=>{const k=cv.dataset.wsk;if(!k)return;const x=cv.getContext('2d');x.imageSmoothingEnabled=false;x.drawImage(wsCell(k,0),16,0,64,64)})}
+// ---- 히든 합체 무기 2탄 (V102): 플로리스 폴라리스 · 영혼결혼식 ----
+Object.assign(WP,{
+ polaris:{name:'플로리스 폴라리스',icon:'🌟',evo:'love',evoName:'플로리스 폴라리스',hid:1,d:'폴라리스 시스템 출신인 그녀는 플로리스해요.',ed:'폴라리스 시스템 출신인 그녀는 플로리스해요.',extra:1},
+ soulwed:{name:'영혼결혼식',icon:'💒',evo:'gukbap',evoName:'영혼결혼식',hid:1,d:'사랑은 끝났는데, 식은 아직 끝나지 않았어요.',ed:'사랑은 끝났는데, 식은 아직 끝나지 않았어요.',extra:1}});
+Object.assign(KC,{polaris:'#bfefff',soulwed:'#c07bff'});
+const HX=[
+ {k:'polaris',a:'heart',b:'ice',it:'love',q:'녹지 않는 왕관을 써도 괜찮을까요?',col:'#bfefff',sub:'🌈 오로라 대관식 + 🏹 북극 직행 화살 + 💌 사랑의 기억'},
+ {k:'soulwed',a:'veil',b:'talis',it:'gukbap',q:'죽어서도 함께하시겠습니까?',col:'#c07bff',sub:'🖤 마계의 웨딩 + 🧧 기갈부적 + 🍲 점례 순대국'}];
+function hxOK(h){const a=W(h.a),b=W(h.b);return!!(a&&a.evo&&b&&b.evo&&G.items[h.it]&&!W(h.k))}
+function hxReady(){return HX.find(hxOK)}
+function hxMerge(h,quiet){G.weapons=G.weapons.filter(w=>w.k!==h.a&&w.k!==h.b);G.weapons.push({k:h.k,lvl:8,evo:true,t:0,t0:G.t,st:{}});recalc();
+  if(!quiet&&!G.bot){SND.p('evo');G.texts.push({x:G.p.x,y:G.p.y-70,v:WP[h.k].name,life:2.6,big:1,col:h.col});G.texts.push({x:G.p.x,y:G.p.y-46,v:WP[h.k].d,life:3,col:'#e8d8ff'});sparks(G.p.x,G.p.y-20,40,['#ffffff',h.col,'#e8d8ff'],300,.6,3)}}
+function hxAsk(h,cb){G.paused=true;const ov=document.createElement('div');ov.className='ov';ov.id='hxq';ov.innerHTML=`<div class="ntc" style="text-align:center"><h2 style="margin:6px 0">${esc(h.q)}</h2><p style="opacity:.85;font-size:13px">${esc(h.sub)}<br>두 무기가 하나로 합쳐지고, 무기 칸이 하나 비어요</p><div class="nbtns"><button class="big" type="button" id="hxY">예</button><button class="ghost" type="button" id="hxN">아니오</button></div></div>`;document.body.appendChild(ov);
+  $('#hxY').onclick=()=>{ov.remove();hxMerge(h);cb()};$('#hxN').onclick=()=>{ov.remove();cb()}}
+// 이펙트 시트 (pixelfx, MIT) — fx/ 폴더
+const HXI={};[['pstar',96,96,25,15],['pimp',208,184,34,20],['rune',112,112,60,15],['ghost',54,61,8,0]].forEach(([k,w,h,n,fps])=>{const im=new Image();im.src='fx/'+k+'.png';HXI[k]={im,w,h,n,fps}});
+function hxFrame(k,f,x,y,sc,al,flip){const S=HXI[k];if(!S||!S.im.complete||!S.im.naturalWidth)return;f=Math.max(0,Math.min(S.n-1,f|0));const w=S.w*sc,h=S.h*sc;ctx.save();ctx.imageSmoothingEnabled=false;if(al!==undefined)ctx.globalAlpha=al;
+  if(flip){ctx.translate(x,y);ctx.scale(-1,1);ctx.drawImage(S.im,f*S.w,0,S.w,S.h,-w/2,-h/2,w,h)}else ctx.drawImage(S.im,f*S.w,0,S.w,S.h,x-w/2,y-h/2,w,h);ctx.restore()}
+function hxFrzT(e,t){const tt=t*(G.S.sdur||1);e.frz=Math.max(e.frz||0,tt);e.stun=Math.max(e.stun||0,tt)}
+function hxVis(e){return!e.dead&&Math.abs(e.x-G.p.x)<VW/2+40&&Math.abs(e.y-G.p.y)<VH/2+40}
+
+// ===== 플로리스 폴라리스 =====
+const PL_LINE='우리 별의 힘을 이곳에 현신시키겠어.';
+function plTick(w,dt){const S=G.S,st=w.st,p=G.p;
+  // 오로라 고리: 닿은 적 빙결, 이미 언 적은 얼음 파편으로 깨지며 주변도 얼림
+  const n=8+S.amount,R=115*S.area,hr=16*S.area,dmg=30*S.might;st.a=(st.a||0)+3.2*dt;st.pts=[];st.sb=Math.min(4,(st.sb||0)+dt*4);
+  for(let i=0;i<n;i++){const a=st.a+i*Math.PI*2/n,x=p.x+Math.cos(a)*R,y=p.y+Math.sin(a)*R;st.pts.push([x,y]);
+    if(!G.bot&&Math.random()<.5*(G.fxi||1))px(x+rnd(-4,4),y+rnd(-4,4),rnd(-15,15),rnd(-15,15),.45,pick(['#bfefff','#ffffff','#7fd8ff','#c07bff','#8dff3a']),2,3,2);
+    for(const e of G.enemies){if(e.dead||(e.x-x)**2+(e.y-y)**2>=(hr+e.r)**2||!canHit(e,'pl'+i,.45))continue;const fz=e.frz>0;hurt(e,dmg,'polaris');if(e.dead)continue;freezeE(e,.8*(S.sdur||1));
+      if(fz&&st.sb>=1&&canHit(e,'plsh',1.2)){st.sb--;const r=45*S.area;for(const o of G.enemies){if(o.dead||o===e||(o.x-e.x)**2+(o.y-e.y)**2>(r+o.r)**2)continue;hurt(o,30*S.might,'polaris');if(!o.dead)freezeE(o,1*(S.sdur||1))}
+        if(!G.bot){sparks(e.x,e.y,12,['#ffffff','#bfefff','#7ad8ff'],200,.35,2);pring(e.x,e.y,r,['#bfefff','#ffffff'],16,.3)}}}}
+  // 북극성 (약 25초마다): 별 1.6초 → 내파 → 화면의 적 전부 빙결(일반 3초 · 보스/엘리트 1.5초, 우정 적용)
+  if(st.ph===undefined){st.ph=0;st.u=6}
+  if(st.ph===0){st.u-=dt;if(st.u<=0){st.ph=1;st.t=0;if(!G.bot){G.texts.push({x:p.x,y:p.y-118,v:PL_LINE,life:2.6,col:'#d8f4ff'});SND.p('evo')}}}
+  else if(st.ph===1){st.t+=dt;st.x=p.x;st.y=p.y-92;if(st.t>=1.6){st.ph=2;st.t=0}}
+  else if(st.ph===2){st.t+=dt;if(!st.pop&&st.t>=1.02){st.pop=1;
+      for(const e of G.enemies){if(!hxVis(e))continue;hurt(e,110*S.might,'polaris',{force:1});if(e.dead)continue;hxFrzT(e,e.boss||e.elite?1.5:3)}
+      if(!G.bot){st.fl=.35;G.shk=Math.max(G.shk||0,5);SND.p('boom');sparks(st.x,st.y,40,['#ffffff','#bfefff','#58b4ec'],420,.6,3)}}
+    if(st.t>=1.7){st.ph=0;st.u=25*S.cd;st.pop=0}}
+  if(st.fl>0)st.fl-=dt}
+function plDraw(w){const st=w.st;if(st.pts)st.pts.forEach(([x,y],i)=>drawEmo(i%2?'💠':'❄️',x,y,20));
+  if(st.ph===1)hxFrame('pstar',st.t*15,st.x,st.y,3);
+  else if(st.ph===2)hxFrame('pimp',st.t*20,st.x,st.y,2.6)}
+function plFlash(w){if(w.st.fl>0){ctx.save();ctx.globalAlpha=Math.min(.55,w.st.fl*1.6);ctx.fillStyle='#e8fbff';ctx.fillRect(G.p.x-VW,G.p.y-VH,VW*2,VH*2);ctx.restore()}}
+
+// ===== 영혼결혼식 =====
+const SW_MAX=20;
+function swR(st){return(100+4*((st.g||[]).filter(q=>q.m==='orb').length))*G.S.area}
+function swGuest(e){const w=W('soulwed');if(!w)return;const st=w.st;st.g=st.g||[];if(st.g.filter(q=>q.m==='orb'||q.m==='join').length>=SW_MAX)return;st.g.push({m:'join',x:e.x,y:e.y,a:rnd(0,6.283),t:0,f:rnd(0,4)});if(!G.bot)sparks(e.x,e.y,8,['#c07bff','#ffffff'],120,.4,2)}
+function swTick(w,dt){const S=G.S,st=w.st,p=G.p;st.g=st.g||[];const g=st.g,nO=g.filter(q=>q.m==='orb').length,R=swR(st);st.R=R;
+  // 오라: 0.5초마다 피해 + 둔화, 하객 수만큼 강해짐
+  st.k=(st.k||0)-dt;if(st.k<=0){st.k=.5;for(const e of G.enemies)if(!e.dead&&(e.x-p.x)**2+(e.y-p.y)**2<(R+e.r)**2)hurt(e,(12+.9*nO)*S.might,'soulwed',{slow:.6})}
+  w.t-=dt;if(w.t<=0){w.t=2.4*S.cd;const R2=R*1.45;for(const e of G.enemies)if(!e.dead&&(e.x-p.x)**2+(e.y-p.y)**2<(R2+e.r)**2)hurt(e,(38+2.2*nO)*S.might,'soulwed',{slow:.6});if(!G.bot){G.fx.push({ring:1,x:p.x,y:p.y,r:0,R:R2,life:.4,L:.4,c:'#b36bff'});pring(p.x,p.y,R2,['#b36bff','#ff3fd2','#e6c4ff'],50,.4)}}
+  // 부적: 붙은 채로 죽은 적은 하객이 돼요
+  st.tt=(st.tt||1)-dt;if(st.tt<=0){st.tt=3*S.cd;const n=2+S.amount,r=(10+1.6*8)*S.area*1.4,dmg=30*S.might;
+    const tg=G.enemies.filter(e=>!e.dead&&(e.x-p.x)**2+(e.y-p.y)**2<360*360).sort((a,b)=>((a.x-p.x)**2+(a.y-p.y)**2)-((b.x-p.x)**2+(b.y-p.y)**2));
+    for(let i=0;i<n;i++){const e=tg[i];const a=e?Math.atan2(e.y-p.y,e.x-p.x):Math.atan2(p.fy,p.fx)+(i-(n-1)/2)*.5,v=58*S.pspeed;shoot({k:'talis',hk:'soulwed',tal:1,x:p.x,y:p.y-6,vx:Math.cos(a)*v,vy:Math.sin(a)*v,life:4.5*S.dur,r,pierce:999,hcd:.3,dmg,id:Math.random(),ev:true,ang:a})}SND.p('paper')}
+  // 엘리트·보스가 나타나면 하객 전원 돌격 → 자폭
+  for(const e of G.enemies){if(e.dead||e.swS||!(e.boss||e.elite))continue;if(Math.abs(e.x-p.x)>VW*.75||Math.abs(e.y-p.y)>VH*.75)continue;e.swS=1;let c=0;for(const q of g)if(q.m==='orb'||q.m==='join'){q.m='dash';q.tg=e;c++}if(c&&!G.bot){G.texts.push({x:p.x,y:p.y-80,v:'하객 여러분, 축의금 내러 가요!',life:2.2,col:'#e6c4ff'})}}
+  st.a=(st.a||0)+1.1*dt;let oi=0;
+  for(const q of g){q.f+=dt*6;q.t+=dt;
+    if(q.m==='orb'||q.m==='join'){const a=st.a+oi*Math.PI*2/Math.max(1,nO+g.filter(z=>z.m==='join').length);oi++;const tx=p.x+Math.cos(a)*(R+8),ty=p.y+Math.sin(a)*(R+8)*.9,dx=tx-q.x,dy=ty-q.y,d=Math.hypot(dx,dy);
+      if(q.m==='join'){const v=Math.min(d,320*dt);q.x+=dx/(d||1)*v;q.y+=dy/(d||1)*v;q.dir=dx<0?-1:1;if(d<6)q.m='orb'}else{q.dir=dx<0?-1:1;q.x=tx;q.y=ty}}
+    else if(q.m==='dash'){const e=q.tg;if(!e||e.dead){q.m='die';q.t=0;continue}const dx=e.x-q.x,dy=e.y-q.y,d=Math.hypot(dx,dy)||1,v=560*dt;q.dir=dx<0?-1:1;if(d<=e.r+10||d<v){q.x=e.x;q.y=e.y;q.m='die';q.t=0;
+        hurt(e,320*S.might,'soulwed',{force:1});for(const o of G.enemies)if(!o.dead&&o!==e&&(o.x-q.x)**2+(o.y-q.y)**2<(50+o.r)**2)hurt(o,120*S.might,'soulwed');
+        if(!G.bot){sparks(q.x,q.y,14,['#c07bff','#ffffff','#ff3fd2'],240,.4,2);if(Math.random()<.4)SND.p('boom')}}else{q.x+=dx/d*v;q.y+=dy/d*v}}}
+  st.g=g.filter(q=>!(q.m==='die'&&q.t>.55));
+  if(!G.bot){const k=pn(1.5);for(let i=0;i<k;i++){const a=rnd(0,6.283),rr=Math.sqrt(Math.random())*R;px(p.x+Math.cos(a)*rr,p.y+Math.sin(a)*rr,rnd(-10,10),-rnd(30,70),.8,pick(['#9b3dff','#ff3fd2','#e6c4ff']),2,1,1)}}}
+function swFloor(w){const R=w.st.R||100*G.S.area;hxFrame('rune',G.t*15%60,G.p.x,G.p.y,R/46,.9)}
+function swDraw(w){for(const q of w.st.g||[]){const sc=.62,bob=Math.sin(G.t*3+q.a*5)*2;if(q.m==='die')hxFrame('ghost',4+q.t/.55*4,q.x,q.y-8,sc,1,q.dir<0);else hxFrame('ghost',(q.f|0)%4,q.x,q.y-8+bob,sc,q.m==='join'?.75:1,q.dir<0)}}
+
+Object.assign(WU,{polaris(w,dt){plTick(w,dt)},soulwed(w,dt){swTick(w,dt)}});
+function hxFloor(){for(const w of G.weapons)if(w.k==='soulwed')swFloor(w)}
+function hxDraw(){for(const w of G.weapons){if(w.k==='polaris'){plDraw(w);plFlash(w)}else if(w.k==='soulwed')swDraw(w)}}
+
 // ---- 레이디 로드스터 ----
 Object.assign(WP,{roadster:{name:'레이디 로드스터',icon:'🚘',evo:'tesla',evoName:'레이디 로드스터',hid:1,d:'그건 제가 본 것 중에 가장 아름다운 가짜였어요.',ed:'그건 제가 본 것 중에 가장 아름다운 가짜였어요.',extra:1}});
 KC.roadster='#ffffff';

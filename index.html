@@ -3950,14 +3950,14 @@ function swTick(w,dt){const S=G.S,st=w.st,p=G.p;st.g=st.g||[];const g=st.g,nO=g.
     for(let i=0;i<n;i++){const e=tg[i];const a=e?Math.atan2(e.y-p.y,e.x-p.x):Math.atan2(p.fy,p.fx)+(i-(n-1)/2)*.5,v=58*S.pspeed;shoot({k:'talis',hk:'soulwed',tal:1,x:p.x,y:p.y-6,vx:Math.cos(a)*v,vy:Math.sin(a)*v,life:4.5*S.dur,r,pierce:999,hcd:.3,dmg,id:Math.random(),ev:true,ang:a})}SND.p('paper')}
   // 엘리트·보스 등장: 하객이 주인공에게 모여 spell charge → arcane missiles 20발 → life steal 5알
   for(const e of G.enemies){if(e.dead||e.swS||!(e.boss||e.elite))continue;if(Math.abs(e.x-p.x)>VW*.75||Math.abs(e.y-p.y)>VH*.75)continue;e.swS=1;
-    if(!st.cast){const c=g.filter(q=>q.m==='orb'||q.m==='join');if(c.length){for(const q of c)q.m='gather';st.cast={t:0,n:20,tg:e};if(!G.bot)G.texts.push({x:p.x,y:p.y-80,v:'하객 여러분, 축의금 내러 가요!',life:2.2,col:'#e6c4ff'})}}}
+    if(!st.cast){const c=g.filter(q=>q.m==='orb'||q.m==='join');if(c.length){for(const q of c)q.m='gather';st.cast={t:0,n:c.length,tg:e};if(!G.bot)G.texts.push({x:p.x,y:p.y-80,v:'하객 여러분, 축의금 내러 가요!',life:2.2,col:'#e6c4ff'})}}}
   // 하객이 없을 땐 20초마다 5발
   st.sc=(st.sc===undefined?20:st.sc)-dt;
   if(!st.cast&&st.sc<=0&&!g.some(q=>q.m==='orb'||q.m==='join')){const tg=swPick();if(tg){st.cast={t:0,n:5,tg};st.sc=20*S.cd}}
   if(st.cast){const C=st.cast;C.t+=dt;
-    if(C.t>=.9&&!C.vo){C.vo=[];for(let i=0;i<C.n/5;i++)C.vo.push({t:-i*.18,hit:0,o:(i-(C.n/5-1)/2)*.14});if(!G.bot)SND.p('evo')}
-    if(C.vo){const tg=swTg(C);for(const v of C.vo){v.t+=dt;while(v.hit<5&&v.t>=.7+v.hit*.12){v.hit++;if(tg){hurt(tg,320*S.might,'soulwed',{force:1});for(const o of G.enemies)if(!o.dead&&o!==tg&&(o.x-C.lx)**2+(o.y-C.ly)**2<(40+o.r)**2)hurt(o,100*S.might,'soulwed');if(!G.bot)sparks(C.lx,C.ly,8,['#c684ff','#ffffff','#ecc8ff'],200,.3,2)}}}
-      if(!C.ls&&C.vo.every(v=>v.hit>=5))C.ls={t:0,x:C.lx,y:C.ly,h:0}}
+    if(C.t>=.9&&!C.vo){C.vo=[];const nv=Math.ceil(C.n/5);for(let i=0;i<nv;i++)C.vo.push({t:-i*.18,hit:0,k:Math.min(5,C.n-i*5),o:(i-(nv-1)/2)*.14});if(!G.bot)SND.p('evo')}
+    if(C.vo){const tg=swTg(C);for(const v of C.vo){v.t+=dt;while(v.hit<v.k&&v.t>=.7+v.hit*.12){v.hit++;if(tg){hurt(tg,320*S.might,'soulwed',{force:1});for(const o of G.enemies)if(!o.dead&&o!==tg&&(o.x-C.lx)**2+(o.y-C.ly)**2<(40+o.r)**2)hurt(o,100*S.might,'soulwed');if(!G.bot)sparks(C.lx,C.ly,8,['#c684ff','#ffffff','#ecc8ff'],200,.3,2)}}}
+      if(!C.ls&&C.vo.every(v=>v.hit>=v.k))C.ls={t:0,x:C.lx,y:C.ly,h:0}}
     if(C.ls){C.ls.t+=dt;while(C.ls.h<5&&C.ls.t>=.6+C.ls.h*.12){C.ls.h++;healP(3);if(!G.bot)sparks(p.x,p.y-8,6,['#ff2040','#ff9a8a','#ffffff'],120,.3,2)}if(C.ls.t>=2.2)st.cast=null}
     if(C.t>12)st.cast=null}
   st.a=(st.a||0)+1.1*dt;let oi=0;

@@ -1156,7 +1156,7 @@ function drawChestGuide(){const p=G.p;for(const k of G.pickups){if(k.k!=='chest'
   ctx.restore()}}
 /* ================= 신규 무기 7종: 보조 함수 ================= */
 const CLOUDP=[[-.6,.12,.3],[-.25,-.12,.42],[.22,-.1,.4],[.6,.12,.3],[0,.16,.46],[-.42,.2,.3],[.42,.2,.3]];
-function photoBlock(e){const w=W('photo');if(!w||!(w.st.ch>0))return false;w.st.ch--;w.st.fl=.25;const S=G.S;SND.p('shutter');
+function photoBlock(e){const w=PHW();if(!w||!(w.st.ch>0))return false;w.st.ch--;w.st.fl=.25;const S=G.S;SND.p('shutter');
   if(!G.bot){G.fx.push({flash:1,x:G.p.x,y:G.p.y,life:.25,L:.25});if(G.texts.length<70)G.texts.push({x:G.p.x,y:G.p.y-34,v:'찰칵!',life:.7,col:'#ffffff'})}
   if(w.evo){const R=95*S.area,dm=(60+e.dmg*3)*S.might;for(const o of G.enemies)if((o.x-G.p.x)**2+(o.y-G.p.y)**2<(R+o.r)**2)hurt(o,dm,'photo',{kb:160,force:1});
     if(!G.bot){G.fx.push({ban:1,x:G.p.x,y:G.p.y,R,life:.5,L:.5});if(G.texts.length<70)G.texts.push({x:G.p.x,y:G.p.y-54,v:'상대방이 차단되었습니다.',life:1.4,col:'#ffd0d6'})}}
@@ -1205,7 +1205,7 @@ function drawWings(){const w=W('wing');if(!w)return;const p=G.p,ev=w.evo,st=w.st
   const ang=-.35*open+.55*(1-open),sx=.45+.55*open,ww=im.width*sc,hh=im.height*sc;ctx.imageSmoothingEnabled=false;
   for(const side of [-1,1]){ctx.save();ctx.translate(Math.round(p.x+side*4),Math.round(p.y-12));ctx.scale(side,1);ctx.rotate(ang);ctx.scale(sx,1);ctx.drawImage(im,0,-hh*.62,ww,hh);ctx.restore()}
   if(ev){ctx.globalAlpha=.9;ctx.strokeStyle='#ffd34d';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(p.x,p.y-40,9,3,0,0,7);ctx.stroke();ctx.globalAlpha=1}}
-function drawPhoto(){const w=W('photo');if(!w||!w.st.ch)return;const p=G.p,n=w.st.ch;for(let i=0;i<n;i++){const a=(w.st.a||0)+i*6.283/n,x=Math.round(p.x+Math.cos(a)*26),y=Math.round(p.y-8+Math.sin(a)*14);
+function drawPhoto(){const w=PHW();if(!w||!w.st.ch)return;const p=G.p,n=w.st.ch;for(let i=0;i<n;i++){const a=(w.st.a||0)+i*6.283/n,x=Math.round(p.x+Math.cos(a)*26),y=Math.round(p.y-8+Math.sin(a)*14);
   ctx.fillStyle=w.evo?'#ff3b5c':'#2a2a36';ctx.fillRect(x-5,y-3,10,7);ctx.fillRect(x-2,y-5,4,2);ctx.fillStyle='#9fe0ff';ctx.fillRect(x-2,y-1,4,3);ctx.fillStyle='#ffffff';ctx.fillRect(x+3,y-2,1,1)}}
 
 /* ================= new weapons: helpers ================= */
@@ -1426,7 +1426,7 @@ function sbU(id){return(SAVE.sbU||{})[id]||0}
 function hellUnl(id){if(id==='쥬은')return true;return !!((SAVE.hellU||{})[id]||((SAVE.bestH||{})[id]||0)>=600)}
 function rangedHit(dm,b){const p=G.p;if(p.dead||p.inv>0||(G.ultOn&&G.ultOn.inv))return;
   const pw=W('pet');if(pw&&pw.st.dome){if(!G.bot&&G.texts.length<70)G.texts.push({x:p.x,y:p.y-40,v:'현무 방어!',life:.6,col:'#7dffb0'});return}
-  const ph=W('photo');if(ph&&ph.evo&&photoBlock({dmg:dm*.5,x:b?b.x:p.x,y:b?b.y:p.y})){p.inv=.6;return}
+  const ph=PHW();if(ph&&ph.evo&&photoBlock({dmg:dm*.5,x:b?b.x:p.x,y:b?b.y:p.y})){p.inv=.6;return}
   hitP(dm)}
 function hitP(dm){const p=G.p,S=G.S;if(p.inv>0||(G.ultOn&&G.ultOn.inv))return;p.hp-=Math.max(1,dm*edm()-S.armor);p.inv=S.iframe;G.hurtFlash=.2;SND.p('hurt')}
 const HEV={read:['😢 읽씹 지옥','이 단톡방은 제 이야기에 아무도 답장을 안해줘요. 슬픔에 눈물이 앞을 가려 경험치 구슬이 안보여요.'],noti:['🔔 알림 폭주','저 없이 재밌는 이야기를 하고 있어요. 적들의 이동속도가 증가해요.'],kick:['🗳️ 강퇴 투표','정모에 안 나갔다고 눈치를 줘요. 무기 하나가 잠시 봉인돼요.'],faction:['⚔️ 파벌 싸움','큰일났어요. 단톡방의 우두머리 둘이 신경전을 해요. 시야의 절반이 잠시 가려져요.'],nammi:['💨 남미새 등장','저년 또 시작이에요. 최대한 피해요!!']};
@@ -2699,7 +2699,7 @@ function checkUnlocks(){
 }
 const DPS_ALIAS={bill:'rose',jackpot:'pachinko',star:'heart'};
 function fmtN(n){return n>=1e6?(n/1e6).toFixed(1)+'M':n>=1e4?(n/1e3).toFixed(1)+'k':Math.round(n).toLocaleString()}
-function dpsHTML(){const K=(G.stats&&G.stats.k)||{},agg={};for(const k in K){const w=WP[k]?k:DPS_ALIAS[k]||(k==='ult'||k==='kiss'?'_ult':'_etc');agg[w]=(agg[w]||0)+K[k]}
+function dpsHTML(){const K=(G.stats&&G.stats.k)||{},agg={};for(const k in K){const w=(GL_REMAP[k]&&W('glass'))?'glass':WP[k]?k:DPS_ALIAS[k]||(k==='ult'||k==='kiss'?'_ult':'_etc');agg[w]=(agg[w]||0)+K[k]}
   const tot=Object.values(agg).reduce((a,b)=>a+b,0)||1,T=Math.max(1,G.t);
   const rows=Object.keys(agg).filter(k=>agg[k]>0).map(k=>{const w=G.weapons.find(q=>q.k===k),span=w?Math.max(1,T-(w.t0||0)):T;const nm=k==='_ult'?'💥 필살기':k==='_etc'?'✨ 기타':`${WP[k].icon} ${w&&w.evo?WP[k].evoName:WP[k].name}${w?(w.evo?' ★':` Lv${w.lvl}`):''}`;return {nm,d:agg[k],dps:agg[k]/span,p:agg[k]/tot}}).sort((a,b)=>b.d-a.d);
   if(!rows.length)return '';const top=rows[0].dps||1;
@@ -3961,7 +3961,44 @@ function swDraw(w){for(const q of w.st.g||[]){const sc=.62,bob=Math.sin(G.t*3+q.
 
 Object.assign(WU,{polaris(w,dt){plTick(w,dt)},soulwed(w,dt){swTick(w,dt)}});
 function hxFloor(){for(const w of G.weapons)if(w.k==='soulwed')swFloor(w)}
-function hxDraw(){for(const w of G.weapons){if(w.k==='polaris'){plDraw(w);plFlash(w)}else if(w.k==='soulwed')swDraw(w)}}
+function hxDraw(){for(const w of G.weapons){if(w.k==='polaris'){plDraw(w);plFlash(w)}else if(w.k==='soulwed')swDraw(w);else if(w.k==='glass')glDraw(w)}}
+
+// ===== 요정의 유리정원 (V103) =====
+Object.assign(WP,{glass:{name:'요정의 유리정원',icon:'🧊',evo:'stardust',evoName:'요정의 유리정원',hid:1,d:'아름다운 건, 유리 안에서만 시들지 않아요.',ed:'아름다운 건, 유리 안에서만 시들지 않아요.',extra:1}});
+KC.glass='#d8f4ff';
+HX.push({k:'glass',a:'fairy',b:'photo',it:'stardust',q:'이 순간을, 영원히 가둬 둘까요?',col:'#d8f4ff',sub:'🧚 Abracadabra + 📸 어플차단 + 🌟 별가루'});
+[['cubeA',120,120,60,15],['cubeB',116,112,36,15]].forEach(([k,w,h,n,fps])=>{const im=new Image();im.src='fx/'+k+'.png';HXI[k]={im,w,h,n,fps}});
+let GL_STYLE='A';
+const GL_REMAP={fairy:'glass',star:'glass',photo:'glass'};
+function PHW(){const p=W('photo');if(p)return p;const g=W('glass');return g&&g.st.sub?g.st.sub.photo:null}
+function glIn(c,e,pad){return Math.abs(e.x-c.x)<c.h+(pad||0)&&Math.abs(e.y-c.y)<c.h+(pad||0)}
+function glTick(w,dt){const S=G.S,st=w.st,p=G.p;
+  if(!st.sub)st.sub={fairy:{k:'fairy',lvl:8,evo:true,t:0,st:{}},photo:{k:'photo',lvl:8,evo:true,t:0,st:{}}};
+  st.c=st.c||[];const h=70*S.area;
+  const pin=st.c.some(c=>glIn(c,p));
+  WU.fairy(st.sub.fairy,dt);WU.photo(st.sub.photo,pin?dt*3:dt);
+  // 설치: 약 10초마다 적이 가장 몰린 곳에 (최대 2개)
+  st.u=(st.u===undefined?3:st.u)-dt;
+  if(st.u<=0&&st.c.length<2){st.u=10*S.cd;const vis=G.enemies.filter(hxVis);let best=null,bn=0;
+    for(let i=0;i<Math.min(40,vis.length);i++){const a=vis[(Math.random()*vis.length)|0];let n=0;for(const b of vis)if(Math.abs(b.x-a.x)<h&&Math.abs(b.y-a.y)<h)n++;if(n>bn){bn=n;best=a}}
+    if(best){st.c.push({x:best.x,y:best.y,h,t:0,life:8*S.dur,ft:0,a:rnd(0,6.283)});if(!G.bot){SND.p('evo');sparks(best.x,best.y,24,['#ffffff','#d8f4ff','#7fd8ff'],260,.5,2)}}}
+  for(const c of st.c){c.t+=dt;c.a+=dt*2.4;
+    for(const e of G.enemies){if(e.dead||!glIn(c,e))continue;
+      if(e.boss)e.slow=Math.max(e.slow||0,.5);else{e.stun=Math.max(e.stun||0,.12);e.kx=0;e.ky=0}
+      e.glA=Math.min(600*S.might,(e.glA||0)+28*S.might*dt);e.glC=c}
+    // 벽: 탄막 차단
+    if(G.eb)for(const b of G.eb)if(glIn(c,b,4))b.life=0;
+    // 요정 집중 사격
+    c.ft-=dt;if(c.ft<=0){c.ft=.12*S.cd/(S.aspd||1);const ins=G.enemies.filter(e=>!e.dead&&glIn(c,e));if(ins.length){const e=pick(ins),k=((c.ft*100)|0)%5,a0=c.a+k*1.2566,fx=c.x+Math.cos(a0)*c.h*.6,fy=c.y+Math.sin(a0)*c.h*.5,an=Math.atan2(e.y-fy,e.x-fx),v=320*S.pspeed;shoot({k:'star',hk:'glass',x:fx,y:fy,vx:Math.cos(an)*v,vy:Math.sin(an)*v,life:1,r:5,pierce:1,dmg:14*S.might,home:e})}}
+    // 끝: 깨지면서 쌓인 피해가 한 번에
+    if(c.t>=c.life){c.done=1;for(const e of G.enemies){if(e.dead||e.glC!==c)continue;const d=(e.glA||0)*(e.boss?.5:1);e.glA=0;e.glC=null;if(d>0)hurt(e,d,'glass',{force:1})}
+      if(!G.bot){SND.p('boom');for(let k=0;k<4;k++)chunks(c.x+rnd(-c.h,c.h)*.6,c.y+rnd(-c.h,c.h)*.6,8,['#ffffff','#d8f4ff','#9bdcff'],260);sparks(c.x,c.y,40,['#ffffff','#d8f4ff','#ffd6f5'],380,.6,3);pring(c.x,c.y,c.h*1.3,['#ffffff','#d8f4ff'],40,.4)}}}
+  st.c=st.c.filter(c=>!c.done)}
+function glDraw(w){const st=w.st;const sf=st.sub&&st.sub.fairy.st.f;if(sf)sf.forEach(([x,y])=>drawEmo(HW('fairy')?'😈':wfxOn('fairy')?'🦇':'🧚',x,y+Math.sin(G.t*6+x)*2,16));
+  for(const c of st.c||[]){const k=Math.min(1,c.t/.25),out=Math.min(1,(c.life-c.t)/.3),al=.85*Math.min(k,out);
+    if(GL_STYLE==='A')hxFrame('cubeA',G.t*15%60,c.x,c.y,c.h/43*(.6+.4*k),al);else hxFrame('cubeB',G.t*15%36,c.x,c.y-2.5*c.h/40,c.h/40*(.6+.4*k),al);
+    for(let i=0;i<5;i++){const a=c.a+i*1.2566;drawEmo('🧚',c.x+Math.cos(a)*c.h*.6,c.y+Math.sin(a)*c.h*.5,14)}}}
+Object.assign(WU,{glass(w,dt){glTick(w,dt)}});
 
 // ---- 레이디 로드스터 ----
 Object.assign(WP,{roadster:{name:'레이디 로드스터',icon:'🚘',evo:'tesla',evoName:'레이디 로드스터',hid:1,d:'그건 제가 본 것 중에 가장 아름다운 가짜였어요.',ed:'그건 제가 본 것 중에 가장 아름다운 가짜였어요.',extra:1}});

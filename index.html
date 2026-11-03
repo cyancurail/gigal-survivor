@@ -1446,7 +1446,7 @@ function bossTick(dt){const wN=!G.hard;if(wN&&!(G.witch&&!G.witch.dead))return;c
       if(e.p2){e.sp=(e.sp||0)-dt;e.sa=(e.sa||0)+dt*1.7;if(e.sp<=0){e.sp=.13;for(const k of [0,Math.PI/2,Math.PI,Math.PI*1.5])ebShot(e,e.sa+k,120,6,.5,'#ff7ad9',7)}}}
     // neon laser: every hell boss, hard final boss
     if(H||fin&&G.hard){e.lz=(e.lz===undefined?4:e.lz)-dt;if(e.lz<=0&&!G.blz){e.lz=H?(rg?6:9):(rg?8:11);G.blz={x:e.x,y:e.y,a:aim,t:0,hit:0,dmg:e.dmg*(H?1.5:1.1)};if(!G.bot&&G.texts.length<70)G.texts.push({x:e.x,y:e.y-e.r-20,v:'너만 쓸 줄 알았니?',life:1.6,big:1,col:'#ff3fd2'})}}}
-  if(G.blz){const L=G.blz;L.t+=dt;if(L.t>1&&L.t<1.7&&!L.hit){const dx=p.x-L.x,dy=p.y-L.y,pr=dx*Math.cos(L.a)+dy*Math.sin(L.a);if(pr>0&&Math.abs(dx*Math.sin(L.a)-dy*Math.cos(L.a))<30){L.hit=1;rangedHit(L.dmg,null)}}if(L.t>=1.7)G.blz=null}}
+  if(G.blz){const L=G.blz;L.t+=dt;L.blk=glRay(L);if(L.blk&&L.t>1&&!G.bot&&Math.random()<.5)sparks(L.x+Math.cos(L.a)*L.blk,L.y+Math.sin(L.a)*L.blk,4,['#ffffff','#d0d8e6'],160,.2);if(L.t>1&&L.t<1.7&&!L.hit){const dx=p.x-L.x,dy=p.y-L.y,pr=dx*Math.cos(L.a)+dy*Math.sin(L.a);if(pr>0&&!(L.blk&&pr>L.blk)&&Math.abs(dx*Math.sin(L.a)-dy*Math.cos(L.a))<30){L.hit=1;rangedHit(L.dmg,null)}}if(L.t>=1.7)G.blz=null}}
 function hellTick(dt){const p=G.p;
   if(G.eb.length){const pw=W('pet'),D=pw&&pw.st.dome;for(const b of G.eb){b.x+=b.vx*dt;b.y+=b.vy*dt;b.life-=dt;const d2=(b.x-p.x)**2+(b.y-p.y)**2;if(D&&d2<D.R*D.R){b.life=0;if(!G.bot&&Math.random()<.5)sparks(b.x,b.y,4,['#7dffb0','#ffffff'],120,.2);continue}if(d2<(b.r+9)**2){b.life=0;rangedHit(b.dmg,b)}}G.eb=G.eb.filter(b=>b.life>0);if(G.eb.length>400)G.eb.splice(0,G.eb.length-400)}
   if(G.map==='sangbong'&&!G.tw&&!G.bot&&G.t>=600&&!G.hell){const nv=G.hard?2:1;if(sbU(G.id)<nv){SAVE.sbU=SAVE.sbU||{};SAVE.sbU[G.id]=nv;persist();const t=nv===2?'💀 상봉 헬 모드 해금!':'🔥 상봉 어려움 모드 해금!';G.unlockedNow.push(`${t.slice(0,2)} ${esc(CHAR[G.ci].nick)}의 ${t.slice(3,-1)}`);toast(t,CHAR[G.ci].nick+' · 상봉에서 10분 생존',true)}}
@@ -1459,7 +1459,7 @@ function hellTick(dt){const p=G.p;
   else if(!G.arena){G.hevT-=dt;if(G.hevT<=0){G.hevT=120;hellEvent(pick(Object.keys(HEV)))}}
 }
 function drawHellWorld(){if(G.eb.length){const pu=.5+.5*Math.sin(G.t*12);for(const b of G.eb){const r=Math.max(b.r,5)*1.25,sp=Math.hypot(b.vx||0,b.vy||0)||1;ctx.globalAlpha=.25+.2*pu;ctx.fillStyle=b.c;ctx.beginPath();ctx.arc(b.x,b.y,r*2.4,0,7);ctx.fill();ctx.globalAlpha=.5;ctx.strokeStyle=b.c;ctx.lineWidth=r*.9;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(b.x-(b.vx||0)/sp*r*2.6,b.y-(b.vy||0)/sp*r*2.6);ctx.lineTo(b.x,b.y);ctx.stroke();ctx.globalAlpha=1;ctx.fillStyle='#120818';ctx.beginPath();ctx.arc(b.x,b.y,r+2,0,7);ctx.fill();ctx.fillStyle=b.c;ctx.beginPath();ctx.arc(b.x,b.y,r,0,7);ctx.fill();ctx.fillStyle='#ffffff';ctx.beginPath();ctx.arc(b.x,b.y,r*.45,0,7);ctx.fill()}}
-  const L=G.blz;if(L){const len=Math.max(VW,VH)*1.6,ex=L.x+Math.cos(L.a)*len,ey=L.y+Math.sin(L.a)*len;ctx.save();if(L.t<1){ctx.setLineDash([10,8]);ctx.strokeStyle=`rgba(255,40,80,${.4+.4*Math.sin(L.t*30)})`;ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(L.x,L.y);ctx.lineTo(ex,ey);ctx.stroke()}else{const a=Math.min(1,(1.7-L.t)*3);ctx.globalAlpha=a;ctx.lineCap='round';ctx.strokeStyle='#ff3fd2';ctx.shadowColor='#ff3fd2';ctx.shadowBlur=24;ctx.lineWidth=60;ctx.beginPath();ctx.moveTo(L.x,L.y);ctx.lineTo(ex,ey);ctx.stroke();ctx.shadowBlur=0;ctx.strokeStyle='#ffffff';ctx.lineWidth=16;ctx.stroke()}ctx.restore()}}
+  const L=G.blz;if(L){const len=L.blk||Math.max(VW,VH)*1.6,ex=L.x+Math.cos(L.a)*len,ey=L.y+Math.sin(L.a)*len;ctx.save();if(L.t<1){ctx.setLineDash([10,8]);ctx.strokeStyle=`rgba(255,40,80,${.4+.4*Math.sin(L.t*30)})`;ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(L.x,L.y);ctx.lineTo(ex,ey);ctx.stroke()}else{const a=Math.min(1,(1.7-L.t)*3);ctx.globalAlpha=a;ctx.lineCap='round';ctx.strokeStyle='#ff3fd2';ctx.shadowColor='#ff3fd2';ctx.shadowBlur=24;ctx.lineWidth=60;ctx.beginPath();ctx.moveTo(L.x,L.y);ctx.lineTo(ex,ey);ctx.stroke();ctx.shadowBlur=0;ctx.strokeStyle='#ffffff';ctx.lineWidth=16;ctx.stroke()}ctx.restore()}}
 function drawHellScreen(){const W=innerWidth,H=innerHeight;ctx.fillStyle=G.tw?'rgba(40,10,70,.24)':'rgba(40,0,0,.2)';ctx.fillRect(0,0,W,H);
   if(G.hev&&G.hev.k==='faction'){const a=Math.min(1,G.hev.t*2,(25-G.hev.t)*2)*.88;ctx.fillStyle=`rgba(6,0,10,${a})`;G.hev.side<0?ctx.fillRect(0,0,W/2,H):ctx.fillRect(W/2,0,W/2,H)}
   if(G.hban&&G.hban.t>0){const a=Math.min(1,G.hban.t*2,(4.5-G.hban.t)*4);ctx.globalAlpha=a;ctx.fillStyle='rgba(10,0,6,.75)';const bw=Math.min(W-32,720),bx=(W-bw)/2,by=H*.14;ctx.fillRect(bx,by,bw,86);ctx.strokeStyle='#ff3a5a';ctx.lineWidth=2;ctx.strokeRect(bx,by,bw,86);ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle='#ff6a80';ctx.font='900 26px "Black Han Sans",sans-serif';ctx.fillText(G.hban.title,W/2,by+28);ctx.fillStyle='#ffe0e6';ctx.font='500 14px "Noto Sans KR",sans-serif';const sub=G.hban.sub;if(ctx.measureText(sub).width>bw-24){const m=Math.floor(sub.length/2),cut=sub.lastIndexOf(' ',m)>0?sub.lastIndexOf(' ',m):m;ctx.fillText(sub.slice(0,cut),W/2,by+56);ctx.fillText(sub.slice(cut).trim(),W/2,by+74)}else ctx.fillText(sub,W/2,by+60);ctx.globalAlpha=1}}
@@ -3967,11 +3967,13 @@ function hxDraw(){for(const w of G.weapons){if(w.k==='polaris'){plDraw(w);plFlas
 Object.assign(WP,{glass:{name:'요정의 유리정원',icon:'🧊',evo:'stardust',evoName:'요정의 유리정원',hid:1,d:'아름다운 건, 유리 안에서만 시들지 않아요.',ed:'아름다운 건, 유리 안에서만 시들지 않아요.',extra:1}});
 KC.glass='#d8f4ff';
 HX.push({k:'glass',a:'fairy',b:'photo',it:'stardust',q:'이 순간을, 영원히 가둬 둘까요?',col:'#d8f4ff',sub:'🧚 Abracadabra + 📸 어플차단 + 🌟 별가루'});
-[['cubeA',120,120,60,15],['cubeB',116,112,36,15]].forEach(([k,w,h,n,fps])=>{const im=new Image();im.src='fx/'+k+'.png';HXI[k]={im,w,h,n,fps}});
-let GL_STYLE='A';
+[['cubeB',116,112,36,15]].forEach(([k,w,h,n,fps])=>{const im=new Image();im.src='fx/'+k+'.png';HXI[k]={im,w,h,n,fps}});
+
 const GL_REMAP={fairy:'glass',star:'glass',photo:'glass'};
 function PHW(){const p=W('photo');if(p)return p;const g=W('glass');return g&&g.st.sub?g.st.sub.photo:null}
-function glIn(c,e,pad){return Math.abs(e.x-c.x)<c.h+(pad||0)&&Math.abs(e.y-c.y)<c.h+(pad||0)}
+// 반구(메탈 실드 위쪽 절반): 바닥선 y0 = c.y + h·0.45, 반지름 R = h·1.15
+function glIn(c,e,pad){pad=pad||0;const y0=c.y+c.h*.45,R=c.h*1.15+pad;return e.y<=y0+pad&&(e.x-c.x)**2+(e.y-y0)**2<=R*R}
+function glRay(L){const w=W('glass');if(!w||!w.st.c||!w.st.c.length)return 0;const len=Math.max(VW,VH)*1.6,ca=Math.cos(L.a),sa=Math.sin(L.a);for(let d=0;d<len;d+=8){const q={x:L.x+ca*d,y:L.y+sa*d};for(const c of w.st.c)if(glIn(c,q))return Math.max(1,d)}return 0}
 function glTick(w,dt){const S=G.S,st=w.st,p=G.p;
   if(!st.sub)st.sub={fairy:{k:'fairy',lvl:8,evo:true,t:0,st:{}},photo:{k:'photo',lvl:8,evo:true,t:0,st:{}}};
   st.c=st.c||[];const h=70*S.area;
@@ -3979,9 +3981,11 @@ function glTick(w,dt){const S=G.S,st=w.st,p=G.p;
   WU.fairy(st.sub.fairy,dt);WU.photo(st.sub.photo,pin?dt*3:dt);
   // 설치: 약 10초마다 적이 가장 몰린 곳에 (최대 2개)
   st.u=(st.u===undefined?3:st.u)-dt;
-  if(st.u<=0&&st.c.length<2){st.u=10*S.cd;const vis=G.enemies.filter(hxVis);let best=null,bn=0;
-    for(let i=0;i<Math.min(40,vis.length);i++){const a=vis[(Math.random()*vis.length)|0];let n=0;for(const b of vis)if(Math.abs(b.x-a.x)<h&&Math.abs(b.y-a.y)<h)n++;if(n>bn){bn=n;best=a}}
-    if(best){st.c.push({x:best.x,y:best.y,h,t:0,life:8*S.dur,ft:0,a:rnd(0,6.283)});if(!G.bot){SND.p('evo');sparks(best.x,best.y,24,['#ffffff','#d8f4ff','#7fd8ff'],260,.5,2)}}}
+  if(st.u<=0){st.u=10*S.cd;const cap=2+Math.min(2,G.items.tesla||0),vis=G.enemies.filter(hxVis);
+    while(st.c.length<cap){let best=null,bn=0;const free=vis.filter(e=>!st.c.some(c=>Math.abs(e.x-c.x)<c.h*1.7&&Math.abs(e.y-c.y)<c.h*1.7));if(!free.length)break;
+      for(let i=0;i<Math.min(40,free.length);i++){const a=free[(Math.random()*free.length)|0];let n=0;for(const b of free)if(Math.abs(b.x-a.x)<h&&Math.abs(b.y-a.y)<h)n++;if(n>bn){bn=n;best=a}}
+      if(!best)break;st.c.push({x:best.x,y:best.y,h,t:0,life:8*S.dur,ft:0,a:rnd(0,6.283)});if(!G.bot){sparks(best.x,best.y,24,['#ffffff','#d8f4ff','#7fd8ff'],260,.5,2)}}
+    if(!G.bot&&st.c.length)SND.p('evo')}
   for(const c of st.c){c.t+=dt;c.a+=dt*2.4;
     for(const e of G.enemies){if(e.dead||!glIn(c,e))continue;
       if(e.boss)e.slow=Math.max(e.slow||0,.5);else{e.stun=Math.max(e.stun||0,.12);e.kx=0;e.ky=0}
@@ -3989,15 +3993,16 @@ function glTick(w,dt){const S=G.S,st=w.st,p=G.p;
     // 벽: 탄막 차단
     if(G.eb)for(const b of G.eb)if(glIn(c,b,4))b.life=0;
     // 요정 집중 사격
-    c.ft-=dt;if(c.ft<=0){c.ft=.12*S.cd/(S.aspd||1);const ins=G.enemies.filter(e=>!e.dead&&glIn(c,e));if(ins.length){const e=pick(ins),k=((c.ft*100)|0)%5,a0=c.a+k*1.2566,fx=c.x+Math.cos(a0)*c.h*.6,fy=c.y+Math.sin(a0)*c.h*.5,an=Math.atan2(e.y-fy,e.x-fx),v=320*S.pspeed;shoot({k:'star',hk:'glass',x:fx,y:fy,vx:Math.cos(an)*v,vy:Math.sin(an)*v,life:1,r:5,pierce:1,dmg:14*S.might,home:e})}}
+    c.ft-=dt;if(c.ft<=0){c.ft=.12*S.cd/(S.aspd||1);const ins=G.enemies.filter(e=>!e.dead&&glIn(c,e));if(ins.length){const e=pick(ins),k=((c.ft*100)|0)%5,a0=c.a+k*1.2566,fx=c.x+Math.cos(a0)*c.h*.6,fy=c.y+c.h*.05+Math.sin(a0)*c.h*.3,an=Math.atan2(e.y-fy,e.x-fx),v=320*S.pspeed;shoot({k:'star',hk:'glass',x:fx,y:fy,vx:Math.cos(an)*v,vy:Math.sin(an)*v,life:1,r:5,pierce:1,dmg:14*S.might,home:e})}}
     // 끝: 깨지면서 쌓인 피해가 한 번에
     if(c.t>=c.life){c.done=1;for(const e of G.enemies){if(e.dead||e.glC!==c)continue;const d=(e.glA||0)*(e.boss?.5:1);e.glA=0;e.glC=null;if(d>0)hurt(e,d,'glass',{force:1})}
       if(!G.bot){SND.p('boom');for(let k=0;k<4;k++)chunks(c.x+rnd(-c.h,c.h)*.6,c.y+rnd(-c.h,c.h)*.6,8,['#ffffff','#d8f4ff','#9bdcff'],260);sparks(c.x,c.y,40,['#ffffff','#d8f4ff','#ffd6f5'],380,.6,3);pring(c.x,c.y,c.h*1.3,['#ffffff','#d8f4ff'],40,.4)}}}
   st.c=st.c.filter(c=>!c.done)}
 function glDraw(w){const st=w.st;const sf=st.sub&&st.sub.fairy.st.f;if(sf)sf.forEach(([x,y])=>drawEmo(HW('fairy')?'😈':wfxOn('fairy')?'🦇':'🧚',x,y+Math.sin(G.t*6+x)*2,16));
   for(const c of st.c||[]){const k=Math.min(1,c.t/.25),out=Math.min(1,(c.life-c.t)/.3),al=.85*Math.min(k,out);
-    if(GL_STYLE==='A')hxFrame('cubeA',G.t*15%60,c.x,c.y,c.h/43*(.6+.4*k),al);else hxFrame('cubeB',G.t*15%36,c.x,c.y-2.5*c.h/40,c.h/40*(.6+.4*k),al);
-    for(let i=0;i<5;i++){const a=c.a+i*1.2566;drawEmo('🧚',c.x+Math.cos(a)*c.h*.6,c.y+Math.sin(a)*c.h*.5,14)}}}
+    {const S2=HXI.cubeB,R=c.h*1.15*(.6+.4*k),y0=c.y+c.h*.45,sc=R/40;ctx.save();ctx.globalAlpha=al*.5;ctx.strokeStyle='#d0d8e6';ctx.lineWidth=1.5;ctx.beginPath();ctx.ellipse(c.x,y0,R,R*.22,0,0,7);ctx.stroke();ctx.globalAlpha=al*.12;ctx.fillStyle='#9aa6ba';ctx.fill();ctx.restore();
+      if(S2&&S2.im.complete&&S2.im.naturalWidth){const f=(G.t*15%36)|0;ctx.save();ctx.imageSmoothingEnabled=false;ctx.globalAlpha=al;ctx.drawImage(S2.im,f*116,0,116,60,c.x-58*sc,y0-58.5*sc,116*sc,60*sc);ctx.restore()}}
+    for(let i=0;i<5;i++){const a=c.a+i*1.2566;drawEmo('🧚',c.x+Math.cos(a)*c.h*.6,c.y+c.h*.05+Math.sin(a)*c.h*.3,14)}}}
 Object.assign(WU,{glass(w,dt){glTick(w,dt)}});
 
 // ---- 레이디 로드스터 ----

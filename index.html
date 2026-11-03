@@ -569,7 +569,8 @@ function ecanvas(type,tint){
 /* ================= canvas ================= */
 const cv=$('#game'),ctx=cv.getContext('2d');
 let VW=0,VH=0,Z=1,DPR=1;
-function resize(){DPR=Math.min(2,devicePixelRatio||1);cv.width=innerWidth*DPR;cv.height=innerHeight*DPR;Z=clamp(Math.min(innerWidth,innerHeight)/520,.75,1.5);VW=innerWidth/Z;VH=innerHeight/Z}
+const PXCAP=2.1e6;
+function resize(){DPR=Math.min(2,devicePixelRatio||1,Math.max(.6,Math.sqrt(PXCAP/Math.max(1,innerWidth*innerHeight))));cv.style.imageRendering=DPR<1?'auto':'';cv.width=innerWidth*DPR;cv.height=innerHeight*DPR;Z=clamp(Math.min(innerWidth,innerHeight)/520,.75,1.5);VW=innerWidth/Z;VH=innerHeight/Z}
 addEventListener('resize',resize);resize();
 
 /* ================= input ================= */
@@ -708,6 +709,8 @@ function shoot(o){if(PXG)o.gx=1;G.projs.push(Object.assign({life:2,r:6,pierce:1,
 const PXN=4000,PX={x:new Float32Array(PXN),y:new Float32Array(PXN),vx:new Float32Array(PXN),vy:new Float32Array(PXN),l:new Float32Array(PXN),ml:new Float32Array(PXN),s:new Uint8Array(PXN),c:new Uint16Array(PXN),f:new Uint8Array(PXN),d:new Float32Array(PXN),g:new Float32Array(PXN),i:0};
 const PCOL=[],PCI={};function pci(c){let k=PCI[c];if(k===undefined){k=PCI[c]=PCOL.length;PCOL.push(c)}return k}
 let FXQ=RM?.5:1,fpsAcc=0,fpsN=0;
+// 프레임이 떨어지면(FXQ<.9) 빛 번짐(shadowBlur) 끄기 — 큰 화면에서 가장 무거운 효과
+{const pd=Object.getOwnPropertyDescriptor(CanvasRenderingContext2D.prototype,'shadowBlur');if(pd&&pd.set)Object.defineProperty(ctx,'shadowBlur',{configurable:true,get(){return pd.get.call(this)},set(v){pd.set.call(this,FXQ<.9?0:v)}})}
 const KC={rain:'#9fd8ff',talis:'#ffe36a',photo:'#ffffff',mic:'#ff9ad8',bag:'#ff7ac8',soju:'#7dffb0',wing:'#fff3b0',ice:'#bfefff',ghost:'#7ab8ff',meteor:'#ff8a3d',unnie:'#ff7ad9',bride:'#ffffff',heart:'#ff5fb8',pachinko:'#ffd34d',veil:'#c07bff',laser:'#ff3fd2',cotton:'#7fd8ff',knife:'#ff3b3b',pillar:'#fff3b0',poison:'#8dff3a',bolt:'#7af6ff',lipstick:'#ff2a6a',docs:'#cfe3ff',rose:'#ff2d55',bill:'#6dff9a',star:'#ffe66d',fairy:'#7dffcf',jackpot:'#ffd34d',kiss:'#ff1744',wedding:'#c07bff',ult:'#ffffff',boom:'#ffffff'};
 /* ================= Act.2 · 쥬은 (13번째) ================= */
 const JU={id:'쥬은',nick:'쥬은',w:'emerald',ju:1,bg:'linear-gradient(160deg,#d01a1a,#ffd34d 55%,#2bd96b)',perk:'소환물 체력 +25%',pk:s=>s.sumHp=(s.sumHp||1)*1.25};

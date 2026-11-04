@@ -1652,35 +1652,27 @@ const CINE={
     if(t<1.2)L.cap('…오로라 예쁘다',.5,.62,.042,'#e6dcff',{st:null,ui:1,a:seg(t,.2,.5)});
     if(tw>.3)L.cap('✦ 반짝',sx0/W+.08,sy0/H-.05,.04,'#fff3b0',{st:null,ui:1,a:tw});
   }else if(!hit){
-    const z=Math.pow(seg(t,1.9,3.45),1.25),cx=lerp(sx0,W/2,z),cy=lerp(sy0,H*.5,z),kB=Math.min(W,H)/26,k=lerp(.15,kB,z*z);
-    L.glow(cx,cy,8+k*22*(1-z*.5),'#fff3b0',.7);
-    for(let i=0;i<4;i++)L.r(cx-k*14+rnd(-k*10,k*10),cy-k*18-rnd(0,k*20),1,rnd(4,12)*(1+z*3),'#ffffff',.35);
-    if(k<1.2)L.star(cx,cy,Math.max(2,Math.round(3+z*8)),'#fff3b0');
-    else{
-      const wob=Math.sin(t*18)*k*.6,X=cx+wob,Y=cy;const P=(a,b,w,h,c)=>L.r(X+(a-16)*k,Y+(b-16)*k,w*k,h*k,c);
-      if(L.T('임재영')){L.spr('임재영',0,X,Y,k,{rot:Math.sin(t*7)*.35})}else{L.sub('임재영',0,0,0,32,23,X,Y,k,1);
-      // flipped skirt → bloomers visible
-      const kick=Math.floor(t*10)%2;
-      P(12,26-kick,3,4,'#ffd9bf');P(17,26+kick-1,3,4,'#ffd9bf');P(11,30-kick,4,2,'#ff8fcf');P(17,29+kick,4,2,'#ff8fcf');
-      P(11,23,10,3,'#ffffff');for(let i=0;i<5;i++)P(11+i*2,26,1,1,'#ffd6ec');P(13,24,1,1,'#ff4fb3');P(18,24,1,1,'#ff4fb3');P(15,23,2,1,'#ffd6ec');
-      [[23,10,21],[22,9,22],[21,9,22],[20,8,23],[19,7,24],[18,7,24]].forEach(([r,a,b])=>P(a,r,b-a+1,1,'#ffb3df'));P(7,17,18,1,'#ffffff');P(9,20,1,1,'#ff8fcf');P(22,20,1,1,'#ff8fcf');
-      // shocked face
-      P(12,11,2,2,'#ffffff');P(18,11,2,2,'#ffffff');P(12,12,1,1,'#2a1a2a');P(19,12,1,1,'#2a1a2a');P(15,15,2,2,'#7a1a2a');}
-      if(Math.random()<.5)L.p({x:X+rnd(-10,10)*k,y:Y-rnd(8,14)*k,vx:rnd(-40,40),vy:-rnd(20,60),l:.5,c:'#9fe0ff',sz:Math.max(1,k/3|0),glow:0});
-      if(Math.random()<.7)L.p({x:X+rnd(-14,14)*k,y:Y+rnd(-14,14)*k,vx:rnd(-60,60),vy:-rnd(40,120),l:.4,c:pick(cols.concat('#fff3b0')),sz:Math.max(1,k/4|0)});
-    }
+    // 빙글빙글 돌며 떨어지기 (V113: 확대 접근 대신)
+    const z=seg(t,1.9,3.45),ez=eIn(z),kB=Math.min(W,H)/26,k=lerp(kB*.08,kB*.3,eOut(z));
+    const cx=lerp(sx0,W/2,ez)+Math.sin(z*Math.PI*2)*W*.08*(1-z),cy=lerp(sy0,H*.7,ez),rot=(t-1.9)*(9+z*10);
+    L.glow(cx,cy,10+k*14,'#fff3b0',.55);
+    for(let i=0;i<3;i++){const ba=rot-i*.5;L.r(cx-Math.cos(ba)*k*12,cy-Math.sin(ba)*k*12,Math.max(1,k*.6),Math.max(1,k*.6),cols[i],.5)}
+    L.spr('임재영',0,cx,cy,k,{rot});
+    if(Math.random()<.8)L.p({x:cx+rnd(-8,8)*k,y:cy+rnd(-8,8)*k,vx:rnd(-50,50),vy:-rnd(40,110),l:.5,c:pick(cols.concat('#fff3b0','#ffffff')),sz:Math.max(1,k/4|0)});
     if(z>.35)L.cap('꺄아아악!! 보지마!!!',.5,.12,.06,'#ff7ad9',{st:'#2a0630',jx:rnd(-2,2),jy:rnd(-2,2),sc:1+.1*z});
   }else{
-    // slammed into the screen
-    if(!s.hit){s.hit=1;s.shake=12;s.flash=1;L.burst(W/2,H*.5,120,['#ff7ad9','#ffd34d','#7af0ff','#fff'],W,{dr:1.5})}
-    const tt=t-3.45,k=Math.min(W,H)/24,sq=eOut(Math.min(1,tt/.15)),slide=Math.max(0,tt-.5)*H*.08;
-    const X=W/2,Y=H*.47+slide;x.save();x.translate(X,Y);x.scale(1+.3*sq,1-.18*sq);x.translate(-X,-Y);
+    // 땅에 착지 (V113: 화면 쾅 클로즈업 대신)
+    const tt=t-3.45,kB=Math.min(W,H)/26,k=kB*.3,X=W/2,gY=H*.7+16*k;
+    if(!s.hit){s.hit=1;s.shake=7;s.flash=.6;L.burst(X,gY,90,['#ff7ad9','#ffd34d','#7af0ff','#fff'],W*.7,{dr:1.5,g:120})}
+    const sq=tt<.12?eOut(tt/.12):Math.max(0,1-(tt-.12)/.25),bounce=tt>.12&&tt<.5?Math.sin((tt-.12)/.38*Math.PI)*k*3:0;
+    for(const pts of s.cracks){for(let i=1;i<pts.length;i++){const [a0,b0]=pts[i-1],[a1,b1]=pts[i],n=8;for(let j=0;j<n;j++){const q=j/n;L.r(X+(a0+(a1-a0)*q)*k*60,gY+(b0+(b1-b0)*q)*k*14,1,1,'#ffe0f4',.8)}}}
+    L.ring(X,gY,k*(10+tt*60),.3,'#ff7ad9',Math.max(0,1-tt*1.5),2);
+    const Y=H*.7-bounce;x.save();x.translate(X,gY);x.scale(1+.35*sq,1-.25*sq);x.translate(-X,-gY);
     L.spr('임재영',0,X,Y,k);const P=(a,b,w,h,c)=>L.r(X+(a-16)*k,Y+(b-16)*k,w*k,h*k,c);
     if(!L.T('임재영')){P(11,10,4,3,'#ffd9bf');P(17,10,4,3,'#ffd9bf');P(11,11,1,1,'#2a1a2a');P(12,12,2,1,'#2a1a2a');P(11,13,1,1,'#2a1a2a');P(20,11,1,1,'#2a1a2a');P(18,12,2,1,'#2a1a2a');P(20,13,1,1,'#2a1a2a');P(14,15,4,1,'#ff4fb3');}
     x.restore();
-    for(const pts of s.cracks){for(let i=1;i<pts.length;i++){const [a0,b0]=pts[i-1],[a1,b1]=pts[i],n=12;for(let j=0;j<n;j++){const q=j/n;L.r(W/2+(a0+(a1-a0)*q)*Math.max(W,H),H*.47+(b0+(b1-b0)*q)*Math.max(W,H),1,1,'#ffffff',.85)}}}
     L.cap('쿠콰앙!!!',.5,.13,.12,'#ffd34d',{st:'#5a0b3a',sc:1+.5*(1-eOut(seg(tt,0,.25))),rot:-.08});
-    if(tt>.4)L.cap('…공주님 납시오♡',.5,.86,.055,'#ffffff',{st:'#ff4fb3',a:seg(tt,.4,.6)});
+    if(tt>.4)L.cap('…공주님 납시오♡',.5,.28,.055,'#ffffff',{st:'#ff4fb3',a:seg(tt,.4,.6)});
   }
 }},
 /* ---------- 무룩: 구름이 걷히고 천사 강림, 우아한 정화 ---------- */

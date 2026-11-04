@@ -289,13 +289,13 @@ button:focus-visible{outline:3px solid var(--cyan);outline-offset:2px}
   </div>
   <div id="lbName"></div>
   <div id="lbBottom">
-    <button type="button" id="lbGo" data-lb="go">▶ 출격</button>
+    <div id="lbGoRow"><button type="button" id="lbGo" data-lb="go">▶ 출격</button><button type="button" id="lbMp" data-lb="mp">👥<span>친구와<br>함께</span></button></div>
     <nav id="lbTabs" aria-label="로비 메뉴">
       <button type="button" data-lb="char"><i>👤</i>캐릭터</button>
       <button type="button" data-lb="stu"><i>📈</i>강화</button>
       <button type="button" data-lb="closet"><i>👗</i>옷장</button>
       <button type="button" data-lb="shop"><i>🛒</i>상점</button>
-      <button type="button" data-lb="mp"><i>👥</i>멀티</button>
+      <button type="button" data-lb="rank"><i>🏆</i>랭킹</button>
     </nav>
   </div>
 </section>
@@ -4414,7 +4414,8 @@ async function load(){if(FB)return FB;const b='https://www.gstatic.com/firebasej
  const app=a.initializeApp(CFG),auth=au.getAuth(app),db=fs.getFirestore(app);
  FB={onAuth:cb=>au.onAuthStateChanged(auth,cb),signIn:(e,p)=>au.signInWithEmailAndPassword(auth,e,p),signUp:async(e,p,id)=>{const c=await au.createUserWithEmailAndPassword(auth,e,p);try{await au.updateProfile(c.user,{displayName:id})}catch(x){}return c},signOut:()=>au.signOut(auth),
   get:async uid=>{const d=await fs.getDoc(fs.doc(db,'saves',uid));return d.exists()?d.data():null},set:(uid,data)=>fs.setDoc(fs.doc(db,'saves',uid),data),
-  mailList:async id=>{const r=await fs.getDocs(fs.query(fs.collection(db,'mail'),fs.where('to','in',['*',id||'*'])));return r.docs.map(d=>({id:d.id,...d.data()}))},mailAll:async()=>{const r=await fs.getDocs(fs.collection(db,'mail'));return r.docs.map(d=>({id:d.id,...d.data()}))},mailSend:m=>fs.addDoc(fs.collection(db,'mail'),m),mailDel:id=>fs.deleteDoc(fs.doc(db,'mail',id))};return FB}
+  mailList:async id=>{const r=await fs.getDocs(fs.query(fs.collection(db,'mail'),fs.where('to','in',['*',id||'*'])));return r.docs.map(d=>({id:d.id,...d.data()}))},mailAll:async()=>{const r=await fs.getDocs(fs.collection(db,'mail'));return r.docs.map(d=>({id:d.id,...d.data()}))},mailSend:m=>fs.addDoc(fs.collection(db,'mail'),m),mailDel:id=>fs.deleteDoc(fs.doc(db,'mail',id)),
+  rankGet:async rid=>{const d=await fs.getDoc(fs.doc(db,'rank',rid));return d.exists()?d.data():null},rankSet:(rid,data)=>fs.setDoc(fs.doc(db,'rank',rid),data),rankList:async m=>{const r=await fs.getDocs(fs.query(fs.collection(db,'rank'),fs.where('map','==',m)));return r.docs.map(d=>d.data())}};return FB}
 const sum=S=>{S=S||{};const n=o=>Object.values(o||{}).filter(Boolean).length;let best=0;for(const v of Object.values(S.best||{}))best=Math.max(best,+v||0);return{g:S.gold||0,f:n(S.fancy),i:n(S.inv),b:best}};
 const fmtT=ms=>{if(!ms)return'-';const d=new Date(ms);return(d.getMonth()+1)+'/'+d.getDate()+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')};
 const fmtS=t=>Math.floor(t/60)+'분 '+String(Math.floor(t%60)).padStart(2,'0')+'초';
@@ -4507,6 +4508,9 @@ function mailM(tab){tab=tab||'in';
 function confirmSend(o,m){const b=o.querySelector('#gmSend');if(b.dataset.ok)return true;b.dataset.ok=1;b.textContent=(m.to==='*'?'📢 전체에게':'💌 '+m.to+'에게')+' 보낼까요? 한 번 더 누르기';return false}
 setInterval(()=>{const t=document.getElementById('lobby');if(t&&!t.hidden&&ACC.user)mailRefresh()},20000);
 window.GMAIL={open:()=>mailM(),n:()=>mUnread()};
+window.GRANK={on:()=>!!ACC.user,uid:()=>ACC.user&&ACC.user.uid,list:async m=>(await load()).rankList(m),
+ submit:async rec=>{const fb=await load(),u=ACC.user;if(!u)return null;const rid=u.uid+'_'+rec.map+'_'+rec.ch;let old=null;try{old=await fb.rankGet(rid)}catch(e){}
+  const n=((old&&old.n)||0)+1,best=!old||rec.t>old.t||(rec.t===old.t&&rec.dmg>old.dmg);const data=best?Object.assign({},rec,{uid:u.uid,id:ACC.id||'',n,at:Date.now()}):Object.assign({},old,{n,id:ACC.id||old.id,title:rec.title||old.title||''});await fb.rankSet(rid,data);return{best,n}}};
 btn();mailBtn();
 load().then(fb=>fb.onAuth(u=>{ACC.user=u||null;ACC.on=false;if(u){ACC.id=ACC.pendingId||u.displayName||ACC.id;ACC.pendingId=null;reconcile()}else{ACC.id=null;const m=meta();if(m.uid){m.uid=null;m.dirty=false;setMeta(m)}}btn();mailAt=0;mailRefresh(true)})).catch(e=>{console.warn('firebase load fail',e);const b=document.getElementById('gaccB');if(b)b.textContent='🔑 로그인(오프라인)'});
 })();</script>
@@ -4839,7 +4843,17 @@ const hadC=!!navigator.serviceWorker.controller;let rl=false;navigator.serviceWo
 #lbIcons .dot{position:absolute;top:-4px;right:-4px;min-width:18px;height:18px;padding:0 4px;box-sizing:border-box;border-radius:9px;background:#ff3b6b;color:#fff;font-size:11px;line-height:18px;text-align:center}
 #lbName{position:absolute;left:50%;transform:translateX(-50%);z-index:4;color:#fff;font:900 15px 'Noto Sans KR',sans-serif;text-shadow:0 2px 0 #000,0 0 8px rgba(0,0,0,.6);white-space:nowrap;pointer-events:none}
 #lbBottom{position:absolute;left:0;right:0;bottom:0;z-index:5;padding:0 10px calc(10px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;align-items:center;gap:10px}
-#lbGo{min-width:200px;padding:14px 36px;border-radius:999px;border:3px solid #fff3b0;background:linear-gradient(180deg,#ff8ac8,#ff4f9a);color:#fff;font:900 20px 'Noto Sans KR',sans-serif;text-shadow:0 2px 0 rgba(0,0,0,.35);box-shadow:0 4px 0 #a2265e,0 0 22px rgba(255,120,190,.55)}
+#lbGoRow{display:flex;gap:10px;align-items:center;justify-content:center}
+#lbMp{display:flex;align-items:center;gap:6px;padding:8px 12px;border-radius:999px;border:2px solid rgba(255,214,234,.7);background:rgba(20,10,26,.85);color:#fff;font:800 12px/1.15 'Noto Sans KR',sans-serif;text-align:left}#lbMp span{font-size:11.5px}
+.rkT{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin:6px 0}.rkT span{flex:0 0 10px}.rkT button,.rkC button{padding:6px 10px;border-radius:999px;border:1.5px solid #4a3658;background:transparent;color:#cfc6dc;font-weight:800;font-size:12.5px}.rkT button[aria-pressed="true"],.rkC button[aria-pressed="true"]{border-color:#ffe08a;color:#fff;background:rgba(255,224,138,.15)}
+.rkC{display:flex;gap:5px;overflow-x:auto;padding:4px 0 8px;white-space:nowrap}.rkC button{flex:0 0 auto;font-size:11.5px;padding:5px 9px}
+.rkL{max-height:52vh;overflow:auto;text-align:left}.rkE{padding:24px 0;line-height:1.7}
+.rkR{display:flex;align-items:center;gap:8px;border:1.5px solid #4a3658;border-radius:12px;padding:6px 8px;margin:0 0 6px;background:rgba(255,255,255,.03)}.rkR.top{border-color:#c07bff}.rkR.me{border-color:#ffe08a;background:rgba(255,224,138,.1)}
+.rkN{flex:0 0 30px;text-align:center;font-weight:900;font-size:15px}.rkR canvas{flex:0 0 40px;width:40px;height:40px;image-rendering:pixelated}
+.rkI{flex:1;min-width:0}.rkI b{display:block;font-size:13.5px}.rkI small{display:block;font-size:11px;opacity:.75}.rkI small.rkTt{color:#ffe08a;opacity:1}
+.rkW{display:flex;flex-wrap:wrap;gap:2px;margin-top:2px}.rkW span{position:relative;font-size:15px}.rkW i{position:absolute;right:-3px;top:-5px;font-style:normal;font-size:9px;color:#ffe08a}
+.rkV{flex:0 0 auto;text-align:right}.rkV b{display:block;font-size:15px}.rkV small{font-size:11px;opacity:.75}
+#lbGo{min-width:180px;padding:12px 30px;border-radius:999px;border:3px solid #fff3b0;background:linear-gradient(180deg,#ff8ac8,#ff4f9a);color:#fff;font:900 19px 'Noto Sans KR',sans-serif;text-shadow:0 2px 0 rgba(0,0,0,.35);box-shadow:0 4px 0 #a2265e,0 0 22px rgba(255,120,190,.55)}
 #lbGo:active{transform:translateY(2px);box-shadow:0 2px 0 #a2265e}
 #lbTabs{display:flex;gap:6px;width:100%;max-width:560px}
 #lbTabs button{flex:1;min-width:0;padding:8px 2px;border-radius:14px;border:1.5px solid rgba(255,214,234,.55);background:rgba(20,10,26,.85);color:#fff;font:700 11.5px 'Noto Sans KR',sans-serif;display:flex;flex-direction:column;align-items:center;gap:2px}
@@ -4944,7 +4958,7 @@ L.addEventListener('click',e=>{const b=e.target.closest('[data-lb]');if(!b)retur
   else if(k==='ach')openAch('title');else if(k==='ntc')showNotice();else if(k==='set')setM();
   else if(k==='go'){toSelect();setTimeout(()=>{const c=document.querySelector(`#selgrid .pc[data-i="${selI}"]`);if(c)c.click()},30)}
   else if(k==='char')toSelect();else if(k==='stu')openStu(CHAR[selI].id);
-  else if(k==='closet'){window.CLO_FROM='lobby';openCloset(CHAR[selI].ju?0:selI)}else if(k==='shop')openShop();
+  else if(k==='closet'){window.CLO_FROM='lobby';openCloset(CHAR[selI].ju?0:selI)}else if(k==='shop')openShop();else if(k==='rank')rkM();
   else if(k==='mp'){const ok=(location.protocol==='https:'&&window.top===window)||window.__RTMOCK;if(!ok){ovM(`<div class="lbM"><h3>👥 친구와 함께하기</h3><p class="c">멀티는 <b>게임 사이트(앱)에서 로그인</b>해야 할 수 있어요.<br>이 화면에서는 친구 서버에 연결할 수 없어요.</p><div class="btns"><button type="button" class="ghost" id="lbX">닫기</button></div></div>`);return}const s=document.getElementById('selMP');if(s)s.click()}});
 // ---- 🐾 펫 (V106, pixelfx critters) ----
 const PETS={slime:{n:'🟢 말랑한 고백',w:74,h:73,f:22,fly:0,sc:.62},wisp:{n:'🔥 길 잃은 별빛',w:117,h:92,f:38,fly:1,sc:.85},butterfly:{n:'🦋 나비의 약속',w:102,h:70,f:38,fly:1,sc:.8},ghost:{n:'👻 수줍은 하객',w:72,h:73,f:29,fly:1,sc:.85}};
@@ -5037,7 +5051,7 @@ function passM(){const S=sp(),L=spLv(),xin=S.xp%SP.lvXp,pre=spNow()<SP.start;
    <div class="spRows"><div class="spHd"><b>무료</b><b>${S.prem?'👑 프리미엄':'🔒 프리미엄'}</b></div><div class="spScroll">${SPF.map((_,i)=>`<div class="spCol${i+1===L?' cur':''}"><span class="spN">${i+1}</span>${cell('f',i)}${cell('p',i)}</div>`).join('')}</div></div>
    <div class="btns">${spCanN()?`<button type="button" class="big" id="spAll">🎁 모두 받기 (${spCanN()})</button>`:''}${S.prem?'':`<button type="button" class="ghost" id="spPrem">👑 프리미엄 열기 · ${SP.premG.toLocaleString()}G</button>`}<button type="button" class="ghost" id="lbX">닫기</button></div>
    <p class="c" style="font-size:11.5px;opacity:.75;margin:4px 0 0">판마다 버틴 시간·보스 처치로, 그리고 📅 미션으로 XP가 쌓여요. 받은 보상은 시즌이 끝나도 남아요.</p></div>`);
-  {const md=o.querySelector('.modal');md.style.maxWidth='760px';md.style.width='94vw'}const sc=o.querySelector('.spScroll');requestAnimationFrame(()=>{const c=sc.querySelector('.spCol.cur');if(c)sc.scrollLeft=c.offsetLeft-sc.clientWidth/2+c.clientWidth/2});
+  {const md=o.querySelector('.modal');md.style.maxWidth='760px';md.style.width='calc(100vw - 20px)';md.style.boxSizing='border-box'}const sc=o.querySelector('.spScroll');requestAnimationFrame(()=>{const c=sc.querySelector('.spCol.cur');if(c)sc.scrollLeft=c.offsetLeft-sc.clientWidth/2+c.clientWidth/2});
   o.querySelectorAll('.spC').forEach(b=>b.onclick=()=>{const tr=b.dataset.tr,lv=+b.dataset.lv,r=(tr==='p'?SPP:SPF)[lv-1];if(spClaim(tr,lv)){persist();try{SND.p('ach')}catch(e){}toast('🎁 '+lv+'단계 보상',rwName(r));res();badges();const k=sc.scrollLeft;passM();const n=document.querySelector('#lbOv .spScroll');if(n)n.scrollLeft=k}});
   const al=o.querySelector('#spAll');if(al)al.onclick=()=>{let n=0;for(let lv=1;lv<=spLv();lv++){if(spClaim('f',lv))n++;if(spClaim('p',lv))n++}persist();try{SND.p('ach')}catch(e){}toast('🎁 패스 보상',n+'개를 받았어요');res();badges();passM()};
   const pr=o.querySelector('#spPrem');if(pr)pr.onclick=()=>{if(SAVE.gold<SP.premG){toast('💰 골드가 부족해요',SP.premG.toLocaleString()+'G가 필요해요');return}if(!pr.dataset.ok){pr.dataset.ok=1;pr.textContent=`👑 ${SP.premG.toLocaleString()}G로 열까요? 한 번 더 누르기`;return}SAVE.gold-=SP.premG;sp().prem=1;persist();try{SND.p('ach')}catch(e){}toast('👑 프리미엄 패스 열림!','지금까지 단계의 보상도 받을 수 있어요');res();badges();passM()}}
@@ -5056,6 +5070,43 @@ function irisGo(mid){if(!(IRIS.complete&&IRIS.naturalWidth)||window.__irisBusy){
     g.setTransform(dpr,0,0,dpr,0,0);g.clearRect(0,0,Wv,Hv);g.imageSmoothingEnabled=false;const sc=Math.max(Wv/320,Hv/180),w=320*sc,h=180*sc;g.drawImage(IRIS,(f%8)*320,((f/8)|0)*180,320,180,(Wv-w)/2,(Hv-h)/2,w,h);
     if(t<2.2)requestAnimationFrame(step);else{c.remove();window.__irisBusy=0;if(!done)mid()}};requestAnimationFrame(step)}
 const _sr=startRun;startRun=function(){const a=arguments,self=this;irisGo(()=>_sr.apply(self,a))};try{window.startRun=startRun}catch(e){}
+// ===== 🏆 랭킹 (V106): 헬 모드 클리어 판만 =====
+const RK_CAP=1800;
+const rkMap=m=>m==='sangbong'?'sangbong':'gigal';
+function rkSkin(id){const fz=id==='쥬은'||!!(SAVE.fancy||{})[id];return{f:fz?1:0,sk:fz?(curSkin(id)||''):'',ms:fz?(mskCur(id)||0):0}}
+function rkSpr(id,k){try{if(id==='쥬은')return k&&k.ms?mskFrame(id,k.ms,0):juFrame('wt0');if(k&&k.f){if(k.ms)return mskFrame(id,k.ms,0);if(MSK_IMG[id+'|0']&&!k.sk)return mskFrame(id,0,0);return skinSpr(id,k.sk||null,0)}return SPR.draw(id,'plain',0)}catch(e){return null}}
+const rkBetter=(a,b)=>!b||a.t>b.t||(a.t===b.t&&a.dmg>b.dmg);
+// 판이 끝날 때: 헬 + 최종 보스 처치 + 로그인
+const _eg2=endGame;endGame=function(win){const g=G;_eg2.apply(this,arguments);try{if(!g||g.bot||g.tw||!g.hell||!g.cleared||!window.GRANK||!GRANK.on())return;
+  const c=CHAR[g.ci],rec={ch:c.id,map:rkMap(g.map),t:Math.min(RK_CAP,Math.floor(g.t)),raw:Math.floor(g.t),dmg:Math.round(g.stats.dmg||0),ws:g.weapons.map(w=>({k:w.k,l:w.lvl,e:w.evo?1:0})),it:Object.keys(g.items||{}),sk:rkSkin(c.id),mp:window.MP&&MP.g?1:0,title:SAVE.title&&(SAVE.titles||{})[SAVE.title]&&window.TITLES?TITLES[SAVE.title]:''};
+  GRANK.submit(rec).then(r=>{if(r&&r.best)toast('🏆 랭킹 기록 갱신!',`${c.nick} · ${fmt(rec.t)}${rec.t>=RK_CAP?' · 딜 '+rec.dmg.toLocaleString():''}`,true);else if(r)toast('🏆 헬 클리어 기록','클리어 횟수 '+r.n+'회')}).catch(e=>console.warn('rank',e))}catch(e){console.warn(e)}};
+try{window.endGame=endGame}catch(e){}
+// ---- 화면 ----
+const RKS={map:'gigal',tab:'surv',ch:''};let RKC={};
+const fmtD=n=>n>=1e6?(n/1e6).toFixed(1)+'M':n>=1e4?Math.round(n/1e3)+'k':n.toLocaleString();
+function rkM(){if(!window.GRANK||!GRANK.on()){ovM(`<div class="lbM"><h3>🏆 헬 모드 랭킹</h3><p class="c">${window.GRANK?'랭킹은 <b>로그인</b>하면 볼 수 있어요.':'랭킹은 <b>게임 사이트(앱)에서 로그인</b>해야 볼 수 있어요.'}</p><div class="btns">${window.GRANK?'<button type="button" class="big" id="rkL">🔑 로그인</button>':''}<button type="button" class="ghost" id="lbX">닫기</button></div></div>`);const l=document.getElementById('rkL');if(l)l.onclick=()=>{document.getElementById('lbOv').remove();const g=document.getElementById('gaccB');if(g)g.click()};return}
+  const o=ovM(`<div class="lbM rkM"><h3>🏆 헬 모드 랭킹</h3><p class="c" style="margin:0 0 6px;font-size:12px">💀 헬 모드에서 최종 보스를 잡은 판만 올라가요 · 30분이 넘으면 총 딜량으로 겨뤄요</p>
+   <div class="rkT">${[['gigal','🌃 기본 맵'],['sangbong','🎡 상봉']].map(([k,n])=>`<button type="button" data-rm="${k}" aria-pressed="${RKS.map===k}">${n}</button>`).join('')}<span></span>${[['surv','⏱ 생존'],['cnt','🔁 클리어 횟수']].map(([k,n])=>`<button type="button" data-rt="${k}" aria-pressed="${RKS.tab===k}">${n}</button>`).join('')}</div>
+   <div class="rkC"><button type="button" data-rc="" aria-pressed="${!RKS.ch}">전체</button>${CHAR.map(c=>`<button type="button" data-rc="${esc(c.id)}" aria-pressed="${RKS.ch===c.id}">${esc(c.nick)}</button>`).join('')}</div>
+   <div class="rkL" id="rkList"><p class="c">불러오는 중…</p></div><div class="btns"><button type="button" class="ghost" id="lbX">닫기</button></div></div>`);
+  {const md=o.querySelector('.modal');md.style.maxWidth='720px';md.style.width='calc(100vw - 20px)';md.style.boxSizing='border-box'}
+  o.querySelectorAll('[data-rm]').forEach(b=>b.onclick=()=>{RKS.map=b.dataset.rm;rkM()});o.querySelectorAll('[data-rt]').forEach(b=>b.onclick=()=>{RKS.tab=b.dataset.rt;rkM()});o.querySelectorAll('[data-rc]').forEach(b=>b.onclick=()=>{RKS.ch=b.dataset.rc;rkM()});
+  {const a=o.querySelector('.rkC [aria-pressed="true"]');if(a)a.scrollIntoView({inline:'center',block:'nearest'})}
+  const box=o.querySelector('#rkList'),me=GRANK.uid();
+  const load=RKC[RKS.map]&&Date.now()-RKC[RKS.map].at<60000?Promise.resolve(RKC[RKS.map].L):GRANK.list(RKS.map).then(L=>{RKC[RKS.map]={at:Date.now(),L};return L});
+  load.then(L=>{L=L.filter(r=>!RKS.ch||r.ch===RKS.ch);
+    if(!L.length){box.innerHTML='<p class="c rkE">아직 아무도 지옥에서 돌아오지 못했어요.<br>첫 번째 이름이 되어 보세요 💀</p>';return}
+    let rows;
+    if(RKS.tab==='surv'){rows=L.slice().sort((a,b)=>b.t-a.t||b.dmg-a.dmg||a.at-b.at).slice(0,50).map((r,i)=>({r,i}))}
+    else{const U={};for(const r of L){const u=U[r.uid]||(U[r.uid]={r,n:0});u.n+=r.n||1;if(rkBetter(r,u.r))u.r=r}rows=Object.values(U).sort((a,b)=>b.n-a.n||b.r.t-a.r.t).slice(0,50).map((u,i)=>({r:u.r,i,n:u.n}))}
+    const mine=rows.find(x=>x.r.uid===me);
+    box.innerHTML=rows.map(({r,i,n})=>{const c=CHAR.find(q=>q.id===r.ch);return `<div class="rkR${r.uid===me?' me':''}${i<3?' top':''}"><span class="rkN">${['🥇','🥈','🥉'][i]||i+1}</span><canvas width="40" height="40" data-rch="${esc(r.ch)}" data-rk="${i}"></canvas>
+      <div class="rkI"><b>${esc(r.id||'???')}${r.mp?' <small>👥</small>':''}</b>${r.title?`<small class="rkTt">${esc(r.title)}</small>`:''}<small>${esc(c?c.nick:r.ch)} · ${new Date(r.at).getMonth()+1}/${new Date(r.at).getDate()}</small>
+      <div class="rkW">${(r.ws||[]).map(({k,l,e})=>WP[k]?`<span title="${esc(WP[k].name)} Lv${l}">${WP[k].icon}${e?'<i>★</i>':''}</span>`:'').join('')}</div></div>
+      <div class="rkV">${RKS.tab==='cnt'?`<b>${n}회</b><small>최고 ${fmt(r.t)}</small>`:`<b>${fmt(r.t)}${r.t>=RK_CAP?'+':''}</b><small>딜 ${fmtD(r.dmg||0)}</small>`}</div></div>`}).join('')+(mine?'':'<p class="c" style="font-size:12px;margin:8px 0 0">아직 내 기록이 없어요. 헬 모드를 클리어하면 올라가요!</p>');
+    box.querySelectorAll('canvas[data-rch]').forEach(cv=>{const r=rows[+cv.dataset.rk].r,im=rkSpr(r.ch,r.sk);if(!im)return;const g=cv.getContext('2d');g.imageSmoothingEnabled=false;g.drawImage(im,0,0,40,40)});
+    if(mine){const el=box.querySelectorAll('.rkR')[rows.indexOf(mine)];if(el)el.scrollIntoView({block:'nearest'})}
+  }).catch(e=>{box.innerHTML=`<p class="c">랭킹을 불러오지 못했어요. (${esc((e&&e.code)||'?')})<br>Firebase 규칙을 확인해 주세요.</p>`})}
 // ---- 화면 전환 ----
 function lobby(){hideAll();$('#hud').hidden=true;L.hidden=false;remember();try{achCheck()}catch(e){}if(SAVE.ntc!==NOTICE_VER&&!window.__rec)setTimeout(showNotice,300);resize();res();badges();if(!run){run=true;last=0;raf=requestAnimationFrame(frame)}}
 new MutationObserver(()=>{if(L.hidden&&run){run=false;cancelAnimationFrame(raf)}}).observe(L,{attributes:true,attributeFilter:['hidden']});

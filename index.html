@@ -2497,7 +2497,7 @@ function update(dt){
    while(G.mark>0&&r>T[G.mark-1]+.12)G.mark--;
    if(r<.15&&!G.lowWarn){G.lowWarn=1;toast('🔥 나 지금 대폭발 직전이니까','체력 위험! 순대국을 찾아요')}else if(r>.35)G.lowWarn=0;
    if(G.say){G.say.life-=dt;if(G.say.life<=0)G.say=null}}
-  gf(false);if(window.petTick)petTick(dt);
+  gf(false);if(window.lbPetTick)lbPetTick(dt);
   // gems & pickups
   const mag=S.magnet;
   for(const g of G.gems){const dx=p.x-g.x,dy=p.y-g.y,d=Math.hypot(dx,dy);if(g.pull||d<mag){g.pull=1;const v=Math.max(260,d*4);g.x+=dx/d*v*dt;g.y+=dy/d*v*dt}if(d<14){g.got=1;G.xp+=g.v*S.growth*G.xpMul;SND.p('gem');if(!G.bot&&Math.random()<.4)sparks(p.x,p.y-4,2,'#9fc2ff',90,.3)}}
@@ -2651,7 +2651,7 @@ function draw(){
     else if(f.bigslash){}
     else{ctx.globalAlpha=Math.min(1,f.life*3);ctx.fillStyle=f.c;ctx.fillRect(f.x,f.y,f.s,f.s);ctx.globalAlpha=1}
   }
-  gf(false);pxDraw();skDraw();bfDraw();drawSummons();juDraw();juDraw2();jgDraw();hdDraw();jgNailDraw();kkDraw();jrDraw();drawDust();drawPhoto();hxDraw();if(window.petDraw)petDraw();
+  gf(false);pxDraw();skDraw();bfDraw();drawSummons();juDraw();juDraw2();jgDraw();hdDraw();jgNailDraw();kkDraw();jrDraw();drawDust();drawPhoto();hxDraw();if(window.lbPetDraw)lbPetDraw();
   drawArena();drawHellWorld();if(G.map==='sangbong')s2World();
   // player
   if(auraOn()){const p0=G.p;ctx.globalAlpha=.32+.1*Math.sin(G.t*8);ctx.fillStyle='#ff4a10';ctx.beginPath();ctx.ellipse(p0.x,p0.y+16,22,7,0,0,7);ctx.fill();ctx.globalAlpha=1;if(!G.bot){for(let k=0;k<2;k++)px(p0.x+rnd(-14,14),p0.y+rnd(4,16),rnd(-10,10),-rnd(60,130),rnd(.4,.8),pick(['#ff3a1a','#ff8a1a','#ffd34d','#fff0a0']),pick([2,3]),1,1)}}
@@ -4982,7 +4982,7 @@ function petTick(dt){if(!G||G.tw)return;const k=petCur();if(!k)return;const p=G.
   if(P.tg&&Math.hypot(P.tg.x-P.x,P.tg.y-P.y)<14){P.tg.pull=1;for(const g of G.gems)if(!g.pull&&(g.x-P.x)**2+(g.y-P.y)**2<30*30)g.pull=1;P.tg=null}
   if(Math.hypot(P.x-p.x,P.y-p.y)>Math.max(VW,VH)){P.x=p.x-30;P.y=p.y-30}}
 function petDraw(){if(!G||G.bot||!G.pet)return;const k=petCur();if(!k)return;const P=G.pet;ctx.globalAlpha=.25;ctx.fillStyle='#000';ctx.beginPath();ctx.ellipse(P.x,P.y+18,10,3,0,0,7);ctx.fill();ctx.globalAlpha=1;petBlit(ctx,k,G.t,P.x,P.y,1.15*PETS[k].sc,P.dir<0)}
-window.petTick=petTick;window.petDraw=petDraw;
+window.lbPetTick=petTick;window.lbPetDraw=petDraw;
 // 옷장: 🏠 로비 꾸미기 탭 (배경 + 펫)
 const _rc=renderCloset;renderCloset=function(){const lob=CLO.tab==='lobby';if(lob)CLO.tab='skin';_rc.apply(this,arguments);if(lob)CLO.tab='lobby';
   const tabs=$('#closet').querySelector('.clotabs');if(!tabs)return;const tb=document.createElement('button');tb.type='button';tb.dataset.tab='lobby';tb.textContent='🏠 로비 꾸미기';tb.setAttribute('aria-pressed',lob);tb.onclick=()=>{CLO.tab='lobby';renderCloset()};tabs.appendChild(tb);

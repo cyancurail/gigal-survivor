@@ -1,5 +1,5 @@
 // 기갈 서바이버 서비스 워커 — 배포할 때마다 VERSION을 올린다
-const VERSION = 'v108';
+const VERSION = 'v109';
 const CACHE = 'gigal-' + VERSION;
 const ASSETS = ['./', './index.html', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png', './icons/icon-512-maskable.png', './icons/apple-touch-icon.png', './fx/pstar.png', './fx/pimp.png', './fx/rune.png', './fx/ghost.png', './fx/cubeB.png', './fx/fnova.png', './fx/scharge.png', './fx/amiss.png', './fx/lsteal.png', './fx/pet_slime.png', './fx/pet_wisp.png', './fx/pet_butterfly.png', './fx/pet_ghost.png', './fx/iris.png'];
 // GitHub Pages는 HTTP 캐시(10분)를 쓰므로 반드시 cache:'reload'로 새 파일을 받는다

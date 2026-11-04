@@ -4855,7 +4855,7 @@ const hadC=!!navigator.serviceWorker.controller;let rl=false;navigator.serviceWo
 .rkR{display:flex;align-items:center;gap:8px;border:1.5px solid #4a3658;border-radius:12px;padding:6px 8px;margin:0 0 6px;background:rgba(255,255,255,.03)}.rkR.top{border-color:#c07bff}.rkR.me{border-color:#ffe08a;background:rgba(255,224,138,.1)}
 .rkN{flex:0 0 30px;text-align:center;font-weight:900;font-size:15px}.rkR canvas{flex:0 0 40px;width:40px;height:40px;image-rendering:pixelated}
 .rkI{flex:1;min-width:0}.rkI b{display:block;font-size:13.5px}.rkI small{display:block;font-size:11px;opacity:.75}.rkI small.rkTt{color:#ffe08a;opacity:1}
-.rkW{display:flex;flex-wrap:wrap;gap:2px;margin-top:2px}.rkW span{position:relative;font-size:15px}.rkW i{position:absolute;right:-3px;top:-5px;font-style:normal;font-size:9px;color:#ffe08a}
+.rkW{display:flex;flex-wrap:wrap;gap:2px;margin-top:2px}.rkW span{position:relative;font-size:15px}.rkW i{position:absolute;right:-3px;top:-5px;font-style:normal;font-size:9px;color:#ffe08a} .rkHx{width:20px;height:20px;vertical-align:-4px;image-rendering:auto} .rkW i.rbw{background:linear-gradient(90deg,#ff5f9e,#ffd75a,#7dffb0,#6ad8ff,#b98bff,#ff5f9e);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:rbwS 2.4s linear infinite;filter:drop-shadow(0 0 2px rgba(255,255,255,.7));font-size:10px} @keyframes rbwS{0%{background-position:0 0}100%{background-position:300% 0}}
 .rkV{flex:0 0 auto;text-align:right}.rkV b{display:block;font-size:15px}.rkV small{font-size:11px;opacity:.75}
 #lbGo{min-width:180px;padding:12px 30px;border-radius:999px;border:3px solid #fff3b0;background:linear-gradient(180deg,#ff8ac8,#ff4f9a);color:#fff;font:900 19px 'Noto Sans KR',sans-serif;text-shadow:0 2px 0 rgba(0,0,0,.35);box-shadow:0 4px 0 #a2265e,0 0 22px rgba(255,120,190,.55)}
 #lbGo:active{transform:translateY(2px);box-shadow:0 2px 0 #a2265e}
@@ -5095,6 +5095,7 @@ try{window.endGame=endGame}catch(e){}
 // ---- 화면 ----
 const RKS={map:'gigal',tab:'surv',ch:''};let RKC={};
 const fmtD=n=>n>=1e6?(n/1e6).toFixed(1)+'M':n>=1e4?Math.round(n/1e3)+'k':n.toLocaleString();
+const HXICO={polaris:'fx/hx_polaris.png',soulwed:'fx/hx_soulwed.png',glass:'fx/hx_glass.png'};
 function rkM(){if(!window.GRANK||!GRANK.on()){ovM(`<div class="lbM"><h3>🏆 헬 모드 랭킹</h3><p class="c">${window.GRANK?'랭킹은 <b>로그인</b>하면 볼 수 있어요.':'랭킹은 <b>게임 사이트(앱)에서 로그인</b>해야 볼 수 있어요.'}</p><div class="btns">${window.GRANK?'<button type="button" class="big" id="rkL">🔑 로그인</button>':''}<button type="button" class="ghost" id="lbX">닫기</button></div></div>`);const l=document.getElementById('rkL');if(l)l.onclick=()=>{document.getElementById('lbOv').remove();const g=document.getElementById('gaccB');if(g)g.click()};return}
   const o=ovM(`<div class="lbM rkM"><h3>🏆 헬 모드 랭킹</h3><p class="c" style="margin:0 0 6px;font-size:12px">💀 헬 모드에서 최종 보스를 잡은 판만 올라가요 · 30분이 넘으면 총 딜량으로 겨뤄요</p>
    <div class="rkT">${[['gigal','🌃 기본 맵'],['sangbong','🎡 상봉']].map(([k,n])=>`<button type="button" data-rm="${k}" aria-pressed="${RKS.map===k}">${n}</button>`).join('')}<span></span>${[['surv','⏱ 생존'],['cnt','🔁 클리어 횟수']].map(([k,n])=>`<button type="button" data-rt="${k}" aria-pressed="${RKS.tab===k}">${n}</button>`).join('')}</div>
@@ -5113,7 +5114,7 @@ function rkM(){if(!window.GRANK||!GRANK.on()){ovM(`<div class="lbM"><h3>🏆 헬
     const mine=rows.find(x=>x.r.uid===me);
     box.innerHTML=rows.map(({r,i,n})=>{const c=CHAR.find(q=>q.id===r.ch);return `<div class="rkR${r.uid===me?' me':''}${i<3?' top':''}"><span class="rkN">${['🥇','🥈','🥉'][i]||i+1}</span><canvas width="40" height="40" data-rch="${esc(r.ch)}" data-rk="${i}"></canvas>
       <div class="rkI"><b>${esc(r.id||'???')}${r.mp?' <small>👥</small>':''}</b>${r.title?`<small class="rkTt">${esc(r.title)}</small>`:''}<small>${esc(c?c.nick:r.ch)} · ${new Date(r.at).getMonth()+1}/${new Date(r.at).getDate()}</small>
-      <div class="rkW">${(r.ws||[]).map(({k,l,e})=>WP[k]?`<span title="${esc(WP[k].name)} Lv${l}">${WP[k].icon}${e?'<i>★</i>':''}</span>`:'').join('')}</div></div>
+      <div class="rkW">${(r.ws||[]).map(({k,l,e})=>WP[k]?`<span title="${esc(WP[k].name)} Lv${l}">${HXICO[k]?`<img class="rkHx" src="${HXICO[k]}" alt="${esc(WP[k].name)}">`:WP[k].icon}${e||WP[k].hid?(WP[k].hid?'<i class="rbw">★</i>':'<i>★</i>'):''}</span>`:'').join('')}</div></div>
       <div class="rkV">${RKS.tab==='cnt'?`<b>${n}회</b><small>최고 ${fmt(r.t)}</small>`:`<b>${fmt(r.t)}${r.t>=RK_CAP?'+':''}</b><small>딜 ${fmtD(r.dmg||0)}</small>`}</div></div>`}).join('')+(mine?'':'<p class="c" style="font-size:12px;margin:8px 0 0">아직 내 기록이 없어요. 헬 모드를 클리어하면 올라가요!</p>');
     box.querySelectorAll('canvas[data-rch]').forEach(cv=>{const r=rows[+cv.dataset.rk].r,im=rkSpr(r.ch,r.sk);if(!im)return;const g=cv.getContext('2d');g.imageSmoothingEnabled=false;g.drawImage(im,0,0,40,40)});
     if(mine){const el=box.querySelectorAll('.rkR')[rows.indexOf(mine)];if(el)el.scrollIntoView({block:'nearest'})}

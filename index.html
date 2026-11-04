@@ -4855,10 +4855,17 @@ let run=false,raf=0,last=0,W=0,H=0,DPR=1;
 try{const sid=localStorage.getItem('gs_sel');const i=CHAR.findIndex(c=>c.id===sid);if(i>=0&&(!CHAR[i].ju||juUnl('emerald')))selI=i}catch(e){}
 const remember=()=>{try{localStorage.setItem('gs_sel',CHAR[selI].id)}catch(e){}};
 // ---- 배경: 제미나이 그림이 오면 fx/lobby_*.png 로 교체 (없으면 코드로 그린 임시 배경) ----
-const BG={};function bgImg(){const k=(SAVE.lobbyMap||'base');if(!BG[k]){const im=new Image();im.src='fx/lobby_'+k+'.png';BG[k]=im}const im=BG[k];return im.complete&&im.naturalWidth?im:null}
+const LBM={base:{n:'🌙 기본 밤하늘'},festa:{n:'🏮 시즌2 축제의 밤거리',gy:.745},spirit:{n:'🍄 정령의 숲',gy:.745},jeonju:{n:'🌕 전주의 숲',gy:.74},princess:{n:'👑 공주님 꿈깨세요',gy:.8}};
+window.LBM=LBM;const lbOwn=k=>k==='base'||!!(SAVE.lbOwn||{})[k];window.lbOwn=lbOwn;
+const lbKey=()=>{const k=SAVE.lobbyMap;return LBM[k]&&lbOwn(k)?k:'base'};
+const BG={};function bgImg(){const k=lbKey();if(k==='base')return null;if(!BG[k]){const im=new Image();im.src='fx/lobby_'+k+'.jpg';BG[k]=im}const im=BG[k];return im.complete&&im.naturalWidth?im:null}
+let CAM=0;function world(){const im=bgImg(),b=$$('#lbBottom').getBoundingClientRect(),tgt=Math.min(H*.85,b.top-34);
+  if(!im)return{im:null,ww:W,wh:H,y0:0,gy:Math.min(H*.82,tgt)};
+  const iw=im.naturalWidth,ih=im.naturalHeight,s=Math.max(W/iw,H/ih)*(W>H?1.25:1),ww=iw*s,wh=ih*s,g=LBM[lbKey()].gy;
+  const y0=Math.max(H-wh,Math.min(0,tgt-g*wh));return{im,ww,wh,y0,gy:y0+g*wh}}
 const lo=document.createElement('canvas'),lx=lo.getContext('2d');
 function hash(i){i=(i^61)^(i>>>16);i=i+(i<<3);i^=i>>>4;i=Math.imul(i,0x27d4eb2d);i^=i>>>15;return(i>>>0)/4294967296}
-function drawBg(t,gy){const im=bgImg();if(im){const s=Math.max(W/im.naturalWidth,H/im.naturalHeight),w=im.naturalWidth*s,h=im.naturalHeight*s;cx.imageSmoothingEnabled=false;cx.drawImage(im,(W-w)/2,(H-h)/2,w,h);return}
+function drawBg(t,gy,Wd){if(Wd.im){cx.imageSmoothingEnabled=true;cx.imageSmoothingQuality='high';cx.fillStyle='#000';cx.fillRect(0,0,W,H);cx.drawImage(Wd.im,-CAM,Wd.y0,Wd.ww,Wd.wh);return}
   const P=3,w=Math.ceil(W/P),h=Math.ceil(H/P),g=gy/P;if(lo.width!==w||lo.height!==h){lo.width=w;lo.height=h}
   const sk=lx.createLinearGradient(0,0,0,g);sk.addColorStop(0,'#2b1b55');sk.addColorStop(.55,'#7a3f8f');sk.addColorStop(1,'#ff9ac0');lx.fillStyle=sk;lx.fillRect(0,0,w,h);
   for(let i=0;i<70;i++){const x=hash(i*7+1)*w|0,y=hash(i*13+5)*g*.7|0,a=.35+.65*Math.abs(Math.sin(t*1.3+i));lx.globalAlpha=a;lx.fillStyle=i%5?'#fff':'#ffe9a8';lx.fillRect(x,y,1,1)}lx.globalAlpha=1;
@@ -4878,20 +4885,21 @@ function sprFor(id,walk,f,idleF){const fz=!!SAVE.fancy[id]||id==='쥬은';
   if(fz){const ms=mskCur(id);if(ms||MSK_IMG[id+'|0'])return mskFrame(id,ms||0,walk?4+f:idleF)}
   return SPRF(id,fz?'fancy':'plain',walk?f:0)}
 function lines(id){const o=(typeof LINES!=='undefined'&&LINES[id])||{};const a=[].concat(...Object.values(o).filter(Array.isArray));return a.length?a:['오늘도 기갈나게!','어디로 출격할까?','단톡방 지키러 가자']}
-function geo(){const b=$$('#lbBottom').getBoundingClientRect();const gy=Math.min(H*.82,b.top-34);const sz=Math.round(Math.max(110,Math.min(190,Math.min(W,H)*.36)));return{gy,sz}}
+function geo(){const Wd=world();const sz=Math.round(Math.max(110,Math.min(190,Math.min(W,H)*.36)));return{gy:Wd.gy,sz,Wd}}
+const scrX=Wd=>ch.x*Wd.ww-CAM;
 function frame(ts){if(!run)return;raf=requestAnimationFrame(frame);const dt=Math.min(.05,(ts-(last||ts))/1000);last=ts;const t=ts/1000;
-  const {gy,sz}=geo();cx.setTransform(DPR,0,0,DPR,0,0);drawBg(t,gy);
-  ch.t-=dt;if(ch.mode==='walk'){ch.x+=ch.dir*dt*.09;ch.f+=dt*7;if(ch.x<.22){ch.x=.22;ch.dir=1}if(ch.x>.78){ch.x=.78;ch.dir=-1}if(ch.t<=0){ch.mode='idle';ch.t=1.2+Math.random()*2.2}}
+  const {gy,sz,Wd}=geo();{const lo=Wd.ww>W?.06:.22,hi=1-lo;ch.lo=lo;ch.hi=hi;if(ch.x<lo)ch.x=lo;if(ch.x>hi)ch.x=hi;const tc=Math.max(0,Math.min(Wd.ww-W,ch.x*Wd.ww-W/2));CAM=ch.cam0?CAM+(tc-CAM)*Math.min(1,dt*3):tc;ch.cam0=1}cx.setTransform(DPR,0,0,DPR,0,0);drawBg(t,gy,Wd);
+  ch.t-=dt;if(ch.mode==='walk'){ch.x+=ch.dir*dt*Math.min(.09,60/Wd.ww);ch.f+=dt*7;if(ch.x<ch.lo){ch.x=ch.lo;ch.dir=1}if(ch.x>ch.hi){ch.x=ch.hi;ch.dir=-1}if(ch.t<=0){ch.mode='idle';ch.t=1.2+Math.random()*2.2}}
   else if(ch.t<=0){ch.mode='walk';ch.t=2+Math.random()*3;if(Math.random()<.5)ch.dir*=-1}
-  const id=CHAR[selI].id,x=ch.x*W,walk=ch.mode==='walk',bob=walk?Math.abs(Math.sin(ch.f*Math.PI/2))*-3:Math.sin(t*2)*1.5;
+  const id=CHAR[selI].id,x=scrX(Wd),walk=ch.mode==='walk',bob=walk?Math.abs(Math.sin(ch.f*Math.PI/2))*-3:Math.sin(t*2)*1.5;
   cx.fillStyle='rgba(0,0,0,.28)';cx.beginPath();cx.ellipse(x,gy,sz*.28,sz*.07,0,0,7);cx.fill();
   let im=null;try{im=sprFor(id,walk,(ch.f|0)%4,Math.floor(t*2)&1)}catch(e){}
   if(im){cx.save();cx.imageSmoothingEnabled=false;cx.translate(x,gy-sz*.5+bob+sz*.06);if(ch.dir<0)cx.scale(-1,1);cx.drawImage(im,-sz/2,-sz/2,sz,sz);cx.restore()}
-  const nm=$$('#lbName');nm.style.top=(gy+4)+'px';
+  const nm=$$('#lbName');nm.style.top=(gy+4)+'px';nm.style.left=x+'px';
   if(ch.say){ch.sayT-=dt;if(ch.sayT<=0)ch.say=null;else{cx.font='700 14px "Noto Sans KR",sans-serif';const tw=cx.measureText(ch.say).width,bw=Math.min(W-20,tw+22),bh=30,bx=Math.max(10,Math.min(W-bw-10,x-bw/2)),by=gy-sz-bh-6;cx.globalAlpha=Math.min(1,ch.sayT*3);cx.fillStyle='#fff';cx.strokeStyle='#1a1020';cx.lineWidth=2;cx.beginPath();cx.roundRect(bx,by,bw,bh,12);cx.moveTo(x-6,by+bh);cx.lineTo(x,by+bh+8);cx.lineTo(x+6,by+bh);cx.fill();cx.stroke();cx.fillStyle='#1a1020';cx.textAlign='center';cx.textBaseline='middle';cx.fillText(ch.say,bx+bw/2,by+bh/2+1);cx.globalAlpha=1}}}
 function resize(){DPR=Math.min(2,devicePixelRatio||1);W=L.clientWidth;H=L.clientHeight;cv.width=Math.round(W*DPR);cv.height=Math.round(H*DPR)}
 addEventListener('resize',()=>{if(run)resize()});
-cv.addEventListener('pointerdown',e=>{const {gy,sz}=geo(),x=ch.x*W;if(Math.abs(e.clientX-x)<sz*.6&&e.clientY>gy-sz*1.1&&e.clientY<gy+10){const a=lines(CHAR[selI].id);ch.say=a[Math.random()*a.length|0];ch.sayT=2.6;ch.mode='idle';ch.t=2.4;try{SND.p('pop')}catch(x){}}});
+cv.addEventListener('pointerdown',e=>{const {gy,sz,Wd}=geo(),x=scrX(Wd);if(Math.abs(e.clientX-x)<sz*.6&&e.clientY>gy-sz*1.1&&e.clientY<gy+10){const a=lines(CHAR[selI].id);ch.say=a[Math.random()*a.length|0];ch.sayT=2.6;ch.mode='idle';ch.t=2.4;try{SND.p('pop')}catch(x){}}});
 // ---- 상단 정보·배지 ----
 function res(){const T=SAVE.tix||{};$$('#lbRes').innerHTML=`<span>💰 ${(SAVE.gold||0).toLocaleString()}G</span>${T.R?`<span>🎟️ 희귀 ${T.R}</span>`:''}${T.L?`<span>🎟️ 전설 ${T.L}</span>`:''}${T.M?`<span>👑 신화 ${T.M}</span>`:''}`;
   const c=CHAR[selI];$$('#lbName').textContent=c.nick+(SAVE.fancy[c.id]&&!c.ju?' · 👗':'')}

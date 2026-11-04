@@ -679,7 +679,7 @@ function twSetup(){const B=twBuild(),own=CHAR[G.ci].w;
   for(const k of B.i.filter(k=>juAllow(k,G.id)).slice(0,6))G.items[k]=IT[k].max||5;
   recalc();
   for(const w of G.weapons)if(G.items[WP[w.k].evo]&&!(WP[w.k].ju&&!(SAVE.juEvo||{})[w.k]))w.evo=true;
-  const HM=SAVE.hxMade||{};if(rdReady()&&HM.roadster)rdMerge(1);for(const h of HX)if(hxOK(h)&&HM[h.k])hxMerge(h,1);recalc();G.p.hp=G.S.maxHp;G.eliteT=20;G.hevT=90}
+  const HM=SAVE.hxMade||{};if(rdReady())rdMerge(1);for(const h of HX)if(hxOK(h)&&HM[h.k])hxMerge(h,1);recalc();G.p.hp=G.S.maxHp;G.eliteT=20;G.hevT=90}
 function addWeapon(k){G.weapons.push({k,lvl:1,evo:false,t:0,t0:G.t,st:{}});recalc()}
 function W(k){return G.weapons.find(w=>w.k===k)}
 const owned=()=>G.weapons.map(w=>w.k);

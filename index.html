@@ -679,7 +679,7 @@ function twSetup(){const B=twBuild(),own=CHAR[G.ci].w;
   for(const k of B.i.filter(k=>juAllow(k,G.id)).slice(0,6))G.items[k]=IT[k].max||5;
   recalc();
   for(const w of G.weapons)if(G.items[WP[w.k].evo]&&!(WP[w.k].ju&&!(SAVE.juEvo||{})[w.k]))w.evo=true;
-  if(rdReady())rdMerge(1);for(const h of HX)if(hxOK(h))hxMerge(h,1);recalc();G.p.hp=G.S.maxHp;G.eliteT=20;G.hevT=90}
+  const HM=SAVE.hxMade||{};if(rdReady()&&HM.roadster)rdMerge(1);for(const h of HX)if(hxOK(h)&&HM[h.k])hxMerge(h,1);recalc();G.p.hp=G.S.maxHp;G.eliteT=20;G.hevT=90}
 function addWeapon(k){G.weapons.push({k,lvl:1,evo:false,t:0,t0:G.t,st:{}});recalc()}
 function W(k){return G.weapons.find(w=>w.k===k)}
 const owned=()=>G.weapons.map(w=>w.k);
@@ -4979,7 +4979,7 @@ const _rc=renderCloset;renderCloset=function(){const lob=CLO.tab==='lobby';if(lo
   d.querySelectorAll('.clt').forEach(b=>b.onclick=()=>{SAVE.title=b.dataset.tt||null;persist();renderCloset()})};
 try{window.renderCloset=renderCloset}catch(e){}
 // ===== 🎫 시즌 패스 + 📅 미션 (V106) =====
-const SP={id:'s2a',name:'시즌2 패스 · 아름다운 거짓',start:new Date('2026-11-05T00:00:00+09:00').getTime(),days:14,lvXp:200,premG:5000};
+const SP={id:'s2a',name:'시즌2 패스 · 아름다운 거짓',start:new Date('2026-11-04T18:00:00+09:00').getTime(),days:14,lvXp:200,premG:5000};
 SP.end=SP.start+SP.days*864e5;window.SP=SP;
 const TITLES={fin:'🏁 시즌2 완주자',liar:'💋 아름다운 거짓말쟁이',hero:'👑 시즌2의 주인공'};window.TITLES=TITLES;
 const SPF=[{g:300},{g:350},{g:400},{g:450},{g:500},{g:550},{g:600},{g:650},{g:700},{bg:'festa'},
@@ -5027,7 +5027,7 @@ const _eg=endGame;endGame=function(win){const g=G,bot=g&&g.bot;_eg.apply(this,ar
   persist();const m=document.getElementById('resmodal');if(m&&spLive()){const d=document.createElement('p');d.className='c';d.style.cssText='margin:6px 0;color:#ffe08a;font-weight:800';d.textContent=tw?'🎫 트와일라잇은 패스 XP가 쌓이지 않아요':`🎫 시즌 패스 +${add} XP · ${spLv()}단계`+(msCanN()?' · 📅 완료한 미션이 있어요!':'');const b=m.querySelector('.btns');m.insertBefore(d,b||null)}}catch(e){console.warn(e)}};
 try{window.endGame=endGame}catch(e){}
 for(const fn of ['doGacha','doGacha10']){const o=window[fn];if(typeof o!=='function')continue;const w=function(){const g0=SAVE.gold;o.apply(this,arguments);if(SAVE.gold<g0){msBump('gacha1',1);persist()}};window[fn]=w;try{if(fn==='doGacha')doGacha=w;else doGacha10=w}catch(e){}}
-for(const fn of ['hxMerge','rdMerge']){const o=window[fn];if(typeof o!=='function')continue;const w=function(h,q){const r=o.apply(this,arguments);const quiet=fn==='rdMerge'?h:q;return r};window[fn]=w;try{if(fn==='hxMerge')hxMerge=w;else rdMerge=w}catch(e){}}
+for(const fn of ['hxMerge','rdMerge']){const o=window[fn];if(typeof o!=='function')continue;const w=function(h,q){const r=o.apply(this,arguments);const quiet=fn==='rdMerge'?h:q;if(!quiet&&G&&!G.bot&&!G.tw){SAVE.hxMade=SAVE.hxMade||{};SAVE.hxMade[fn==='rdMerge'?'roadster':h.k]=1;try{persist()}catch(e){}}return r};window[fn]=w;try{if(fn==='hxMerge')hxMerge=w;else rdMerge=w}catch(e){}}
 // ---- 화면 ----
 const dLeft=()=>{const ms0=SP.end-spNow();if(ms0<=0)return'시즌 종료';const d=Math.floor(ms0/864e5),h=Math.floor(ms0%864e5/36e5);return d?`${d}일 ${h}시간 남음`:`${h}시간 남음`};
 function passM(){const S=sp(),L=spLv(),xin=S.xp%SP.lvXp,pre=spNow()<SP.start;

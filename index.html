@@ -4945,7 +4945,7 @@ L.addEventListener('click',e=>{const b=e.target.closest('[data-lb]');if(!b)retur
   else if(k==='go'){toSelect();setTimeout(()=>{const c=document.querySelector(`#selgrid .pc[data-i="${selI}"]`);if(c)c.click()},30)}
   else if(k==='char')toSelect();else if(k==='stu')openStu(CHAR[selI].id);
   else if(k==='closet'){window.CLO_FROM='lobby';openCloset(CHAR[selI].ju?0:selI)}else if(k==='shop')openShop();
-  else if(k==='mp'){toSelect();setTimeout(()=>{const s=document.getElementById('selMP');if(s)s.click()},30)}});
+  else if(k==='mp'){const ok=(location.protocol==='https:'&&window.top===window)||window.__RTMOCK;if(!ok){ovM(`<div class="lbM"><h3>👥 친구와 함께하기</h3><p class="c">멀티는 <b>게임 사이트(앱)에서 로그인</b>해야 할 수 있어요.<br>이 화면에서는 친구 서버에 연결할 수 없어요.</p><div class="btns"><button type="button" class="ghost" id="lbX">닫기</button></div></div>`);return}const s=document.getElementById('selMP');if(s)s.click()}});
 // ---- 🐾 펫 (V106, pixelfx critters) ----
 const PETS={slime:{n:'🟢 말랑한 고백',w:74,h:73,f:22,fly:0,sc:.62},wisp:{n:'🔥 길 잃은 별빛',w:117,h:92,f:38,fly:1,sc:.85},butterfly:{n:'🦋 나비의 약속',w:102,h:70,f:38,fly:1,sc:.8},ghost:{n:'👻 수줍은 하객',w:72,h:73,f:29,fly:1,sc:.85}};
 window.PETS=PETS;const petOwn=k=>!!window.__devAll||!!(SAVE.petOwn||{})[k];window.petOwn=petOwn;

@@ -274,8 +274,34 @@ button:focus-visible{outline:3px solid var(--cyan);outline-offset:2px}
   <div id="titleSnd"></div>
 </section>
 
+<section class="scr" id="lobby" hidden aria-label="로비">
+  <canvas id="lbCv" aria-hidden="true"></canvas>
+  <div id="lbRes"></div>
+  <div id="lbIcons">
+    <button type="button" data-lb="mail" aria-label="우편함"><i>📮</i>우편함</button>
+    <button type="button" data-lb="att" aria-label="출석 체크"><i>🎉</i>출석</button>
+    <button type="button" data-lb="day" class="soon" aria-label="일일 미션 (준비 중)"><i>📅</i>일일</button>
+    <button type="button" data-lb="week" class="soon" aria-label="주간 미션 (준비 중)"><i>🗓️</i>주간</button>
+    <button type="button" data-lb="pass" class="soon" aria-label="시즌 패스 (준비 중)"><i>🎫</i>패스</button>
+    <button type="button" data-lb="ach" aria-label="업적"><i>🏆</i>업적</button>
+    <button type="button" data-lb="ntc" aria-label="공지"><i>📢</i>공지</button>
+    <button type="button" data-lb="set" aria-label="설정"><i>⚙️</i>설정</button>
+  </div>
+  <div id="lbName"></div>
+  <div id="lbBottom">
+    <button type="button" id="lbGo" data-lb="go">▶ 출격</button>
+    <nav id="lbTabs" aria-label="로비 메뉴">
+      <button type="button" data-lb="char"><i>👤</i>캐릭터</button>
+      <button type="button" data-lb="stu"><i>📈</i>강화</button>
+      <button type="button" data-lb="closet"><i>👗</i>옷장</button>
+      <button type="button" data-lb="shop"><i>🛒</i>상점</button>
+      <button type="button" data-lb="mp"><i>👥</i>멀티</button>
+    </nav>
+  </div>
+</section>
+
 <section class="scr gut" id="select" hidden>
-  <div class="selhead"><button class="ghost" type="button" id="selBack">← 처음으로</button><h2>누구로 버틸래?</h2><div class="tbtns"><button class="ghost" type="button" id="selShop">🎰 뽑기 · 💰<span id="selGold"></span></button><button class="ghost" type="button" id="selCloset">👗 옷장</button><button class="ghost" type="button" id="selStu">📈 강화</button><button class="ghost" type="button" id="selMP">👥 친구와 함께하기</button><button class="ghost" type="button" id="selAch">🏆 업적</button></div></div>
+  <div class="selhead"><button class="ghost" type="button" id="selBack">← 로비</button><h2>누구로 버틸래?</h2><div class="tbtns"><button class="ghost" type="button" id="selShop">🎰 뽑기 · 💰<span id="selGold"></span></button><button class="ghost" type="button" id="selCloset">👗 옷장</button><button class="ghost" type="button" id="selStu">📈 강화</button><button class="ghost" type="button" id="selMP">👥 친구와 함께하기</button><button class="ghost" type="button" id="selAch">🏆 업적</button></div></div>
   <div class="selgrid" id="selgrid"></div>
   <div class="detail" id="detail"></div>
 </section>
@@ -3448,8 +3474,8 @@ function openShop(){
   <h4>📖 도감 ${own}/${POOL.length}</h4>
   <div class="gsec"><b class="tM">신화</b>${tierList('M')}</div><div class="gsec"><b class="tL">전설</b>${tierList('L')}</div><div class="gsec"><b class="tR">희귀</b>${tierList('R')}</div><div class="gsec"><b class="tC">일반</b>${tierList('C')}</div>
   <p class="c">스킨과 무기 스킨은 👗 옷장에서 고를 수 있어요.</p>`;
-  $('#shBack').onclick=()=>{$('#shop').hidden=true;(G?toSelect:titleScreen)()};
-  $('#shCloset').onclick=()=>openCloset(CHAR[selI].ju?0:selI);$('#shop').querySelectorAll('.msel').forEach(b=>b.onclick=()=>{if((SAVE.tix.S||0)<=0)return;const it=PBY[b.dataset.id];SAVE.tix.S--;SAVE.inv[it.id]=true;persist();achCheck();SND.p('ach');toast('👑 신화 획득!',it.n,true);openShop()});if($('#shPull'))$('#shPull').onclick=doGacha;if($('#shPull10'))$('#shPull10').onclick=doGacha10;$('#shop').querySelectorAll('.tixb').forEach(b=>b.onclick=()=>useTicket(b.dataset.t));
+  $('#shBack').onclick=()=>{$('#shop').hidden=true;titleScreen()};
+  $('#shCloset').onclick=()=>{window.CLO_FROM='lobby';openCloset(CHAR[selI].ju?0:selI)};$('#shop').querySelectorAll('.msel').forEach(b=>b.onclick=()=>{if((SAVE.tix.S||0)<=0)return;const it=PBY[b.dataset.id];SAVE.tix.S--;SAVE.inv[it.id]=true;persist();achCheck();SND.p('ach');toast('👑 신화 획득!',it.n,true);openShop()});if($('#shPull'))$('#shPull').onclick=doGacha;if($('#shPull10'))$('#shPull10').onclick=doGacha10;$('#shop').querySelectorAll('.tixb').forEach(b=>b.onclick=()=>useTicket(b.dataset.t));
   $('#shop').querySelectorAll('.vidb').forEach(b=>b.onclick=()=>playVid(b.dataset.v,()=>{}));$('#shop').querySelectorAll('.mpk').forEach(b=>b.onclick=()=>{SAVE.mpick=SAVE.mpick||{};SAVE.mpick[b.dataset.c]=b.dataset.i;persist();openShop()});
   $('#shop').querySelectorAll('.introb').forEach(b=>b.onclick=()=>{const k=b.dataset.t;SAVE.introOff=SAVE.introOff||{};SAVE.introOff[k]=!SAVE.introOff[k];persist();openShop()});
   $('#shop').querySelectorAll('.wsb').forEach(b=>b.onclick=()=>{const k=b.dataset.k,v=b.dataset.v;SAVE.wsel=SAVE.wsel||{};SAVE.wsel[k]=v;if(v==='r')SAVE.wfx[k]=true;else if(SAVE.inv['w:'+k])SAVE.wfx[k]=false;persist();openShop()});
@@ -4394,7 +4420,7 @@ const fmtT=ms=>{if(!ms)return'-';const d=new Date(ms);return(d.getMonth()+1)+'/'
 const fmtS=t=>Math.floor(t/60)+'분 '+String(Math.floor(t%60)).padStart(2,'0')+'초';
 const isEmpty=S=>{const s=sum(S);return !s.g&&!s.f&&!s.i&&!s.b};
 // ---- UI ----
-function btn(){let b=document.getElementById('gaccB');const t=document.getElementById('title');if(!t)return;if(!b){b=document.createElement('button');b.type='button';b.id='gaccB';b.onclick=()=>ACC.user?accM():loginM();t.appendChild(b)}
+function btn(){let b=document.getElementById('gaccB');const t=document.getElementById('lobby')||document.getElementById('title');if(!t)return;if(!b){b=document.createElement('button');b.type='button';b.id='gaccB';b.onclick=()=>ACC.user?accM():loginM();t.appendChild(b)}
  b.dataset.st=ACC.user?'on':'off';b.textContent=ACC.user?'☁️ '+(ACC.id||'계정'):'🔑 로그인'}
 function ov(html){close();const o=document.createElement('div');o.id='gaccOv';o.innerHTML='<div class="gaccM" role="dialog" aria-modal="true">'+html+'</div>';o.addEventListener('pointerdown',e=>{if(e.target===o&&!o.dataset.lock)close()});document.body.appendChild(o);return o}
 function close(){const o=document.getElementById('gaccOv');if(o)o.remove()}
@@ -4448,7 +4474,7 @@ const mUnread=()=>MAILS.filter(m=>mLive(m)&&!mGot()[m.id]).length;
 const mRw=m=>{const r=[];if(m.g)r.push('💰 '+m.g+'G');const t=m.t||{};if(t.R)r.push('🎟️ 희귀 확정권 '+t.R+'장');if(t.L)r.push('🎟️ 전설 확정권 '+t.L+'장');if(t.M)r.push('👑 신화 확정권 '+t.M+'장');return r.join(' + ')};
 const mHas=m=>!!(m.g||(m.t&&(m.t.R||m.t.L||m.t.M)));
 const dLeft=m=>{if(!m.exp)return'';const d=Math.ceil((m.exp-Date.now())/864e5);return d<=1?'오늘까지':'D-'+d};
-function mailBtn(){const t=document.getElementById('title');if(!t)return;let b=document.getElementById('gmailB');if(!b){b=document.createElement('button');b.type='button';b.id='gmailB';b.onclick=()=>mailM();t.appendChild(b)}
+function mailBtn(){try{window.lbBadges&&lbBadges()}catch(e){}const t=document.getElementById('title');if(!t)return;let b=document.getElementById('gmailB');if(!b){b=document.createElement('button');b.type='button';b.id='gmailB';b.onclick=()=>mailM();t.appendChild(b)}
  const n=mUnread();b.innerHTML='📮 우편함'+(n?` <span class="gmN">${n>99?'99+':n}</span>`:'');b.setAttribute('aria-label',n?`우편함, 안 읽은 우편 ${n}통`:'우편함')}
 async function mailRefresh(force){if(!ACC.user){MAILS=[];mailBtn();return}if(!force&&Date.now()-mailAt<60000){mailBtn();return}mailAt=Date.now();
  try{const fb=await load(),id=norm(ACC.id||'');const r=await fb.mailList(id);MAILS=r.filter(mLive).sort((a,b)=>(b.at||0)-(a.at||0))}catch(e){console.warn('mail',e)}mailBtn()}
@@ -4478,7 +4504,8 @@ function mailM(tab){tab=tab||'in';
    box.innerHTML=L.length?L.map(m=>`<div class="gmC${mLive(m)?'':' got'}"><div class="gmH"><b>${E(m.title)}</b><small>${m.to==='*'?'📢 전체':'💌 '+E(m.to)} · ${fmtT(m.at)} · ${mLive(m)?dLeft(m):'기한 끝'}</small></div>${mHas(m)?`<p class="gmR">${E(mRw(m))}</p>`:''}<button type="button" class="gmDel" data-id="${E(m.id)}">🗑️ 삭제</button></div>`).join(''):'<p class="gaccS">보낸 우편이 없어요.</p>';
    box.querySelectorAll('.gmDel').forEach(b=>b.onclick=async()=>{b.disabled=true;try{await fb.mailDel(b.dataset.id);mailRefresh(true).then(()=>mailM('sent'))}catch(e){b.textContent='삭제 실패';b.disabled=false}})}catch(e){box.innerHTML='<p class="gaccE">불러오지 못했어요. ('+E((e&&e.code)||'?')+')</p>'}})()}
 function confirmSend(o,m){const b=o.querySelector('#gmSend');if(b.dataset.ok)return true;b.dataset.ok=1;b.textContent=(m.to==='*'?'📢 전체에게':'💌 '+m.to+'에게')+' 보낼까요? 한 번 더 누르기';return false}
-setInterval(()=>{const t=document.getElementById('title');if(t&&!t.hidden&&ACC.user)mailRefresh()},20000);
+setInterval(()=>{const t=document.getElementById('lobby');if(t&&!t.hidden&&ACC.user)mailRefresh()},20000);
+window.GMAIL={open:()=>mailM(),n:()=>mUnread()};
 btn();mailBtn();
 load().then(fb=>fb.onAuth(u=>{ACC.user=u||null;ACC.on=false;if(u){ACC.id=ACC.pendingId||u.displayName||ACC.id;ACC.pendingId=null;reconcile()}else{ACC.id=null;const m=meta();if(m.uid){m.uid=null;m.dirty=false;setMeta(m)}}btn();mailAt=0;mailRefresh(true)})).catch(e=>{console.warn('firebase load fail',e);const b=document.getElementById('gaccB');if(b)b.textContent='🔑 로그인(오프라인)'});
 })();</script>
@@ -4783,4 +4810,129 @@ navigator.serviceWorker.register('sw.js').then(reg=>{const show=w=>{if(document.
  if(reg.waiting&&navigator.serviceWorker.controller)show(reg.waiting);
  reg.addEventListener('updatefound',()=>{const w=reg.installing;w&&w.addEventListener('statechange',()=>{if(w.state==='installed'&&navigator.serviceWorker.controller)show(w)})});
  setInterval(()=>reg.update().catch(()=>{}),20*60*1000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)reg.update().catch(()=>{})})}).catch(()=>{});
-const hadC=!!navigator.serviceWorker.controller;let rl=false;navigator.serviceWorker.addEventListener('controllerchange',()=>{if(rl||!hadC||!window.__updReq)return;rl=true;location.reload()})})();</script></body></html>
+const hadC=!!navigator.serviceWorker.controller;let rl=false;navigator.serviceWorker.addEventListener('controllerchange',()=>{if(rl||!hadC||!window.__updReq)return;rl=true;location.reload()})})();</script><style>
+/* ===== 🏠 로비 (V106) ===== */
+#lobby{position:fixed;inset:0;overflow:hidden;padding:0;margin:0;max-width:none;background:#1a1030;user-select:none;-webkit-user-select:none}
+#lobby #lbCv{position:absolute;inset:0;width:100%;height:100%;image-rendering:pixelated;touch-action:manipulation}
+#lobby #gaccB{left:10px;right:auto}
+#lbRes{position:absolute;top:calc(48px + env(safe-area-inset-top,0px));left:10px;z-index:5;display:flex;gap:6px;flex-wrap:wrap;max-width:60vw}
+#lbRes span{background:rgba(20,10,26,.78);border:1.5px solid rgba(255,214,234,.45);border-radius:999px;padding:4px 10px;color:#fff;font:700 12.5px 'Noto Sans KR',sans-serif}
+#lbIcons{position:absolute;top:calc(10px + env(safe-area-inset-top,0px));right:10px;z-index:5;display:grid;grid-template-columns:repeat(2,58px);gap:8px;direction:rtl}
+#lbIcons button{direction:ltr;position:relative;width:58px;height:58px;border-radius:16px;border:1.5px solid rgba(255,214,234,.6);background:rgba(20,10,26,.78);color:#fff;font:700 10.5px 'Noto Sans KR',sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:0}
+#lbIcons button i{font-style:normal;font-size:22px;line-height:1}
+#lbIcons button.soon{opacity:.55}
+#lbIcons .dot{position:absolute;top:-4px;right:-4px;min-width:18px;height:18px;padding:0 4px;box-sizing:border-box;border-radius:9px;background:#ff3b6b;color:#fff;font-size:11px;line-height:18px;text-align:center}
+#lbName{position:absolute;left:50%;transform:translateX(-50%);z-index:4;color:#fff;font:900 15px 'Noto Sans KR',sans-serif;text-shadow:0 2px 0 #000,0 0 8px rgba(0,0,0,.6);white-space:nowrap;pointer-events:none}
+#lbBottom{position:absolute;left:0;right:0;bottom:0;z-index:5;padding:0 10px calc(10px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;align-items:center;gap:10px}
+#lbGo{min-width:200px;padding:14px 36px;border-radius:999px;border:3px solid #fff3b0;background:linear-gradient(180deg,#ff8ac8,#ff4f9a);color:#fff;font:900 20px 'Noto Sans KR',sans-serif;text-shadow:0 2px 0 rgba(0,0,0,.35);box-shadow:0 4px 0 #a2265e,0 0 22px rgba(255,120,190,.55)}
+#lbGo:active{transform:translateY(2px);box-shadow:0 2px 0 #a2265e}
+#lbTabs{display:flex;gap:6px;width:100%;max-width:560px}
+#lbTabs button{flex:1;min-width:0;padding:8px 2px;border-radius:14px;border:1.5px solid rgba(255,214,234,.55);background:rgba(20,10,26,.85);color:#fff;font:700 11.5px 'Noto Sans KR',sans-serif;display:flex;flex-direction:column;align-items:center;gap:2px}
+#lbTabs button i{font-style:normal;font-size:22px;line-height:1.1}
+.lbM{text-align:center}
+.lbM h3{margin:0 0 6px}
+.lbAtt{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:10px 0}
+.lbAtt div{border:1.5px solid var(--line,#4a3658);border-radius:12px;padding:8px 4px;font-size:11.5px;line-height:1.4;background:rgba(255,255,255,.04)}
+.lbAtt div b{display:block;font-size:12px}
+.lbAtt div.on{border-color:#ffe08a;background:rgba(255,224,138,.14)}
+.lbAtt div.got{opacity:.5}
+.lbAtt div.d7{grid-column:span 2}
+.lbSetRow{display:flex;flex-direction:column;gap:8px;margin:10px 0}
+#title.tonly .how,#title.tonly #startBtn,#title.tonly .tbtns,#title.tonly #titleSnd,#title.tonly #gmailB,#title.tonly #gaccB{display:none!important}
+#title .tapgo{display:none}
+#title.tonly .tapgo{display:block;margin:22px auto 8px;text-align:center;color:#fff;font:900 18px 'Noto Sans KR',sans-serif;animation:tapb 1.4s ease-in-out infinite}
+@keyframes tapb{0%,100%{opacity:.35}50%{opacity:1}}
+#title.tonly{cursor:pointer}
+#select .selhead .tbtns{display:none}
+@media (min-width:900px){#lbIcons{grid-template-columns:repeat(4,62px)}#lbIcons button{width:62px;height:62px}#lbTabs button{flex-direction:row;justify-content:center;gap:6px;font-size:14px;padding:10px 4px}#lbTabs button i{font-size:20px}}
+</style>
+<script>(()=>{
+const L=document.getElementById('lobby');if(!L)return;
+const $$=s=>L.querySelector(s);
+const cv=$$('#lbCv'),cx=cv.getContext('2d');
+let run=false,raf=0,last=0,W=0,H=0,DPR=1;
+// ---- 선택 캐릭터 기억 ----
+try{const sid=localStorage.getItem('gs_sel');const i=CHAR.findIndex(c=>c.id===sid);if(i>=0&&(!CHAR[i].ju||juUnl('emerald')))selI=i}catch(e){}
+const remember=()=>{try{localStorage.setItem('gs_sel',CHAR[selI].id)}catch(e){}};
+// ---- 배경: 제미나이 그림이 오면 fx/lobby_*.png 로 교체 (없으면 코드로 그린 임시 배경) ----
+const BG={};function bgImg(){const k=(SAVE.lobbyMap||'base');if(!BG[k]){const im=new Image();im.src='fx/lobby_'+k+'.png';BG[k]=im}const im=BG[k];return im.complete&&im.naturalWidth?im:null}
+const lo=document.createElement('canvas'),lx=lo.getContext('2d');
+function hash(i){i=(i^61)^(i>>>16);i=i+(i<<3);i^=i>>>4;i=Math.imul(i,0x27d4eb2d);i^=i>>>15;return(i>>>0)/4294967296}
+function drawBg(t,gy){const im=bgImg();if(im){const s=Math.max(W/im.naturalWidth,H/im.naturalHeight),w=im.naturalWidth*s,h=im.naturalHeight*s;cx.imageSmoothingEnabled=false;cx.drawImage(im,(W-w)/2,(H-h)/2,w,h);return}
+  const P=3,w=Math.ceil(W/P),h=Math.ceil(H/P),g=gy/P;if(lo.width!==w||lo.height!==h){lo.width=w;lo.height=h}
+  const sk=lx.createLinearGradient(0,0,0,g);sk.addColorStop(0,'#2b1b55');sk.addColorStop(.55,'#7a3f8f');sk.addColorStop(1,'#ff9ac0');lx.fillStyle=sk;lx.fillRect(0,0,w,h);
+  for(let i=0;i<70;i++){const x=hash(i*7+1)*w|0,y=hash(i*13+5)*g*.7|0,a=.35+.65*Math.abs(Math.sin(t*1.3+i));lx.globalAlpha=a;lx.fillStyle=i%5?'#fff':'#ffe9a8';lx.fillRect(x,y,1,1)}lx.globalAlpha=1;
+  {const mx=w*.78,my=g*.22,r=Math.max(6,w*.035);lx.fillStyle='#fff3d6';lx.beginPath();lx.arc(mx,my,r,0,7);lx.fill();lx.fillStyle='#ffe0a8';lx.fillRect(mx-r*.4,my-r*.2,2,2);lx.fillRect(mx+r*.2,my+r*.3,2,1)}
+  const hill=(base,amp,fr,col,off)=>{lx.fillStyle=col;for(let x=0;x<w;x++){const y=base+Math.sin((x+off)*fr)*amp+Math.sin((x+off)*fr*2.7)*amp*.35;lx.fillRect(x,y|0,1,g-y+1)}};
+  hill(g*.62,g*.06,.035,'#5a2f7a',t*2);hill(g*.78,g*.05,.05,'#3f2a66',t*4);
+  for(let i=0;i<18;i++){const bx=(hash(i*3+9)*w+((-t*6)%w)+w)%w|0,bh=(g*.12+hash(i*5)*g*.14)|0,bw=4+(hash(i*11)*6|0);lx.fillStyle='#2a1d48';lx.fillRect(bx,g-bh,bw,bh);lx.fillStyle=i%3?'#ffd36b':'#7fe7ff';for(let k=2;k<bh-2;k+=4)if(hash(i*97+k)>.45)lx.fillRect(bx+1+(hash(k+i)*(bw-2)|0),g-bh+k,1,1)}
+  lx.fillStyle='#4fa86a';lx.fillRect(0,g,w,h-g);lx.fillStyle='#62c27e';lx.fillRect(0,g,w,2);lx.fillStyle='#3d8c57';for(let x=0;x<w;x+=2)if(hash(x*31)>.6)lx.fillRect(x,g+2+(hash(x)*3|0),1,1);
+  lx.fillStyle='#e8d9a8';lx.fillRect(0,g+6,w,4);lx.fillStyle='#cdbb86';for(let x=0;x<w;x+=6)lx.fillRect(x,g+9,3,1);
+  for(let i=0;i<26;i++){const x=hash(i*17+3)*w|0,y=g+12+hash(i*23)*(h-g-14)|0;lx.fillStyle=['#ff8ac8','#fff3a8','#ffffff','#bfa0ff'][i%4];lx.fillRect(x,y,1,1);lx.fillStyle='#2f7a48';lx.fillRect(x,y+1,1,1)}
+  for(let i=0;i<28;i++){const sp=.3+hash(i*41)*.5,x=((hash(i*19)*w+t*12*sp+Math.sin(t+i)*6)%w+w)%w,y=((hash(i*29)*h+t*16*sp)%h);lx.fillStyle=i%3?'#ffb6d9':'#ffe1ef';lx.fillRect(x|0,y|0,1,1)}
+  cx.imageSmoothingEnabled=false;cx.drawImage(lo,0,0,w*P,h*P)}
+// ---- 캐릭터 ----
+const ch={x:.5,dir:1,mode:'idle',t:1.5,f:0,say:null,sayT:0};
+function sprFor(id,walk,f,idleF){const fz=!!SAVE.fancy[id]||id==='쥬은';
+  if(id==='쥬은'){const ms=mskCur(id);if(ms)return mskFrame(id,ms,walk?4+f:idleF);return juFrame(walk?'ww'+f:'wt'+idleF)}
+  if(fz){const ms=mskCur(id);if(ms||MSK_IMG[id+'|0'])return mskFrame(id,ms||0,walk?4+f:idleF)}
+  return SPRF(id,fz?'fancy':'plain',walk?f:0)}
+function lines(id){const o=(typeof LINES!=='undefined'&&LINES[id])||{};const a=[].concat(...Object.values(o).filter(Array.isArray));return a.length?a:['오늘도 기갈나게!','어디로 출격할까?','단톡방 지키러 가자']}
+function geo(){const b=$$('#lbBottom').getBoundingClientRect();const gy=Math.min(H*.82,b.top-34);const sz=Math.round(Math.max(110,Math.min(190,Math.min(W,H)*.36)));return{gy,sz}}
+function frame(ts){if(!run)return;raf=requestAnimationFrame(frame);const dt=Math.min(.05,(ts-(last||ts))/1000);last=ts;const t=ts/1000;
+  const {gy,sz}=geo();cx.setTransform(DPR,0,0,DPR,0,0);drawBg(t,gy);
+  ch.t-=dt;if(ch.mode==='walk'){ch.x+=ch.dir*dt*.09;ch.f+=dt*7;if(ch.x<.22){ch.x=.22;ch.dir=1}if(ch.x>.78){ch.x=.78;ch.dir=-1}if(ch.t<=0){ch.mode='idle';ch.t=1.2+Math.random()*2.2}}
+  else if(ch.t<=0){ch.mode='walk';ch.t=2+Math.random()*3;if(Math.random()<.5)ch.dir*=-1}
+  const id=CHAR[selI].id,x=ch.x*W,walk=ch.mode==='walk',bob=walk?Math.abs(Math.sin(ch.f*Math.PI/2))*-3:Math.sin(t*2)*1.5;
+  cx.fillStyle='rgba(0,0,0,.28)';cx.beginPath();cx.ellipse(x,gy,sz*.28,sz*.07,0,0,7);cx.fill();
+  let im=null;try{im=sprFor(id,walk,(ch.f|0)%4,Math.floor(t*2)&1)}catch(e){}
+  if(im){cx.save();cx.imageSmoothingEnabled=false;cx.translate(x,gy-sz*.5+bob+sz*.06);if(ch.dir<0)cx.scale(-1,1);cx.drawImage(im,-sz/2,-sz/2,sz,sz);cx.restore()}
+  const nm=$$('#lbName');nm.style.top=(gy+4)+'px';
+  if(ch.say){ch.sayT-=dt;if(ch.sayT<=0)ch.say=null;else{cx.font='700 14px "Noto Sans KR",sans-serif';const tw=cx.measureText(ch.say).width,bw=Math.min(W-20,tw+22),bh=30,bx=Math.max(10,Math.min(W-bw-10,x-bw/2)),by=gy-sz-bh-6;cx.globalAlpha=Math.min(1,ch.sayT*3);cx.fillStyle='#fff';cx.strokeStyle='#1a1020';cx.lineWidth=2;cx.beginPath();cx.roundRect(bx,by,bw,bh,12);cx.moveTo(x-6,by+bh);cx.lineTo(x,by+bh+8);cx.lineTo(x+6,by+bh);cx.fill();cx.stroke();cx.fillStyle='#1a1020';cx.textAlign='center';cx.textBaseline='middle';cx.fillText(ch.say,bx+bw/2,by+bh/2+1);cx.globalAlpha=1}}}
+function resize(){DPR=Math.min(2,devicePixelRatio||1);W=L.clientWidth;H=L.clientHeight;cv.width=Math.round(W*DPR);cv.height=Math.round(H*DPR)}
+addEventListener('resize',()=>{if(run)resize()});
+cv.addEventListener('pointerdown',e=>{const {gy,sz}=geo(),x=ch.x*W;if(Math.abs(e.clientX-x)<sz*.6&&e.clientY>gy-sz*1.1&&e.clientY<gy+10){const a=lines(CHAR[selI].id);ch.say=a[Math.random()*a.length|0];ch.sayT=2.6;ch.mode='idle';ch.t=2.4;try{SND.p('pop')}catch(x){}}});
+// ---- 상단 정보·배지 ----
+function res(){const T=SAVE.tix||{};$$('#lbRes').innerHTML=`<span>💰 ${(SAVE.gold||0).toLocaleString()}G</span>${T.R?`<span>🎟️ 희귀 ${T.R}</span>`:''}${T.L?`<span>🎟️ 전설 ${T.L}</span>`:''}${T.M?`<span>👑 신화 ${T.M}</span>`:''}`;
+  const c=CHAR[selI];$$('#lbName').textContent=c.nick+(SAVE.fancy[c.id]&&!c.ju?' · 👗':'')}
+const dot=(k,n)=>{const b=$$(`[data-lb="${k}"]`);if(!b)return;let d=b.querySelector('.dot');if(!n){if(d)d.remove();return}if(!d){d=document.createElement('span');d.className='dot';b.appendChild(d)}d.textContent=n===true?'!':(n>99?'99+':n)};
+function badges(){try{dot('mail',window.GMAIL?GMAIL.n():0)}catch(e){}dot('att',attCan()?true:0);try{dot('ach',achUnclaimed())}catch(e){}}
+window.lbBadges=()=>{if(run)badges()};
+// ---- 🎉 7일 출석 체크 ----
+const ATT7=[{g:300},{t:{R:1}},{g:500},{t:{R:2}},{g:800},{t:{L:1}},{g:1500,t:{L:1}}];
+const today=()=>{const d=new Date();return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()};
+const att=()=>(SAVE.att=SAVE.att||{n:0,d:''});
+const attCan=()=>att().d!==today();
+const rwTxt=r=>{const a=[];if(r.g)a.push('💰 '+r.g+'G');const t=r.t||{};if(t.R)a.push('🎟️ 희귀 '+t.R);if(t.L)a.push('🎟️ 전설 '+t.L);if(t.M)a.push('👑 신화 '+t.M);return a.join('<br>')};
+function attM(){const A=att(),can=attCan(),n=A.n>=7&&can?0:A.n;const o=ovM(`<div class="lbM"><h3>🎉 7일 출석 체크</h3><p class="c" style="margin:0">하루에 한 번, 접속하면 선물을 받아요. 7일을 채우면 처음부터 다시!</p>
+  <div class="lbAtt">${ATT7.map((r,i)=>`<div class="${i<n?'got':''} ${i===n&&can?'on':''} ${i===6?'d7':''}"><b>${i+1}일째${i<n?' ✔':''}</b>${rwTxt(r)}</div>`).join('')}</div>
+  <div class="btns"><button type="button" class="big" id="attGo" ${can?'':'disabled'}>${can?`🎁 ${n+1}일째 선물 받기`:'✔ 오늘은 받았어요 · 내일 또 만나요'}</button><button type="button" class="ghost" id="lbX">닫기</button></div></div>`);
+  o.querySelector('#attGo').onclick=()=>{if(!attCan())return;const A=att();if(A.n>=7)A.n=0;const r=ATT7[A.n];A.n++;A.d=today();if(r.g)SAVE.gold+=r.g;SAVE.tix=SAVE.tix||{};for(const k in (r.t||{}))SAVE.tix[k]=(SAVE.tix[k]||0)+r.t[k];persist();try{SND.p('ach')}catch(e){}toast('🎉 출석 '+A.n+'일째',rwTxt(r).replace(/<br>/g,' + '));res();badges();attM()}}
+// ---- 공용 모달 ----
+function ovM(html){let o=document.getElementById('lbOv');if(o)o.remove();o=document.createElement('div');o.className='ov';o.id='lbOv';o.innerHTML=`<div class="modal">${html}</div>`;document.body.appendChild(o);o.addEventListener('pointerdown',e=>{if(e.target===o)o.remove()});const x=o.querySelector('#lbX');if(x)x.onclick=()=>o.remove();return o}
+function setM(){const o=ovM(`<div class="lbM"><h3>⚙️ 설정</h3><div class="lbSetRow">${sndBtns()}<button type="button" class="ghost" id="lbSave">💾 저장 코드 · 🎟️ 쿠폰</button><button type="button" class="ghost" id="lbNtc">📢 공지 다시 보기</button></div><div class="btns"><button type="button" class="ghost" id="lbX">닫기</button></div></div>`);
+  o.querySelector('#lbSave').onclick=()=>{o.remove();openSave('title')};o.querySelector('#lbNtc').onclick=()=>{o.remove();showNotice()}}
+const soon=n=>toast('🚧 '+n,'곧 열려요! 조금만 기다려 주세요');
+// ---- 버튼 ----
+L.addEventListener('click',e=>{const b=e.target.closest('[data-lb]');if(!b)return;try{SND.p('click')}catch(x){}const k=b.dataset.lb;remember();
+  if(k==='mail'){if(window.GMAIL)GMAIL.open()}else if(k==='att')attM();else if(k==='day')soon('일일 미션');else if(k==='week')soon('주간 미션');else if(k==='pass')soon('시즌 패스');
+  else if(k==='ach')openAch('title');else if(k==='ntc')showNotice();else if(k==='set')setM();
+  else if(k==='go'){toSelect();setTimeout(()=>{const c=document.querySelector(`#selgrid .pc[data-i="${selI}"]`);if(c)c.click()},30)}
+  else if(k==='char')toSelect();else if(k==='stu')openStu(CHAR[selI].id);
+  else if(k==='closet'){window.CLO_FROM='lobby';openCloset(CHAR[selI].ju?0:selI)}else if(k==='shop')openShop();
+  else if(k==='mp'){toSelect();setTimeout(()=>{const s=document.getElementById('selMP');if(s)s.click()},30)}});
+// ---- 화면 전환 ----
+function lobby(){hideAll();$('#hud').hidden=true;L.hidden=false;remember();try{achCheck()}catch(e){}if(SAVE.ntc!==NOTICE_VER&&!window.__rec)setTimeout(showNotice,300);resize();res();badges();if(!run){run=true;last=0;raf=requestAnimationFrame(frame)}}
+new MutationObserver(()=>{if(L.hidden&&run){run=false;cancelAnimationFrame(raf)}}).observe(L,{attributes:true,attributeFilter:['hidden']});
+window.lobbyScreen=lobby;
+let titled=false;const T=document.getElementById('title');
+if(T&&!T.querySelector('.tapgo')){const d=document.createElement('div');d.className='tapgo';d.textContent='화면을 터치해서 시작';T.appendChild(d)}
+T&&T.addEventListener('click',e=>{if(!titled&&T.classList.contains('tonly')){titled=true;T.classList.remove('tonly');try{SND.p('click')}catch(x){}lobby()}});
+const _ts=titleScreen;titleScreen=function(){if(!titled){_ts.apply(this,arguments);T.classList.add('tonly');return}lobby()};try{window.titleScreen=titleScreen}catch(e){}
+const _cc=closeCloset;closeCloset=function(){const f=window.CLO_FROM;window.CLO_FROM=null;if(f==='lobby'){clearInterval(CLOT);CLOT=null;$('#closet').hidden=true;lobby()}else _cc.apply(this,arguments)};
+const _po=persist;
+if(!$('#select').hidden||!$('#title').hidden)titleScreen();
+setInterval(()=>{if(run){res();badges()}},3000);
+})();</script>
+
+</body></html>

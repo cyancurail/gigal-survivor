@@ -4362,6 +4362,19 @@ addEventListener('keydown',e=>{if(ph===3&&B.isConnected)done()});
 #gaccOv .gaccC>div{flex:1;border:1.5px solid #4a3658;border-radius:12px;padding:10px;font-size:12.5px;line-height:1.6;background:#120c1a}
 #gaccOv .gaccC b{display:block;font-size:14px;margin-bottom:4px}
 #gaccOv .gaccN{font-size:11.5px;color:#a99bb8;margin-top:10px;line-height:1.5}
+#gmailB{position:fixed;top:calc(48px + env(safe-area-inset-top,0px));right:10px;z-index:60;border:1.5px solid rgba(255,214,234,.7);background:rgba(20,10,26,.85);color:#fff;font:700 13px 'Noto Sans KR',sans-serif;padding:7px 12px;border-radius:999px}
+#gmailB .gmN{display:inline-block;min-width:18px;padding:0 5px;margin-left:4px;border-radius:9px;background:#ff3b6b;color:#fff;font-size:11px;line-height:18px;text-align:center}
+#gaccOv .gmList{max-height:58vh;overflow:auto;margin:4px 0}
+#gaccOv .gmC{border:1.5px solid #4a3658;border-radius:12px;padding:10px;margin:0 0 8px;background:#120c1a}
+#gaccOv .gmC.got{opacity:.6}
+#gaccOv .gmH b{display:block;font-size:14px}#gaccOv .gmH small{font-size:11px;color:#a99bb8}
+#gaccOv .gmB{white-space:pre-wrap;font-size:12.5px;line-height:1.55;margin:6px 0;color:#eee}
+#gaccOv .gmR{font-size:12.5px;color:#ffe08a;margin:6px 0;font-weight:700}
+#gaccOv .gmGet,#gaccOv .gmDel{width:100%;padding:9px;border-radius:10px;border:2px solid #ffd6ea;background:#ff6fb5;color:#2a0b26;font-weight:900}
+#gaccOv .gmGet[disabled]{background:transparent;color:#cfc6dc;border-color:#4a3658}
+#gaccOv .gmDel{background:transparent;color:#ff9ab8;border-color:#ff9ab8}
+#gaccOv textarea{width:100%;box-sizing:border-box;padding:10px 12px;border-radius:10px;border:1.5px solid #4a3658;background:#0e0914;color:#fff;font-size:15px;font-family:inherit;resize:vertical}
+#gaccOv .gmRow{display:flex;gap:8px}#gaccOv .gmRow>div{flex:1}
 </style>
 <script>(()=>{
 const CFG={apiKey:"AIzaSyBuRp0Xw9WzMTOTHnvdruX9yC9zKe5kFwU",authDomain:"studiosilverbell.firebaseapp.com",projectId:"studiosilverbell",storageBucket:"studiosilverbell.firebasestorage.app",messagingSenderId:"175142185014",appId:"1:175142185014:web:00ccbfaabdf8eb9d8b5097"};
@@ -4374,7 +4387,8 @@ let FB=window.__FBMOCK||null;
 async function load(){if(FB)return FB;const b='https://www.gstatic.com/firebasejs/10.12.2/';const[a,au,fs]=await Promise.all([import(b+'firebase-app.js'),import(b+'firebase-auth.js'),import(b+'firebase-firestore.js')]);
  const app=a.initializeApp(CFG),auth=au.getAuth(app),db=fs.getFirestore(app);
  FB={onAuth:cb=>au.onAuthStateChanged(auth,cb),signIn:(e,p)=>au.signInWithEmailAndPassword(auth,e,p),signUp:async(e,p,id)=>{const c=await au.createUserWithEmailAndPassword(auth,e,p);try{await au.updateProfile(c.user,{displayName:id})}catch(x){}return c},signOut:()=>au.signOut(auth),
-  get:async uid=>{const d=await fs.getDoc(fs.doc(db,'saves',uid));return d.exists()?d.data():null},set:(uid,data)=>fs.setDoc(fs.doc(db,'saves',uid),data)};return FB}
+  get:async uid=>{const d=await fs.getDoc(fs.doc(db,'saves',uid));return d.exists()?d.data():null},set:(uid,data)=>fs.setDoc(fs.doc(db,'saves',uid),data),
+  mailList:async id=>{const r=await fs.getDocs(fs.query(fs.collection(db,'mail'),fs.where('to','in',['*',id||'*'])));return r.docs.map(d=>({id:d.id,...d.data()}))},mailAll:async()=>{const r=await fs.getDocs(fs.collection(db,'mail'));return r.docs.map(d=>({id:d.id,...d.data()}))},mailSend:m=>fs.addDoc(fs.collection(db,'mail'),m),mailDel:id=>fs.deleteDoc(fs.doc(db,'mail',id))};return FB}
 const sum=S=>{S=S||{};const n=o=>Object.values(o||{}).filter(Boolean).length;let best=0;for(const v of Object.values(S.best||{}))best=Math.max(best,+v||0);return{g:S.gold||0,f:n(S.fancy),i:n(S.inv),b:best}};
 const fmtT=ms=>{if(!ms)return'-';const d=new Date(ms);return(d.getMonth()+1)+'/'+d.getDate()+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')};
 const fmtS=t=>Math.floor(t/60)+'분 '+String(Math.floor(t%60)).padStart(2,'0')+'초';
@@ -4425,8 +4439,48 @@ const P=window.persist;window.persist=function(){P.apply(this,arguments);const m
 try{persist=window.persist}catch(e){}
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&meta().dirty)upload().catch(()=>{})});
 addEventListener('pagehide',()=>{if(meta().dirty)upload().catch(()=>{})});
-btn();
-load().then(fb=>fb.onAuth(u=>{ACC.user=u||null;ACC.on=false;if(u){ACC.id=ACC.pendingId||u.displayName||ACC.id;ACC.pendingId=null;reconcile()}else{ACC.id=null;const m=meta();if(m.uid){m.uid=null;m.dirty=false;setMeta(m)}}btn()})).catch(e=>{console.warn('firebase load fail',e);const b=document.getElementById('gaccB');if(b)b.textContent='🔑 로그인(오프라인)'});
+// ---- 📮 우편함 (V105) ----
+const DEV_ID='조무룩';const isDev=()=>!!(ACC.user&&ACC.id&&norm(ACC.id)===DEV_ID);
+let MAILS=[],mailAt=0;
+const mGot=()=>(SAVE.mailGot=SAVE.mailGot||{});
+const mLive=m=>!m.exp||m.exp>Date.now();
+const mUnread=()=>MAILS.filter(m=>mLive(m)&&!mGot()[m.id]).length;
+const mRw=m=>{const r=[];if(m.g)r.push('💰 '+m.g+'G');const t=m.t||{};if(t.R)r.push('🎟️ 희귀 확정권 '+t.R+'장');if(t.L)r.push('🎟️ 전설 확정권 '+t.L+'장');if(t.M)r.push('👑 신화 확정권 '+t.M+'장');return r.join(' + ')};
+const mHas=m=>!!(m.g||(m.t&&(m.t.R||m.t.L||m.t.M)));
+const dLeft=m=>{if(!m.exp)return'';const d=Math.ceil((m.exp-Date.now())/864e5);return d<=1?'오늘까지':'D-'+d};
+function mailBtn(){const t=document.getElementById('title');if(!t)return;let b=document.getElementById('gmailB');if(!b){b=document.createElement('button');b.type='button';b.id='gmailB';b.onclick=()=>mailM();t.appendChild(b)}
+ const n=mUnread();b.innerHTML='📮 우편함'+(n?` <span class="gmN">${n>99?'99+':n}</span>`:'');b.setAttribute('aria-label',n?`우편함, 안 읽은 우편 ${n}통`:'우편함')}
+async function mailRefresh(force){if(!ACC.user){MAILS=[];mailBtn();return}if(!force&&Date.now()-mailAt<60000){mailBtn();return}mailAt=Date.now();
+ try{const fb=await load(),id=norm(ACC.id||'');const r=await fb.mailList(id);MAILS=r.filter(mLive).sort((a,b)=>(b.at||0)-(a.at||0))}catch(e){console.warn('mail',e)}mailBtn()}
+function mailClaim(m){if(mGot()[m.id])return false;mGot()[m.id]=1;if(m.g)SAVE.gold+=+m.g||0;const t=m.t||{};SAVE.tix=SAVE.tix||{};for(const k of['R','L','M'])if(t[k])SAVE.tix[k]=(SAVE.tix[k]||0)+(+t[k]||0);persist();try{SND.p(mHas(m)?'ach':'click')}catch(e){}return true}
+function mailM(tab){tab=tab||'in';
+ if(!ACC.user){const o=ov(`<h3>📮 우편함</h3><p class="gaccS">로그인하면 개발자 은방울꽃🌸이 보낸 우편과 선물을 받을 수 있어요.</p><div class="gaccBtns"><button type="button" class="sub" id="gmX">닫기</button><button type="button" id="gmL">🔑 로그인</button></div>`);o.querySelector('#gmX').onclick=close;o.querySelector('#gmL').onclick=()=>loginM();return}
+ const dev=isDev(),tabs=dev?`<div class="gaccT"><button type="button" data-t="in" aria-pressed="${tab==='in'}">받은 우편</button><button type="button" data-t="send" aria-pressed="${tab==='send'}">✉️ 보내기</button><button type="button" data-t="sent" aria-pressed="${tab==='sent'}">보낸 우편</button></div>`:'';
+ let body='';
+ if(tab==='in'){const L=MAILS.filter(mLive);body=L.length?L.map(m=>{const got=!!mGot()[m.id],rw=mHas(m);return `<div class="gmC${got?' got':''}"><div class="gmH"><b>${E(m.title||'(제목 없음)')}</b><small>${E(m.from||'은방울꽃🌸')} · ${fmtT(m.at)}${m.exp?' · '+dLeft(m):''}${m.to&&m.to!=='*'?' · 💌 나에게':''}</small></div>${m.body?`<p class="gmB">${E(m.body)}</p>`:''}${rw?`<p class="gmR">${E(mRw(m))}</p>`:''}<button type="button" class="gmGet" data-id="${E(m.id)}" ${got?'disabled':''}>${got?(rw?'받음 ✔':'읽음 ✔'):(rw?'🎁 받기':'확인')}</button></div>`}).join(''):'<p class="gaccS">아직 우편이 없어요.</p>';
+   const can=L.filter(m=>!mGot()[m.id]).length;if(can>1)body+=`<div class="gaccBtns"><button type="button" id="gmAll">🎁 모두 받기 (${can})</button></div>`}
+ else if(tab==='send'){body=`<label for="gmTo">받는 사람</label><input id="gmTo" placeholder="비우면 전체 (아이디 입력 시 그 친구만)" maxlength="10">
+  <label for="gmTi">제목</label><input id="gmTi" maxlength="40">
+  <label for="gmBo">내용</label><textarea id="gmBo" rows="4" maxlength="500">안녕하세요. 인디게임 기갈 서바이버 개발자 은방울꽃🌸입니다.\n</textarea>
+  <div class="gmRow"><div><label for="gmG">💰 골드</label><input id="gmG" type="number" min="0" step="100" value="0"></div><div><label for="gmD">기한 (일)</label><input id="gmD" type="number" min="1" max="90" value="7"></div></div>
+  <div class="gmRow"><div><label for="gmR">🎟️ 희귀</label><input id="gmR" type="number" min="0" max="20" value="0"></div><div><label for="gmLg">🎟️ 전설</label><input id="gmLg" type="number" min="0" max="20" value="0"></div><div><label for="gmM">👑 신화</label><input id="gmM" type="number" min="0" max="10" value="0"></div></div>
+  <p class="gaccE" id="gmE" role="alert"></p><div class="gaccBtns"><button type="button" id="gmSend">✉️ 보내기</button></div>`}
+ else body='<p class="gaccS" id="gmSL">불러오는 중…</p>';
+ const o=ov(`<h3>📮 우편함</h3>${tabs}<div class="gmList">${body}</div><div class="gaccBtns"><button type="button" class="sub" id="gmX">닫기</button></div>`);
+ o.querySelector('#gmX').onclick=close;o.querySelectorAll('.gaccT button').forEach(b=>b.onclick=()=>mailM(b.dataset.t));
+ o.querySelectorAll('.gmGet').forEach(b=>b.onclick=()=>{const m=MAILS.find(q=>q.id===b.dataset.id);if(m&&mailClaim(m)){if(mHas(m)&&typeof toast==='function')toast('🎁 우편 선물 받기',mRw(m));mailBtn();mailM('in')}});
+ const all=o.querySelector('#gmAll');if(all)all.onclick=()=>{let g=0;for(const m of MAILS.filter(mLive))if(mailClaim(m)&&mHas(m))g++;if(g&&typeof toast==='function')toast('🎁 우편 선물 받기',g+'통의 선물을 받았어요');mailBtn();mailM('in')};
+ if(tab==='send')o.querySelector('#gmSend').onclick=async()=>{const v=id=>o.querySelector(id).value,n=(id,mx)=>Math.max(0,Math.min(mx,Math.floor(+v(id)||0))),er=o.querySelector('#gmE');
+   const to=norm(v('#gmTo'))||'*',title=v('#gmTi').trim(),bd=v('#gmBo').trim();if(!title){er.textContent='제목을 적어 주세요.';return}
+   const m={to,title,body:bd,g:n('#gmG',100000),t:{R:n('#gmR',20),L:n('#gmLg',20),M:n('#gmM',10)},at:Date.now(),from:'은방울꽃🌸'};m.exp=m.at+Math.max(1,n('#gmD',90))*864e5;
+   if(!confirmSend(o,m))return;er.textContent='보내는 중…';try{const fb=await load();await fb.mailSend(m);er.textContent='';mailRefresh(true).then(()=>mailM('sent'))}catch(e){er.textContent='보내지 못했어요. Firebase 규칙을 확인해 주세요. ('+((e&&e.code)||'?')+')'}};
+ if(tab==='sent')(async()=>{const box=o.querySelector('.gmList');try{const fb=await load(),L=(await fb.mailAll()).sort((a,b)=>(b.at||0)-(a.at||0));
+   box.innerHTML=L.length?L.map(m=>`<div class="gmC${mLive(m)?'':' got'}"><div class="gmH"><b>${E(m.title)}</b><small>${m.to==='*'?'📢 전체':'💌 '+E(m.to)} · ${fmtT(m.at)} · ${mLive(m)?dLeft(m):'기한 끝'}</small></div>${mHas(m)?`<p class="gmR">${E(mRw(m))}</p>`:''}<button type="button" class="gmDel" data-id="${E(m.id)}">🗑️ 삭제</button></div>`).join(''):'<p class="gaccS">보낸 우편이 없어요.</p>';
+   box.querySelectorAll('.gmDel').forEach(b=>b.onclick=async()=>{b.disabled=true;try{await fb.mailDel(b.dataset.id);mailRefresh(true).then(()=>mailM('sent'))}catch(e){b.textContent='삭제 실패';b.disabled=false}})}catch(e){box.innerHTML='<p class="gaccE">불러오지 못했어요. ('+E((e&&e.code)||'?')+')</p>'}})()}
+function confirmSend(o,m){const b=o.querySelector('#gmSend');if(b.dataset.ok)return true;b.dataset.ok=1;b.textContent=(m.to==='*'?'📢 전체에게':'💌 '+m.to+'에게')+' 보낼까요? 한 번 더 누르기';return false}
+setInterval(()=>{const t=document.getElementById('title');if(t&&!t.hidden&&ACC.user)mailRefresh()},20000);
+btn();mailBtn();
+load().then(fb=>fb.onAuth(u=>{ACC.user=u||null;ACC.on=false;if(u){ACC.id=ACC.pendingId||u.displayName||ACC.id;ACC.pendingId=null;reconcile()}else{ACC.id=null;const m=meta();if(m.uid){m.uid=null;m.dirty=false;setMeta(m)}}btn();mailAt=0;mailRefresh(true)})).catch(e=>{console.warn('firebase load fail',e);const b=document.getElementById('gaccB');if(b)b.textContent='🔑 로그인(오프라인)'});
 })();</script>
 
 <style>

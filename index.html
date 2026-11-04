@@ -4662,7 +4662,7 @@ function go(r){const u=me(),meP=(r.ps||{})[u.uid]||{};const ci=CHAR.findIndex(c=
  MP.game={code:MP.code,host:MP.host,map:r.map,diff:r.diff,seed:r.seed};
  SAVE.map=r.map;persist();const f=!!(SAVE.fancy||{})[meP.ch];
  // M1: 같은 설정으로 각자 시작 (M2에서 실제 협동으로 교체)
- try{startRun(ci<0?0:ci,f,r.diff>=1,r.diff>=2,false)}catch(e){console.warn(e)}
+ try{(window.__startRunRaw||startRun)(ci<0?0:ci,f,r.diff>=1,r.diff>=2,false)}catch(e){console.warn(e)}
  if(MP.unsub)MP.unsub();MP.unsub=null;MP.code=null;MP.room=null;MP.started=0;
  if(NET)NET.offDisc('rooms/'+MP.g0code+(MP.host?'':'/ps/'+u.uid));
  try{MP.begin&&MP.begin(r,u.uid)}catch(e){console.warn(e)}}
@@ -5080,7 +5080,7 @@ function irisGo(mid){if(!(IRIS.complete&&IRIS.naturalWidth)||window.__irisBusy){
   const step=ts=>{if(!t0)t0=ts;const t=(ts-t0)/1000,f=Math.min(44,Math.floor(t*20));if(!done&&t>=1.06){done=true;try{mid()}catch(e){console.warn(e)}if(window.G&&G.running)G.freeze=Math.max(G.freeze||0,.9)}
     g.setTransform(dpr,0,0,dpr,0,0);g.clearRect(0,0,Wv,Hv);g.imageSmoothingEnabled=false;const sc=Math.max(Wv/320,Hv/180),w=320*sc,h=180*sc;g.drawImage(IRIS,(f%8)*320,((f/8)|0)*180,320,180,(Wv-w)/2,(Hv-h)/2,w,h);
     if(t<2.2)requestAnimationFrame(step);else{c.remove();window.__irisBusy=0;if(!done)mid()}};requestAnimationFrame(step)}
-const _sr=startRun;startRun=function(){const a=arguments,self=this;irisGo(()=>_sr.apply(self,a))};try{window.startRun=startRun}catch(e){}
+const _sr=startRun;window.__startRunRaw=_sr;startRun=function(){const a=arguments,self=this;irisGo(()=>_sr.apply(self,a))};try{window.startRun=startRun}catch(e){}
 // ===== 🏆 랭킹 (V106): 헬 모드 클리어 판만 =====
 const RK_CAP=1800;
 const rkMap=m=>m==='sangbong'?'sangbong':'gigal';

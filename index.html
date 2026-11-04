@@ -2493,7 +2493,7 @@ function update(dt){
    while(G.mark>0&&r>T[G.mark-1]+.12)G.mark--;
    if(r<.15&&!G.lowWarn){G.lowWarn=1;toast('🔥 나 지금 대폭발 직전이니까','체력 위험! 순대국을 찾아요')}else if(r>.35)G.lowWarn=0;
    if(G.say){G.say.life-=dt;if(G.say.life<=0)G.say=null}}
-  gf(false);
+  gf(false);if(window.petTick)petTick(dt);
   // gems & pickups
   const mag=S.magnet;
   for(const g of G.gems){const dx=p.x-g.x,dy=p.y-g.y,d=Math.hypot(dx,dy);if(g.pull||d<mag){g.pull=1;const v=Math.max(260,d*4);g.x+=dx/d*v*dt;g.y+=dy/d*v*dt}if(d<14){g.got=1;G.xp+=g.v*S.growth*G.xpMul;SND.p('gem');if(!G.bot&&Math.random()<.4)sparks(p.x,p.y-4,2,'#9fc2ff',90,.3)}}
@@ -2647,7 +2647,7 @@ function draw(){
     else if(f.bigslash){}
     else{ctx.globalAlpha=Math.min(1,f.life*3);ctx.fillStyle=f.c;ctx.fillRect(f.x,f.y,f.s,f.s);ctx.globalAlpha=1}
   }
-  gf(false);pxDraw();skDraw();bfDraw();drawSummons();juDraw();juDraw2();jgDraw();hdDraw();jgNailDraw();kkDraw();jrDraw();drawDust();drawPhoto();hxDraw();
+  gf(false);pxDraw();skDraw();bfDraw();drawSummons();juDraw();juDraw2();jgDraw();hdDraw();jgNailDraw();kkDraw();jrDraw();drawDust();drawPhoto();hxDraw();if(window.petDraw)petDraw();
   drawArena();drawHellWorld();if(G.map==='sangbong')s2World();
   // player
   if(auraOn()){const p0=G.p;ctx.globalAlpha=.32+.1*Math.sin(G.t*8);ctx.fillStyle='#ff4a10';ctx.beginPath();ctx.ellipse(p0.x,p0.y+16,22,7,0,0,7);ctx.fill();ctx.globalAlpha=1;if(!G.bot){for(let k=0;k<2;k++)px(p0.x+rnd(-14,14),p0.y+rnd(4,16),rnd(-10,10),-rnd(60,130),rnd(.4,.8),pick(['#ff3a1a','#ff8a1a','#ffd34d','#fff0a0']),pick([2,3]),1,1)}}
@@ -4476,7 +4476,7 @@ const mHas=m=>!!(m.g||(m.t&&(m.t.R||m.t.L||m.t.M)));
 const dLeft=m=>{if(!m.exp)return'';const d=Math.ceil((m.exp-Date.now())/864e5);return d<=1?'오늘까지':'D-'+d};
 function mailBtn(){try{window.lbBadges&&lbBadges()}catch(e){}const t=document.getElementById('title');if(!t)return;let b=document.getElementById('gmailB');if(!b){b=document.createElement('button');b.type='button';b.id='gmailB';b.onclick=()=>mailM();t.appendChild(b)}
  const n=mUnread();b.innerHTML='📮 우편함'+(n?` <span class="gmN">${n>99?'99+':n}</span>`:'');b.setAttribute('aria-label',n?`우편함, 안 읽은 우편 ${n}통`:'우편함')}
-async function mailRefresh(force){if(!ACC.user){MAILS=[];mailBtn();return}if(!force&&Date.now()-mailAt<60000){mailBtn();return}mailAt=Date.now();
+async function mailRefresh(force){window.__devAll=isDev();if(!ACC.user){MAILS=[];mailBtn();return}if(!force&&Date.now()-mailAt<60000){mailBtn();return}mailAt=Date.now();
  try{const fb=await load(),id=norm(ACC.id||'');const r=await fb.mailList(id);MAILS=r.filter(mLive).sort((a,b)=>(b.at||0)-(a.at||0))}catch(e){console.warn('mail',e)}mailBtn()}
 function mailClaim(m){if(mGot()[m.id])return false;mGot()[m.id]=1;if(m.g)SAVE.gold+=+m.g||0;const t=m.t||{};SAVE.tix=SAVE.tix||{};for(const k of['R','L','M'])if(t[k])SAVE.tix[k]=(SAVE.tix[k]||0)+(+t[k]||0);persist();try{SND.p(mHas(m)?'ach':'click')}catch(e){}return true}
 function mailM(tab){tab=tab||'in';
@@ -4856,7 +4856,7 @@ try{const sid=localStorage.getItem('gs_sel');const i=CHAR.findIndex(c=>c.id===si
 const remember=()=>{try{localStorage.setItem('gs_sel',CHAR[selI].id)}catch(e){}};
 // ---- 배경: 제미나이 그림이 오면 fx/lobby_*.png 로 교체 (없으면 코드로 그린 임시 배경) ----
 const LBM={base:{n:'🌙 기본 밤하늘'},festa:{n:'🏮 시즌2 축제의 밤거리',gy:.745},spirit:{n:'🍄 정령의 숲',gy:.745},jeonju:{n:'🌕 전주의 숲',gy:.74},princess:{n:'👑 공주님 꿈깨세요',gy:.8}};
-window.LBM=LBM;const lbOwn=k=>k==='base'||!!(SAVE.lbOwn||{})[k];window.lbOwn=lbOwn;
+window.LBM=LBM;const lbOwn=k=>k==='base'||!!window.__devAll||!!(SAVE.lbOwn||{})[k];window.lbOwn=lbOwn;
 const lbKey=()=>{const k=SAVE.lobbyMap;return LBM[k]&&lbOwn(k)?k:'base'};
 const BG={};function bgImg(){const k=lbKey();if(k==='base')return null;if(!BG[k]){const im=new Image();im.src='fx/lobby_'+k+'.jpg';BG[k]=im}const im=BG[k];return im.complete&&im.naturalWidth?im:null}
 let CAM=0;function world(){const im=bgImg(),b=$$('#lbBottom').getBoundingClientRect(),tgt=Math.min(H*.85,b.top-34);
@@ -4889,9 +4889,11 @@ function geo(){const Wd=world();const sz=Math.round(Math.max(110,Math.min(190,Ma
 const scrX=Wd=>ch.x*Wd.ww-CAM;
 function frame(ts){if(!run)return;raf=requestAnimationFrame(frame);const dt=Math.min(.05,(ts-(last||ts))/1000);last=ts;const t=ts/1000;
   const {gy,sz,Wd}=geo();{const lo=Wd.ww>W?.06:.22,hi=1-lo;ch.lo=lo;ch.hi=hi;if(ch.x<lo)ch.x=lo;if(ch.x>hi)ch.x=hi;const tc=Math.max(0,Math.min(Wd.ww-W,ch.x*Wd.ww-W/2));CAM=ch.cam0?CAM+(tc-CAM)*Math.min(1,dt*3):tc;ch.cam0=1}cx.setTransform(DPR,0,0,DPR,0,0);drawBg(t,gy,Wd);
-  ch.t-=dt;if(ch.mode==='walk'){ch.x+=ch.dir*dt*Math.min(.09,60/Wd.ww);ch.f+=dt*7;if(ch.x<ch.lo){ch.x=ch.lo;ch.dir=1}if(ch.x>ch.hi){ch.x=ch.hi;ch.dir=-1}if(ch.t<=0){ch.mode='idle';ch.t=1.2+Math.random()*2.2}}
+  ch.t-=dt;if(ch.goal!=null){const gd=ch.goal-ch.x;ch.dir=gd<0?-1:1;ch.mode='walk';ch.t=1;if(Math.abs(gd)<Math.min(.09,60/Wd.ww)*dt*1.6){ch.goal=null;ch.mode='idle';ch.t=2.5}}if(ch.mode==='walk'){ch.x+=ch.dir*dt*Math.min(.09,60/Wd.ww)*(ch.goal!=null?1.6:1);ch.f+=dt*7;if(ch.x<ch.lo){ch.x=ch.lo;ch.dir=1}if(ch.x>ch.hi){ch.x=ch.hi;ch.dir=-1}if(ch.t<=0){ch.mode='idle';ch.t=1.2+Math.random()*2.2}}
   else if(ch.t<=0){ch.mode='walk';ch.t=2+Math.random()*3;if(Math.random()<.5)ch.dir*=-1}
   const id=CHAR[selI].id,x=scrX(Wd),walk=ch.mode==='walk',bob=walk?Math.abs(Math.sin(ch.f*Math.PI/2))*-3:Math.sin(t*2)*1.5;
+  {const pk=petCur();if(pk){const PP=PETS[pk],psc=sz/48*PP.sc,P=ch.pet&&ch.pet.k===pk?ch.pet:(ch.pet={k:pk,wx:ch.x*Wd.ww-ch.dir*sz*.6,y:gy-sz*.6,dir:1});const tx=ch.x*Wd.ww-ch.dir*(sz*.3+PP.w*psc*.28),ty=PP.fly?gy-sz*.78+Math.sin(t*2.2)*6:gy-PP.h*psc*.42;const k2=Math.min(1,dt*(walk?3:1.6));const ox=P.wx;P.wx+=(tx-P.wx)*k2;P.y+=(ty-P.y)*k2;if(Math.abs(P.wx-ox)>.3)P.dir=P.wx<ox?-1:1;
+    const px0=P.wx-CAM;cx.fillStyle='rgba(0,0,0,.22)';cx.beginPath();cx.ellipse(px0,gy,PP.w*psc*.18,sz*.04,0,0,7);cx.fill();petBlit(cx,pk,t,px0,P.y,psc,P.dir<0)}else ch.pet=null}
   cx.fillStyle='rgba(0,0,0,.28)';cx.beginPath();cx.ellipse(x,gy,sz*.28,sz*.07,0,0,7);cx.fill();
   let im=null;try{im=sprFor(id,walk,(ch.f|0)%4,Math.floor(t*2)&1)}catch(e){}
   if(im){cx.save();cx.imageSmoothingEnabled=false;cx.translate(x,gy-sz*.5+bob+sz*.06);if(ch.dir<0)cx.scale(-1,1);cx.drawImage(im,-sz/2,-sz/2,sz,sz);cx.restore()}
@@ -4899,7 +4901,7 @@ function frame(ts){if(!run)return;raf=requestAnimationFrame(frame);const dt=Math
   if(ch.say){ch.sayT-=dt;if(ch.sayT<=0)ch.say=null;else{cx.font='700 14px "Noto Sans KR",sans-serif';const tw=cx.measureText(ch.say).width,bw=Math.min(W-20,tw+22),bh=30,bx=Math.max(10,Math.min(W-bw-10,x-bw/2)),by=gy-sz-bh-6;cx.globalAlpha=Math.min(1,ch.sayT*3);cx.fillStyle='#fff';cx.strokeStyle='#1a1020';cx.lineWidth=2;cx.beginPath();cx.roundRect(bx,by,bw,bh,12);cx.moveTo(x-6,by+bh);cx.lineTo(x,by+bh+8);cx.lineTo(x+6,by+bh);cx.fill();cx.stroke();cx.fillStyle='#1a1020';cx.textAlign='center';cx.textBaseline='middle';cx.fillText(ch.say,bx+bw/2,by+bh/2+1);cx.globalAlpha=1}}}
 function resize(){DPR=Math.min(2,devicePixelRatio||1);W=L.clientWidth;H=L.clientHeight;cv.width=Math.round(W*DPR);cv.height=Math.round(H*DPR)}
 addEventListener('resize',()=>{if(run)resize()});
-cv.addEventListener('pointerdown',e=>{const {gy,sz,Wd}=geo(),x=scrX(Wd);if(Math.abs(e.clientX-x)<sz*.6&&e.clientY>gy-sz*1.1&&e.clientY<gy+10){const a=lines(CHAR[selI].id);ch.say=a[Math.random()*a.length|0];ch.sayT=2.6;ch.mode='idle';ch.t=2.4;try{SND.p('pop')}catch(x){}}});
+cv.addEventListener('pointerdown',e=>{const {gy,sz,Wd}=geo(),x=scrX(Wd);if(!(Math.abs(e.clientX-x)<sz*.6&&e.clientY>gy-sz*1.1&&e.clientY<gy+10)){if(e.clientY>gy-sz*.9){ch.goal=Math.max(ch.lo||.06,Math.min(ch.hi||.94,(e.clientX+CAM)/Wd.ww));ch.say=null}return}{const a=lines(CHAR[selI].id);ch.say=a[Math.random()*a.length|0];ch.sayT=2.6;ch.mode='idle';ch.t=2.4;try{SND.p('pop')}catch(x){}}});
 // ---- 상단 정보·배지 ----
 function res(){const T=SAVE.tix||{};$$('#lbRes').innerHTML=`<span>💰 ${(SAVE.gold||0).toLocaleString()}G</span>${T.R?`<span>🎟️ 희귀 ${T.R}</span>`:''}${T.L?`<span>🎟️ 전설 ${T.L}</span>`:''}${T.M?`<span>👑 신화 ${T.M}</span>`:''}`;
   const c=CHAR[selI];$$('#lbName').textContent=c.nick+(SAVE.fancy[c.id]&&!c.ju?' · 👗':'')}
@@ -4929,6 +4931,36 @@ L.addEventListener('click',e=>{const b=e.target.closest('[data-lb]');if(!b)retur
   else if(k==='char')toSelect();else if(k==='stu')openStu(CHAR[selI].id);
   else if(k==='closet'){window.CLO_FROM='lobby';openCloset(CHAR[selI].ju?0:selI)}else if(k==='shop')openShop();
   else if(k==='mp'){toSelect();setTimeout(()=>{const s=document.getElementById('selMP');if(s)s.click()},30)}});
+// ---- 🐾 펫 (V106, pixelfx critters) ----
+const PETS={slime:{n:'🟢 말랑한 고백',w:74,h:73,f:22,fly:0,sc:.62},wisp:{n:'🔥 길 잃은 별빛',w:117,h:92,f:38,fly:1,sc:.85},butterfly:{n:'🦋 나비의 약속',w:102,h:70,f:38,fly:1,sc:.8},ghost:{n:'👻 수줍은 하객',w:72,h:73,f:29,fly:1,sc:.85}};
+window.PETS=PETS;const petOwn=k=>!!window.__devAll||!!(SAVE.petOwn||{})[k];window.petOwn=petOwn;
+const petCur=()=>{const k=SAVE.pet;return PETS[k]&&petOwn(k)?k:null};window.petCur=petCur;
+const PIM={};function petIm(k){if(!PIM[k]){const im=new Image();im.src='fx/pet_'+k+'.png';PIM[k]=im}const im=PIM[k];return im.complete&&im.naturalWidth?im:null}
+function petBlit(g,k,t,x,y,sc,flip){const P=PETS[k],im=petIm(k);if(!im)return;const f=Math.floor(t*12)%P.f,w=P.w*sc,h=P.h*sc;g.save();g.imageSmoothingEnabled=false;g.translate(x,y);if(flip)g.scale(-1,1);g.drawImage(im,f*P.w,0,P.w,P.h,-w/2,-h/2,w,h);g.restore()}
+window.petBlit=petBlit;
+// 게임 안: 화면 안의 경험치 보석을 찾아가 끌어당겨요(주인에게 날아가게 = 기존 자석과 같은 처리)
+function petTick(dt){if(!G||G.tw)return;const k=petCur();if(!k)return;const p=G.p;let P=G.pet;if(!P)P=G.pet={x:p.x-30,y:p.y-30,tg:null,scan:0,dir:1};
+  P.scan-=dt;if(P.scan<=0){P.scan=.25;if(!P.tg||P.tg.got||P.tg.pull){P.tg=null;let bd=1e18;const R2=(Math.min(VW,VH)*.55)**2;for(const g of G.gems){if(g.pull||g.got)continue;const d=(g.x-p.x)**2+(g.y-p.y)**2;if(d>R2)continue;const e=(g.x-P.x)**2+(g.y-P.y)**2;if(e<bd){bd=e;P.tg=g}}}}
+  let tx,ty;if(P.tg&&!P.tg.got&&!P.tg.pull){tx=P.tg.x;ty=P.tg.y}else{P.tg=null;tx=p.x-(p.fx<0?-34:34);ty=p.y-26+Math.sin(G.t*3)*4}
+  const dx=tx-P.x,dy=ty-P.y,d=Math.hypot(dx,dy)||1,v=(P.tg?340:Math.min(380,d*4))*dt;if(d>v){P.x+=dx/d*v;P.y+=dy/d*v}else{P.x=tx;P.y=ty}if(Math.abs(dx)>2)P.dir=dx<0?-1:1;
+  if(P.tg&&Math.hypot(P.tg.x-P.x,P.tg.y-P.y)<14){P.tg.pull=1;for(const g of G.gems)if(!g.pull&&(g.x-P.x)**2+(g.y-P.y)**2<30*30)g.pull=1;P.tg=null}
+  if(Math.hypot(P.x-p.x,P.y-p.y)>Math.max(VW,VH)){P.x=p.x-30;P.y=p.y-30}}
+function petDraw(){if(!G||G.bot||!G.pet)return;const k=petCur();if(!k)return;const P=G.pet;ctx.globalAlpha=.25;ctx.fillStyle='#000';ctx.beginPath();ctx.ellipse(P.x,P.y+18,10,3,0,0,7);ctx.fill();ctx.globalAlpha=1;petBlit(ctx,k,G.t,P.x,P.y,1.15*PETS[k].sc,P.dir<0)}
+window.petTick=petTick;window.petDraw=petDraw;
+// 옷장: 🏠 로비 꾸미기 탭 (배경 + 펫)
+const _rc=renderCloset;renderCloset=function(){const lob=CLO.tab==='lobby';if(lob)CLO.tab='skin';_rc.apply(this,arguments);if(lob)CLO.tab='lobby';
+  const tabs=$('#closet').querySelector('.clotabs');if(!tabs)return;const tb=document.createElement('button');tb.type='button';tb.dataset.tab='lobby';tb.textContent='🏠 로비 꾸미기';tb.setAttribute('aria-pressed',lob);tb.onclick=()=>{CLO.tab='lobby';renderCloset()};tabs.appendChild(tb);
+  if(!lob)return;tabs.querySelectorAll('button').forEach(b=>{if(b!==tb)b.setAttribute('aria-pressed','false')});
+  const host=tabs.parentElement;while(tabs.nextSibling)host.removeChild(tabs.nextSibling);
+  const bg=SAVE.lobbyMap&&lbOwn(SAVE.lobbyMap)?SAVE.lobbyMap:'base',pc=petCur();
+  const d=document.createElement('div');d.innerHTML=`<p class="clonote">로비 배경과 펫은 어떤 캐릭터로 놀든 함께해요. 시즌 패스에서 얻을 수 있어요.</p>
+   <div class="clowrow"><span class="wn">🖼️ 로비 배경</span><span class="wb">${Object.keys(LBM).map(k=>lbOwn(k)?`<button type="button" class="wfxb clb" data-lbm="${k}" aria-pressed="${bg===k}">${esc(LBM[k].n)}</button>`:`<button type="button" class="wfxb" disabled>🔒 ???</button>`).join('')}</span></div>
+   <div class="clowrow"><span class="wn">🐾 펫</span><span class="wb"><button type="button" class="wfxb clp" data-pet="" aria-pressed="${!pc}">없음</button>${Object.keys(PETS).map(k=>petOwn(k)?`<button type="button" class="wfxb clp" data-pet="${k}" aria-pressed="${pc===k}"><canvas width="40" height="34" data-pp="${k}" style="vertical-align:middle;margin-right:4px"></canvas>${esc(PETS[k].n)}</button>`:`<button type="button" class="wfxb" disabled>🔒 ???</button>`).join('')}</span><span class="c">로비에서는 따라다니고, 게임에서는 경험치 보석을 주워 와요</span></div>`;
+  host.appendChild(d);
+  d.querySelectorAll('canvas[data-pp]').forEach(cv=>{const k=cv.dataset.pp,draw=()=>{const g=cv.getContext('2d');g.clearRect(0,0,40,34);petBlit(g,k,0,20,17,.45)};const im=petIm(k);if(im)draw();else PIM[k].onload=draw});
+  d.querySelectorAll('.clb').forEach(b=>b.onclick=()=>{SAVE.lobbyMap=b.dataset.lbm;persist();renderCloset()});
+  d.querySelectorAll('.clp').forEach(b=>b.onclick=()=>{SAVE.pet=b.dataset.pet||null;persist();renderCloset()})};
+try{window.renderCloset=renderCloset}catch(e){}
 // ---- 화면 전환 ----
 function lobby(){hideAll();$('#hud').hidden=true;L.hidden=false;remember();try{achCheck()}catch(e){}if(SAVE.ntc!==NOTICE_VER&&!window.__rec)setTimeout(showNotice,300);resize();res();badges();if(!run){run=true;last=0;raf=requestAnimationFrame(frame)}}
 new MutationObserver(()=>{if(L.hidden&&run){run=false;cancelAnimationFrame(raf)}}).observe(L,{attributes:true,attributeFilter:['hidden']});

@@ -5710,7 +5710,7 @@ function finish(win){T.over=true;const td=TDS(),sid=T.stg,hpP=Math.round(T.hp/T.
    ${got.length?`<div class="tdJoin">🎁 처음 달성 보상<br>${got.join('<br>')}</div>`:''}
    <p class="tdJoin">🔮 오드 +${odG} <small>(웨이브 ${T.wave}${win?' + 클리어 10':''}${stars?' + ★ '+stars*5:''})</small></p>
    ${joined?`<p class="tdJoin">✨ 새 대원 합류: <b>${CICON[joined]} ${nick(joined)}</b></p>`:''}
-   <div class="tdBtns"><button type="button" data-a="retry">다시 도전</button><button type="button" data-a="menu">디펜스 로비로</button></div>`;r.hidden=false;bgm(null);snd(win?'ach':'hurt');T.retry=[T.stg,T.sq[0].id]}
+   <div class="tdBtns"><button type="button" data-a="retry">다시 도전</button><button type="button" data-a="menu">디펜스 로비로</button><button type="button" data-a="exit">🏠 서바이버로</button></div>`;r.hidden=false;bgm(null);snd(win?'ach':'hurt');T.retry=[T.stg,T.sq[0].id]}
 
 /* ---- 그리기 ---- */
 const sprC={};function spr(id,f){try{return SPRF(id,(SAVE.fancy||{})[id]?'fancy':'plain',f)}catch(e){return null}}
@@ -5828,7 +5828,7 @@ function css(){if(document.getElementById('tdCss'))return;const st=document.crea
 #lbTd{display:none;align-items:center;gap:6px;padding:8px 12px;border-radius:999px;border:2px solid rgba(255,214,234,.7);background:rgba(40,14,50,.88);color:#fff;font:800 12px/1.15 'Noto Sans KR',sans-serif}#lbTd span{font-size:11.5px}body.tdDev #lbTd{display:flex}
 #tdOv .tdLobby{position:absolute;z-index:3;display:flex;flex-direction:column;box-sizing:border-box;padding:10px 10px 0}
 #tdOv .lbHead{display:flex;justify-content:space-between;align-items:center}
-#tdOv .lbX{border:1.5px solid rgba(255,214,234,.6);background:rgba(20,10,26,.8);color:#fff;border-radius:12px;padding:6px 10px;font:700 12px inherit;font-family:inherit}
+#tdOv .lbX{border:2px solid #fff3b0;background:linear-gradient(180deg,#ff8ac8,#ff4f9a);color:#fff;border-radius:999px;padding:6px 12px;font:800 12px inherit;font-family:inherit;box-shadow:0 3px 0 #a2265e;white-space:nowrap}
 #tdOv .lbRes{display:flex;gap:6px}#tdOv .lbRes span{background:rgba(20,10,26,.8);border:1.5px solid rgba(159,232,255,.5);border-radius:999px;padding:4px 10px;font-weight:800;font-size:13px}
 /* 서바이버 로비: 출격 작게, 버튼 이름, 오른쪽 위 아이콘 작게 + 접기 */
 #lbGoRow{gap:6px!important;flex-wrap:nowrap}#lbGo{min-width:0!important;padding:8px 16px!important;font-size:15px!important;white-space:nowrap}
@@ -5888,7 +5888,7 @@ function menu(){T=null;const td=TDS();ov.querySelectorAll('.tdPanel').forEach(p=
   LOB=LOB||{t:0};LOB.tab=LOB.tab||'go';LOB.stg=LOB.stg||'1-1';LOB.d=LOB.d==null?0:LOB.d;bgm('lobby');lbRender()}
 const cardSum=()=>Object.values(TDS().cd||{}).reduce((a,b)=>a+b,0);
 function lbRender(){const box=ov.querySelector('.tdLobby'),td=TDS(),L=LOB;if(!td.lead||!td.un.includes(td.lead))td.lead=td.un[0];
-  box.innerHTML=`<div class="lbHead"><button type="button" data-a="exit" class="lbX">← 서바이버</button><div class="lbRes"><button type="button" class="lbIcB" data-icb>☰<i class="lbIcD" hidden></i></button><span>🔮 ${(td.od||0).toLocaleString()}</span><span>💠 ${cardSum().toLocaleString()}</span></div></div>
+  box.innerHTML=`<div class="lbHead"><button type="button" data-a="exit" class="lbX">🏠 서바이버로 돌아가기</button><div class="lbRes"><button type="button" class="lbIcB" data-icb>☰<i class="lbIcD" hidden></i></button><span>🔮 ${(td.od||0).toLocaleString()}</span><span>💠 ${cardSum().toLocaleString()}</span></div></div>
    <div class="lbIc" ${LOB.ic?'':'hidden'}>${icHTML()}</div>
    <div class="lbTitle"></div>
    <div class="lbSheet">${lbTab(L.tab)}</div>

@@ -5710,7 +5710,7 @@ function finish(win){T.over=true;const td=TDS(),sid=T.stg,hpP=Math.round(T.hp/T.
    ${got.length?`<div class="tdJoin">🎁 처음 달성 보상<br>${got.join('<br>')}</div>`:''}
    <p class="tdJoin">🔮 오드 +${odG} <small>(웨이브 ${T.wave}${win?' + 클리어 10':''}${stars?' + ★ '+stars*5:''})</small></p>
    ${joined?`<p class="tdJoin">✨ 새 대원 합류: <b>${CICON[joined]} ${nick(joined)}</b></p>`:''}
-   <div class="tdBtns"><button type="button" data-a="retry">다시 도전</button><button type="button" data-a="menu">디펜스 로비로</button><button type="button" data-a="exit">🏠 서바이버로</button></div>`;r.hidden=false;bgm(null);snd(win?'ach':'hurt');T.retry=[T.stg,T.sq[0].id]}
+   <div class="tdBtns"><button type="button" data-a="retry">다시 도전</button><button type="button" data-a="menu">디펜스 로비로</button><button type="button" data-a="exit">🌙 트와일라잇으로</button></div>`;r.hidden=false;bgm(null);snd(win?'ach':'hurt');T.retry=[T.stg,T.sq[0].id]}
 
 /* ---- 그리기 ---- */
 const sprC={};function spr(id,f){try{return SPRF(id,(SAVE.fancy||{})[id]?'fancy':'plain',f)}catch(e){return null}}
@@ -5888,7 +5888,7 @@ function menu(){T=null;const td=TDS();ov.querySelectorAll('.tdPanel').forEach(p=
   LOB=LOB||{t:0};LOB.tab=LOB.tab||'go';LOB.stg=LOB.stg||'1-1';LOB.d=LOB.d==null?0:LOB.d;bgm('lobby');lbRender()}
 const cardSum=()=>Object.values(TDS().cd||{}).reduce((a,b)=>a+b,0);
 function lbRender(){const box=ov.querySelector('.tdLobby'),td=TDS(),L=LOB;if(!td.lead||!td.un.includes(td.lead))td.lead=td.un[0];
-  box.innerHTML=`<div class="lbHead"><button type="button" data-a="exit" class="lbX">🏠 서바이버로 돌아가기</button><div class="lbRes"><button type="button" class="lbIcB" data-icb>☰<i class="lbIcD" hidden></i></button><span>🔮 ${(td.od||0).toLocaleString()}</span><span>💠 ${cardSum().toLocaleString()}</span></div></div>
+  box.innerHTML=`<div class="lbHead"><button type="button" data-a="exit" class="lbX">🌙 트와일라잇으로 돌아가기</button><div class="lbRes"><button type="button" class="lbIcB" data-icb>☰<i class="lbIcD" hidden></i></button><span>🔮 ${(td.od||0).toLocaleString()}</span><span>💠 ${cardSum().toLocaleString()}</span></div></div>
    <div class="lbIc" ${LOB.ic?'':'hidden'}>${icHTML()}</div>
    <div class="lbTitle"></div>
    <div class="lbSheet">${lbTab(L.tab)}</div>

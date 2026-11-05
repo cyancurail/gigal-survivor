@@ -5420,9 +5420,9 @@ const WPN={
    for(let i=0;i<n;i++){const e=i===0?densest():pick(front(8));const tx=e?e.x+rnd(-14,14):rnd(60,W-60),ty=e?e.y+e.spd*(e.slowF||1)*lead+rnd(-10,10):rnd(150,400);
      const big=ev(m,3,'B')&&i===0&&m.nl%3===0;const sx=x+rnd(-6,6),sy=Y-20,dist=Math.hypot(tx-sx,ty-sy),ang=Math.atan2(ty-sy,tx-sx)+Math.PI/2,syy=dist/200,dmg=120*GM*P(m,0,.9)*P(m,3,1.3)*(big?3:1),R=55*P(m,1,1.5)*(ev(m,1,'B')?1.4:1)*(big?1.6:1),zd=1.5+m.lv[2]+(ev(m,2,'A')?2:0),zs=.3+.15*m.lv[4];
      setTimeout0(i*.12,()=>vfx('rocket',sx,sy,{ang,sc:1,sy:syy,tx,ty,bs:R/52,hit:()=>{aoe(tx,ty,R,dmg);snd('boom');
-       if(big&&T.vfx.filter(v=>v.k==='darkx').length<2)vfx('darkx',tx,ty+R*.3,{sc:Math.min(.7,R/130)});
+       if(big&&T.vfx.filter(v=>v.k==='darkx').length<2)vfx('darkx',tx,ty+R*.3,{sc:Math.min(1,R/100)});
        if(ev(m,1,'A'))for(let k=0;k<3;k++){const a=k*2.094+rnd(0,1),ax=tx+Math.cos(a)*R*.9,ay=ty+Math.sin(a)*R*.9;setTimeout0(.15+k*.08,()=>{aoe(ax,ay,R*.45,dmg*.35);T.fx.push({k:'ring',x:ax,y:ay,r:R*.45,t:.3,col:'#ffb3e6'})})}
-       if(ev(m,2,'B')&&i===0)setTimeout0(.35,()=>{if(T.vfx.filter(v=>v.k==='darkx').length<2)vfx('darkx',tx,ty+R*.25,{sc:Math.min(.5,R/150)});setTimeout0(FXM.darkx.hit/FXM.darkx.fps,()=>aoe(tx,ty,R*1.3,dmg*.8*Math.min(n,3)))});
+       if(ev(m,2,'B')&&i===0)setTimeout0(.35,()=>{if(T.vfx.filter(v=>v.k==='darkx').length<2)vfx('darkx',tx,ty+R*.25,{sc:Math.min(.7,R/120)});setTimeout0(FXM.darkx.hit/FXM.darkx.fps,()=>aoe(tx,ty,R*1.3,dmg*.8*Math.min(n,3)))});
        let merged=false;if(ev(m,3,'A'))for(const z of T.zn)if(z.k==='goo'&&Math.hypot(z.x-tx,z.y-ty)<z.R+R*.5){z.R=Math.min(150,z.R*1.25);z.t=0;z.dps=(z.dps||0)+(ev(m,2,'A')?dmg*.25:0);merged=true;break}
        if(!merged)T.zn.push({k:'goo',x:tx,y:ty,R:R*.8,t:0,T:zd,s:zs,dps:ev(m,2,'A')?dmg*.25:0,land:ev(m,2,'A')})}}))}snd('whoosh')},
  '조혁래'(m,dt,x,Y){if(ev(m,2,'A')){m.ga=(m.ga||9)-dt;if(m.ga<=0){m.ga=9;const e=densest();if(e){const tx=e.x,ty=Math.min(e.y+e.spd*.6,600),d=58*GM*4;vfx('pillar',tx,ty+10,{sc:.8,hit:()=>{const before=T.kills;aoe(tx,ty,70,d,{bossMul:P(m,4,1.2)});T.hp=Math.min(T.hpMax,T.hp+.5*(T.kills-before));snd('ult')}})}}}

@@ -281,8 +281,8 @@ button:focus-visible{outline:3px solid var(--cyan);outline-offset:2px}
   <div id="lbIcons">
     <button type="button" data-lb="mail" aria-label="우편함"><i>📮</i>우편함</button>
     <button type="button" data-lb="att" aria-label="출석 체크"><i>🎉</i>출석</button>
-    <button type="button" data-lb="day" aria-label="일일 미션"><i>📅</i>일일</button>
-    <button type="button" data-lb="week" aria-label="주간 미션"><i>🗓️</i>주간</button>
+    <button type="button" data-lb="day" aria-label="미션"><i>📅</i>미션</button>
+    <button type="button" data-lb="patch" aria-label="패치내역"><i>📜</i>패치내역</button>
     <button type="button" data-lb="pass" aria-label="시즌 패스"><i>🎫</i>패스</button>
     <button type="button" data-lb="ach" aria-label="업적"><i>🏆</i>업적</button>
     <button type="button" data-lb="ntc" aria-label="공지"><i>📢</i>공지</button>
@@ -4870,6 +4870,12 @@ const hadC=!!navigator.serviceWorker.controller;let rl=false;navigator.serviceWo
 #lbTabs button{flex:1;min-width:0;padding:8px 2px;border-radius:14px;border:1.5px solid rgba(255,214,234,.55);background:rgba(20,10,26,.85);color:#fff;font:700 11.5px 'Noto Sans KR',sans-serif;display:flex;flex-direction:column;align-items:center;gap:2px}
 #lbTabs button i{font-style:normal;font-size:22px;line-height:1.1}
 .lbM{text-align:center}
+.lbPatch{text-align:left;max-height:58vh;overflow:auto;margin:10px 0;display:flex;flex-direction:column;gap:6px}
+.lbPatch div{border:1.5px solid var(--line,#4a3658);border-radius:12px;padding:8px 10px;background:rgba(255,255,255,.04);font-size:13px;line-height:1.5}
+.lbPatch div.new{border-color:#ffe08a;background:rgba(255,224,138,.12)}
+.lbPatch b{display:flex;justify-content:space-between;align-items:baseline;font-size:13px;color:#ffd6ea}
+.lbPatch b small{font-weight:400;font-size:11px;opacity:.7}
+.lbPatch span{display:block;margin-top:2px}
 .lbM h3{margin:0 0 6px}
 .lbAtt{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:10px 0}
 .lbAtt div{border:1.5px solid var(--line,#4a3658);border-radius:12px;padding:8px 4px;font-size:11.5px;line-height:1.4;background:rgba(255,255,255,.04)}
@@ -4953,7 +4959,7 @@ cv.addEventListener('pointerdown',e=>{const {gy,sz,Wd}=geo(),x=scrX(Wd);if(!(Mat
 function res(){const T=SAVE.tix||{};$$('#lbRes').innerHTML=`<span>💰 ${(SAVE.gold||0).toLocaleString()}G</span>${T.R?`<span>🎟️ 희귀 ${T.R}</span>`:''}${T.L?`<span>🎟️ 전설 ${T.L}</span>`:''}${T.M?`<span>👑 신화 ${T.M}</span>`:''}`;
   const c=CHAR[selI],tt=SAVE.title&&(SAVE.titles||{})[SAVE.title]&&window.TITLES?TITLES[SAVE.title]:'';$$('#lbName').innerHTML=esc(c.nick)+(SAVE.fancy[c.id]&&!c.ju?' · 👗':'')+(tt?`<small class="lbTt">${esc(tt)}</small>`:'')}
 const dot=(k,n)=>{const b=$$(`[data-lb="${k}"]`);if(!b)return;let d=b.querySelector('.dot');if(!n){if(d)d.remove();return}if(!d){d=document.createElement('span');d.className='dot';b.appendChild(d)}d.textContent=n===true?'!':(n>99?'99+':n)};
-function badges(){try{dot('mail',window.GMAIL?GMAIL.n():0)}catch(e){}dot('att',attCan()?true:0);try{const n=msCanN();dot('day',n);dot('week',0);dot('pass',spCanN())}catch(e){}try{dot('ach',achUnclaimed())}catch(e){}}
+function badges(){try{dot('mail',window.GMAIL?GMAIL.n():0)}catch(e){}dot('att',attCan()?true:0);try{const n=msCanN();dot('day',n);dot('pass',spCanN())}catch(e){}try{dot('ach',achUnclaimed())}catch(e){}try{dot('patch',localStorage.getItem('gs_patch')===PATCH[0][0]?0:'N')}catch(e){}}
 window.lbBadges=()=>{if(run)badges()};
 // ---- 🎉 7일 출석 체크 ----
 const ATT7=[{g:300},{t:{R:1}},{g:500},{t:{R:2}},{g:800},{t:{L:1}},{g:1500,t:{L:1}}];
@@ -4965,6 +4971,9 @@ function attM(){const A=att(),can=attCan(),n=A.n>=7&&can?0:A.n;const o=ovM(`<div
   <div class="lbAtt">${ATT7.map((r,i)=>`<div class="${i<n?'got':''} ${i===n&&can?'on':''} ${i===6?'d7':''}"><b>${i+1}일째${i<n?' ✔':''}</b>${rwTxt(r)}</div>`).join('')}</div>
   <div class="btns"><button type="button" class="big" id="attGo" ${can?'':'disabled'}>${can?`🎁 ${n+1}일째 선물 받기`:'✔ 오늘은 받았어요 · 내일 또 만나요'}</button><button type="button" class="ghost" id="lbX">닫기</button></div></div>`);
   o.querySelector('#attGo').onclick=()=>{if(!attCan())return;const A=att();if(A.n>=7)A.n=0;const r=ATT7[A.n];A.n++;A.d=today();if(r.g)SAVE.gold+=r.g;SAVE.tix=SAVE.tix||{};for(const k in (r.t||{}))SAVE.tix[k]=(SAVE.tix[k]||0)+r.t[k];persist();try{SND.p('ach')}catch(e){}toast('🎉 출석 '+A.n+'일째',rwTxt(r).replace(/<br>/g,' + '));res();badges();attM()}}
+// ---- 📜 패치내역 (V118) ----
+const PATCH=[["V118", "11/5", "📜 패치내역이 생겼어요 · 미션 아이콘을 하나로 합쳤어요"], ["V117", "11/5", "⚖️ 밸런스 패치: 해방하는 5월, 비련의 신부, 왕언니, 공명하는 4월"], ["V116", "11/5", "일일 미션이 오전 4시에 바뀌어요"], ["V115", "11/5", "스탯 강화 초기화: 첫 1회는 무료, 이후 50% 환급"], ["V113~V114", "11/5", "👻 멀티에서 친구 무기가 보여요 · 태태영 필살기 연출 새 단장"], ["V111~V112", "11/5", "PC 로비가 부드러워지고, 랭킹 상세 보기 추가 · 멀티 시작 오류 수정"], ["V107~V109", "11/4", "PC 화면 배율 설정 · 로비 캐릭터 대사 · 동물 친구들 그림 오류 수정"], ["V106", "11/4", "🏠 로비 · 🎫 시즌 패스 · 📅 미션 · 🎉 출석 · 🏆 헬 랭킹"], ["V105", "11/4", "📮 우편함"], ["V100~V101", "11/3", "멀티 멈춤 오류 수정 · PC 렉 개선"], ["V97~V99", "11/2~3", "필살기 해금 오류 수정 · 신화 입장 연출 복구 + 태태영 Ⅲ"], ["V93~V96", "11/2", "👥 친구와 함께하기(2인 협동) · 모바일 캐릭터 선택 화면 개선"], ["V88~V92", "11/2", "🌐 기갈 서바이버 사이트·앱 오픈 · 로그인·계정 저장"]];
+function patchM(){try{localStorage.setItem('gs_patch',PATCH[0][0])}catch(e){}const o=ovM(`<div class="lbM"><h3>📜 패치내역</h3><div class="lbPatch">${PATCH.map((p,i)=>`<div class="${i?'':'new'}"><b>${p[0]}<small>${p[1]}</small></b><span>${p[2]}</span></div>`).join('')}</div><div class="btns"><button type="button" class="ghost" id="lbX">닫기</button></div></div>`);badges();return o}
 // ---- 공용 모달 ----
 function ovM(html){let o=document.getElementById('lbOv');if(o)o.remove();o=document.createElement('div');o.className='ov';o.id='lbOv';o.innerHTML=`<div class="modal">${html}</div>`;document.body.appendChild(o);o.addEventListener('pointerdown',e=>{if(e.target===o)o.remove()});const x=o.querySelector('#lbX');if(x)x.onclick=()=>o.remove();return o}
 function setM(){const o=ovM(`<div class="lbM"><h3>⚙️ 설정</h3><div class="lbSetRow">${sndBtns()}<div class="lbZoom"><b>🔍 화면 배율</b> ${[['wide','넓게'],['normal','보통'],['big','크게']].map(([k,n])=>`<button type="button" class="ghost small${zoomMode()===k?' on':''}" data-zm="${k}">${n}</button>`).join('')}</div><button type="button" class="ghost" id="lbSave">💾 저장 코드 · 🎟️ 쿠폰</button><button type="button" class="ghost" id="lbNtc">📢 공지 다시 보기</button></div><div class="btns"><button type="button" class="ghost" id="lbX">닫기</button></div></div>`);
@@ -4972,7 +4981,7 @@ function setM(){const o=ovM(`<div class="lbM"><h3>⚙️ 설정</h3><div class="
 const soon=n=>toast('🚧 '+n,'곧 열려요! 조금만 기다려 주세요');
 // ---- 버튼 ----
 L.addEventListener('click',e=>{const b=e.target.closest('[data-lb]');if(!b)return;try{SND.p('click')}catch(x){}const k=b.dataset.lb;remember();
-  if(k==='mail'){if(window.GMAIL)GMAIL.open()}else if(k==='att')attM();else if(k==='day'||k==='week')msM();else if(k==='pass')passM();
+  if(k==='mail'){if(window.GMAIL)GMAIL.open()}else if(k==='att')attM();else if(k==='day'||k==='week')msM();else if(k==='patch')patchM();else if(k==='pass')passM();
   else if(k==='ach')openAch('title');else if(k==='ntc')showNotice();else if(k==='set')setM();
   else if(k==='go'){toSelect();setTimeout(()=>{const c=document.querySelector(`#selgrid .pc[data-i="${selI}"]`);if(c)c.click()},30)}
   else if(k==='char')toSelect();else if(k==='stu')openStu(CHAR[selI].id);

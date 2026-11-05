@@ -191,7 +191,7 @@ button:focus-visible{outline:3px solid var(--cyan);outline-offset:2px}
 .modal{width:100%;max-width:440px;background:var(--panel);border:2px solid var(--line);border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:10px;animation:pop .3s cubic-bezier(.2,1.4,.4,1);max-height:92vh;overflow-y:auto}
 .modal h3{margin:0;font-family:var(--f-dis);font-size:28px;text-align:center}
 .modal p.c{margin:0;text-align:center;color:var(--sub);font-size:13px}
-.opt{display:flex;gap:10px;align-items:center;border:2px solid var(--line);background:var(--panel2);border-radius:14px;padding:10px;text-align:left}
+.optw{position:relative;display:flex;flex-direction:column}.optw>.opt{width:100%}.banB{position:absolute;right:6px;top:-9px;z-index:2;font-size:11px;font-weight:800;padding:3px 8px;border-radius:999px;border:1.5px solid #ff6b8a;background:#2a0f1c;color:#ffb3c4;cursor:pointer;line-height:1.2}.banB:hover{background:#ff6b8a;color:#fff}.bnNew>.opt{animation:bnPop .35s ease-out}@keyframes bnPop{0%{transform:scale(.6) rotate(-4deg);opacity:0}70%{transform:scale(1.05)}100%{transform:none;opacity:1}}.bnLeft{text-align:center;font-size:11px;color:#ffb3c4;margin:4px 0 0}.opt{display:flex;gap:10px;align-items:center;border:2px solid var(--line);background:var(--panel2);border-radius:14px;padding:10px;text-align:left}
 .opt:hover,.opt:focus-visible{border-color:var(--gold)}
 .opt .ic{flex:none;width:52px;height:52px;border-radius:12px;background:#120c1a;display:grid;place-items:center;font-size:26px;position:relative}
 .opt .ic canvas{width:52px;height:52px;image-rendering:pixelated}
@@ -2142,17 +2142,17 @@ function cutin(cb,label){
 }
 
 /* ================= level up / chests ================= */
-function choices(){
-  const opts=[];const S=G.S;
+function choices(n0,ex){
+  const opts=[];const BAN=G.ban||{};const S=G.S;
   G.weapons.forEach(w=>{if(w.lvl<8&&!w.evo)opts.push({t:'wup',k:w.k})});
-  G.weapons.length<6&&Object.keys(WP).forEach(k=>{if(!W(k)&&juAllow(k,G.id))opts.push({t:'wnew',k})});
+  G.weapons.length<6&&Object.keys(WP).forEach(k=>{if(!W(k)&&!BAN[k]&&juAllow(k,G.id))opts.push({t:'wnew',k})});
   Object.keys(G.items).forEach(k=>{if(G.items[k]<(IT[k].max||5))opts.push({t:'iup',k})});
   Object.keys(G.items).length<6&&Object.keys(IT).forEach(k=>{if(!G.items[k]&&juAllow(k,G.id))opts.push({t:'inew',k})});
   // weight: prefer owned upgrades
   const nNew=opts.filter(o=>o.t==='wnew').length,nX=opts.filter(o=>o.t==='wnew'&&WP[o.k].extra).length,wf=nNew?Math.max(1,nNew-nX)/nNew:1;const pool=[];opts.forEach(o=>{const wgt=o.t==='wup'?4:o.t==='iup'?2.2:o.t==='wnew'?1.6*wf*(WP[o.k].ju&&G.id==='쥬은'?(o.k==='pearl'?.5:2.2):1):1.6;for(let i=0;i<Math.round(wgt*10);i++)pool.push(o)});
-  const out=[];const n=Math.random()<S.luck?4:3;let guard=0;
-  while(out.length<n&&pool.length&&guard++<500){const o=pick(pool);if(!out.some(x=>x.t===o.t&&x.k===o.k))out.push(o)}
-  if(!out.length)out.push({t:'heal'},{t:'gold'});
+  const out=[];const n=n0||(Math.random()<S.luck?4:3);let guard=0;const same=(x,o)=>x.t===o.t&&x.k===o.k;
+  while(out.length<n&&pool.length&&guard++<500){const o=pick(pool);if(!out.some(x=>same(x,o))&&!(ex||[]).some(x=>same(x,o)))out.push(o)}
+  if(!out.length){if(n0){const f=[{t:'heal'},{t:'gold'}].find(o=>!(ex||[]).some(x=>same(x,o)));if(f)out.push(f)}else out.push({t:'heal'},{t:'gold'})}
   return out;
 }
 function applyChoice(o){
@@ -2174,11 +2174,17 @@ function optHTML(o,i){s2Desc();
   return `<button type="button" class="opt" data-i="${i}"><span class="ic">${icon}</span><span class="tx"><b>${esc(title)}${tag}</b><small>${esc(desc)}</small>${lu?`<small class="lu">${esc(lu)}</small>`:''}${pair?`<small class="pr">${esc(pair)}</small>`:''}${pair2?`<small class="pr2">${esc(pair2)}</small>`:''}</span><span class="key">${i+1}</span></button>`;
 }
 function levelUp(){
-  G.paused=true;SND.p('lvl');if(G.rr===undefined)G.rr=8;const ops=choices();
-  $('#lvmodal').innerHTML=`<h3>LEVEL UP!</h3><p class="c">Lv ${G.lvl} · 카드 1장을 골라요</p>${ops.map(optHTML).join('')}<button type="button" class="rrb" id="rrB" ${G.rr>0?'':'disabled'}>🔀 다시 섞기 · 이번 판 ${G.rr}/8회 남음</button>`;
+  G.paused=true;SND.p('lvl');if(G.rr===undefined)G.rr=8;if(G.bn===undefined)G.bn=2;const ops=choices();lvRender(ops,-1);
+}
+/* V123 [이 련은 빼버리기]: NEW 무기 카드만, 한 판 2번, 그 판 끝까지 안 나옴, 그 칸만 새로 뽑기 */
+function lvRender(ops,fresh){
+  $('#lvmodal').innerHTML=`<h3>LEVEL UP!</h3><p class="c">Lv ${G.lvl} · 카드 1장을 골라요</p>${ops.map((o,i)=>`<div class="optw${i===fresh?' bnNew':''}">${optHTML(o,i)}${o.t==='wnew'&&G.bn>0&&!G.bot&&!G.tw?`<button type="button" class="banB" data-b="${i}" title="이 련은 빼버리기">✕ 이 련은 빼버리기</button>`:''}</div>`).join('')}<button type="button" class="rrb" id="rrB" ${G.rr>0?'':'disabled'}>🔀 다시 섞기 · 이번 판 ${G.rr}/8회 남음</button><p class="bnLeft">✕ 빼버리기 · 이번 판 ${G.bn}/2회 남음</p>`;
   $('#rrB').onclick=()=>{if(G.rr>0){G.rr--;SND.p('shuffle');levelUp()}};
   $('#lvmodal').querySelectorAll('canvas[data-spr]').forEach(c=>{const x=c.getContext('2d');x.imageSmoothingEnabled=false;x.drawImage(SPRF(c.dataset.spr,'plain',0),0,0,64,64)});
   $('#lvmodal').querySelectorAll('.opt').forEach(b=>b.onclick=()=>{applyChoice(ops[+b.dataset.i]);$('#lvov').hidden=true;G.paused=false;checkLevel()});
+  $('#lvmodal').querySelectorAll('.banB').forEach(b=>b.onclick=e=>{e.stopPropagation();const i=+b.dataset.b,o=ops[i];if(!(G.bn>0)||!o||o.t!=='wnew')return;
+    G.bn--;(G.ban=G.ban||{})[o.k]=1;const nw=choices(1,ops.filter((_,j)=>j!==i))[0];SND.p('shuffle');toast(`✕ ${WP[o.k].icon} ${WP[o.k].name}`,'이 련은 이번 판에서 빠졌어요');
+    if(nw)ops[i]=nw;else ops.splice(i,1);lvRender(ops,nw?i:-1)});
   $('#lvov').hidden=false;
 }
 function checkLevel(){if(G.xp>=G.next){G.xp-=G.next;G.lvl++;if(!G.bot){const m=pn(90);for(let k=0;k<m;k++){const a=rnd(0,6.283);px(G.p.x+Math.cos(a)*14,G.p.y+Math.sin(a)*8,Math.cos(a)*rnd(20,80),-rnd(120,340),1.1,pick(['#ff5fb8','#ffd34d','#7fd8ff','#8dff3a','#c07bff','#ffffff']),2,3,1.2,280)}}G.next=Math.floor(4+G.lvl*4+1.4*Math.pow(G.lvl,1.8));levelUp()}}
@@ -4980,7 +4986,7 @@ function attM(){const A=att(),can=attCan(),n=A.n>=7&&can?0:A.n;const o=ovM(`<div
   <div class="btns"><button type="button" class="big" id="attGo" ${can?'':'disabled'}>${can?`🎁 ${n+1}일째 선물 받기`:'✔ 오늘은 받았어요 · 내일 또 만나요'}</button><button type="button" class="ghost" id="lbX">닫기</button></div></div>`);
   o.querySelector('#attGo').onclick=()=>{if(!attCan())return;const A=att();if(A.n>=7)A.n=0;const r=ATT7[A.n];A.n++;A.d=today();if(r.g)SAVE.gold+=r.g;SAVE.tix=SAVE.tix||{};for(const k in (r.t||{}))SAVE.tix[k]=(SAVE.tix[k]||0)+r.t[k];persist();try{SND.p('ach')}catch(e){}toast('🎉 출석 '+A.n+'일째',rwTxt(r).replace(/<br>/g,' + '));res();badges();attM()}}
 // ---- 📜 패치내역 (V118) ----
-const PATCH=[["V121", "11/5", "신화스킨 추가"], ["V120", "11/5", "긴급소식:왕언니가 불법무면허운전으로 적발되어, 사회교육 및 면허취득 후 다시 합류했어요."], ["V119", "11/5", "💄 BPS(Beauty per Sec) 추가 · 결과창 DPS/BPS/HPS · 🏆 랭킹에 ⚔️ DPS · 💄 BPS 카테고리"], ["V118", "11/5", "📜 패치내역이 생겼어요 · 미션 아이콘을 하나로 합쳤어요"], ["V117", "11/5", "⚖️ 밸런스 패치: 해방하는 5월, 비련의 신부, 왕언니, 공명하는 4월"], ["V116", "11/5", "일일 미션이 오전 4시에 바뀌어요"], ["V115", "11/5", "스탯 강화 초기화: 첫 1회는 무료, 이후 50% 환급"], ["V113~V114", "11/5", "👻 멀티에서 친구 무기가 보여요 · 태태영 필살기 연출 새 단장"], ["V111~V112", "11/5", "PC 로비가 부드러워지고, 랭킹 상세 보기 추가 · 멀티 시작 오류 수정"], ["V107~V109", "11/4", "PC 화면 배율 설정 · 로비 캐릭터 대사 · 동물 친구들 그림 오류 수정"], ["V106", "11/4", "🏠 로비 · 🎫 시즌 패스 · 📅 미션 · 🎉 출석 · 🏆 헬 랭킹"], ["V105", "11/4", "📮 우편함"], ["V100~V101", "11/3", "멀티 멈춤 오류 수정 · PC 렉 개선"], ["V97~V99", "11/2~3", "필살기 해금 오류 수정 · 신화 입장 연출 복구 + 태태영 Ⅲ"], ["V93~V96", "11/2", "👥 친구와 함께하기(2인 협동) · 모바일 캐릭터 선택 화면 개선"], ["V88~V92", "11/2", "🌐 기갈 서바이버 사이트·앱 오픈 · 로그인·계정 저장"]];
+const PATCH=[["V123", "11/5", "레벨업 카드 빼버리기 추가"], ["V121", "11/5", "신화스킨 추가"], ["V120", "11/5", "긴급소식:왕언니가 불법무면허운전으로 적발되어, 사회교육 및 면허취득 후 다시 합류했어요."], ["V119", "11/5", "💄 BPS(Beauty per Sec) 추가 · 결과창 DPS/BPS/HPS · 🏆 랭킹에 ⚔️ DPS · 💄 BPS 카테고리"], ["V118", "11/5", "📜 패치내역이 생겼어요 · 미션 아이콘을 하나로 합쳤어요"], ["V117", "11/5", "⚖️ 밸런스 패치: 해방하는 5월, 비련의 신부, 왕언니, 공명하는 4월"], ["V116", "11/5", "일일 미션이 오전 4시에 바뀌어요"], ["V115", "11/5", "스탯 강화 초기화: 첫 1회는 무료, 이후 50% 환급"], ["V113~V114", "11/5", "👻 멀티에서 친구 무기가 보여요 · 태태영 필살기 연출 새 단장"], ["V111~V112", "11/5", "PC 로비가 부드러워지고, 랭킹 상세 보기 추가 · 멀티 시작 오류 수정"], ["V107~V109", "11/4", "PC 화면 배율 설정 · 로비 캐릭터 대사 · 동물 친구들 그림 오류 수정"], ["V106", "11/4", "🏠 로비 · 🎫 시즌 패스 · 📅 미션 · 🎉 출석 · 🏆 헬 랭킹"], ["V105", "11/4", "📮 우편함"], ["V100~V101", "11/3", "멀티 멈춤 오류 수정 · PC 렉 개선"], ["V97~V99", "11/2~3", "필살기 해금 오류 수정 · 신화 입장 연출 복구 + 태태영 Ⅲ"], ["V93~V96", "11/2", "👥 친구와 함께하기(2인 협동) · 모바일 캐릭터 선택 화면 개선"], ["V88~V92", "11/2", "🌐 기갈 서바이버 사이트·앱 오픈 · 로그인·계정 저장"]];
 function patchM(){try{localStorage.setItem('gs_patch',PATCH[0][0])}catch(e){}const o=ovM(`<div class="lbM"><h3>📜 패치내역</h3><div class="lbPatch">${PATCH.map((p,i)=>`<div class="${i?'':'new'}"><b>${p[0]}<small>${p[1]}</small></b><span>${p[2]}</span></div>`).join('')}</div><div class="btns"><button type="button" class="ghost" id="lbX">닫기</button></div></div>`);badges();return o}
 // ---- 공용 모달 ----
 function ovM(html){let o=document.getElementById('lbOv');if(o)o.remove();o=document.createElement('div');o.className='ov';o.id='lbOv';o.innerHTML=`<div class="modal">${html}</div>`;document.body.appendChild(o);o.addEventListener('pointerdown',e=>{if(e.target===o)o.remove()});const x=o.querySelector('#lbX');if(x)x.onclick=()=>o.remove();return o}

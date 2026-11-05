@@ -3198,12 +3198,16 @@ const SND=(()=>{
   function music(name){want=name;if(!ok())return;if(name===cur)return;cur=name;step=0;nextT=AC.currentTime+.08;if(!timer)timer=setInterval(()=>{try{sched()}catch(e){}},25)}
   function tick(){ // decide track every frame
     if(!AC)return;if(AC.state!=='running'){return}
-    if(window.__tdOn){if(cur)cur=null;return} // 디펜스 모드는 자체 BGM
+    if(window.__tdOn){if(cur)cur=null;lowA(false);return} // 디펜스 모드는 자체 BGM
     let w;const vid=!$('#ultvid').hidden,cin=!$('#cine').hidden;
     if(vid)w=null;else if(G&&G.running){const bs=G.enemies.some(e=>e.boss);w=G.escOpen?'clear':G.hell?(bs?'hellboss':(G.map==='sangbong'&&!G.tw?'sbHell':'hell')):bs?'boss':(G.map==='sangbong'?'sbField':'field')}else w=cin?null:'title';
     if(cin&&G&&G.running)w=cur; // 게임 중 필살기 연출은 음악 유지
-    const d=vid||cin&&!(G&&G.running)?0:(G&&G.paused&&G.running&&!G.escOpen?.45:1);if(Math.abs(d-duck)>.01){duck=d;MG.gain.setTargetAtTime(SAVE.snd.m?.32*duck:0,AC.currentTime,.08)}
+    // 🚨 위기 곡: 체력 20% 미만이면 합성 음악을 줄이고 mp3 반복, 25% 이상 회복하면 원래대로
+    let low=false;if(w&&G&&G.running&&!G.paused&&!G.escOpen&&!cin&&G.p&&G.S&&G.p.hp>0){low=G.p.hp/G.S.maxHp<(G._low?.25:.2)}if(G)G._low=low;lowA(low);
+    const d=low?0:vid||cin&&!(G&&G.running)?0:(G&&G.paused&&G.running&&!G.escOpen?.45:1);if(Math.abs(d-duck)>.01){duck=d;MG.gain.setTargetAtTime(SAVE.snd.m?.32*duck:0,AC.currentTime,.08)}
     if(w===null){if(cur){cur=null}return}music(w)}
+  let LOWA=null;function lowA(on){if(on&&!LOWA){LOWA=new Audio('td/bgm_low.mp3');LOWA.loop=true;LOWA.preload='auto'}if(!LOWA)return;LOWA.volume=SAVE.snd.m?.5:0;if(on&&!document.hidden){if(LOWA.paused){if(!LOWA._on)LOWA.currentTime=0;LOWA.play().catch(()=>{})}LOWA._on=1}else{if(!LOWA.paused)LOWA.pause();if(!on)LOWA._on=0}}
+  document.addEventListener('visibilitychange',()=>{if(document.hidden&&LOWA&&!LOWA.paused)LOWA.pause()});
   function set(k,v){SAVE.snd[k]=v;persist();if(!AC)return;if(k==='m')MG.gain.setTargetAtTime(v?.32*duck:0,AC.currentTime,.05);else SG.gain.setTargetAtTime(v?.55:0,AC.currentTime,.05)}
   function once(s,k,name){if(!s['_s'+k]){s['_s'+k]=1;p(name)}}
   function bell(){if(!init())return;if(AC.state==='suspended')AC.resume();if(!SAVE.snd.s)return;const t=AC.currentTime+.03;[[2093,0,.07],[2637,.12,.05],[3136,.24,.045],[4186,.36,.03]].forEach(([f,dt,v])=>{tone({w:'sine',f,d:2.2,v,a:.004,hold:.02},SG,t+dt);tone({w:'sine',f:f*2.76,d:.9,v:v*.25,a:.002,hold:.01},SG,t+dt)})}

@@ -5305,10 +5305,10 @@ const sv=()=>{try{persist()}catch(e){}};
 const STN=100,STK=['atk','crit','line'],stOf=i=>STK[i%3],stCost=n=>5+Math.floor(n/2);
 const STL={atk:['⚔️','기본 공격력 +1'],crit:['🎯','크리티컬 확률 +0.1%'],line:['🌙','마음의 선 +1']};
 const stSum=lv=>{const o={atk:0,crit:0,line:0};for(let i=0;i<lv;i++)o[stOf(i)]++;return o};
-/* 🎵 BGM: 로비 Gear Up Hero / 전투 / 최종 보스 Sector Siege */
+/* 🎵 BGM: lobby 로딩·로비 / battle 게임 시작(한 번) → fight 전투 지속(Sector Siege, 반복) / boss 최종 보스 / low 마음의 선 20% 미만 */
 const BG={};let bgCur=null;
 function bgm(k){if(k===bgCur)return;if(bgCur&&BG[bgCur]){try{BG[bgCur].pause()}catch(e){}}bgCur=k;if(!k)return;
-  const a=BG[k]||(BG[k]=Object.assign(new Audio('td/bgm_'+k+'.mp3'),{loop:true,preload:'auto'}));try{a.currentTime=0}catch(e){}bgVol();a.play().catch(()=>{})}
+  const a=BG[k]||(BG[k]=Object.assign(new Audio('td/bgm_'+k+'.mp3'),{loop:k!=='battle',preload:'auto'}));if(k==='battle')a.onended=()=>{if(T&&!T.over)T.ph='fight'};try{a.currentTime=0}catch(e){}bgVol();a.play().catch(()=>{})}
 function bgVol(){const a=bgCur&&BG[bgCur];if(!a)return;const on=!SAVE.snd||SAVE.snd.m!==false;a.volume=on?(T&&T.paused&&!T.over?.22:.5):0;if(document.hidden){if(!a.paused)a.pause()}else if(a.paused&&!window.__tdBgOff)a.play().catch(()=>{})}
 const snd=k=>{try{SND.p(k)}catch(e){}};
 
@@ -5925,8 +5925,9 @@ function upPanel(back){const box=ov.querySelector('.tdMenu'),td=TDS();td.up=td.u
   render();box.onclick=e=>{const b=e.target.closest('[data-u]');if(b&&!b.disabled){const id=b.dataset.u,u=td.up[id]||0;if(u<6&&(td.cd[id]||0)>=UPN[u]){td.cd[id]-=UPN[u];td.up[id]=u+1;sv();snd('evo');render()}return}
     if(e.target.closest('[data-dev]')){CHAR.forEach(c=>td.cd[c.id]=(td.cd[c.id]||0)+100);sv();render();return}
     if(e.target.closest('[data-back]')){back()}}}
-function start(stg,ld){const S=SOF(stg);T=null;ov.querySelector('.tdLobby').hidden=true;LOB&&(LOB.off=1);bgm(null);loading([S.n,`${WAVES}웨이브 · 보스 ${BOSSW.length}`,pick(KKI)],3.2,()=>{T=newRun(stg,ld);ov.querySelector('.tdTop [data-a=spd]').textContent='⏩ 2배';snd('ult');bgm('battle')})}
-function loop(ts){raf=requestAnimationFrame(loop);const dt=Math.min(.05,(ts-(last||ts))/1000);last=ts;if(LD){ldStep(dt);if(LD){ldDraw();return}}if(T&&!T.paused&&!T.over){const n=T.speed;for(let i=0;i<n;i++)update(dt);if(!T.bossM&&T.wave>=WAVES&&T.en.some(e=>e.boss&&!e.dead)){T.bossM=1;bgm('boss')}}bgVol();if(!T&&LOB&&!ov.querySelector('.tdLobby').hidden){lbDraw(dt);return}draw()}
+function start(stg,ld){const S=SOF(stg);T=null;ov.querySelector('.tdLobby').hidden=true;LOB&&(LOB.off=1);bgm(null);loading([S.n,`${WAVES}웨이브 · 보스 ${BOSSW.length}`,pick(KKI)],3.2,()=>{T=newRun(stg,ld);ov.querySelector('.tdTop [data-a=spd]').textContent='⏩ 2배';snd('ult');T.ph='battle';bgm('battle')})}
+function loop(ts){raf=requestAnimationFrame(loop);const dt=Math.min(.05,(ts-(last||ts))/1000);last=ts;if(LD){ldStep(dt);if(LD){ldDraw();return}}if(T&&!T.paused&&!T.over){const n=T.speed;for(let i=0;i<n;i++)update(dt);if(!T.bossM&&T.wave>=WAVES&&T.en.some(e=>e.boss&&!e.dead))T.bossM=1;
+    if(!T.over&&T.ph){const low=T.hp/T.hpMax<(T.lowM?.25:.2);T.lowM=low;if(low&&T.ph==='battle')T.ph='fight';bgm(low?'low':T.bossM?'boss':T.ph)}}bgVol();if(!T&&LOB&&!ov.querySelector('.tdLobby').hidden){lbDraw(dt);return}draw()}
 function open(){build();ov.hidden=false;window.__tdOn=1;resize();last=0;cancelAnimationFrame(raf);raf=requestAnimationFrame(loop);T=null;LOB=null;ov.querySelector('.tdLobby').hidden=true;bgm('lobby');loading(['🛡️ 기갈 디펜스','무너지지 않는 마음의 선',pick(KKI)],4.2,menu)}
 /* 화면 전환: 서바이버 → 디펜스 = iris, 디펜스 → 서바이버 = star iris */
 function irisC(mid){const im=IMG['fx/iris_c.png'];if(!ok(im)||window.__irisBusy){mid();return}window.__irisBusy=1;

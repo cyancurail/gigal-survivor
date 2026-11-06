@@ -2999,6 +2999,8 @@ const POOL_V14=POOL.length;POOL.push({id:'m4:임재영',tier:'M',kind:'tall',own
 const MSK2L=(()=>{const L=[["승태민", "동물모자"], ["박계원", "동물모자"], ["조혁래", "공룡 레인저"], ["김세진", "여우 레인저"], ["진형우", "사자 레인저"], ["임재영", "토끼 레인저"], ["박계원", "해달 레인저"], ["영규형", "기린 레인저"], ["승태민", "얼룩말 레인저"], ["송기호", "병아리 레인저"], ["박민규", "잉어 레인저"], ["박준형", "거북이 레인저"], ["박준영", "쥐 레인저"], ["창환이형", "복순 레인저"], ["쥬은", "돼지 레인저"], ["조혁래", "공룡 알바생"], ["김세진", "여우 알바생"], ["진형우", "사자 알바생"], ["임재영", "토끼 알바생"], ["송기호", "병아리 알바생"], ["박민규", "잉어 그 자체"], ["박준형", "거북이 그 자체"], ["창환이형", "강아지 알바생"], ["박계원", "수달 알바생"], ["영규형", "기린 탈"], ["김세진", "여우 탈"], ["송기호", "오리 드레스"], ["박준형", "거북이 드레스"], ["쥬은", "돼지 탈"], ["박준영", "쥐공주"]],nx={};return L.map(([id,n],i)=>{const s=nx[id]=(nx[id]||(id==='쥬은'?3:4))+(nx[id]?1:0);return{id,s,n,pid:'mx:'+id+'|'+s,f:'msk2/'+String(i+1).padStart(2,'0')+'.png'}})})();
 const MSK2B={};MSK2L.forEach(o=>MSK2B[o.id+'|'+o.s]=o);
 const POOL_V15=POOL.length;MSK2L.forEach(o=>{const c=CHAR.find(q=>q.id===o.id);POOL.push({id:o.pid,tier:'M',kind:'mskin',owner:o.id,s:o.s,n:`${c?c.nick:o.id} · ${o.n}`})});
+/* V135 히든 무기 제작 업적 보상 신화 스킨 (뽑기 제외 nog) — POOL 맨 끝 */
+const POOL_V16=POOL.length;[['임재영',6,'폴라리스 사령관','msk2/hx_polaris.png'],['박계원',7,'유령신부','msk2/hx_soulwed.png'],['박준영',6,'미란타롯토','msk2/hx_glass.png']].forEach(([id,sl,n,f])=>{const o={id,s:sl,n,pid:'mx:'+id+'|'+sl,f};MSK2L.push(o);MSK2B[id+'|'+sl]=o;const c=CHAR.find(q=>q.id===id);POOL.push({id:o.pid,tier:'M',kind:'mskin',owner:id,s:sl,nog:1,n:`${c?c.nick:id} · ${n}`})});
 {const t=POOL.find(p=>p.id==='ms:임재영');if(t){t.vid='ult3/taetae.mp4';t.role='intro';t.vn='태태영 Ⅲ'}}
 const PBY={};POOL.forEach(p=>PBY[p.id]=p);
 const TIERN={C:'일반',R:'희귀',L:'전설',M:'신화'},TIERC={C:'#e8e8f0',R:'#ffd34d',L:'#ff7ac8',M:'#fff3b0'};
@@ -3034,15 +3036,16 @@ const ACH=[
 /* 히든 무기 제작 업적 (V133 준비, 사용자 결정 B안): 보상 신화 스킨이 준비되면 ACH_HX_ON=true + 각 항목에 inv(스킨 POOL id)·r 채우기.
    켜면 ACH 맨 끝에 붙음(18→24개, 저장 코드 3바이트 그대로). 숨김 업적(pub 없음). 패치내역엔 안 씀(히든). 달성 = SAVE.hxMade[hx](직접 합체, 트와일라잇 제외, 예전 기록 소급) */
 const ACH_HX=[
- {id:'hx_polaris',hx:'polaris',n:'차가운 얼음 나라의 공주',c:'플로리스 폴라리스 제작',r:'👑 전용 신화 스킨'},
- {id:'hx_glass',hx:'glass',n:'고대 요정의 마법 : 시공간 제어',c:'요정의 유리정원 제작',r:'👑 전용 신화 스킨'},
- {id:'hx_soulwed',hx:'soulwed',n:'죽음을 넘는 사랑에 빠진 여자',c:'영혼결혼식 제작',r:'👑 전용 신화 스킨'},
- {id:'hx_roadster',hx:'roadster',n:'억척스럽게 생긴 련들은 Out',c:'레이디 로드스터 제작',r:'👑 전용 신화 스킨'},
- {id:'hx_stellar',hx:'stellar',n:'별들의 후손',c:'스텔라 디센던트 제작',r:'👑 전용 신화 스킨'},
- {id:'hx_rave',hx:'rave',n:'리샤 발렌타인',c:'R.A.V.E. 제작',r:'👑 전용 신화 스킨'},
+ {id:'hx_polaris',hx:'polaris',n:'차가운 얼음 나라의 공주',c:'플로리스 폴라리스 제작',r:'👑 태태영 신화 스킨 「폴라리스 사령관」',inv:'mx:임재영|6'},
+ {id:'hx_glass',hx:'glass',n:'고대 요정의 마법 : 시공간 제어',c:'요정의 유리정원 제작',r:'👑 힐블 신화 스킨 「미란타롯토」',inv:'mx:박준영|6'},
+ {id:'hx_soulwed',hx:'soulwed',n:'죽음을 넘는 사랑에 빠진 여자',c:'영혼결혼식 제작',r:'👑 K1 신화 스킨 「유령신부」',inv:'mx:박계원|7'},
+ {id:'hx_roadster',hx:'roadster',n:'억척스럽게 생긴 련들은 Out',c:'레이디 로드스터 제작',r:'👑 전용 신화 스킨 (준비 중)'},
+ {id:'hx_stellar',hx:'stellar',n:'별들의 후손',c:'스텔라 디센던트 제작',r:'👑 전용 신화 스킨 (준비 중)'},
+ {id:'hx_rave',hx:'risha',n:'리샤 발렌타인',c:'R.A.V.E. 제작',r:'👑 전용 신화 스킨 (준비 중)'},
 ];
-const ACH_HX_ON=false;if(ACH_HX_ON)ACH.push(...ACH_HX);
-function achHx(k){for(const a of ACH)if(a.hx&&(!k||a.hx===k)&&SAVE.hxMade&&SAVE.hxMade[a.hx])achGet(a.id)}
+const ACH_HX_ON=true;if(ACH_HX_ON)ACH.push(...ACH_HX);
+function achHx(k){for(const a of ACH)if(a.hx&&(!k||a.hx===k)&&SAVE.hxMade&&SAVE.hxMade[a.hx])achGet(a.id);
+  /* 나중에 보상(inv)이 붙은 업적: 이미 받은 사람에게 소급 지급 */let ch=0;for(const a of ACH)if(a.inv&&SAVE.achC&&SAVE.achC[a.id]&&!SAVE.inv[a.inv]){SAVE.inv[a.inv]=true;ch=1}if(ch)try{persist()}catch(e){}}
 const ACH_V6=16;
 const AXN={black:'🕶️ 왕언니 블랙 스킨',sakura:'🌸 신부 벚꽃 공격',goldevo:'✨ 황금 진화 이펙트',heartkill:'💖 하트 처치 이펙트',xpack:'💘 추가 무기 스킨팩'};
 if(SAVE.ach&&!SAVE.achC){SAVE.achC={};Object.keys(SAVE.ach).forEach(k=>SAVE.achC[k]=1)}
@@ -3249,7 +3252,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)r
 
 /* ================= 저장 코드 (기기 간 이동) =================
    ※ POOL/ACH/AXN/WFX 순서가 코드 해석 순서예요. 새 항목은 반드시 "끝에" 추가하세요. */
-const SC_VER=16;
+const SC_VER=17;
 function scBits(list,has){const out=[];for(let i=0;i<list.length;i+=8){let b=0;for(let j=0;j<8&&i+j<list.length;j++)if(has(list[i+j],i+j))b|=1<<j;out.push(b)}return out}
 function scUnbits(bytes,pos,list,set){for(let i=0;i<list.length;i++){if(bytes[pos+(i>>3)]>>(i&7)&1)set(list[i],i)}return pos+Math.ceil(list.length/8)}
 function scVar(out,n){n=Math.max(0,Math.floor(n||0));do{let b=n&127;n=Math.floor(n/128);if(n)b|=128;out.push(b)}while(n)}
@@ -3284,7 +3287,7 @@ function parseCode(code){
   try{const C=CH12().map(c=>c.id),S={fancy:{},ult:{},cine:{},tallOff:{},best:{},bestH:{},inv:{},skin:{},wfx:{},ach:{},ax:{},xevo:{},achC:{},tix:{R:0,L:0,M:0}};let p=1;
     for(const k of ['fancy','ult','cine','tallOff'])p=scUnbits(body,p,C,id=>S[k][id]=true);
     C.forEach(id=>{const v=body[p++];if(v)S.best[id]=v*10});C.forEach(id=>{const v=body[p++];if(v)S.bestH[id]=v*10});
-    p=scUnbits(body,p,ver>=16?POOL:ver>=15?POOL.slice(0,POOL_V15):ver>=14?POOL.slice(0,POOL_V14):ver>=13?POOL.slice(0,POOL_V13):ver>=11?POOL.slice(0,POOL_V11):ver>=9?POOL.slice(0,POOL_V9):ver>=8?POOL.slice(0,POOL_V8):ver>=6?POOL.slice(0,POOL_V7):ver>=5?POOL.slice(0,POOL_V5):POOL.slice(0,POOL_V4),it=>S.inv[it.id]=true);
+    p=scUnbits(body,p,ver>=17?POOL:ver>=16?POOL.slice(0,POOL_V16):ver>=15?POOL.slice(0,POOL_V15):ver>=14?POOL.slice(0,POOL_V14):ver>=13?POOL.slice(0,POOL_V13):ver>=11?POOL.slice(0,POOL_V11):ver>=9?POOL.slice(0,POOL_V9):ver>=8?POOL.slice(0,POOL_V8):ver>=6?POOL.slice(0,POOL_V7):ver>=5?POOL.slice(0,POOL_V5):POOL.slice(0,POOL_V4),it=>S.inv[it.id]=true);
     C.forEach(id=>{const v=body[p++];if(v&&POOL[v-1]&&['color','swim','hanbok','wed','god'].includes(POOL[v-1].kind))S.skin[id]=POOL[v-1].id});
     p=scUnbits(body,p,WK(),k=>S.wfx[k]=false);
     p=scUnbits(body,p,AL,a=>S.ach[a.id]=1);p=scUnbits(body,p,AXK(),k=>S.ax[k]=false);p=scUnbits(body,p,XW(),k=>S.xevo[k]=1);S.achC={};if(ver>=2)p=scUnbits(body,p,AL,a=>S.achC[a.id]=1);else Object.keys(S.ach).forEach(k=>S.achC[k]=1);if(ver>=4){S.cpn={};p=scUnbits(body,p,COUPONS,q=>S.cpn[q.c]=1)}
@@ -5192,7 +5195,7 @@ try{window.endGame=endGame}catch(e){}
 // ---- 화면 ----
 const RKS={map:'gigal',tab:'surv',ch:'',cat:'surv',bd:'h'};let RKC={};
 const fmtD=n=>n>=1e6?(n/1e6).toFixed(1)+'M':n>=1e4?Math.round(n/1e3)+'k':n.toLocaleString();
-const HXICO={polaris:'fx/hx_polaris.png',soulwed:'fx/hx_soulwed.png',glass:'fx/hx_glass.png'};
+const HXICO={polaris:'fx/hx_polaris.png',soulwed:'fx/hx_soulwed.png',glass:'fx/hx_glass.png',stellar:'fx/hx_stellar.png',risha:'fx/hx_rave.png'};
 function rkM(){if(!window.GRANK||!GRANK.on()){ovM(`<div class="lbM"><h3>🏆 랭킹</h3><p class="c">${window.GRANK?'랭킹은 <b>로그인</b>하면 볼 수 있어요.':'랭킹은 <b>게임 사이트(앱)에서 로그인</b>해야 볼 수 있어요.'}</p><div class="btns">${window.GRANK?'<button type="button" class="big" id="rkL">🔑 로그인</button>':''}<button type="button" class="ghost" id="lbX">닫기</button></div></div>`);const l=document.getElementById('rkL');if(l)l.onclick=()=>{document.getElementById('lbOv').remove();const g=document.getElementById('gaccB');if(g)g.click()};return}
   const cat=RKS.cat,bp=cat==='bps';
   const desc=cat==='surv'?'💀 헬 모드에서 최종 보스를 잡은 판만 올라가요 · 30분이 넘으면 총 딜량으로 겨뤄요':cat==='dps'?'💀 헬 모드 클리어 기록의 초당 딜(총 딜 ÷ 생존 시간)로 겨뤄요':'🔥 어려움 · 💀 헬에서 10·15·20분이 될 때 잰 BPS예요 · 더 늦은 시간대 기록이 먼저 와요';

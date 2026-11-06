@@ -280,6 +280,7 @@ button:focus-visible{outline:3px solid var(--cyan);outline-offset:2px}
   <canvas id="lbCv" aria-hidden="true"></canvas>
   <div id="lbRes"></div>
   <div id="lbIcons">
+    <button type="button" id="lbIcT" aria-label="메뉴 접기" aria-expanded="true">▲ 접기</button>
     <button type="button" data-lb="mail" aria-label="우편함"><i>📮</i>우편함</button>
     <button type="button" data-lb="att" aria-label="출석 체크"><i>🎉</i>출석</button>
     <button type="button" data-lb="day" aria-label="미션"><i>📅</i>미션</button>
@@ -287,6 +288,7 @@ button:focus-visible{outline:3px solid var(--cyan);outline-offset:2px}
     <button type="button" data-lb="pass" aria-label="시즌 패스"><i>🎫</i>패스</button>
     <button type="button" data-lb="ach" aria-label="업적"><i>🏆</i>업적</button>
     <button type="button" data-lb="ntc" aria-label="공지"><i>📢</i>공지</button>
+    <button type="button" data-lb="wiki" aria-label="기갈 위키"><i>📖</i>위키</button>
     <button type="button" data-lb="set" aria-label="설정"><i>⚙️</i>설정</button>
   </div>
   <div id="lbName"></div>
@@ -4865,9 +4867,14 @@ const hadC=!!navigator.serviceWorker.controller;let rl=false;navigator.serviceWo
 #lobby #gaccB{left:10px;right:auto}
 #lbRes{position:absolute;top:calc(48px + env(safe-area-inset-top,0px));left:10px;z-index:5;display:flex;gap:6px;flex-wrap:wrap;max-width:60vw}
 #lbRes span{background:rgba(20,10,26,.78);border:1.5px solid rgba(255,214,234,.45);border-radius:999px;padding:4px 10px;color:#fff;font:700 12.5px 'Noto Sans KR',sans-serif}
-#lbIcons{position:absolute;top:calc(10px + env(safe-area-inset-top,0px));right:10px;z-index:5;display:grid;grid-template-columns:repeat(2,58px);gap:8px;direction:rtl}
-#lbIcons button{direction:ltr;position:relative;width:58px;height:58px;border-radius:16px;border:1.5px solid rgba(255,214,234,.6);background:rgba(20,10,26,.78);color:#fff;font:700 10.5px 'Noto Sans KR',sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:0}
-#lbIcons button i{font-style:normal;font-size:22px;line-height:1}
+#lbIcons{position:absolute;top:calc(10px + env(safe-area-inset-top,0px));right:10px;z-index:5;display:grid;grid-template-columns:repeat(2,48px);gap:6px;direction:rtl}
+#lbIcons button{direction:ltr;position:relative;width:48px;height:48px;border-radius:14px;border:1.5px solid rgba(255,214,234,.6);background:rgba(20,10,26,.78);color:#fff;font:700 9.5px 'Noto Sans KR',sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;padding:0}
+#lbIcons button i{font-style:normal;font-size:18px;line-height:1}
+#lbIcons #lbIcT{grid-column:1/-1;width:auto;height:24px;border-radius:999px;font-size:11px;flex-direction:row;gap:4px}
+#lbIcons.fold button[data-lb]{display:none}
+#lbIcons.fold{grid-template-columns:auto!important}
+#lbIcons.fold #lbIcT{height:40px;padding:0 14px;font-size:13px}
+#lbWiki{position:fixed;inset:0;z-index:9000;background:#140c22;display:flex;flex-direction:column}#lbWiki iframe{flex:1;width:100%;border:0;background:#140c22}#lbWiki button{position:absolute;top:calc(8px + env(safe-area-inset-top,0px));right:10px;width:40px;height:40px;border-radius:50%;border:1.5px solid rgba(255,214,234,.7);background:rgba(20,10,26,.9);color:#fff;font:900 18px sans-serif;z-index:2}
 #lbIcons button.soon{opacity:.55}
 #lbIcons .dot{position:absolute;top:-4px;right:-4px;min-width:18px;height:18px;padding:0 4px;box-sizing:border-box;border-radius:9px;background:#ff3b6b;color:#fff;font-size:11px;line-height:18px;text-align:center}
 #lbName{position:absolute;left:50%;transform:translateX(-50%);z-index:4;color:#fff;font:900 15px 'Noto Sans KR',sans-serif;text-shadow:0 2px 0 #000,0 0 8px rgba(0,0,0,.6);white-space:nowrap;pointer-events:none}
@@ -4908,7 +4915,7 @@ const hadC=!!navigator.serviceWorker.controller;let rl=false;navigator.serviceWo
 @keyframes tapb{0%,100%{opacity:.35}50%{opacity:1}}
 #title.tonly{cursor:pointer}
 #select .selhead .tbtns{display:none}
-@media (min-width:900px){#lbIcons{grid-template-columns:repeat(4,62px)}#lbIcons button{width:62px;height:62px}#lbTabs button{flex-direction:row;justify-content:center;gap:6px;font-size:14px;padding:10px 4px}#lbTabs button i{font-size:20px}}
+@media (min-width:900px){#lbIcons{grid-template-columns:repeat(5,54px)}#lbIcons button{width:54px;height:54px}#lbTabs button{flex-direction:row;justify-content:center;gap:6px;font-size:14px;padding:10px 4px}#lbTabs button i{font-size:20px}}
 </style>
 <script>(()=>{
 const L=document.getElementById('lobby');if(!L)return;
@@ -4990,17 +4997,27 @@ function attM(){const A=att(),can=attCan(),n=A.n>=7&&can?0:A.n;const o=ovM(`<div
   <div class="btns"><button type="button" class="big" id="attGo" ${can?'':'disabled'}>${can?`🎁 ${n+1}일째 선물 받기`:'✔ 오늘은 받았어요 · 내일 또 만나요'}</button><button type="button" class="ghost" id="lbX">닫기</button></div></div>`);
   o.querySelector('#attGo').onclick=()=>{if(!attCan())return;const A=att();if(A.n>=7)A.n=0;const r=ATT7[A.n];A.n++;A.d=today();if(r.g)SAVE.gold+=r.g;SAVE.tix=SAVE.tix||{};for(const k in (r.t||{}))SAVE.tix[k]=(SAVE.tix[k]||0)+r.t[k];persist();try{SND.p('ach')}catch(e){}toast('🎉 출석 '+A.n+'일째',rwTxt(r).replace(/<br>/g,' + '));res();badges();attM()}}
 // ---- 📜 패치내역 (V118) ----
-const PATCH=[["V125", "11/6", "기갈위키최신화"], ["V123", "11/5", "레벨업 카드 빼버리기 추가"], ["V121", "11/5", "신화스킨 추가"], ["V120", "11/5", "긴급소식:왕언니가 불법무면허운전으로 적발되어, 사회교육 및 면허취득 후 다시 합류했어요."], ["V119", "11/5", "💄 BPS(Beauty per Sec) 추가 · 결과창 DPS/BPS/HPS · 🏆 랭킹에 ⚔️ DPS · 💄 BPS 카테고리"], ["V118", "11/5", "📜 패치내역이 생겼어요 · 미션 아이콘을 하나로 합쳤어요"], ["V117", "11/5", "⚖️ 밸런스 패치: 해방하는 5월, 비련의 신부, 왕언니, 공명하는 4월"], ["V116", "11/5", "일일 미션이 오전 4시에 바뀌어요"], ["V115", "11/5", "스탯 강화 초기화: 첫 1회는 무료, 이후 50% 환급"], ["V113~V114", "11/5", "👻 멀티에서 친구 무기가 보여요 · 태태영 필살기 연출 새 단장"], ["V111~V112", "11/5", "PC 로비가 부드러워지고, 랭킹 상세 보기 추가 · 멀티 시작 오류 수정"], ["V107~V109", "11/4", "PC 화면 배율 설정 · 로비 캐릭터 대사 · 동물 친구들 그림 오류 수정"], ["V106", "11/4", "🏠 로비 · 🎫 시즌 패스 · 📅 미션 · 🎉 출석 · 🏆 헬 랭킹"], ["V105", "11/4", "📮 우편함"], ["V100~V101", "11/3", "멀티 멈춤 오류 수정 · PC 렉 개선"], ["V97~V99", "11/2~3", "필살기 해금 오류 수정 · 신화 입장 연출 복구 + 태태영 Ⅲ"], ["V93~V96", "11/2", "👥 친구와 함께하기(2인 협동) · 모바일 캐릭터 선택 화면 개선"], ["V88~V92", "11/2", "🌐 기갈 서바이버 사이트·앱 오픈 · 로그인·계정 저장"]];
+const PATCH=[["V126", "11/6", "로비 메뉴 접기 · 📖 위키 버튼 · 캐릭터 탭에서 로비 캐릭터 바꾸기"], ["V125", "11/6", "기갈위키최신화"], ["V123", "11/5", "레벨업 카드 빼버리기 추가"], ["V121", "11/5", "신화스킨 추가"], ["V120", "11/5", "긴급소식:왕언니가 불법무면허운전으로 적발되어, 사회교육 및 면허취득 후 다시 합류했어요."], ["V119", "11/5", "💄 BPS(Beauty per Sec) 추가 · 결과창 DPS/BPS/HPS · 🏆 랭킹에 ⚔️ DPS · 💄 BPS 카테고리"], ["V118", "11/5", "📜 패치내역이 생겼어요 · 미션 아이콘을 하나로 합쳤어요"], ["V117", "11/5", "⚖️ 밸런스 패치: 해방하는 5월, 비련의 신부, 왕언니, 공명하는 4월"], ["V116", "11/5", "일일 미션이 오전 4시에 바뀌어요"], ["V115", "11/5", "스탯 강화 초기화: 첫 1회는 무료, 이후 50% 환급"], ["V113~V114", "11/5", "👻 멀티에서 친구 무기가 보여요 · 태태영 필살기 연출 새 단장"], ["V111~V112", "11/5", "PC 로비가 부드러워지고, 랭킹 상세 보기 추가 · 멀티 시작 오류 수정"], ["V107~V109", "11/4", "PC 화면 배율 설정 · 로비 캐릭터 대사 · 동물 친구들 그림 오류 수정"], ["V106", "11/4", "🏠 로비 · 🎫 시즌 패스 · 📅 미션 · 🎉 출석 · 🏆 헬 랭킹"], ["V105", "11/4", "📮 우편함"], ["V100~V101", "11/3", "멀티 멈춤 오류 수정 · PC 렉 개선"], ["V97~V99", "11/2~3", "필살기 해금 오류 수정 · 신화 입장 연출 복구 + 태태영 Ⅲ"], ["V93~V96", "11/2", "👥 친구와 함께하기(2인 협동) · 모바일 캐릭터 선택 화면 개선"], ["V88~V92", "11/2", "🌐 기갈 서바이버 사이트·앱 오픈 · 로그인·계정 저장"]];
 function patchM(){try{localStorage.setItem('gs_patch',PATCH[0][0])}catch(e){}const o=ovM(`<div class="lbM"><h3>📜 패치내역</h3><div class="lbPatch">${PATCH.map((p,i)=>`<div class="${i?'':'new'}"><b>${p[0]}<small>${p[1]}</small></b><span>${p[2]}</span></div>`).join('')}</div><div class="btns"><button type="button" class="ghost" id="lbX">닫기</button></div></div>`);badges();return o}
 // ---- 공용 모달 ----
 function ovM(html){let o=document.getElementById('lbOv');if(o)o.remove();o=document.createElement('div');o.className='ov';o.id='lbOv';o.innerHTML=`<div class="modal">${html}</div>`;document.body.appendChild(o);o.addEventListener('pointerdown',e=>{if(e.target===o)o.remove()});const x=o.querySelector('#lbX');if(x)x.onclick=()=>o.remove();return o}
 function setM(){const o=ovM(`<div class="lbM"><h3>⚙️ 설정</h3><div class="lbSetRow">${sndBtns()}<div class="lbZoom"><b>🔍 화면 배율</b> ${[['wide','넓게'],['normal','보통'],['big','크게']].map(([k,n])=>`<button type="button" class="ghost small${zoomMode()===k?' on':''}" data-zm="${k}">${n}</button>`).join('')}</div><button type="button" class="ghost" id="lbSave">💾 저장 코드 · 🎟️ 쿠폰</button><button type="button" class="ghost" id="lbNtc">📢 공지 다시 보기</button></div><div class="btns"><button type="button" class="ghost" id="lbX">닫기</button></div></div>`);
   o.querySelector('#lbSave').onclick=()=>{o.remove();openSave('title')};o.querySelectorAll('[data-zm]').forEach(b=>b.onclick=()=>{try{localStorage.setItem('gs_zoom',b.dataset.zm)}catch(e){}o.querySelectorAll('[data-zm]').forEach(x=>x.classList.toggle('on',x===b));dispatchEvent(new Event('resize'));toast('🔍 화면 배율: '+b.textContent,'게임 화면에 바로 적용돼요')});o.querySelector('#lbNtc').onclick=()=>{o.remove();showNotice()}}
+// ---- V126 📖 인게임 위키 ----
+function wikiM(){let o=document.getElementById('lbWiki');if(o)o.remove();o=document.createElement('div');o.id='lbWiki';o.innerHTML='<iframe src="wiki.html?ingame=1" title="기갈 서바이버 공략 위키"></iframe><button type="button" aria-label="위키 닫기">✕</button>';document.body.appendChild(o);const c=()=>{o.remove();removeEventListener('keydown',k)},k=e=>{if(e.key==='Escape')c()};o.querySelector('button').onclick=c;addEventListener('keydown',k)}
+// ---- V126 메뉴 접기 (기기별 gs_lbFold) ----
+{const box=$$('#lbIcons'),tg=$$('#lbIcT');let fold=false;try{fold=localStorage.getItem('gs_lbFold')==='1'}catch(e){}
+ const upd=()=>{box.classList.toggle('fold',fold);tg.setAttribute('aria-expanded',String(!fold));if(!fold){tg.textContent='▲ 접기';return}let n=0,any=false;box.querySelectorAll('button[data-lb] .dot').forEach(d=>{if(d.offsetParent===null&&getComputedStyle(d).display==='none')return;const v=parseInt(d.textContent,10);any=true;n+=isNaN(v)?1:v});tg.innerHTML='☰ 메뉴'+(any?`<span class="dot">${n>99?'99+':n||'N'}</span>`:'')};
+ tg.onclick=e=>{e.stopPropagation();fold=!fold;try{localStorage.setItem('gs_lbFold',fold?'1':'0')}catch(x){}try{SND.p('click')}catch(x){}upd()};upd();setInterval(()=>{if(fold&&!L.hidden)upd()},1500)}
+// ---- V126 캐릭터 탭 = 로비 캐릭터 바꾸기 ----
+{const lab=()=>{if(!window.LB_PICK)return;const g=document.getElementById('goB');if(g&&!g.dataset.lbp){g.dataset.lbp=1;g.classList.remove('hardgo');g.textContent='✅ 로비 캐릭터로 정하기'}};
+ new MutationObserver(lab).observe(document.getElementById('select')||document.body,{childList:true,subtree:true});
+ document.addEventListener('click',e=>{if(!window.LB_PICK)return;const g=e.target&&e.target.closest&&e.target.closest('#goB');if(!g)return;e.stopImmediatePropagation();e.preventDefault();window.LB_PICK=false;remember();const s=document.getElementById('select');if(s)s.hidden=true;titleScreen();toast('👤 로비 캐릭터 변경',CHAR[selI].nick+'(이)가 로비에 나왔어요')},true)}
 const soon=n=>toast('🚧 '+n,'곧 열려요! 조금만 기다려 주세요');
 // ---- 버튼 ----
-L.addEventListener('click',e=>{const b=e.target.closest('[data-lb]');if(!b)return;try{SND.p('click')}catch(x){}const k=b.dataset.lb;remember();
+L.addEventListener('click',e=>{const b=e.target.closest('[data-lb]');if(!b)return;try{SND.p('click')}catch(x){}const k=b.dataset.lb;remember();window.LB_PICK=k==='char';
   if(k==='mail'){if(window.GMAIL)GMAIL.open()}else if(k==='att')attM();else if(k==='day'||k==='week')msM();else if(k==='patch')patchM();else if(k==='pass')passM();
-  else if(k==='ach')openAch('title');else if(k==='ntc')showNotice();else if(k==='set')setM();
+  else if(k==='ach')openAch('title');else if(k==='wiki')wikiM();else if(k==='ntc')showNotice();else if(k==='set')setM();
   else if(k==='go'){toSelect();setTimeout(()=>{const c=document.querySelector(`#selgrid .pc[data-i="${selI}"]`);if(c)c.click()},30)}
   else if(k==='char')toSelect();else if(k==='stu')openStu(CHAR[selI].id);
   else if(k==='closet'){window.CLO_FROM='lobby';openCloset(CHAR[selI].ju?0:selI)}else if(k==='shop')openShop();else if(k==='rank')rkM();

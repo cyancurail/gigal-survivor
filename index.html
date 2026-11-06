@@ -5451,7 +5451,7 @@ const slotOf=m=>ORDER[T.sq.indexOf(m)];const memAt=i=>T.sq[ORDER.indexOf(i)];
 const mx=m=>SLOTX[slotOf(m)],my=m=>slotY(slotOf(m));
 
 /* ---- 적 ---- */
-const waveHp=w=>17*Math.pow(1.205,w-1);
+const waveHp=w=>55*Math.pow(1.14,w-1)*(w>7?Math.pow(1.06,w-7):1);/* 11-07 밸런스 1단계: 초반 ×3·후반 완만 (이전 17×1.205^(w−1)) */
 /* 쿨타임이 길어진 만큼 몬스터는 적게·단단하게(땡땡 마법사식) */
 let MCNT=.22,MHP=3.9;/* 11-06 사용자: 몬스터가 너무 빨리 죽음 → 체력 ×3 */window.__tdTune=(c,h)=>{MCNT=c;MHP=h};
 /* 몬스터 10종 (그림 번호 = 사용자 제공 시트 순서) */
@@ -5465,7 +5465,7 @@ function planWave(w){const q=[],boss=BOSSW.includes(w),dur=boss?BDUR:WDUR,n=Math
   const wt=ks.map((k,i)=>k==='e'?.25:k==='n'?2:1);const tw=wt.reduce((a,b)=>a+b,0);
   for(let i=0;i<n;i++){let r=Math.random()*tw,k=ks[0];for(let j=0;j<ks.length;j++){r-=wt[j];if(r<=0){k=ks[j];break}}q.push({at:rnd(0,dur*.72),k})}
   if(boss)q.push({at:1,k:'b'});q.sort((a,b)=>a.at-b.at);T.spawnQ=q;T.wt=0;T.wdur=dur}
-function spawn(k,x0,y0,mu){const w=T.wave,S=SOF(T.stg),bt=k==='b'?S.mix[0]:null,y=bt?ETY[bt]:ETY[k],hp=(k==='b'?waveHp(w)*(w===21?95:55):waveHp(w)*y.hp*MHP)*(1+(S.hpm-1)*(.15+.85*Math.pow(w/WAVES,1.3)));
+function spawn(k,x0,y0,mu){const w=T.wave,S=SOF(T.stg),bt=k==='b'?S.mix[0]:null,y=bt?ETY[bt]:ETY[k],hp=(k==='b'?waveHp(w)*(w>=21?100:w>=14?80:14):waveHp(w)*y.hp*MHP)*(1+(S.hpm-1)*(.15+.85*Math.pow(w/WAVES,1.3)));
   const e={id:T.eid++,k,s:y.s,x:x0!=null?cl(x0+rnd(-14,14),16,W-16):rnd(30,W-30),y:y0!=null?y0+rnd(-8,8):-20,r:y.r,spd:y.spd*(1+w*.012),hp,max:hp,dmg:y.dmg,xp:y.xp,col:y.col,boss:!!y.boss,elite:!!y.elite,arm:y.arm||1,
    rng:y.rng,lay:y.lay,split:y.split,dash:y.dash,ph:rnd(0,6.28),cd:rnd(1.5,3),stopY:rnd(300,430),dsT:0,slow:0,slowF:1,stun:0,fl:0,dead:false};
   if(bt){Object.assign(e,{k:'b',bt,boss:true,elite:false,r:Math.min(54,y.r*3.2),x:W/2+rnd(-60,60),spd:y.spd*.42,dmg:w===21?60:40,xp:20,arm:bt==='a'?.3:bt==='t'?.5:bt==='e'?.7:1,cd2:3,hpS:4,stopY:rnd(260,320),
@@ -5666,8 +5666,13 @@ function cardHTML(c){if(V2){const h=w2Card(c);if(h)return h}if(c.k==='join')retu
   if(c.k==='bless'){const B=BLS[c.b];return`<b>🌙 트와일라잇의 축복 · ${B[0]}</b><small>${B[1]}</small><i>${'●'.repeat(bl(c.b))}${'○'.repeat(3-bl(c.b))}</i>`}
   if(c.k==='elem'){const E=ELM[c.id];return`<b>✨ 특이 진화 · ${nick(c.id)} ${E[0]} ${E[1]}</b><small>${E[2]} (3강 해금)</small>`}
   if(c.k==='shield')return`<b>💠 별빛 보호막</b><small>마음의 선 피해를 20만큼 먼저 막아요</small>`;return`<b>🌙 마음의 선 강화</b><small>최대 체력 +15</small>`}
+/* 사람처럼 고르는 봇 (밸런스 측정용): 무기 3~4개에 집중, 희귀·각성·조합 우선, 위험하면 회복 */
+function botPick(L){const n=T.sq.length,lowHp=T.hp<T.hpMax*.45;let best=L[0],bs=-1e9;
+  for(const c of L){let v=1;if(c.k==='new')v=n<2?9:n<3?6:n<4?3.5:.8;else if(c.k==='combo')v=8;else if(c.k==='heal')v=lowHp?9:.3;else if(c.k==='max'||c.k==='shield')v=lowHp?4:.5;
+    else if(c.k==='wc'){const m=T.sq.find(q=>q.id===c.id),main=T.sq.indexOf(m)<2;v=c.c==='u4'?9:c.rare?7:c.c==='fam'?6.5:c.c==='d'?5:c.c==='f'?4.5:c.c==='n'?4:w2Trade(c.id,c.c)?2.5:3.5;if(main)v+=1.5}
+    v+=Math.random()*1.5;if(v>bs){bs=v;best=c}}return best}
 function openCards(src){const L=offers(3);if(!L.length){T.cardsLeft=0;return}T.paused=true;
-  if(T.bot){apply(pick(L));T.paused=false;evoNext();return}
+  if(T.bot){apply(window.__botRand?pick(L):botPick(L));T.paused=false;evoNext();return}
   const box=ov.querySelector('.tdCards');box.innerHTML=`<h3>${src||'카드를 골라요'}</h3><div class="tdCL">${L.map((c,i)=>`<button type="button" data-i="${i}"${c.rare?' class="w2R"':''}>${cardHTML(c)}</button>`).join('')}</div>`;box.hidden=false;
   box.onclick=e=>{const b=e.target.closest('button[data-i]');if(!b)return;snd('click');apply(L[+b.dataset.i]);box.hidden=true;T.paused=false;evoNext()}}
 function evoNext(){if(!T||!T.evoQ.length)return;const q=T.evoQ.shift(),D=(EVD[q.m.id]||[])[q.st-1];if(!D){evoNext();return}
@@ -5729,7 +5734,7 @@ function update(dt){if(!T||T.paused||T.over)return;T.t+=dt;if(T.lab)labTick(dt);
   if(T.hp<=0&&T.pray&&(T.prayed||0)<(T.prayN||1)){T.prayed=(T.prayed||0)+1;T.hp=T.hpMax*.5;banner('🧚 요정의 기도');snd('ach')}
   if(T.hp<=0){T.hp=0;finish(false);return}
   if(T.wave>=WAVES&&!T.spawnQ.length&&!T.en.length){finish(true);return}
-  if(T.en_>=T.need){T.en_-=T.need;T.picks++;T.need=10+1.5*(T.picks+1);openCards()}}
+  if(T.en_>=T.need){T.en_-=T.need;T.picks++;T.need=8+1.3*(T.picks+1);openCards()}}
 
 function finish(win){T.over=true;const td=TDS(),sid=T.stg,hpP=Math.round(T.hp/T.hpMax*100);
   let stars=0;if(win)stars=hpP>=100?3:hpP>=70?2:hpP>=30?1:0;

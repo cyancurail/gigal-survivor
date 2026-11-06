@@ -1,5 +1,5 @@
 // 기갈 서바이버 서비스 워커 — 배포할 때마다 VERSION을 올린다
-const VERSION='v127';
+const VERSION='v128';
 const CACHE = 'gigal-' + VERSION;
 const ASSETS = ['./', './index.html', './wiki.html', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png', './icons/icon-512-maskable.png', './icons/apple-touch-icon.png', './fx/pstar.png', './fx/pimp.png', './fx/rune.png', './fx/ghost.png', './fx/cubeB.png', './fx/fnova.png', './fx/scharge.png', './fx/amiss.png', './fx/lsteal.png', './fx/pet_slime.png', './fx/pet_wisp.png', './fx/pet_butterfly.png', './fx/pet_ghost.png', './fx/iris.png', './fx/hx_polaris.png', './fx/hx_soulwed.png', './fx/hx_glass.png', './msk2/01.png', './msk2/02.png', './msk2/03.png', './msk2/04.png', './msk2/05.png', './msk2/06.png', './msk2/07.png', './msk2/08.png', './msk2/09.png', './msk2/10.png', './msk2/11.png', './msk2/12.png', './msk2/13.png', './msk2/14.png', './msk2/15.png', './msk2/16.png', './msk2/17.png', './msk2/18.png', './msk2/19.png', './msk2/20.png', './msk2/21.png', './msk2/22.png', './msk2/23.png', './msk2/24.png', './msk2/25.png', './msk2/26.png', './msk2/27.png', './msk2/28.png', './msk2/29.png', './msk2/30.png'];
 // GitHub Pages는 HTTP 캐시(10분)를 쓰므로 반드시 cache:'reload'로 새 파일을 받는다

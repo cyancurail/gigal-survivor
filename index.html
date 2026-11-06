@@ -709,6 +709,7 @@ function hurt(e,amt,key,opts={}){
   PXG=false;
   if(G.texts.length<70&&(crit||Math.random()<.35))G.texts.push({x:e.x+rnd(-6,6),y:e.y-e.r,v:Math.round(d),life:.6,crit});
   if(G.ultOn&&G.ultOn.vamp)healP(Math.min(1.5,d*.05));
+  if(key==='soulwed'&&G.swB>0){const h=Math.min(d*.09,G.swB);G.swB-=h;healP(h,'soulwed')}
   if(key==='talis'&&G.lsB>0){const tw=W('talis');if(tw&&tw.evo){const h=Math.min(d*.04,G.lsB);G.lsB-=h;healP(h)}}
   if(e.hp<=0)kill(e,key);
 }
@@ -3618,14 +3619,14 @@ function renderDetail(){
    ※ 저장 코드 순서: STU 스탯 순서와 CHAR 순서(맨 끝 추가만)가 해석 순서예요. */
 const STU=[{k:'hp',i:'❤️',n:'체력',per:.4,f:v=>`최대 체력 +${(v*.4).toFixed(1).replace(/\.0$/,'')}`},
  {k:'atk',i:'⚔️',n:'공격력',per:.2,f:v=>`공격력 +${(v*.2).toFixed(1).replace(/\.0$/,'')}%`},
- {k:'def',i:'🛡️',n:'방어력',per:.04,f:v=>`방어 +${(v*.04).toFixed(2).replace(/\.?0+$/,'')}`},
+ {k:'def',i:'🛡️',n:'방어력',per:.1,f:v=>`방어 +${(v*.1).toFixed(1).replace(/\.0$/,'')}`},
  {k:'spd',i:'👟',n:'이동속도',per:.3,f:v=>`이동속도 +${(v*.3).toFixed(1).replace(/\.0$/,'')}`},
  {k:'crit',i:'💥',n:'크리티컬',per:.3,f:v=>`크리티컬 확률 +${(v*.3).toFixed(1).replace(/\.0$/,'')}%`},
  {k:'luck',i:'🍀',n:'행운',per:.3,f:v=>`레벨업 선택지 4개 확률 +${(v*.3).toFixed(1).replace(/\.0$/,'')}%`}];
 const STU_MAX=100,STU_G=100;
 function stuOf(id){const a=(SAVE.stu||{})[id];return STU.map((_,i)=>Math.max(0,Math.min(STU_MAX,(a&&a[i])|0)))}
 function stuSum(id){return stuOf(id).reduce((a,b)=>a+b,0)}
-function stuApply(s,id){const u=stuOf(id);s.maxHp+=.4*u[0];s.might*=1+.002*u[1];s.armor+=.04*u[2];s.speed+=.3*u[3];s.crit+=.003*u[4];s.luck+=.003*u[5]}
+function stuApply(s,id){const u=stuOf(id);s.maxHp+=.4*u[0];s.might*=1+.002*u[1];s.armor+=.1*u[2];s.speed+=.3*u[3];s.crit+=.003*u[4];s.luck+=.003*u[5]}
 function jmsRow(){const id='쥬은',cur=mskCur(id);return `<div class="wardrobe"><b>👑 신화 스킨</b><button type="button" data-jms="0" aria-pressed="${!cur}">기본</button>${[1,2,3,4,5,6].filter(s=>mskHas(id,s)).map(s=>mskOwn(id,s)?`<button type="button" data-jms="${s}" aria-pressed="${cur===s}">${mskNm(id,s)}</button>`:`<button type="button" disabled>🔒 ${mskNm(id,s)}</button>`).join('')}</div>`}
 document.addEventListener('click',e=>{const b=e.target&&e.target.closest&&e.target.closest('[data-jms]');if(!b)return;SAVE.mskin=SAVE.mskin||{};SAVE.mskin['쥬은']=+b.dataset.jms;persist();SND.p('click');renderDetail()});
 function stuRow(c){const n=stuSum(c.id);return `<div class="wardrobe"><b>📈 스탯 강화 · ${n}/${STU.length*STU_MAX}</b><button type="button" id="detStat">📈 강화하기</button></div>`}
@@ -3986,7 +3987,7 @@ function plFlash(w){if(w.st.fl>0){ctx.save();ctx.globalAlpha=Math.min(.8,w.st.fl
 const SW_MAX=20;
 function swR(st){return(100+4*((st.g||[]).filter(q=>q.m==='orb').length))*G.S.area}
 function swGuest(e){const w=W('soulwed');if(!w)return;const st=w.st;st.g=st.g||[];if(st.g.filter(q=>q.m==='orb'||q.m==='join').length>=SW_MAX)return;st.g.push({m:'join',x:e.x,y:e.y,a:rnd(0,6.283),t:0,f:rnd(0,4)});if(!G.bot)sparks(e.x,e.y,8,['#c07bff','#ffffff'],120,.4,2)}
-function swTick(w,dt){const S=G.S,st=w.st,p=G.p;st.g=st.g||[];const g=st.g,nO=g.filter(q=>q.m==='orb').length,R=swR(st);st.R=R;
+function swTick(w,dt){const S=G.S,st=w.st,p=G.p;st.g=st.g||[];if(!S.swA){S.swA=1;S.armor+=10}G.swB=Math.min(9,(G.swB||0)+9*dt);const g=st.g,nO=g.filter(q=>q.m==='orb').length,R=swR(st);st.R=R;
   // 오라: 0.5초마다 피해 + 둔화, 하객 수만큼 강해짐
   st.k=(st.k||0)-dt;if(st.k<=0){st.k=.5;for(const e of G.enemies)if(!e.dead&&(e.x-p.x)**2+(e.y-p.y)**2<(R+e.r)**2)hurt(e,(12+.9*nO)*S.might,'soulwed',{slow:.6})}
   w.t-=dt;if(w.t<=0){w.t=2.4*S.cd;const R2=R*1.45;for(const e of G.enemies)if(!e.dead&&(e.x-p.x)**2+(e.y-p.y)**2<(R2+e.r)**2)hurt(e,(38+2.2*nO)*S.might,'soulwed',{slow:.6});if(!G.bot){G.fx.push({ring:1,x:p.x,y:p.y,r:0,R:R2,life:.4,L:.4,c:'#b36bff'});pring(p.x,p.y,R2,['#b36bff','#ff3fd2','#e6c4ff'],50,.4)}}
@@ -3994,17 +3995,15 @@ function swTick(w,dt){const S=G.S,st=w.st,p=G.p;st.g=st.g||[];const g=st.g,nO=g.
   st.tt=(st.tt||1)-dt;if(st.tt<=0){st.tt=3*S.cd;const n=2+S.amount,r=(10+1.6*8)*S.area*1.4,dmg=30*S.might;
     const tg=G.enemies.filter(e=>!e.dead&&(e.x-p.x)**2+(e.y-p.y)**2<360*360).sort((a,b)=>((a.x-p.x)**2+(a.y-p.y)**2)-((b.x-p.x)**2+(b.y-p.y)**2));
     for(let i=0;i<n;i++){const e=tg[i];const a=e?Math.atan2(e.y-p.y,e.x-p.x):Math.atan2(p.fy,p.fx)+(i-(n-1)/2)*.5,v=58*S.pspeed;shoot({k:'talis',hk:'soulwed',tal:1,x:p.x,y:p.y-6,vx:Math.cos(a)*v,vy:Math.sin(a)*v,life:4.5*S.dur,r,pierce:999,hcd:.3,dmg,id:Math.random(),ev:true,ang:a})}SND.p('paper')}
-  // 엘리트·보스 등장: 하객이 주인공에게 모여 spell charge → arcane missiles 20발 → life steal 5알
-  for(const e of G.enemies){if(e.dead||e.swS||!(e.boss||e.elite))continue;if(Math.abs(e.x-p.x)>VW*.75||Math.abs(e.y-p.y)>VH*.75)continue;e.swS=1;
-    if(!st.cast){const c=g.filter(q=>q.m==='orb'||q.m==='join');if(c.length){for(const q of c)q.m='gather';st.cast={t:0,n:c.length,tg:e};if(!G.bot)G.texts.push({x:p.x,y:p.y-80,v:'하객 여러분, 축의금 내러 가요!',life:2.2,col:'#e6c4ff'})}}}
-  // 하객이 없을 땐 20초마다 5발
-  st.sc=(st.sc===undefined?20:st.sc)-dt;
-  if(!st.cast&&st.sc<=0&&!g.some(q=>q.m==='orb'||q.m==='join')){const tg=swPick();if(tg){st.cast={t:0,n:5,tg};st.sc=20*S.cd}}
+  // V125 하객 폭격: 20초×cd마다 (10 + 하객 수)발, 하객은 소모. 보스가 나타나면 바로 1번
+  for(const e of G.enemies){if(e.dead||e.swS||!e.boss||!hxVis(e))continue;e.swS=1;if(!st.cast)st.sc=0}
+  st.sc=(st.sc===undefined?20*S.cd:st.sc)-dt;
+  if(!st.cast&&st.sc<=0){const tg=swPick();if(tg){const c=g.filter(q=>q.m==='orb'||q.m==='join');for(const q of c)q.m='gather';st.cast={t:0,n:10+c.length,tg};st.sc=20*S.cd;if(c.length&&!G.bot)G.texts.push({x:p.x,y:p.y-80,v:'하객 여러분, 축의금 내러 가요!',life:2.2,col:'#e6c4ff'})}else st.sc=1}
   if(st.cast){const C=st.cast;C.t+=dt;
-    if(C.t>=.9&&!C.vo){C.vo=[];const nv=Math.ceil(C.n/5);for(let i=0;i<nv;i++)C.vo.push({t:-i*.18,hit:0,k:Math.min(5,C.n-i*5),o:(i-(nv-1)/2)*.14});if(!G.bot)SND.p('evo')}
-    if(C.vo){const tg=swTg(C);for(const v of C.vo){v.t+=dt;while(v.hit<v.k&&v.t>=.7+v.hit*.12){v.hit++;if(tg){hurt(tg,320*S.might,'soulwed',{force:1});for(const o of G.enemies)if(!o.dead&&o!==tg&&(o.x-C.lx)**2+(o.y-C.ly)**2<(40+o.r)**2)hurt(o,100*S.might,'soulwed');if(!G.bot)sparks(C.lx,C.ly,8,['#c684ff','#ffffff','#ecc8ff'],200,.3,2)}}}
-      if(!C.ls&&C.vo.every(v=>v.hit>=v.k))C.ls={t:0,x:C.lx,y:C.ly,h:0}}
-    if(C.ls){C.ls.t+=dt;while(C.ls.h<5&&C.ls.t>=.6+C.ls.h*.12){C.ls.h++;healP(3);if(!G.bot)sparks(p.x,p.y-8,6,['#ff2040','#ff9a8a','#ffffff'],120,.3,2)}if(C.ls.t>=2.2)st.cast=null}
+    if(C.t>=.9&&!C.vo){C.vo=[];const nv=Math.ceil(C.n/5),bs=G.enemies.find(e=>!e.dead&&e.boss&&hxVis(e)),pool=bs?[bs]:swNear(nv);for(let i=0;i<nv;i++)C.vo.push({t:-i*.18,hit:0,k:Math.min(5,C.n-i*5),o:(i-(nv-1)/2)*.14,tg:pool[i%Math.max(1,pool.length)]||C.tg});if(!G.bot)SND.p('evo')}
+    if(C.vo){for(const v of C.vo){if(!v.tg||v.tg.dead)v.tg=swPick();if(v.tg){v.lx=v.tg.x;v.ly=v.tg.y;C.lx=v.lx;C.ly=v.ly}v.t+=dt;while(v.hit<v.k&&v.t>=.7+v.hit*.12){v.hit++;const tg=v.tg;if(tg){hurt(tg,500*S.might,'soulwed',{force:1});for(const o of G.enemies)if(!o.dead&&o!==tg&&(o.x-v.lx)**2+(o.y-v.ly)**2<(40+o.r)**2)hurt(o,100*S.might,'soulwed');if(!G.bot)sparks(v.lx,v.ly,8,['#c684ff','#ffffff','#ecc8ff'],200,.3,2)}}}
+      if(!C.ls&&C.vo.every(v=>v.hit>=v.k))C.ls={t:0,x:C.lx===undefined?p.x:C.lx,y:C.ly===undefined?p.y:C.ly,h:0}}
+    if(C.ls){C.ls.t+=dt;while(C.ls.h<3&&C.ls.t>=.25+C.ls.h*.4+1.2){C.ls.h++;healP(5,'soulwed');if(!G.bot)sparks(p.x,p.y-8,10,['#ff2040','#ff9a8a','#ffffff'],140,.35,2)}if(C.ls.t>=2.3)st.cast=null}
     if(C.t>12)st.cast=null}
   st.a=(st.a||0)+1.1*dt;let oi=0;
   for(const q of g){q.f+=dt*6;q.t+=dt;
@@ -4013,13 +4012,18 @@ function swTick(w,dt){const S=G.S,st=w.st,p=G.p;st.g=st.g||[];const g=st.g,nO=g.
     else if(q.m==='gather'){const dx=p.x-q.x,dy=p.y-8-q.y,d=Math.hypot(dx,dy)||1,v=520*dt;q.dir=dx<0?-1:1;if(d<=14||d<v){q.x=p.x;q.y=p.y-8;q.m='die';q.t=0}else{q.x+=dx/d*v;q.y+=dy/d*v}}}
   st.g=g.filter(q=>!(q.m==='die'&&q.t>.55));
   if(!G.bot){const k=pn(1.5);for(let i=0;i<k;i++){const a=rnd(0,6.283),rr=Math.sqrt(Math.random())*R;px(p.x+Math.cos(a)*rr,p.y+Math.sin(a)*rr,rnd(-10,10),-rnd(30,70),.8,pick(['#9b3dff','#ff3fd2','#e6c4ff']),2,1,1)}}}
+function swNear(n){return G.enemies.filter(e=>!e.dead&&hxVis(e)).sort((a,b)=>(((b.boss||b.elite)?1:0)-((a.boss||a.elite)?1:0))||(((a.x-G.p.x)**2+(a.y-G.p.y)**2)-((b.x-G.p.x)**2+(b.y-G.p.y)**2))).slice(0,n)}
 function swPick(){let b=null,bd=1e18;for(const e of G.enemies){if(!hxVis(e))continue;const d=(e.x-G.p.x)**2+(e.y-G.p.y)**2-((e.boss||e.elite)?1e12:0);if(d<bd){bd=d;b=e}}return b}
 function swTg(C){if(!C.tg||C.tg.dead)C.tg=swPick();if(C.tg){C.lx=C.tg.x;C.ly=C.tg.y}return C.tg}
 function swBeam(k,hx,hy,base,x0,y0,x1,y1,f,al){const S=HXI[k];if(!S||!S.im.complete||!S.im.naturalWidth)return;const d=Math.hypot(x1-x0,y1-y0)||1,sx=Math.max(.6,d/base),sy=Math.min(1.6,Math.max(.9,sx*.8));ctx.save();ctx.imageSmoothingEnabled=false;ctx.globalAlpha=al===undefined?1:al;ctx.translate(x0,y0);ctx.rotate(Math.atan2(y1-y0,x1-x0));ctx.scale(sx,sy);ctx.drawImage(S.im,Math.min(S.n-1,f|0)*S.w,0,S.w,S.h,-hx,-hy,S.w,S.h);ctx.restore()}
 function swCastDraw(st){const C=st.cast;if(!C)return;const p=G.p;
   if(C.t<1.1){const S=HXI.scharge,sc=1.5;if(S&&S.im.complete&&S.im.naturalWidth){ctx.save();ctx.imageSmoothingEnabled=false;ctx.globalAlpha=Math.min(1,(1.1-C.t)*5);ctx.drawImage(S.im,((C.t*15)%24|0)*S.w,0,S.w,S.h,p.x+10-59*sc,p.y-6-58*sc,S.w*sc,S.h*sc);ctx.restore()}}
-  if(C.vo&&C.lx!==undefined)for(const v of C.vo){if(v.t<0||v.t>=1.75)continue;const a=Math.atan2(C.ly-p.y,C.lx-p.x)+v.o,d=Math.hypot(C.lx-p.x,C.ly-p.y);swBeam('amiss',41,64,137,p.x,p.y-8,p.x+Math.cos(a)*d,p.y-8+Math.sin(a)*d,v.t*20)}
-  if(C.ls)swBeam('lsteal',37,72,103,p.x,p.y-8,C.ls.x,C.ls.y,C.ls.t*15)}
+  if(C.vo)for(const v of C.vo){if(v.t<0||v.t>=1.75||v.lx===undefined)continue;const a=Math.atan2(v.ly-p.y,v.lx-p.x)+v.o,d=Math.hypot(v.lx-p.x,v.ly-p.y);swBeam('amiss',41,64,137,p.x,p.y-8,p.x+Math.cos(a)*d,p.y-8+Math.sin(a)*d,v.t*20)}
+  if(C.ls){const L=C.ls,sx=L.x,sy=L.y-6,ex=p.x,ey=p.y-8;ctx.save();ctx.globalCompositeOperation='lighter';
+    const at=(k,i)=>{const e2=k*k*(3-2*k),mx=(sx+ex)/2+(i-1)*40,my=Math.min(sy,ey)-60-i*14;return[(1-e2)*(1-e2)*sx+2*(1-e2)*e2*mx+e2*e2*ex,(1-e2)*(1-e2)*sy+2*(1-e2)*e2*my+e2*e2*ey]};
+    for(let i=0;i<3;i++){const k=(L.t-.25-i*.4)/1.2;if(k<0||k>=1)continue;const r=7+2*Math.sin(G.t*14+i);
+      for(let j=5;j>=1;j--){const [tx,ty]=at(Math.max(0,k-j*.035),i);ctx.globalAlpha=.16*(6-j)/5;ctx.fillStyle='#ff3050';ctx.beginPath();ctx.arc(tx,ty,r*(1-j*.12),0,6.283);ctx.fill()}
+      const [x,y]=at(k,i),gr=ctx.createRadialGradient(x,y,0,x,y,r*2.2);gr.addColorStop(0,'rgba(255,255,255,1)');gr.addColorStop(.3,'rgba(255,80,110,.95)');gr.addColorStop(1,'rgba(255,20,60,0)');ctx.globalAlpha=1;ctx.fillStyle=gr;ctx.beginPath();ctx.arc(x,y,r*2.2,0,6.283);ctx.fill()}ctx.restore()}}
 function swFloor(w){const R=w.st.R||100*G.S.area;hxFrame('rune',G.t*15%60,G.p.x,G.p.y,R/46,.9)}
 function swDraw(w){swCastDraw(w.st);for(const q of w.st.g||[]){const sc=.62,bob=Math.sin(G.t*3+q.a*5)*2;if(q.m==='die')hxFrame('ghost',4+q.t/.55*4,q.x,q.y-8,sc,1,q.dir<0);else hxFrame('ghost',(q.f|0)%4,q.x,q.y-8+bob,sc,q.m==='join'?.75:1,q.dir<0)}}
 
@@ -4986,7 +4990,7 @@ function attM(){const A=att(),can=attCan(),n=A.n>=7&&can?0:A.n;const o=ovM(`<div
   <div class="btns"><button type="button" class="big" id="attGo" ${can?'':'disabled'}>${can?`🎁 ${n+1}일째 선물 받기`:'✔ 오늘은 받았어요 · 내일 또 만나요'}</button><button type="button" class="ghost" id="lbX">닫기</button></div></div>`);
   o.querySelector('#attGo').onclick=()=>{if(!attCan())return;const A=att();if(A.n>=7)A.n=0;const r=ATT7[A.n];A.n++;A.d=today();if(r.g)SAVE.gold+=r.g;SAVE.tix=SAVE.tix||{};for(const k in (r.t||{}))SAVE.tix[k]=(SAVE.tix[k]||0)+r.t[k];persist();try{SND.p('ach')}catch(e){}toast('🎉 출석 '+A.n+'일째',rwTxt(r).replace(/<br>/g,' + '));res();badges();attM()}}
 // ---- 📜 패치내역 (V118) ----
-const PATCH=[["V123", "11/5", "레벨업 카드 빼버리기 추가"], ["V121", "11/5", "신화스킨 추가"], ["V120", "11/5", "긴급소식:왕언니가 불법무면허운전으로 적발되어, 사회교육 및 면허취득 후 다시 합류했어요."], ["V119", "11/5", "💄 BPS(Beauty per Sec) 추가 · 결과창 DPS/BPS/HPS · 🏆 랭킹에 ⚔️ DPS · 💄 BPS 카테고리"], ["V118", "11/5", "📜 패치내역이 생겼어요 · 미션 아이콘을 하나로 합쳤어요"], ["V117", "11/5", "⚖️ 밸런스 패치: 해방하는 5월, 비련의 신부, 왕언니, 공명하는 4월"], ["V116", "11/5", "일일 미션이 오전 4시에 바뀌어요"], ["V115", "11/5", "스탯 강화 초기화: 첫 1회는 무료, 이후 50% 환급"], ["V113~V114", "11/5", "👻 멀티에서 친구 무기가 보여요 · 태태영 필살기 연출 새 단장"], ["V111~V112", "11/5", "PC 로비가 부드러워지고, 랭킹 상세 보기 추가 · 멀티 시작 오류 수정"], ["V107~V109", "11/4", "PC 화면 배율 설정 · 로비 캐릭터 대사 · 동물 친구들 그림 오류 수정"], ["V106", "11/4", "🏠 로비 · 🎫 시즌 패스 · 📅 미션 · 🎉 출석 · 🏆 헬 랭킹"], ["V105", "11/4", "📮 우편함"], ["V100~V101", "11/3", "멀티 멈춤 오류 수정 · PC 렉 개선"], ["V97~V99", "11/2~3", "필살기 해금 오류 수정 · 신화 입장 연출 복구 + 태태영 Ⅲ"], ["V93~V96", "11/2", "👥 친구와 함께하기(2인 협동) · 모바일 캐릭터 선택 화면 개선"], ["V88~V92", "11/2", "🌐 기갈 서바이버 사이트·앱 오픈 · 로그인·계정 저장"]];
+const PATCH=[["V125", "11/6", "기갈위키최신화"], ["V123", "11/5", "레벨업 카드 빼버리기 추가"], ["V121", "11/5", "신화스킨 추가"], ["V120", "11/5", "긴급소식:왕언니가 불법무면허운전으로 적발되어, 사회교육 및 면허취득 후 다시 합류했어요."], ["V119", "11/5", "💄 BPS(Beauty per Sec) 추가 · 결과창 DPS/BPS/HPS · 🏆 랭킹에 ⚔️ DPS · 💄 BPS 카테고리"], ["V118", "11/5", "📜 패치내역이 생겼어요 · 미션 아이콘을 하나로 합쳤어요"], ["V117", "11/5", "⚖️ 밸런스 패치: 해방하는 5월, 비련의 신부, 왕언니, 공명하는 4월"], ["V116", "11/5", "일일 미션이 오전 4시에 바뀌어요"], ["V115", "11/5", "스탯 강화 초기화: 첫 1회는 무료, 이후 50% 환급"], ["V113~V114", "11/5", "👻 멀티에서 친구 무기가 보여요 · 태태영 필살기 연출 새 단장"], ["V111~V112", "11/5", "PC 로비가 부드러워지고, 랭킹 상세 보기 추가 · 멀티 시작 오류 수정"], ["V107~V109", "11/4", "PC 화면 배율 설정 · 로비 캐릭터 대사 · 동물 친구들 그림 오류 수정"], ["V106", "11/4", "🏠 로비 · 🎫 시즌 패스 · 📅 미션 · 🎉 출석 · 🏆 헬 랭킹"], ["V105", "11/4", "📮 우편함"], ["V100~V101", "11/3", "멀티 멈춤 오류 수정 · PC 렉 개선"], ["V97~V99", "11/2~3", "필살기 해금 오류 수정 · 신화 입장 연출 복구 + 태태영 Ⅲ"], ["V93~V96", "11/2", "👥 친구와 함께하기(2인 협동) · 모바일 캐릭터 선택 화면 개선"], ["V88~V92", "11/2", "🌐 기갈 서바이버 사이트·앱 오픈 · 로그인·계정 저장"]];
 function patchM(){try{localStorage.setItem('gs_patch',PATCH[0][0])}catch(e){}const o=ovM(`<div class="lbM"><h3>📜 패치내역</h3><div class="lbPatch">${PATCH.map((p,i)=>`<div class="${i?'':'new'}"><b>${p[0]}<small>${p[1]}</small></b><span>${p[2]}</span></div>`).join('')}</div><div class="btns"><button type="button" class="ghost" id="lbX">닫기</button></div></div>`);badges();return o}
 // ---- 공용 모달 ----
 function ovM(html){let o=document.getElementById('lbOv');if(o)o.remove();o=document.createElement('div');o.className='ov';o.id='lbOv';o.innerHTML=`<div class="modal">${html}</div>`;document.body.appendChild(o);o.addEventListener('pointerdown',e=>{if(e.target===o)o.remove()});const x=o.querySelector('#lbX');if(x)x.onclick=()=>o.remove();return o}

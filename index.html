@@ -5303,14 +5303,26 @@ const arcY=x=>653+59*((x-225)/225)**2,LINE=653,SLOTY=692;const slotY=i=>arcY(SLO
 const WAVES=21,BOSSW=[7,14,21],WDUR=25,BDUR=40;/* 11-07: 34·50초 → 25·40초 (몬스터가 쌓이게) */
 /* 스테이지 23개: 보통 10 · 어려움 10 · 헬 3 (사용자 승인 2026-11-05). mix = 나오는 종류(1·5·9·13웨이브부터 하나씩), rot = 웨이브마다 그중 3종씩 교대, mut = 귀염 변이체 확률 */
 const ALL9=['n','f','t','r','p','d','a','s','e'];
-const STAGES=[
- ...[['n'],['n'],['n','f'],['n','t'],['f','t','r'],['n','p','r'],['f','t','d'],['n','p','a'],['r','d','s'],['n','a','s','e']].map((mix,i)=>({id:'1-'+(i+1),n:'보통 '+(i+1),d:0,mix,hpm:1.3+.14*i,mut:0})),
- ...[[['n','f','t'],.03],[['n','r','p'],.04],[['f','d','a'],.05],[['n','s','e'],.06],[['t','r','d','p'],.07],[['f','a','s'],.08],[['r','d','e'],.09],[['p','a','s'],.10],[['n','f','t','e'],.12],[ALL9,.15,1]].map(([mix,mut,rot],i)=>({id:'2-'+(i+1),n:'어려움 '+(i+1),d:1,mix,rot,hpm:2.6*(1+.1*i),mut})),
- {id:'3-1',n:'헬 1',d:2,mix:['n','t','r','e'],rot:1,hpm:5,mut:.2},{id:'3-2',n:'헬 2',d:2,mix:['f','t','r','p','d','a'],rot:1,hpm:6.5,mut:.25},{id:'3-3',n:'헬 3',d:2,mix:ALL9,rot:1,hpm:8,mut:.3}];
+/* 60스테이지 (11-07 2단계): 보통 20·어려움 20·헬 20. 체력 B안: 땡땡 환산 n=2s−1, n≤41이면 1+0.0034(n−1)^2.38, 이후 스테이지당 +2.63.
+   공격 A(n)=1+0.014(n−1)^1.83, 이후 +1.09 → 선 피해 배율 1+(A−1)×0.5. 어려움·헬은 마릿수로 이미 웨이브 총 체력 ×1.29·×1.83이라 한 마리 배율에서 나눔.
+   hpm은 예전처럼 판 안에서 15%→100% 적용, 보통 1 = 예전 보통 1(1.3) */
+const STG_TY=['n','f','t','r','p','a','d','s','e'],STG_NM=['보통','어려움','헬'];
+const stgB=s=>{const n=2*s-1;return n<=41?1+.0034*Math.pow(n-1,2.38):1+.0034*Math.pow(40,2.38)+2.63*(s-21)};
+const stgA=s=>{const n=2*s-1;return n<=41?1+.014*Math.pow(n-1,1.83):1+.014*Math.pow(40,1.83)+1.09*(s-21)};
+const STAGES=[];for(let d=0;d<3;d++)for(let i=1;i<=20;i++){const s=d*20+i,cnt=[1,1.29,1.83][d];let mix,rot=0;
+  if(d===0&&i<19){const k=Math.min(9,1+Math.floor((i-1)/2));mix=[...new Set(['n',STG_TY[k-1],STG_TY[k-2],STG_TY[k-3]].filter(Boolean))]}else{mix=ALL9;rot=1}
+  STAGES.push({id:(d+1)+'-'+i,n:STG_NM[d]+' '+i,d,mix,rot,hpm:1.3*stgB(s)/cnt,atm:1+(stgA(s)-1)*.5,mut:d===0?0:d===1?.10+.30*(i-1)/19:.45+.45*(i-1)/19,
+    nw:d===0&&i<18&&i%2===1?STG_TY[Math.floor((i-1)/2)]:null})}
 const SOF=id=>STAGES.find(q=>q.id===id)||STAGES[0];
 const rnd=(a,b)=>a+Math.random()*(b-a),pick=a=>a[Math.floor(Math.random()*a.length)],cl=(v,a,b)=>v<a?a:v>b?b:v;
 const nick=id=>{const c=CHAR.find(q=>q.id===id);return c?c.nick:id};
-const TDS=()=>{SAVE.td=SAVE.td||{};const t=SAVE.td;t.un=t.un||[];t.best=t.best||{};t.st=t.st||{};t.od=t.od||0;t.sl=t.sl||0;return t};
+const TDS=()=>{SAVE.td=SAVE.td||{};const t=SAVE.td;t.un=t.un||[];t.best=t.best||{};t.st=t.st||{};t.od=t.od||0;t.sl=t.sl||0;if(!t.s60)stgMigrate(t);return t};
+/* 예전 23스테이지(보통 10·어려움 10·헬 3) → 60스테이지: 예전 n번째 = 새 2n−1번째, 헬 1·2·3 = 새 헬 1·7·13. 깬 스테이지 이전은 모두 깬 것으로 */
+function stgMigrate(t){t.s60=1;const ob=t.best||{},os=t.st||{},nb={},ns={},W1=22;
+  const map=(d,n)=>d===3?[1,7,13][n-1]:2*n-1;
+  for(const id in ob){const [d,n]=id.split('-').map(Number);if(!d||!n)continue;const nn=map(d,n);if(!nn||nn>20)continue;const nid=d+'-'+nn,v=ob[id];nb[nid]=Math.max(nb[nid]||0,v);if(os[id])ns[nid]=Math.max(ns[nid]||0,os[id]);
+    if(v>=W1)for(let dd=1;dd<=d;dd++)for(let k=1;k<=(dd<d?20:nn);k++){const pid=dd+'-'+k;if((nb[pid]||0)<W1){nb[pid]=W1;ns[pid]=Math.max(ns[pid]||0,1)}}}
+  t.best=nb;t.st=ns}
 const sv=()=>{try{persist()}catch(e){}};
 /* 📈 스탯 강화 100단계 (오드로 강화): 공격력 +1(=피해 +1%) → 크리티컬 +0.1% → 마음의 선 +1 순서로 돌아가요 */
 const STN=100,STK=['atk','crit','line'],stOf=i=>STK[i%3],stCost=n=>5+Math.floor(n/2);
@@ -5470,6 +5482,7 @@ function spawn(k,x0,y0,mu){const w=T.wave,S=SOF(T.stg),bt=k==='b'?S.mix[0]:null,
    rng:y.rng,lay:y.lay,split:y.split,dash:y.dash,ph:rnd(0,6.28),cd:rnd(1.5,3),stopY:rnd(300,430),dsT:0,slow:0,slowF:1,stun:0,fl:0,dead:false};
   if(bt){Object.assign(e,{k:'b',bt,boss:true,elite:false,r:Math.min(54,y.r*3.2),x:W/2+rnd(-60,60),spd:y.spd*.42,dmg:w===21?60:40,xp:20,arm:bt==='a'?.3:bt==='t'?.5:bt==='e'?.7:1,cd2:3,hpS:4,stopY:rnd(260,320),
     nm:(w===21?'👑 여왕 ':'👑 거대 ')+y.nm})}
+  e.dmg*=S.atm||1;
   if(mu||(k!=='b'&&k!=='sm'&&Math.random()<S.mut*Math.min(1,w/8))||(k==='b'&&S.d===2&&w===21)){e.mut=1;if(k!=='b'){e.hp*=2.5;e.max=e.hp;e.spd*=1.15;e.dmg*=1.5;e.xp*=3}T.fx.push({k:'txt',x:e.x,y:Math.max(60,e.y+30),v:'✨ 변이!',t:1,col:'#ff9ad5'})}
   T.en.push(e);
   if(k==='b'){snd('boss');banner(`${e.nm} 등장!`)}}

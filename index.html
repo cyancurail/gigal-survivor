@@ -5757,23 +5757,24 @@ const W2U=[['재건',1],['박준형',1],['송기호',3],['박계원',5],['김세
 const W2N={'재건':['수호탄','에너지','#3dffd0'],'박준형':['폭렬 미사일','불','#ff5a5a'],'송기호':['관통 레이저','에너지','#8dff6a'],'박계원':['교란 드론','역장','#4fa8ff'],'김세진':['궤도 포격','물리','#ffd36a'],'승태민':['번개 생성기','전기','#b07bff'],
   '창환이형':['집중 레이저포','에너지','#5affc8'],'박민규':['서리 신성','빙결','#9fe8ff'],'진형우':['화륜 드론','불','#ff8a3d'],'박준영':['벌집','물리','#fff0a0'],'하도':['관통포','물리','#e8f0ff'],'영규형':['폭풍 소용돌이','바람','#7dffd8'],'조혁래':['레일건','전기','#c9a0ff'],'임재영':['유성우','불·물리','#ff9a5a'],'쥬은':['반중력 장치','역장','#5a8cff']};
 const W2I=new Set(['재건','박준형','송기호','박계원','김세진','승태민']);/* 구현된 무기 (나머지는 다음 단계) */
-const W2D={'재건':'위로 탄환을 쏘고, 맞으면 작은 탄 2개로 갈라져요','박준형':'적을 쫓아가는 미사일, 폭발 후 화염 구역','송기호':'화면 끝까지 꿰뚫는 레이저','박계원':'적 무리에 감속 역장, 끝날 때 폭발','김세진':'하늘에서 포탄이 떨어져 폭발','승태민':'낙뢰 + 옆 적에게 튀는 체인 번개'};
+const W2D={'재건':'위로 탄환을 쏘고, 맞으면 작은 탄 2개로 갈라져요','박준형':'적을 쫓아가는 미사일, 맞으면 폭발','송기호':'화면 끝까지 꿰뚫는 레이저','박계원':'적 무리에 감속 역장, 끝날 때 폭발','김세진':'하늘에서 포탄이 떨어져 폭발','승태민':'낙뢰 + 옆 적에게 튀는 체인 번개'};
 /* 카드: 공통 n·d·r·f + 고유 u1~u3·u5~u7(u7 ⚖ 맞교환) + u4 각성 + fam 계열 강화, 랭크는 W2R */
 const W2C={
  '재건':{n:'탄환 +1 (피해 −15%)',r:'분열 탄 +1',u1:'▶ 관통 +1',u2:'▶ 쏠 때마다 작은 탄 2발 추가 (10% 폭발)',u3:'▲ 10발마다 에너지 충전 → 다음 발 분열 2배',u4:'★ 각성: 모든 탄 관통 +2, 4갈래 분열',u5:'▲ 같은 적을 맞힐수록 피해 +10% (최대 +100%)',u6:'▶ 처치하면 50% 확률로 그 자리에서 탄 3발',u7:'⚖ 집중 사격: 탄환 1줄 고정, 대신 피해 ×2.2'},
- '박준형':{n:'미사일 +1 (피해 −15%)',r:'폭발 범위 +30%',u1:'◆ 맞은 적 3초 점화',u2:'▲ 화염 구역 위 적 받는 피해 +20%',u3:'▶ 폭발 후 작은 폭발 3번 연쇄',u4:'★ 각성: 미사일 충격 피해 +200%',u5:'◆ 화염 구역 5초, 화염 피해 +50%',u6:'▶ 미사일로 처치하면 작은 미사일 2발 재발사',u7:'⚖ 대형 탄두: 미사일 −1, 폭발 범위 +60%·피해 +80%'},
+ '박준형':{n:'미사일 +1 (피해 −15%)',r:'폭발 범위 +30%',u1:'◆ 맞은 적 3초 점화',u2:'▲ 화염 구역 위 적 받는 피해 +20% (🔥 필요)',u3:'▶ 폭발 후 작은 폭발 3번 연쇄',u4:'★ 각성: 미사일 충격 피해 +200%',u5:'◆ 화염 구역 5초, 화염 피해 +50% (🔥 필요)',u6:'▶ 분열 탄두: 맞히면 작은 미사일 2발로 분열 (피해 40%)',u8:'🔥 화염 구역: 폭발 자리에 3초 화염 구역',u9:'◆ 화염 폭풍: 화염 구역끼리 겹치면 합쳐져 커짐 (🔥 필요)',u7:'⚖ 대형 탄두: 미사일 −1, 폭발 범위 +60%·피해 +80%'},
  '송기호':{n:'작은 레이저 +1',r:'레이저 굵기 +30%',u1:'▶ 반사 +1 (반사마다 −20%)',u2:'◆ 맞은 적 감속',u3:'▶ 비스듬한 레이저 2줄 추가',u4:'★ 각성: 레이저 자리가 1.5초 남아 계속 피해',u5:'▲ 같은 적에게 맞힐수록 피해 +40% (최대 +200%)',u6:'◆ 맞은 적 취약 (받는 피해 +20%, 2초)',u7:'▶ 굴절: 처음 맞은 적에서 레이저 2줄이 옆 적에게 꺾임'},
  '박계원':{n:'역장 +1',r:'역장 범위·지속 +30%',u1:'◆ 맞을 때마다 와해 1스택 (10스택 폭발)',u2:'▶ 5% 확률로 적을 맨 위로 되돌림',u3:'▶ 역장이 적을 가운데로 끌어당김',u4:'★ 각성: 끝날 때 작은 블랙홀 2초',u5:'◆ 역장 안 적 받는 피해 +25%',u6:'▶ 역장이 끝나면 다른 무리로 한 번 더 날아가 펼침',u7:'⚖ 강한 감속: 감속 45%→70%, 대신 피해 −30%'},
  '김세진':{n:'포탄 +1 (피해 −15%)',r:'폭발 범위 +30%',u1:'▶ 중심에 고에너지 폭발',u2:'◆ 폭발 후 번개 구슬 2개',u3:'▶ 폭격 후 관통 산탄 5발',u4:'★ 각성: 폭격 1회 추가',u5:'◆ 폭발에 맞은 적 0.5초 기절',u6:'▲ 정예·보스에게 피해 +80%',u7:'⚖ 집중 포격: 포탄 수 절반, 모두 체력 높은 적에게 피해 ×2'},
  '승태민':{n:'낙뢰 +1 (피해 −15%)',r:'체인 +2',u1:'◆ 낙뢰로 처치하면 60% 번개 구슬',u2:'◆ 체인 맞은 적 마비, 체인 피해 +100%',u3:'▶ 번개 구슬 근처에 떨어지면 구슬이 폭발',u4:'★ 각성: 낙뢰마다 체인 5줄',u5:'◆ 번개 구슬 7초 유지, 공격 간격 0.5→0.3초 (모든 구슬)',u6:'▶ 체인이 튀는 거리 +50%',u7:'⚖ 과충전: 낙뢰 간격 3→4.5초, 대신 낙뢰 피해 ×2.5'}};
 /* 랭크·희귀 (갤럭시 디펜스식): [랭크, 희귀] — 랭크2는 무기 Lv3, 랭크3은 Lv6부터 등장 */
 const W2RK={n:[1],d:[1],r:[1],f:[1],fam:[3]};
-const W2R={'재건':{u1:[1],u2:[1,1],u3:[2],u5:[2],u6:[2],u7:[1],u4:[3,1]},'박준형':{u1:[1],u5:[1],u2:[2],u3:[2],u6:[2,1],u7:[1],u4:[3,1]},'송기호':{u1:[1],u2:[1],u6:[1,1],u3:[2],u5:[2],u7:[3],u4:[3,1]},
+const W2R={'재건':{u1:[1],u2:[1,1],u3:[2],u5:[2],u6:[2],u7:[1],u4:[3,1]},'박준형':{u8:[1],u6:[1],u1:[1],u7:[1],u5:[2],u2:[2],u3:[2],u9:[2,1],u4:[3,1]},'송기호':{u1:[1],u2:[1],u6:[1,1],u3:[2],u5:[2],u7:[3],u4:[3,1]},
  '박계원':{u1:[1],u3:[1],u6:[1,1],u2:[2],u5:[2],u7:[3],u4:[3,1]},'김세진':{u1:[1],u5:[1],u7:[1],u2:[2],u3:[2],u6:[2,1],u4:[3,1]},'승태민':{u1:[1],u2:[1,1],u6:[1],u3:[2],u5:[2],u7:[2],u4:[3,1]}};
 const w2Rk=(id,k)=>(W2R[id]&&W2R[id][k])||W2RK[k]||[1];
-const W2KS=['n','d','r','f','u1','u2','u3','u5','u6','u7','u4','fam'];
+const W2KS=['n','d','r','f','u8','u1','u2','u3','u5','u6','u9','u7','u4','fam'];
+const W2PRE={'박준형':{u2:'u8',u5:'u8',u9:'u8'}};/* 선행 카드 */
 function w2Txt(id,k){if(k==='d')return'피해 +50%';if(k==='f')return'공격 간격 −23% (쿨 +30%)';if(k==='fam')return`✦ 모든 ${W2N[id][1]} 계열 무기 피해 +60%`;return(W2C[id]||{})[k]||''}
-const W2CMAX={n:2,d:3,r:2,f:2,u1:1,u2:1,u3:1,u4:1,u5:1,u6:1,u7:1,fam:1};
+const W2CMAX={n:2,d:3,r:2,f:2,u1:1,u2:1,u3:1,u4:1,u5:1,u6:1,u7:1,u8:1,u9:1,fam:1};
 const W2COMBO=[{k:'mz',a:'박준형',b:'재건',la:2,lb:2,n:'불꽃 탄환',d:'수호탄이 맞히면 작은 폭발'},{k:'jr',a:'송기호',b:'승태민',la:2,lb:1,n:'빛 에너지 마비',d:'관통 레이저에 맞은 적 0.4초 마비'}];
 const cmLv=()=>{const c=TDS().cl||{lv:1,xp:0};return c.lv||1};
 const cmNeed=l=>100+40*l;
@@ -5801,7 +5802,7 @@ const W2T={
    m.chg=(m.chg||0);for(let i=0;i<3;i++)setTimeout0(i*.12,()=>{for(let k=0;k<n;k++){const a=Math.atan2(e.y-Y,e.x-x)+(k-(n-1)/2)*.12;const dbl=m.chg>=10;if(dbl)m.chg=0;else if(cc(m,'u3'))m.chg++;
      w2Shoot({k:'bul',m,x:x+(k-(n-1)/2)*6,y:Y,vx:Math.cos(a)*620,vy:Math.sin(a)*620,d,pc:cc(m,'u1')+(aw?2:0),sp:(2+cc(m,'r'))*(dbl?2:1)*(aw?2:1),hit:new Set(),life:1.4,w:2.2})}
      if(cc(m,'u2'))for(const s of [-1,1])w2Shoot({k:'bul',m,x,y:Y,vx:s*160,vy:-600,d:d*.4,pc:0,sp:0,boom:.1,hit:new Set(),life:1.4,w:1.4,small:1});snd('pop')})},
- '박준형'(m,dt,x,Y){m.t-=dt;if(m.t>0)return;if(!T.en.length){m.t=.2;return}m.t=3;const z7=cc(m,'u7'),n=Math.max(1,2+cc(m,'n')-z7),d=40*w2Dm(m)*Math.pow(.85,cc(m,'n'))*(cc(m,'u4')?3:1)*(z7?1.8:1);
+ '박준형'(m,dt,x,Y){m.t-=dt;if(m.t>0)return;if(!T.en.length){m.t=.2;return}m.t=3;const z7=cc(m,'u7'),n=Math.max(1,2+cc(m,'n')-z7),d=46*w2Dm(m)*Math.pow(.85,cc(m,'n'))*(cc(m,'u4')?3:1)*(z7?1.8:1);
    for(let i=0;i<n;i++){const a=-Math.PI/2+(i-(n-1)/2)*.5+rnd(-.1,.1);w2Shoot({k:'mis',m,x,y:Y,a,sp:290,tr:5.5,d,ex:d*.6,R:32*(1+.3*cc(m,'r'))*(z7?1.6:1),tl:[[x,Y]],life:3.2,t:0})}snd('whoosh')},
  '송기호'(m,dt,x,Y){m.t-=dt;if(m.t>0)return;const e=densest()||near(x,Y,1)[0];if(!e){m.t=.2;return}m.t=4;const a0=Math.atan2(e.y-Y,e.x-x),d=45*w2Dm(m),w=8*(1+.3*cc(m,'r'));
    const ls=[[a0,1]];for(let i=0;i<cc(m,'n');i++)ls.push([a0+(i%2?1:-1)*(.12+.1*Math.floor(i/2)),.6]);if(cc(m,'u3'))ls.push([a0-.35,.6],[a0+.35,.6]);
@@ -5846,8 +5847,9 @@ function w2Step(dt){if(!T)return;
     else if(p.k==='mis'){p.t+=dt;p.life-=dt;if(!p.tg||p.tg.dead)p.tg=near(p.x,p.y,1)[0];if(p.tg&&p.t>.12){const want=Math.atan2(p.tg.y-p.y,p.tg.x-p.x);let d=want-p.a;while(d>Math.PI)d-=6.283;while(d<-Math.PI)d+=6.283;p.a+=cl(d,-p.tr*dt,p.tr*dt)}
       p.x+=Math.cos(p.a)*p.sp*dt;p.y+=Math.sin(p.a)*p.sp*dt;p.tl.push([p.x,p.y]);if(p.tl.length>16)p.tl.shift();if(p.y<-40||p.x<-40||p.x>W+40)p.life=0;
       for(const e of T.en){if(e.dead||(e.x-p.x)**2+(e.y-p.y)**2>(e.r+5)**2)continue;const m=p.m;w2Hit(m,e,p.d);CURM=m;aoe(p.x,p.y,p.R,p.ex);CURM=null;if(cc(m,'u1'))for(const q of T.en)if(!q.dead&&(q.x-p.x)**2+(q.y-p.y)**2<(p.R+q.r)**2)burn(q,p.d*.15,3);
-        T.fz=T.fz||[];T.fz.push({x:p.x,y:p.y,R:p.R*.9,t:0,T:cc(m,'u5')?5:3,k:0,d:p.d*.12*(cc(m,'u5')?1.5:1),m,v:cc(m,'u2')});if(T.fz.length>40)T.fz.shift();
-        if(cc(m,'u6')&&e.dead&&!p.mini)for(const s of[-1,1])w2Shoot({k:'mis',m,x:p.x,y:p.y,a:-Math.PI/2+s*.9,sp:320,tr:7,d:p.d*.4,ex:p.ex*.4,R:p.R*.6,tl:[[p.x,p.y]],life:2,t:0,mini:1});gRing(p.x,p.y,p.R,'#ff9a5a');gSpark(p.x,p.y,'#ffb070',8,160);
+        if(cc(m,'u8')){T.fz=T.fz||[];const nz={x:p.x,y:p.y,R:p.R*.9,t:0,T:cc(m,'u5')?5:3,k:0,d:p.d*.12*(cc(m,'u5')?1.5:1),m,v:cc(m,'u2')};const mg=cc(m,'u9')&&T.fz.find(z=>z.m===m&&Math.hypot(z.x-nz.x,z.y-nz.y)<(z.R+nz.R)*.7);
+          if(mg){mg.x=(mg.x*2+nz.x)/3;mg.y=(mg.y*2+nz.y)/3;mg.R=Math.min(120,mg.R+nz.R*.35);mg.t=Math.min(mg.t,.3);mg.d=Math.max(mg.d,nz.d)*1.05;gRing(mg.x,mg.y,mg.R,'#ffb070')}else T.fz.push(nz);if(T.fz.length>40)T.fz.shift()}
+        if(cc(m,'u6')&&!p.mini)for(const s of[-1,1])w2Shoot({k:'mis',m,x:p.x,y:p.y,a:-Math.PI/2+s*.9,sp:320,tr:7,d:p.d*.4,ex:p.ex*.4,R:p.R*.6,tl:[[p.x,p.y]],life:2,t:0,mini:1});gRing(p.x,p.y,p.R,'#ff9a5a');gSpark(p.x,p.y,'#ffb070',8,160);
         if(cc(m,'u3'))for(let i=0;i<3;i++){const ox=p.x+rnd(-p.R,p.R),oy=p.y+rnd(-p.R,p.R);setTimeout0(.15*(i+1),()=>{CURM=m;aoe(ox,oy,p.R*.6,p.ex*.5);CURM=null;gRing(ox,oy,p.R*.6,'#ff7a4a')})}
         p.life=0;snd('boom');break}}
     else if(p.k==='drn'){p.t+=dt;if(p.ph==='fly'){const dx=p.tx-p.x,dy=p.ty-p.y,dd=Math.hypot(dx,dy);if(dd<8){p.ph='fld';p.t=0;gRing(p.x,p.y,p.R,w2Col(p.m))}else{const v=Math.min(1,420*dt/dd);p.x+=dx*v;p.y+=dy*v}}
@@ -5875,7 +5877,7 @@ function w2Draw(g){if(!T)return;g.save();g.globalCompositeOperation='lighter';
 /* ---- 레벨업 카드 ---- */
 function w2Offers(n){const L=[],un=w2Un().filter(id=>W2I.has(id)&&!T.sq.some(m=>m.id===id));
   if(T.sq.length<5)for(const id of un)L.push({k:'new',id,w:T.sq.length<3?2.2:1.2});
-  for(const m of T.sq){const C=W2C[m.id];if(!C)continue;const lv=w2Lv(m),rk=lv>=6?3:lv>=3?2:1;for(const k of W2KS){if(cc(m,k)>=W2CMAX[k])continue;const [r,rare]=w2Rk(m.id,k);if(r>rk)continue;
+  for(const m of T.sq){const C=W2C[m.id];if(!C)continue;const lv=w2Lv(m),rk=lv>=6?3:lv>=3?2:1;for(const k of W2KS){if(cc(m,k)>=W2CMAX[k])continue;if(!w2Txt(m.id,k))continue;const pre=W2PRE[m.id]&&W2PRE[m.id][k];if(pre&&!cc(m,pre))continue;const [r,rare]=w2Rk(m.id,k);if(r>rk)continue;
     if(k==='n'&&cc(m,'u7')&&(m.id==='재건'))continue;if(k==='u7'&&m.id==='재건'&&cc(m,'n'))continue;
     if(k==='fam'&&T.sq.some(q=>cc(q,'fam')&&W2N[q.id][1]===W2N[m.id][1]))continue;
     L.push({k:'wc',id:m.id,c:k,rare:rare?1:0,rk:r,w:rare?(k==='u4'?.9:.55):k[0]==='u'?1.3:k==='fam'?.8:1})}}
@@ -5950,7 +5952,7 @@ function labFill(){T.wave=10;T.wt=0;T.wdur=1e9;const ds=T.en.filter(e=>e.dummy&&
 function labApply(){if(V2&&!W2I.has(LAB.id)){LAB.id='재건';LAB.ev=''}build();ov.hidden=false;window.__tdOn=1;document.body.classList.add('tdOn');resize();if(!raf){last=0;raf=requestAnimationFrame(loop)}LD=null;
   ov.querySelectorAll('.tdPanel').forEach(p=>p.hidden=true);ov.querySelector('.tdLobby').hidden=true;ov.querySelector('.tdTop').style.visibility='hidden';
   T=newRun('1-10',LAB.id);T.lab=1;T.need=1e12;T.hp=T.hpMax=1e9;T.labV=LAB.mv?14:0;T.ts=LAB.ts;T.labD=0;T.labH=[];T.labT=0;
-  const mk=(id,ev)=>{if(V2){const m=mkW(id);m.t=0;const ps={'':{},'c':{n:2,d:3,r:2,f:2},'u':{u1:1,u2:1,u3:1,u5:1,u6:1},'t':{d:3,r:2,f:2,u7:1},'all':{n:2,d:3,r:2,f:2,u1:1,u2:1,u3:1,u5:1,u6:1,u4:1,fam:1}}[ev]||{};m.c=Object.assign({},ps);return m}const m=mkM(id);m.t=0;m.lv=[0,1,2,3,4].map(()=>Math.min(TYPMAX,LAB.lv));m.ev=ev.split('');m.up=LAB.up;m.el=LAB.el&&!NOEL(id)?1:0;return m};
+  const mk=(id,ev)=>{if(V2){const m=mkW(id);m.t=0;const ps={'':{},'c':{n:2,d:3,r:2,f:2},'u':{u1:1,u2:1,u3:1,u5:1,u6:1,u8:1,u9:1},'t':{d:3,r:2,f:2,u7:1},'all':{n:2,d:3,r:2,f:2,u1:1,u2:1,u3:1,u5:1,u6:1,u8:1,u9:1,u4:1,fam:1}}[ev]||{};m.c={};for(const k in ps)if(w2Txt(id,k))m.c[k]=ps[k];return m}const m=mkM(id);m.t=0;m.lv=[0,1,2,3,4].map(()=>Math.min(TYPMAX,LAB.lv));m.ev=ev.split('');m.up=LAB.up;m.el=LAB.el&&!NOEL(id)?1:0;return m};
   T.sq=[mk(LAB.id,LAB.ev)];if(LAB.b&&LAB.b!==LAB.id){T.sq.push(mk(LAB.b,LAB.ev));const d=DUO.find(q=>q.a===LAB.id&&q.b===LAB.b||q.b===LAB.id&&q.a===LAB.b);if(d)T.duo=[d.k]}
   bgm(null);labUI()}
 function labUI(){let u=ov.querySelector('.tdLab');if(!u){u=document.createElement('div');u.className='tdLab';ov.appendChild(u);u.addEventListener('change',labChg);u.addEventListener('click',labClk)}
@@ -6180,7 +6182,7 @@ function lbTab(k){const td=TDS(),L=LOB;
     <div class="tdGrid">${CHAR.map(c=>{const id=c.id,o=td.un.includes(id);return`<button type="button" data-q="${id}" class="${L.sq===id?'on':''}" style="${o?'':'opacity:.35'}"><span data-face="${id}"></span>${o?'':'🔒 '}${nick(id)}${upOf(id)?` <em style="font-style:normal;color:#ffd34d">+${upOf(id)}</em>`:''}</button>`}).join('')}</div>
     ${sel?sqInfo(sel.id):'<p style="font-size:12px;color:#cbb">친구를 누르면 무기 정보를 볼 수 있어요</p>'}`}
   return''}
-function sqInfo(id){if(V2){const C=W2C[id],u=W2U.find(q=>q[0]===id);return`<div class="sqInfo"><b>${CICON[id]} ${nick(id)} · ${W2N[id][0]}</b><small>${W2N[id][1]} 계열 · 사령관 Lv${u[1]} 해금${W2I.has(id)?'':' · 제작 중'}</small><small>${W2D[id]||''}</small>${C?W2KS.map(k=>{const [r,ra]=w2Rk(id,k);return`<small>${'ⅠⅡⅢ'[r-1]}${ra?'💜':''} ${w2Txt(id,k)}</small>`}).join(''):''}</div>`}const u=upOf(id),o=TDS().un.includes(id),g=['초반형','중반형','대기만성형'][GROW[id]||0],e=EVD[id]||[];
+function sqInfo(id){if(V2){const C=W2C[id],u=W2U.find(q=>q[0]===id);return`<div class="sqInfo"><b>${CICON[id]} ${nick(id)} · ${W2N[id][0]}</b><small>${W2N[id][1]} 계열 · 사령관 Lv${u[1]} 해금${W2I.has(id)?'':' · 제작 중'}</small><small>${W2D[id]||''}</small>${C?W2KS.filter(k=>w2Txt(id,k)).map(k=>{const [r,ra]=w2Rk(id,k);return`<small>${'ⅠⅡⅢ'[r-1]}${ra?'💜':''} ${w2Txt(id,k)}</small>`}).join(''):''}</div>`}const u=upOf(id),o=TDS().un.includes(id),g=['초반형','중반형','대기만성형'][GROW[id]||0],e=EVD[id]||[];
   return`<div class="sqInfo"><b>${CICON[id]} ${nick(id)}</b> ${o?'':'<small>(아직 합류 전)</small>'}<small>무기 「${nick(id)}」 · ${g} · +${u}강</small>
    ${e.map((p,i)=>`<small>${i+1}진화: A ${p[0][0]} / B ${p[1][0]}</small>`).join('')}
    <small>${ELM[id][0]} 3강 속성: ${ELM[id][1]}</small><small>🔒 5강 C: ${EVC[id][0]} — ${EVC[id][1]}</small><small>💗 6강 각성: ${EVW[id]}</small></div>`}

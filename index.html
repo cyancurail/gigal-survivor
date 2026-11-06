@@ -3031,6 +3031,18 @@ const ACH=[
  {id:'hellev',n:'헬 모드 추가 이벤트!',c:'헬 모드 추가 기념 접속 선물',r:'💰 2000G',gold:2000},
  {id:'s2ev',n:'시즌2 업데이트 기념 접속 이벤트 달성!',c:'시즌2 업데이트 기념 접속 선물',r:'💰 5000G',gold:5000},
 ];
+/* 히든 무기 제작 업적 (V133 준비, 사용자 결정 B안): 보상 신화 스킨이 준비되면 ACH_HX_ON=true + 각 항목에 inv(스킨 POOL id)·r 채우기.
+   켜면 ACH 맨 끝에 붙음(18→24개, 저장 코드 3바이트 그대로). 숨김 업적(pub 없음). 패치내역엔 안 씀(히든). 달성 = SAVE.hxMade[hx](직접 합체, 트와일라잇 제외, 예전 기록 소급) */
+const ACH_HX=[
+ {id:'hx_polaris',hx:'polaris',n:'차가운 얼음 나라의 공주',c:'플로리스 폴라리스 제작',r:'👑 전용 신화 스킨'},
+ {id:'hx_glass',hx:'glass',n:'고대 요정의 마법 : 시공간 제어',c:'요정의 유리정원 제작',r:'👑 전용 신화 스킨'},
+ {id:'hx_soulwed',hx:'soulwed',n:'죽음을 넘는 사랑에 빠진 여자',c:'영혼결혼식 제작',r:'👑 전용 신화 스킨'},
+ {id:'hx_roadster',hx:'roadster',n:'억척스럽게 생긴 련들은 Out',c:'레이디 로드스터 제작',r:'👑 전용 신화 스킨'},
+ {id:'hx_stellar',hx:'stellar',n:'별들의 후손',c:'스텔라 디센던트 제작',r:'👑 전용 신화 스킨'},
+ {id:'hx_rave',hx:'rave',n:'리샤 발렌타인',c:'R.A.V.E. 제작',r:'👑 전용 신화 스킨'},
+];
+const ACH_HX_ON=false;if(ACH_HX_ON)ACH.push(...ACH_HX);
+function achHx(k){for(const a of ACH)if(a.hx&&(!k||a.hx===k)&&SAVE.hxMade&&SAVE.hxMade[a.hx])achGet(a.id)}
 const ACH_V6=16;
 const AXN={black:'🕶️ 왕언니 블랙 스킨',sakura:'🌸 신부 벚꽃 공격',goldevo:'✨ 황금 진화 이펙트',heartkill:'💖 하트 처치 이펙트',xpack:'💘 추가 무기 스킨팩'};
 if(SAVE.ach&&!SAVE.achC){SAVE.achC={};Object.keys(SAVE.ach).forEach(k=>SAVE.achC[k]=1)}
@@ -3042,7 +3054,7 @@ function achBadge(){const n=achUnclaimed();document.querySelectorAll('#achBtn,#s
 function achGet(id){if(SAVE.ach[id])return;if(G&&G.tw&&G.running)return;const a=ACH.find(q=>q.id===id);if(!a)return;SAVE.ach[id]=Date.now();persist();achBadge();
   SND.p('ach');if(!(G&&G.bot))toast('🏆 업적 달성!','업적 창에서 보상을 받으세요',true)}
 function achCheck(){
-  achGet('enter');achGet('hellev');achGet('s2ev');
+  achGet('enter');achGet('hellev');achGet('s2ev');try{achHx()}catch(e){}
   if(fancyCount()>=CH12().length)achGet('fancy12');
   if(CH12().every(c=>SAVE.cine[c.id]))achGet('cine12');
   if(anyMyth())achGet('myth');if((SAVE.mdup||0)>=1)achGet('mdup1');if((SAVE.mdup||0)>=2)achGet('mdup2');
@@ -5119,7 +5131,7 @@ const _eg=endGame;endGame=function(win){const g=G,bot=g&&g.bot;_eg.apply(this,ar
   persist();const m=document.getElementById('resmodal');if(m&&spLive()){const d=document.createElement('p');d.className='c';d.style.cssText='margin:6px 0;color:#ffe08a;font-weight:800';d.textContent=tw?'🎫 트와일라잇은 패스 XP가 쌓이지 않아요':`🎫 시즌 패스 +${add} XP · ${spLv()}단계`+(msCanN()?' · 📅 완료한 미션이 있어요!':'');const b=m.querySelector('.btns');m.insertBefore(d,b||null)}}catch(e){console.warn(e)}};
 try{window.endGame=endGame}catch(e){}
 for(const fn of ['doGacha','doGacha10']){const o=window[fn];if(typeof o!=='function')continue;const w=function(){const g0=SAVE.gold;o.apply(this,arguments);if(SAVE.gold<g0){msBump('gacha1',1);persist()}};window[fn]=w;try{if(fn==='doGacha')doGacha=w;else doGacha10=w}catch(e){}}
-for(const fn of ['hxMerge','rdMerge']){const o=window[fn];if(typeof o!=='function')continue;const w=function(h,q){const r=o.apply(this,arguments);const quiet=fn==='rdMerge'?h:q;if(!quiet&&G&&!G.bot&&!G.tw){SAVE.hxMade=SAVE.hxMade||{};SAVE.hxMade[fn==='rdMerge'?'roadster':h.k]=1;try{persist()}catch(e){}}return r};window[fn]=w;try{if(fn==='hxMerge')hxMerge=w;else rdMerge=w}catch(e){}}
+for(const fn of ['hxMerge','rdMerge']){const o=window[fn];if(typeof o!=='function')continue;const w=function(h,q){const r=o.apply(this,arguments);const quiet=fn==='rdMerge'?h:q;if(!quiet&&G&&!G.bot&&!G.tw){SAVE.hxMade=SAVE.hxMade||{};SAVE.hxMade[fn==='rdMerge'?'roadster':h.k]=1;try{persist()}catch(e){}try{achHx(fn==='rdMerge'?'roadster':h.k)}catch(e){}}return r};window[fn]=w;try{if(fn==='hxMerge')hxMerge=w;else rdMerge=w}catch(e){}}
 // ---- 화면 ----
 const dLeft=()=>{const ms0=SP.end-spNow();if(ms0<=0)return'시즌 종료';const d=Math.floor(ms0/864e5),h=Math.floor(ms0%864e5/36e5);return d?`${d}일 ${h}시간 남음`:`${h}시간 남음`};
 function passM(){const S=sp(),L=spLv(),xin=S.xp%SP.lvXp,pre=spNow()<SP.start;

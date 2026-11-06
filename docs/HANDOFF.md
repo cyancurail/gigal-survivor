@@ -1,4 +1,4 @@
-# 기갈 서바이버 인수인계 문서 (2026-11-06 기준, 사이트 V128 / claude.ai V87)
+# 기갈 서바이버 인수인계 문서 (2026-11-06 기준, 사이트 V129 / claude.ai V87)
 
 새 대화(또는 프로젝트)에서 이 문서를 먼저 읽고 작업을 이어간다.
 
@@ -31,6 +31,7 @@
 | 홍보 이미지 캔버스 | https://claude.ai/artifact/CMEttteZbaj4VHwD5iTHst | 도트 키 비주얼 (참고용) |
 
 - 게임은 **HTML 한 파일**(V81 이후 약 2.4MB 이상). 소스는 claude-artifacts `read_file`에 slug(UUID)와 `paths:["index.html"]`을 주면 파일로 저장된다(대화에 통째로 붙이지 말 것). 수정 후 같은 slug로 publish.
+- **V129 배포 (2026-11-06 21:25, 사이트) — 🐾 펫 하향**: petTick 탐색 반경 = min(**G.S.magnet×2**, 화면 짧은 변×0.55)(예전엔 화면 55% 고정 ≈ 290px), 이동 240(←340), 한 번에 끌어오는 묶음 20px(←30), 가져온 뒤 0.6초 휴식(`P.rest`). 2분 봇 경험치: 펫 없음 119 / 슬라임 127(+7%). 패치내역(사용자 문구) 「밸런스 패치 : 펫은 주인공이 아니에요. 이 련이 좀 나대서 기강을 좀 잡았어요.」 sw VERSION 'v129'.
 - **V128 배포 (2026-11-06 19:20, 사이트 + claude.ai 위키) — 📖 위키 캐릭터: 필살기 · ✨ 성격분석**: 위키 👥 캐릭터 카드(`.cc[data-cid=내부 id]`)를 누르면 아래 시트 `#csh`(필살기 이름·종류·설명 = 게임 `ULT` 그대로, 쿨타임 3분). 일반 12명은 「✨ 성격분석 보기」 → 전체 화면 `#cv` = 원조 게임 「누가 말했노」(claude.ai XFxriBVKZuyony5myPBApr, slug f508fee7-…)의 성격분석 카드·테마 12종·오프닝·파티클 그대로 이식(‹ › 12명 순환, Esc·←→). **쥬은·짱재·하도는 필살기만**(사용자 결정). 원조 문장(욕설 포함) 그대로(사용자 결정), 빈 별명만 세나·앙헬·잔느로 채움. CSS는 `.cv` 아래로 범위 지정 + 키프레임 `cv_` 접두사, `.tag`→`.ptag`(위키 .tag와 충돌). 원조 글꼴 20종은 시트를 처음 열 때만 불러옴. 🏠 시작하기 「🏠 로비」 카드에 V126 내용(▲ 접기/☰ 메뉴·📖 위키·✅ 로비 캐릭터로 정하기). **생성기 gen.py가 없어져서 wiki.html을 직접 고침** — 이번 변환 스크립트는 `docs/wiki_v128_build.py`(원조 게임 HTML 필요). claude.ai 위키(EjwZ…)도 같은 파일. 패치내역 「📖 위키 캐릭터: 필살기 · ✨ 성격분석 보기」. sw VERSION 'v128'.
 - **V127 배포 (2026-11-06 18:57, 사이트) — 인게임 위키 버그 수정**: sw.js fetch가 `mode==='navigate'`를 전부 index.html로 돌려 iframe `wiki.html?ingame=1`에도 게임이 떴음 → 경로가 `/wiki.html`이면 캐시 키 `./wiki.html`. 패치내역 새 줄 없음(자잘한 수정). sw VERSION 'v127'. **iframe·새 페이지를 추가할 때는 sw.js navigate 분기를 꼭 확인.**
 - **V126 배포 (2026-11-06 18:40, 사이트) — 로비 메뉴 접기 · 인게임 위키 · 캐릭터 탭**: ① `#lbIcons` 맨 위 `#lbIcT`(▲ 접기 / ☰ 메뉴 + 배지 합계), 상태 `localStorage gs_lbFold`(기기별), `.fold`면 data-lb 버튼 숨김. 아이콘 58→48px(PC 62→54, 5열). ② 📖 위키 `data-lb="wiki"` → `wikiM()` 전체 화면 오버레이 `#lbWiki` iframe `wiki.html?ingame=1`(?ingame이면 위키의 게임 링크 숨김), ✕/Esc 닫기. 저장소 루트 `wiki.html` = claude.ai 위키와 같은 생성기 출력(/home/claude/w/gen.py), sw ASSETS에 추가. **위키를 고치면 wiki.html과 claude.ai 위키를 같이 갱신.** ③ 로비 「👤 캐릭터」 → `window.LB_PICK=true`: MutationObserver가 `#goB`를 「✅ 로비 캐릭터로 정하기」로 바꾸고, 캡처 단계 클릭에서 gs_sel 저장 + 로비 복귀(게임 시작 안 함). 다른 로비 버튼은 LB_PICK=false(▶ 출격은 그대로 시작). 패치내역 「로비 메뉴 접기 · 📖 위키 버튼 · 캐릭터 탭에서 로비 캐릭터 바꾸기」. sw VERSION 'v126'.

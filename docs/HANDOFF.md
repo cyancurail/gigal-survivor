@@ -1,4 +1,4 @@
-# 기갈 서바이버 인수인계 문서 (2026-11-06 기준, 사이트 V131 / claude.ai V87)
+# 기갈 서바이버 인수인계 문서 (2026-11-06 기준, 사이트 V132 / claude.ai V87)
 
 새 대화(또는 프로젝트)에서 이 문서를 먼저 읽고 작업을 이어간다.
 
@@ -31,6 +31,7 @@
 | 홍보 이미지 캔버스 | https://claude.ai/artifact/CMEttteZbaj4VHwD5iTHst | 도트 키 비주얼 (참고용) |
 
 - 게임은 **HTML 한 파일**(V81 이후 약 2.4MB 이상). 소스는 claude-artifacts `read_file`에 slug(UUID)와 `paths:["index.html"]`을 주면 파일로 저장된다(대화에 통째로 붙이지 말 것). 수정 후 같은 slug로 publish.
+- **V132 배포 (2026-11-07 02:05, 사이트) — 🔊 볼륨 조절**: 전역 `VOL(k)`(localStorage `gs_vol_m`·`gs_vol_s`, 0~1, 기본 1, 기기별·저장 코드 미포함). MG(.32)·SG(.55)·로비 mp3(lbVol .55)에 곱함. `SND.vol(k,v)`·`apply(k)`. `sndBtns()`에 슬라이더 `.volrow`(0~100, 10 단위, `data-vol`), document input 이벤트로 즉시 반영. 최대 100%(사용자 결정). 패치내역 「🔊 음악·효과음 볼륨 조절 추가」. sw VERSION 'v132'.
 - **V131 배포 (2026-11-06 23:15, 사이트) — 🎵 로비 배경음**: 사용자가 Gemini로 만든 곡 「Pockets Full of Sunshine」 → `bgm/lobby.mp3`(157초로 끝 무음 자름 + 1.2초 페이드, loudnorm −16 LUFS, 128kbps 스테레오, 약 2.5MB). SND 안 `LB`: 로비·select·shop·closet·ach·savescr 화면이 보이고 게임 중·결과창·시작 화면(#title.tonly)이 아닐 때 `tick`의 'title' 대신 AudioBufferSource(loop) 재생, 칩튠은 멈춤(cur=null). 볼륨 = 음악 켜짐 ? .55×duck : 0(일시정지·영상 덕킹 그대로), 떠나면 0.35초 페이드아웃 후 멈추고 이어 듣기 위치(LB.off) 기억. 로비에 처음 들어갈 때 fetch·decode(받기 전엔 칩튠). **시작 화면은 칩튠 그대로(사용자 결정).** sw.js: `/bgm/*.mp3`는 버전과 무관한 캐시 `gigal-bgm-1`(곡을 바꾸면 이름 올리기), activate에서 지우지 않음. `SND.st()`에 [.., LB 재생중, LB 로드됨] 추가. 패치내역 「🎵 로비 배경음 변경」. sw VERSION 'v131'.
 - **V130 배포 (2026-11-06 22:50, 사이트 + claude.ai 위키 V13) — ✨ 성격분석 시즌2**: 위키 성격분석 화면(`#cv`) 카드 오른쪽 위 빛나는 「↻ 뒤집어서 시즌2 성격분석 보기」(`#cvFlip`) → `.s2card` 3D 뒤집기(rotateY, 반짝이 `.s2burst`) 후 시즌2 면(「SEASON 2 · 기갈 이후의 우리」 배지, `.cv.s2` 배경 hue + 칸 홀로그램 빛). 같은 버튼으로 시즌1 복귀, ‹ ›는 보던 시즌 유지, 시트에서 새로 열면 시즌1. 데이터 `S2[id]`(epi·tag·stats·ana·habit·quotes·hours·peak) = 사용자 제공 카톡 내보내기 2026-10-17~11-06(약 9,700줄) 분석, 명대사는 실제 대화 그대로(연속 메시지 합친 것 포함), 이메일 등 개인 정보 제외. 마녀·앙헬·잔느·힐블은 메시지가 적어(18~36개) 「레어 등장」 콘셉트. 패치 스크립트 `docs/wiki_v130_s2_patch.py` + 문구 `docs/wiki_s2_text.json`(시간대는 스크립트 입력 stats.json, 이미 wiki.html에 반영됨). 패치내역 「📖 위키: ✨ 성격분석 시즌2 (카드를 뒤집어 보세요)」. sw VERSION 'v130'.
 - **V129 배포 (2026-11-06 21:25, 사이트) — 🐾 펫 하향**: petTick 탐색 반경 = min(**G.S.magnet×2**, 화면 짧은 변×0.55)(예전엔 화면 55% 고정 ≈ 290px), 이동 240(←340), 한 번에 끌어오는 묶음 20px(←30), 가져온 뒤 0.6초 휴식(`P.rest`). 2분 봇 경험치: 펫 없음 119 / 슬라임 127(+7%). 패치내역(사용자 문구) 「밸런스 패치 : 펫은 주인공이 아니에요. 이 련이 좀 나대서 기강을 좀 잡았어요.」 sw VERSION 'v129'.

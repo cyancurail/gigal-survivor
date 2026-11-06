@@ -3041,12 +3041,13 @@ const ACH_HX=[
  {id:'hx_soulwed',hx:'soulwed',n:'죽음을 넘는 사랑에 빠진 여자',c:'영혼결혼식 제작',r:'👑 K1 신화 스킨 「유령신부」',inv:'mx:박계원|7'},
  {id:'hx_roadster',hx:'roadster',n:'억척스럽게 생긴 련들은 Out',c:'레이디 로드스터 제작',r:'👑 전용 신화 스킨 (준비 중)'},
  {id:'hx_stellar',hx:'stellar',n:'별들의 후손',c:'스텔라 디센던트 제작',r:'👑 전용 신화 스킨 (준비 중)'},
+ {id:'hx_prism',hx:'prism',n:'하늘을 쪼갠 일곱 빛깔',c:'셀레스티얼 프리즘 제작',r:'👑 전용 신화 스킨 (준비 중)'},
  {id:'hx_rave',hx:'risha',n:'리샤 발렌타인',c:'R.A.V.E. 제작',r:'👑 전용 신화 스킨 (준비 중)'},
 ];
 const ACH_HX_ON=true;if(ACH_HX_ON)ACH.push(...ACH_HX);
 function achHx(k){for(const a of ACH)if(a.hx&&(!k||a.hx===k)&&SAVE.hxMade&&SAVE.hxMade[a.hx])achGet(a.id);
   /* 나중에 보상(inv)이 붙은 업적: 이미 받은 사람에게 소급 지급 */let ch=0;for(const a of ACH)if(a.inv&&SAVE.achC&&SAVE.achC[a.id]&&!SAVE.inv[a.inv]){SAVE.inv[a.inv]=true;ch=1}if(ch)try{persist()}catch(e){}}
-const ACH_V6=16;
+const ACH_V6=16,ACH_V16=18;
 const AXN={black:'🕶️ 왕언니 블랙 스킨',sakura:'🌸 신부 벚꽃 공격',goldevo:'✨ 황금 진화 이펙트',heartkill:'💖 하트 처치 이펙트',xpack:'💘 추가 무기 스킨팩'};
 if(SAVE.ach&&!SAVE.achC){SAVE.achC={};Object.keys(SAVE.ach).forEach(k=>SAVE.achC[k]=1)}
 ['ach','ax','xevo','achC'].forEach(k=>{if(!SAVE[k])SAVE[k]={}});if(!SAVE.tix)SAVE.tix={R:0,L:0};
@@ -3283,7 +3284,7 @@ function parseCode(code){
   let bin;try{bin=atob(m0[1].replace(/-/g,'+').replace(/_/g,'/'))}catch(e){return null}
   const bytes=scMask([...bin].map(c=>c.charCodeAt(0)));if(bytes.length<10)return null;
   const body=bytes.slice(0,-2),h=scHash(body);if((h&255)!==bytes[bytes.length-2]||(h>>8&255)!==bytes[bytes.length-1])return null;
-  const ver=body[0];if(ver<1||ver>SC_VER)return null;const AL=ver>=7?ACH:ACH.slice(0,ACH_V6);
+  const ver=body[0];if(ver<1||ver>SC_VER)return null;const AL=ver>=17?ACH:ver>=7?ACH.slice(0,ACH_V16):ACH.slice(0,ACH_V6);
   try{const C=CH12().map(c=>c.id),S={fancy:{},ult:{},cine:{},tallOff:{},best:{},bestH:{},inv:{},skin:{},wfx:{},ach:{},ax:{},xevo:{},achC:{},tix:{R:0,L:0,M:0}};let p=1;
     for(const k of ['fancy','ult','cine','tallOff'])p=scUnbits(body,p,C,id=>S[k][id]=true);
     C.forEach(id=>{const v=body[p++];if(v)S.best[id]=v*10});C.forEach(id=>{const v=body[p++];if(v)S.bestH[id]=v*10});
@@ -3659,7 +3660,7 @@ const STU_MAX=100,STU_G=100;
 function stuOf(id){const a=(SAVE.stu||{})[id];return STU.map((_,i)=>Math.max(0,Math.min(STU_MAX,(a&&a[i])|0)))}
 function stuSum(id){return stuOf(id).reduce((a,b)=>a+b,0)}
 function stuApply(s,id){const u=stuOf(id);s.maxHp+=.4*u[0];s.might*=1+.002*u[1];s.armor+=.1*u[2];s.speed+=.3*u[3];s.crit+=.003*u[4];s.luck+=.003*u[5]}
-function jmsRow(){const id='쥬은',cur=mskCur(id);return `<div class="wardrobe"><b>👑 신화 스킨</b><button type="button" data-jms="0" aria-pressed="${!cur}">기본</button>${[1,2,3,4,5,6].filter(s=>mskHas(id,s)).map(s=>mskOwn(id,s)?`<button type="button" data-jms="${s}" aria-pressed="${cur===s}">${mskNm(id,s)}</button>`:`<button type="button" disabled>🔒 ${mskNm(id,s)}</button>`).join('')}</div>`}
+function jmsRow(){const id='쥬은',cur=mskCur(id);return `<div class="wardrobe"><b>👑 신화 스킨</b><button type="button" data-jms="0" aria-pressed="${!cur}">기본</button>${[1,2,3,4,5,6].filter(s=>mskHas(id,s)).map(s=>mskOwn(id,s)?`<button type="button" data-jms="${s}" aria-pressed="${cur===s}">${mskNm(id,s)}</button>`:`<button type="button" disabled>🔒 ${mskLk(id,s)}</button>`).join('')}</div>`}
 document.addEventListener('click',e=>{const b=e.target&&e.target.closest&&e.target.closest('[data-jms]');if(!b)return;SAVE.mskin=SAVE.mskin||{};SAVE.mskin['쥬은']=+b.dataset.jms;persist();SND.p('click');renderDetail()});
 function stuRow(c){const n=stuSum(c.id);return `<div class="wardrobe"><b>📈 스탯 강화 · ${n}/${STU.length*STU_MAX}</b><button type="button" id="detStat">📈 강화하기</button></div>`}
 function openStu(id){let ov=$('#gstov');if(!ov){ov=document.createElement('div');ov.className='ov';ov.id='gstov';document.body.appendChild(ov)}ov.hidden=false;
@@ -4154,6 +4155,7 @@ const JG_SWI=['data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAALCAYAAAANxs/
 MSK2L.forEach(o=>MSK_IMG[o.id+'|'+o.s]=o.f);
 const MSK={};(function(){for(const k in MSK_IMG){const im=new Image();im.src=MSK_IMG[k];MSK[k]=im}})();
 const MSKN=['','Ⅰ','Ⅱ','Ⅲ'];
+function mskLk(id,s){const o=MSK2B[id+'|'+s],p=o&&PBY[o.pid];return p&&p.nog?'???':mskNm(id,s)}
 function mskNm(id,s){const o=MSK2B[id+'|'+s];return o?o.n:MSKN[s]}
 function mskSrc(id,s){const o2=MSK2B[id+'|'+s];if(o2)return o2.pid;return s===1?'m:'+id:s===2?'m3:'+id:(id==='박계원'?'m2:박계원':'ms:'+id)}
 function mskHas(id,s){return!!MSK_IMG[id+'|'+s]}
@@ -4163,7 +4165,7 @@ const MSKC={};
 function mskFrame(id,s,i){const k=id+'|'+s+'|'+i;if(MSKC[k])return MSKC[k];const c=document.createElement('canvas');c.width=c.height=64;const im=MSK[id+'|'+s];if(!(im&&im.complete&&im.width))return c;const g=c.getContext('2d');g.imageSmoothingEnabled=false;g.drawImage(im,i*64,0,64,64,0,0,64,64);return MSKC[k]=c}
 function mskSpr(id,s,f){const p=typeof G!=='undefined'&&G&&G.running&&CHAR[G.ci]&&CHAR[G.ci].id===id?G.p:null;if(p){G.mskA=CHAR[G.ci].w;if(p.mv)return mskFrame(id,s,4+((f||0)%4));if(G.mAtk>0)return mskFrame(id,s,2+(Math.floor(G.t*6)&1))}return mskFrame(id,s,Math.floor(performance.now()/500)&1)}
 function mskRow(id){if(!mskHas(id,1))return'';const cur=mskCur(id);let b=`<button type="button" class="wfxb cmsk" data-s="0" aria-pressed="${!cur}">해제</button>`;
-  for(const s of [1,2,3,4,5,6,7,8,9].filter(q=>mskHas(id,q))){const o=mskOwn(id,s);b+=o?`<button type="button" class="wfxb cmsk" data-s="${s}" aria-pressed="${cur===s}"><canvas width="32" height="32" data-msk="${s}" style="width:32px;height:32px;image-rendering:pixelated;vertical-align:middle"></canvas> ${mskNm(id,s)}</button>`:`<button type="button" class="wfxb" disabled>🔒 ${mskNm(id,s)}</button>`}
+  for(const s of [1,2,3,4,5,6,7,8,9].filter(q=>mskHas(id,q))){const o=mskOwn(id,s);b+=o?`<button type="button" class="wfxb cmsk" data-s="${s}" aria-pressed="${cur===s}"><canvas width="32" height="32" data-msk="${s}" style="width:32px;height:32px;image-rendering:pixelated;vertical-align:middle"></canvas> ${mskNm(id,s)}</button>`:`<button type="button" class="wfxb" disabled>🔒 ${mskLk(id,s)}</button>`}
   return `<div class="clowrow" style="border-color:#fff3a0"><span class="wn">👑 신화 스킨</span><span class="wb">${b}</span><span class="c">${id==='박계원'?'Ⅰ·Ⅱ·Ⅲ은 신화 입장 연출과 함께, 나머지는 신화 뽑기에서 얻어요':'Ⅰ·Ⅱ는 신화 입장 연출과 함께, Ⅲ부터는 신화 뽑기에서 얻어요'} · 이 캐릭터 전용 · 화려한 모습에 입혀져요</span></div>`}
 function mskBind(id){$('#closet').querySelectorAll('canvas[data-msk]').forEach(cv=>{const x=cv.getContext('2d');x.imageSmoothingEnabled=false;x.drawImage(mskFrame(id,+cv.dataset.msk,0),0,0,32,32)});
   $('#closet').querySelectorAll('.cmsk').forEach(b=>b.onclick=()=>{SAVE.mskin=SAVE.mskin||{};SAVE.mskin[id]=+b.dataset.s;persist();SND.p('click');renderCloset()});

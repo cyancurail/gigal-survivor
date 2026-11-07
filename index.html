@@ -5270,9 +5270,9 @@ setInterval(()=>{if(run){res();badges()}},3000);
 })();</script>
 
 <script>/* ===== 🌈 그레이스 프리즘 (히든: QUEEN 레이저쇼★ + 솜사탕 랜드★ + 선글라스) ===== */
-Object.assign(WP,{prism:{name:'그레이스 프리즘',icon:'🌈',evo:'sunglass',evoName:'그레이스 프리즘',hid:1,d:'화려한 쇼 뒤에 남겨진 고요한 흔적.',ed:'화려한 쇼 뒤에 남겨진 고요한 흔적.',extra:1}});
+Object.assign(WP,{prism:{name:'그레이스 프리즘',icon:'🌈',evo:'sunglass',evoName:'그레이스 프리즘',hid:1,d:'가장 눈부신 순간엔, 언제나 우린 함께였어요.',ed:'가장 눈부신 순간엔, 언제나 우린 함께였어요.',extra:1}});
 KC.prism='#ffb3f0';
-HX.push({k:'prism',a:'laser',b:'cotton',it:'sunglass',q:'그녀의 진정한 힘을 깨운다.',lore:'화려한 쇼 뒤에 남겨진 고요한 흔적.',col:'#ffb3f0',sub:'💗 QUEEN 레이저쇼 + 🍭 솜사탕 랜드 + 🕶️ 선글라스'});
+HX.push({k:'prism',a:'laser',b:'cotton',it:'sunglass',q:'지금 당신은 가장 강하고 아름다워요. 준비됐어요?',lore:'가장 눈부신 순간엔, 언제나 우린 함께였어요.',col:'#ffb3f0',sub:'💗 QUEEN 레이저쇼 + 🍭 솜사탕 랜드 + 🕶️ 선글라스'});
 [['pcore',120,86,24,15],['pmana',208,150,28,15],['pplasma',224,200,27,15],['pimpact',320,180,10,30],['pwarpb',100,104,42,30],['pdebris',232,96,64,20],['pdisc',64,64,6,20],['pquake',288,104,48,15]].forEach(([k,w,h,n,fps])=>{const im=new Image();im.src='fx/'+k+'.png';HXI[k]={im,w,h,n,fps}});
 function hxDrawList(){const L=G.weapons;const p=L.find(w=>w.k==='prism');return p&&p.st.sub?L.concat([p.st.sub.laser,p.st.sub.cotton].filter(Boolean)):L}
 const PR={T0:6,CD:13,AP:2.0,CH:3.0,FIRE:3.5,K:240};// 맘터 등장 → 충전(정전) → 발사

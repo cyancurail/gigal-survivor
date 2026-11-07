@@ -3001,6 +3001,7 @@ const MSK2B={};MSK2L.forEach(o=>MSK2B[o.id+'|'+o.s]=o);
 const POOL_V15=POOL.length;MSK2L.forEach(o=>{const c=CHAR.find(q=>q.id===o.id);POOL.push({id:o.pid,tier:'M',kind:'mskin',owner:o.id,s:o.s,n:`${c?c.nick:o.id} · ${o.n}`})});
 /* V135 히든 무기 제작 업적 보상 신화 스킨 (뽑기 제외 nog) — POOL 맨 끝 */
 const POOL_V16=POOL.length;[['임재영',6,'폴라리스 사령관','msk2/hx_polaris.png'],['박계원',7,'유령신부','msk2/hx_soulwed.png'],['박준영',6,'미란타롯토','msk2/hx_glass.png']].forEach(([id,sl,n,f])=>{const o={id,s:sl,n,pid:'mx:'+id+'|'+sl,f};MSK2L.push(o);MSK2B[id+'|'+sl]=o;const c=CHAR.find(q=>q.id===id);POOL.push({id:o.pid,tier:'M',kind:'mskin',owner:id,s:sl,nog:1,n:`${c?c.nick:id} · ${n}`})});
+const POOL_V17=POOL.length;[['조혁래',6,'대천사','msk2/hx_rave.png'],['김세진',7,'세나 어센딩','msk2/hx_stellar.png']].forEach(([id,sl,n,f])=>{const o={id,s:sl,n,pid:'mx:'+id+'|'+sl,f};MSK2L.push(o);MSK2B[id+'|'+sl]=o;const c=CHAR.find(q=>q.id===id);POOL.push({id:o.pid,tier:'M',kind:'mskin',owner:id,s:sl,nog:1,n:`${c?c.nick:id} · ${n}`})});
 {const t=POOL.find(p=>p.id==='ms:임재영');if(t){t.vid='ult3/taetae.mp4';t.role='intro';t.vn='태태영 Ⅲ'}}
 const PBY={};POOL.forEach(p=>PBY[p.id]=p);
 const TIERN={C:'일반',R:'희귀',L:'전설',M:'신화'},TIERC={C:'#e8e8f0',R:'#ffd34d',L:'#ff7ac8',M:'#fff3b0'};
@@ -3040,9 +3041,9 @@ const ACH_HX=[
  {id:'hx_glass',hx:'glass',n:'고대 요정의 마법 : 시공간 제어',c:'요정의 유리정원 제작',r:'👑 힐블 신화 스킨 「미란타롯토」',inv:'mx:박준영|6'},
  {id:'hx_soulwed',hx:'soulwed',n:'죽음을 넘는 사랑에 빠진 여자',c:'영혼결혼식 제작',r:'👑 K1 신화 스킨 「유령신부」',inv:'mx:박계원|7'},
  {id:'hx_roadster',hx:'roadster',n:'억척스럽게 생긴 련들은 Out',c:'레이디 로드스터 제작',r:'👑 전용 신화 스킨 (준비 중)'},
- {id:'hx_stellar',hx:'stellar',n:'별들의 후손',c:'스텔라 디센던트 제작',r:'👑 전용 신화 스킨 (준비 중)'},
+ {id:'hx_stellar',hx:'stellar',n:'별들의 후손',c:'스텔라 디센던트 제작',r:'👑 세나 신화 스킨 「세나 어센딩」',inv:'mx:김세진|7'},
  {id:'hx_prism',hx:'prism',n:'하늘을 쪼갠 일곱 빛깔',c:'셀레스티얼 프리즘 제작',r:'👑 전용 신화 스킨 (준비 중)'},
- {id:'hx_rave',hx:'risha',n:'리샤 발렌타인',c:'R.A.V.E. 제작',r:'👑 전용 신화 스킨 (준비 중)'},
+ {id:'hx_rave',hx:'risha',n:'리샤 발렌타인',c:'R.A.V.E. 제작',r:'👑 무룩 신화 스킨 「대천사」',inv:'mx:조혁래|6'},
 ];
 const ACH_HX_ON=true;if(ACH_HX_ON)ACH.push(...ACH_HX);
 function achHx(k){for(const a of ACH)if(a.hx&&(!k||a.hx===k)&&SAVE.hxMade&&SAVE.hxMade[a.hx])achGet(a.id);
@@ -3253,7 +3254,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)r
 
 /* ================= 저장 코드 (기기 간 이동) =================
    ※ POOL/ACH/AXN/WFX 순서가 코드 해석 순서예요. 새 항목은 반드시 "끝에" 추가하세요. */
-const SC_VER=17;
+const SC_VER=18;
 function scBits(list,has){const out=[];for(let i=0;i<list.length;i+=8){let b=0;for(let j=0;j<8&&i+j<list.length;j++)if(has(list[i+j],i+j))b|=1<<j;out.push(b)}return out}
 function scUnbits(bytes,pos,list,set){for(let i=0;i<list.length;i++){if(bytes[pos+(i>>3)]>>(i&7)&1)set(list[i],i)}return pos+Math.ceil(list.length/8)}
 function scVar(out,n){n=Math.max(0,Math.floor(n||0));do{let b=n&127;n=Math.floor(n/128);if(n)b|=128;out.push(b)}while(n)}
@@ -3288,7 +3289,7 @@ function parseCode(code){
   try{const C=CH12().map(c=>c.id),S={fancy:{},ult:{},cine:{},tallOff:{},best:{},bestH:{},inv:{},skin:{},wfx:{},ach:{},ax:{},xevo:{},achC:{},tix:{R:0,L:0,M:0}};let p=1;
     for(const k of ['fancy','ult','cine','tallOff'])p=scUnbits(body,p,C,id=>S[k][id]=true);
     C.forEach(id=>{const v=body[p++];if(v)S.best[id]=v*10});C.forEach(id=>{const v=body[p++];if(v)S.bestH[id]=v*10});
-    p=scUnbits(body,p,ver>=17?POOL:ver>=16?POOL.slice(0,POOL_V16):ver>=15?POOL.slice(0,POOL_V15):ver>=14?POOL.slice(0,POOL_V14):ver>=13?POOL.slice(0,POOL_V13):ver>=11?POOL.slice(0,POOL_V11):ver>=9?POOL.slice(0,POOL_V9):ver>=8?POOL.slice(0,POOL_V8):ver>=6?POOL.slice(0,POOL_V7):ver>=5?POOL.slice(0,POOL_V5):POOL.slice(0,POOL_V4),it=>S.inv[it.id]=true);
+    p=scUnbits(body,p,ver>=18?POOL:ver>=17?POOL.slice(0,POOL_V17):ver>=16?POOL.slice(0,POOL_V16):ver>=15?POOL.slice(0,POOL_V15):ver>=14?POOL.slice(0,POOL_V14):ver>=13?POOL.slice(0,POOL_V13):ver>=11?POOL.slice(0,POOL_V11):ver>=9?POOL.slice(0,POOL_V9):ver>=8?POOL.slice(0,POOL_V8):ver>=6?POOL.slice(0,POOL_V7):ver>=5?POOL.slice(0,POOL_V5):POOL.slice(0,POOL_V4),it=>S.inv[it.id]=true);
     C.forEach(id=>{const v=body[p++];if(v&&POOL[v-1]&&['color','swim','hanbok','wed','god'].includes(POOL[v-1].kind))S.skin[id]=POOL[v-1].id});
     p=scUnbits(body,p,WK(),k=>S.wfx[k]=false);
     p=scUnbits(body,p,AL,a=>S.ach[a.id]=1);p=scUnbits(body,p,AXK(),k=>S.ax[k]=false);p=scUnbits(body,p,XW(),k=>S.xevo[k]=1);S.achC={};if(ver>=2)p=scUnbits(body,p,AL,a=>S.achC[a.id]=1);else Object.keys(S.ach).forEach(k=>S.achC[k]=1);if(ver>=4){S.cpn={};p=scUnbits(body,p,COUPONS,q=>S.cpn[q.c]=1)}

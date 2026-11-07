@@ -5483,7 +5483,7 @@ const ETY={n:{s:1,nm:'거미',r:13,spd:36,hp:1,dmg:3,xp:1,col:'#c46bff'},f:{s:2,
  a:{s:4,nm:'바위 핵',r:20,spd:18,hp:4,dmg:10,xp:4,col:'#9aa',arm:.5},r:{s:5,nm:'대포 벌레',r:16,spd:30,hp:1.8,dmg:3,xp:3,col:'#f66',rng:1},e:{s:6,nm:'전갈',r:22,spd:26,hp:10,dmg:12,xp:8,col:'#f4a',elite:1},
  s:{s:7,nm:'알 덩어리',r:20,spd:20,hp:3,dmg:6,xp:4,col:'#6c9',lay:1},p:{s:8,nm:'무리 덩어리',r:19,spd:28,hp:2.2,dmg:5,xp:3,col:'#99f',split:1},d:{s:9,nm:'제트',r:14,spd:30,hp:1.2,dmg:4,xp:2,col:'#fc6',dash:1},
  sm:{s:1,nm:'새끼',r:7,spd:50,hp:.25,dmg:1,xp:0,col:'#c9f',small:1},b:{s:10,nm:'가시 별',r:38,spd:13,hp:0,dmg:40,xp:20,col:'#ff3b6b',boss:1}};
-let BOSSF=80;const PKMAX=20,PKF=.6,ENTY=150;
+let BOSSF=80;const RPB=[2,3,4],RPG=100;const PKMAX=20,PKF=.6,ENTY=150;
 /* 11-07: 몬스터 번쩍임·빛 테두리는 한 번만 그려 두고 다시 씀 (필터·그림자를 매 프레임 쓰면 관통 공격 때 렉) */
 const MOBC=new Map();
 function mobC(im,w,h,gl,fl){const K=Math.max(1,Math.min(3,sc*dpr)),key=im.src+'|'+Math.round(w)+'|'+(gl?1:0)+(fl?1:0)+'|'+K.toFixed(2);let c=MOBC.get(key);if(c)return c;if(MOBC.size>500)MOBC.clear();
@@ -5775,17 +5775,21 @@ function finish(win){T.over=true;const td=TDS(),sid=T.stg,hpP=Math.round(T.hp/T.
   let stars=0;if(win)stars=hpP>=100?3:hpP>=70?2:hpP>=30?1:0;
   td.best[sid]=Math.max(td.best[sid]||0,win?WAVES+1:T.wave);td.st[sid]=Math.max(td.st[sid]||0,stars);
   const rest=CHAR.map(c=>c.id).filter(id=>!td.un.includes(id));let joined=null;if(!V2&&rest.length&&!T.bot){joined=pick(rest);td.un.push(joined)}
-  td.rw=td.rw||{};td.cd=td.cd||{};const got=[];const dI=SOF(sid).d,RWC=[[10,20,40],[30,60,120]][0],RWG=[1000,2000,5000],RWC3=[30,60,120];
+  td.rw=td.rw||{};td.cd=td.cd||{};const got=[];const dI=SOF(sid).d,RWC=[7,10,10],RWG=[1000,2000,5000],RWC3=[21,30,30];/* 11-07 4단계: 60스테이지라 처음 달성 카드 줄임(예전 10·20·40 / 30·60·120) */
   const giveCards=n=>{const ids=T.sq.map(q=>q.id);const per={};for(let i=0;i<n;i++){const id=pick(ids);per[id]=(per[id]||0)+1}for(const id in per)td.cd[id]=(td.cd[id]||0)+per[id];return Object.entries(per).map(([id,c])=>`${nick(id)} ${c}`).join(', ')};
   for(let st=(td.rw[sid]||0)+1;st<=stars;st++){if(st===1)got.push(`★ 강화카드 ${RWC[dI]}장 (${giveCards(RWC[dI])})`);if(st===2){SAVE.gold=(SAVE.gold||0)+RWG[dI];got.push(`★★ 골드 ${RWG[dI].toLocaleString()}G`)}
     if(st===3){SAVE.tix=SAVE.tix||{};SAVE.tix.R=(SAVE.tix.R||0)+1;got.push(`★★★ 강화카드 ${RWC3[dI]}장 (${giveCards(RWC3[dI])}) + 희귀 확정권 1장`)}}
   td.rw[sid]=Math.max(td.rw[sid]||0,stars);
+  /* 11-07 4단계: 판마다 보상 — 그 판에 쓴 무기마다 강화카드, 골드. 지면 도달 웨이브 비율의 절반 */
+  let rpc='',rpg=0;if(V2&&!T.bot&&!T.lab){const PI=Math.max(0,STAGES.indexOf(SOF(sid))),si=PI%20+1,prog=win?1:.5*T.wave/WAVES,base=RPB[dI]+.1*si;
+    const pc=T.sq.map(q=>[q.id,Math.max(win?1:0,Math.round(base*prog))]).filter(x=>x[1]>0);for(const [id,n] of pc)td.cd[id]=(td.cd[id]||0)+n;
+    rpc=pc.map(([id,n])=>`${CICON[id]||''}${W2N[id][0]} ${n}`).join(' · ');rpg=Math.round(RPG*(PI+1)*prog*(win?1.2:1));SAVE.gold=(SAVE.gold||0)+rpg}
   const cmR=V2&&!T.bot?cmGain(Math.round((T.wave*10+(win?50:0)+stars*20)*Math.pow(1.05,Math.max(0,STAGES.indexOf(SOF(sid)))))):null;const odG=T.bot?0:Math.max(1,T.wave)+(win?10:0)+stars*5;td.od=(td.od||0)+odG;
   sv();if(T.bot){T.result={win,wave:T.wave,hpP,stars};return}
   const r=ov.querySelector('.tdRes');r.innerHTML=`<h2>${win?'🌙 마음의 선을 지켰어요':'💔 마음의 선이 무너졌어요'}</h2>
    <p>${SOF(sid).n} · 웨이브 ${T.wave}/${WAVES} · 처치 ${T.kills} · 남은 체력 ${hpP}%</p>
    ${win?`<p class="tdStar">${'★'.repeat(stars)}${'☆'.repeat(3-stars)}</p><small>★ 30% 이상 · ★★ 70% 이상 · ★★★ 100%</small>`:''}
-   ${got.length?`<div class="tdJoin">🎁 처음 달성 보상<br>${got.join('<br>')}</div>`:''}
+   ${got.length?`<div class="tdJoin">🎁 처음 달성 보상<br>${got.join('<br>')}</div>`:''}${rpc||rpg?`<div class="tdJoin">🎁 이번 판 보상<br>${rpc?`💠 강화카드 ${rpc}<br>`:''}🪙 골드 +${rpg.toLocaleString()}G</div>`:''}
    ${cmR?`<p class="tdJoin">🎖️ 사령관 Lv${cmLv()}${cmR.up?` <b>(레벨 업 +${cmR.up})</b>`:''}${cmR.nw.map(id=>`<br>🔓 새 무기: <b>${W2N[id][0]}</b> · ${CICON[id]} ${nick(id)}`).join('')}</p>`:''}<p class="tdJoin">🔮 오드 +${odG} <small>(웨이브 ${T.wave}${win?' + 클리어 10':''}${stars?' + ★ '+stars*5:''})</small></p>
    ${joined?`<p class="tdJoin">✨ 새 대원 합류: <b>${CICON[joined]} ${nick(joined)}</b></p>`:''}
    <div class="tdBtns"><button type="button" data-a="retry">다시 도전</button><button type="button" data-a="menu">디펜스 로비로</button><button type="button" data-a="exit">🌙 트와일라잇으로</button></div>`;r.hidden=false;bgm(null);snd(win?'ach':'hurt');T.retry=[T.stg,T.sq[0].id]}

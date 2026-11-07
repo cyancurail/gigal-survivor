@@ -6702,7 +6702,11 @@ function css(){if(document.getElementById('tdCss'))return;const st=document.crea
 body.tdOn .ov{z-index:9700!important}body.tdOn #ach{position:fixed;inset:0;z-index:9700;overflow:auto}
 #tdOv .lbIcB{position:relative;border:1.5px solid rgba(255,232,150,.7);background:rgba(20,10,26,.8);color:#fff;border-radius:999px;padding:3px 10px;font:800 14px inherit;font-family:inherit}
 #tdOv .lbIcD{position:absolute;top:-3px;right:-3px;width:10px;height:10px;border-radius:50%;background:#ff3b6b}
-#tdOv .tdAri{position:absolute;inset:0;z-index:40;display:flex;align-items:flex-end;justify-content:center;padding:0 0 calc(18px + env(safe-area-inset-bottom,0px));pointer-events:auto}.tdAri[hidden]{display:none}
+#tdOv .tdElv{position:absolute;inset:0;z-index:45;background:#020308;color:#bff6ff;font-family:'Noto Sans KR',sans-serif;overflow:hidden}.tdElv[hidden]{display:none}.tdElvC{position:absolute;inset:0;width:100%;height:100%}
+.tdElvT{position:absolute;left:0;right:0;top:34%;text-align:center;font-family:'Courier New',monospace;letter-spacing:1px}.tdElvT p{margin:6px 0;font-size:15px;font-weight:700;min-height:20px;text-shadow:0 0 8px rgba(120,230,255,.8)}.tdElvT b{display:block;margin-top:10px;font-size:12px;color:#ff9ae0;font-weight:700;font-variant-numeric:tabular-nums}
+.tdElv:not(.long) .tdElvT{top:42%}.tdElvH{position:absolute;left:0;right:0;top:50%;display:flex;flex-direction:column;align-items:center;gap:8px;opacity:0;transition:opacity .4s}.tdElvH canvas{width:120px;height:120px;image-rendering:pixelated;filter:drop-shadow(0 0 8px rgba(120,230,255,.8))}.tdElvH p{margin:0;max-width:300px;text-align:center;font-size:13.5px;min-height:40px;word-break:keep-all}
+.tdElvU{position:absolute;left:0;right:0;top:44%;text-align:center;font:900 15px 'Courier New',monospace;color:#fff;letter-spacing:2px;text-shadow:0 0 14px #8ff0ff,0 0 26px #ff9ae0;opacity:0}.tdElvU small{font:700 12px 'Noto Sans KR',sans-serif;letter-spacing:0;color:#ffd6f4}.tdElvF{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none}.tdElv .tdAriS{top:auto;bottom:calc(20px + env(safe-area-inset-bottom,0px));right:14px}
+.tdAri{position:absolute;inset:0;z-index:40;display:flex;align-items:flex-end;justify-content:center;padding:0 0 calc(18px + env(safe-area-inset-bottom,0px));pointer-events:auto}.tdAri[hidden]{display:none}
 .tdAriBg{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 40%,rgba(10,20,40,.55),rgba(2,2,8,.96))}.tdAriBg i{position:absolute;left:50%;top:0;width:2px;height:62%;margin-left:-1px;background:linear-gradient(#fff0,#ffe9ff 40%,#8ff0ff);box-shadow:0 0 12px #8ff0ff,0 0 26px #ff9ae0;animation:ariT 1.6s ease-out both}@keyframes ariT{from{transform:scaleY(0);transform-origin:top}to{transform:scaleY(1);transform-origin:top}}
 .tdAriW{position:relative;display:flex;align-items:flex-end;gap:8px;width:min(94vw,430px);background:linear-gradient(180deg,rgba(10,30,48,.9),rgba(14,8,26,.94));border:1.5px solid rgba(140,235,255,.7);border-radius:16px;box-shadow:0 0 18px rgba(120,230,255,.35),inset 0 0 22px rgba(120,230,255,.12);padding:8px 10px 10px 4px;color:#eafcff;font-family:'Noto Sans KR',sans-serif}
 .tdAriW canvas{width:104px;height:104px;flex:none;margin-top:-56px;image-rendering:pixelated;filter:drop-shadow(0 0 1px #bff6ff) drop-shadow(0 0 6px rgba(120,230,255,.75))}.tdAri.pro .tdAriW canvas{width:116px;height:116px;margin-top:-64px}
@@ -6845,6 +6849,31 @@ function tutFinish(win,sid,nw){const td=TDS(),tt=T.tut;if(T.bot)return;
   if(tt){if(win)ari('t_clear');ari('t_res');tutS().lbp=1}if(!win)ari('s_loss');
   if(win){if(sid==='1-10')ari('s_c10');if(sid==='1-20')ari('s_c20');if(sid==='3-20')ari('s_c3')}
   for(const id of nw||[])ari('u_'+id);tutS().done=1;sv()}
+/* ===== 🛗 궤도 엘리베이터 입장 (11-08 사용자 아이디어) — 처음: 옛 실루엣 아리아드네 → 엔진 업데이트 → 새 모습 프롤로그. 다음부터: 문구만 짧게 ===== */
+const ELV_A=['…치직. 사령관님, 들리세요? 신호가 아직…','잠깐만요. 이 모습으론 언니 앞에 못 서겠어요.'];
+let EV=null;
+function elv(long,then){const b=ov.querySelector('.tdElv')||(()=>{const d=document.createElement('div');d.className='tdElv';d.innerHTML='<canvas class="tdElvC"></canvas><div class="tdElvT"><p></p><p></p><b></b></div><div class="tdElvH"><canvas width="224" height="224"></canvas><p></p></div><div class="tdElvU">ARIADNE ENGINE UPDATE COMPLETE<br><small>아리아드네 엔진 업데이트 완료</small></div><div class="tdElvF"></div><button type="button" class="tdAriS">건너뛰기</button>';ov.appendChild(d);
+    d.querySelector('.tdAriS').addEventListener('click',e=>{e.stopPropagation();elvEnd()});return d})();
+  b.hidden=false;b.classList.toggle('long',!!long);b.querySelectorAll('.tdElvT p,.tdElvH p').forEach(p=>p.textContent='');b.querySelector('.tdElvH').style.opacity=0;b.querySelector('.tdElvU').style.opacity=0;b.querySelector('.tdElvF').style.opacity=0;b.querySelector('.tdElvT').style.opacity=1;ov.querySelector('.tdLobby').hidden=true;EV={t0:performance.now(),long:!!long,then,dur:long?11.6:1.7,st:{}};snd('whoosh');requestAnimationFrame(elvAnim)}
+function elvEnd(){if(!EV)return;const f=EV.then;EV=null;const b=ov.querySelector('.tdElv');if(b)b.hidden=true;if(f)f()}
+function elvType(el,s,t0,t,sp){const n=Math.max(0,Math.min(s.length,Math.floor((t-t0)/(sp||.035))));const v=s.slice(0,n);if(el.textContent!==v)el.textContent=v}
+function elvAnim(now){if(!EV)return;const b=ov.querySelector('.tdElv'),t=(now-EV.t0)/1000,L=EV.long,cv=b.querySelector('.tdElvC');requestAnimationFrame(elvAnim);
+  const W0=cv.clientWidth,H0=cv.clientHeight;if(cv.width!==W0)cv.width=W0;if(cv.height!==H0)cv.height=H0;const g=cv.getContext('2d');g.fillStyle='#020308';g.fillRect(0,0,W0,H0);
+  /* 엘리베이터 빛줄기: 위로 올라가는 느낌 = 빛이 아래로 흐름 */
+  const sp=L?(t<4.5?Math.min(1,t/1.2):Math.max(.15,1-(t-4.5)/1.5)):Math.min(1,t/.4);g.globalCompositeOperation='lighter';
+  for(let i=0;i<26;i++){const x=(i%2?W0*.08:W0*.92)+Math.sin(i*7.1)*W0*.06,len=40+((i*53)%90),y=((t*900*sp+i*137)%(H0+len*2))-len;g.globalAlpha=.25+.35*((i*29)%10)/10;const gr=g.createLinearGradient(0,y,0,y+len);gr.addColorStop(0,'rgba(120,230,255,0)');gr.addColorStop(1,'rgba(160,240,255,.9)');g.fillStyle=gr;g.fillRect(x,y,2,len)}
+  g.globalAlpha=1;g.globalCompositeOperation='source-over';
+  const tx=b.querySelectorAll('.tdElvT p'),alt=b.querySelector('.tdElvT b');
+  elvType(tx[0],'궤도 엘리베이터 탑승…',L?.3:0,t,L?.045:.02);elvType(tx[1],'아이기스 지휘본부로 이동 중',L?1.6:.5,t,L?.045:.02);
+  const au=L?Math.min(1,Math.max(0,(t-.4)/4.1)):Math.min(1,t/1.4);alt.textContent='고도 '+Math.round(36000*(1-Math.pow(1-au,2))).toLocaleString()+' km';
+  b.querySelector('.tdElvT').style.opacity=L&&t>9.4?Math.max(0,1-(t-9.4)*2):1;
+  if(L){const h=b.querySelector('.tdElvH');h.style.opacity=t<4.6||t>10.1?0:1;
+    if(t>=4.6){const hc=h.querySelector('canvas'),u=t-4.6;ariHolo(hc,t>9.6?'o':'x',u);if(t>9.6&&Math.random()<.5)hc.style.transform=`translateX(${(Math.random()-.5)*16}px) skewX(${(Math.random()-.5)*12}deg)`;else hc.style.transform='';
+      const hp=h.querySelector('p');if(t<7.4)elvType(hp,ELV_A[0],5,t);else elvType(hp,ELV_A[1],7.4,t);
+      if(!EV.st.g&&t>9.6){EV.st.g=1;snd('t')}}
+    const fl=b.querySelector('.tdElvF');fl.style.opacity=t<10.1?0:Math.max(0,1-(t-10.1)*1.6);if(!EV.st.f&&t>10.1){EV.st.f=1;snd('ach')}
+    b.querySelector('.tdElvU').style.opacity=t<10.2?0:t<11.1?1:Math.max(0,1-(t-11.1)*2)}
+  if(t>=EV.dur)elvEnd()}
 
 function menu(){T=null;const td=TDS();if(V2)td.un=w2Un();ov.querySelectorAll('.tdPanel').forEach(p=>p.hidden=true);if(!V2&&td.un.length<5){LOB={t:LOB?LOB.t:0,tab:'go'};return firstPick()}
   LOB=LOB||{t:0};LOB.stg=LOB.stg||'1-1';LOB.d=LOB.d==null?0:LOB.d;bgm('lobby');lbRender();
@@ -6891,7 +6920,7 @@ function sqInfo(id){if(V2){const C=W2C[id],u=W2U.find(q=>q[0]===id);return`<div 
    <small>${ELM[id][0]} 3강 속성: ${ELM[id][1]}</small><small>🔒 5강 C: ${EVC[id][0]} — ${EVC[id][1]}</small><small>💗 6강 각성: ${EVW[id]}</small></div>`}
 function icHTML(){const src=document.getElementById('lbIcons');return(V2?'<button type="button" data-arip aria-label="프롤로그 다시 보기"><i>📖</i>프롤로그</button>':'')+(src?[...src.querySelectorAll('button[data-lb]')].map(b=>b.outerHTML.replace('data-lb=','data-lbf=')).join(''):'')}
 function icDot(){const d=ov&&ov.querySelector('.lbIcD');if(!d)return;const src=document.getElementById('lbIcons');d.hidden=!(src&&[...src.querySelectorAll('button[data-lb] .dot')].some(x=>getComputedStyle(x).display!=='none'))}
-function lbClick(e){const td=TDS(),L=LOB;if(!L)return;let b;if(e.target.closest('[data-arip]')){L.ic=false;lbRender();ari('pro',{force:1});return}
+function lbClick(e){const td=TDS(),L=LOB;if(!L)return;let b;if(e.target.closest('[data-arip]')){L.ic=false;lbRender();elv(1,()=>{ov.querySelector('.tdLobby').hidden=false;ari('pro',{force:1})});return}
   if(e.target.closest('[data-lab]')){snd('click');labApply();return}
   if(e.target.closest('[data-icb]')){L.ic=!L.ic;snd('click');lbRender();return}
   if(b=e.target.closest('[data-lbf]')){const o=document.querySelector(`#lbIcons [data-lb="${b.dataset.lbf}"]`);L.ic=false;lbRender();if(o)o.click();return}
@@ -6935,7 +6964,7 @@ function upPanel(back){const box=ov.querySelector('.tdMenu'),td=TDS();td.up=td.u
 function start(stg,ld){const S=SOF(stg);T=null;ov.querySelector('.tdLobby').hidden=true;LOB&&(LOB.off=1);bgm(null);loading([],2.4,()=>{T=newRun(stg,ld);if(V2&&!tutS().done&&!Object.keys(TDS().best||{}).length)T.tut=1;ov.querySelector('.tdTop [data-a=spd]').textContent='⏩ 2배';snd('ult');T.ph='battle';bgm('battle')})}
 function loop(ts){raf=requestAnimationFrame(loop);const dt=Math.min(.05,(ts-(last||ts))/1000);last=ts;if(LD){ldStep(dt);if(LD){ldDraw();return}}if(T&&!T.paused&&!T.over){const n=T.speed;for(let i=0;i<n;i++)update(dt*(T.ts||1));if(!T.bossM&&T.wave>=WAVES&&T.en.some(e=>e.boss&&!e.dead))T.bossM=1;
     if(!T.over&&T.ph){const low=T.hp/T.hpMax<(T.lowM?.25:.2);T.lowM=low;if(low&&T.ph==='battle')T.ph='fight';bgm(low?'low':T.bossM?'boss':T.ph)}}bgVol();if(!T&&LOB&&!ov.querySelector('.tdLobby').hidden){lbDraw(dt);return}draw();if(T&&T.lab)labDraw(ctx);dragDraw()}
-function open(){build();ov.hidden=false;window.__tdOn=1;document.body.classList.add('tdOn');resize();last=0;cancelAnimationFrame(raf);raf=requestAnimationFrame(loop);T=null;LOB=null;ov.querySelector('.tdLobby').hidden=true;bgm('lobby');loading([],2.6,menu,1)}
+function open(){build();ov.hidden=false;window.__tdOn=1;document.body.classList.add('tdOn');resize();last=0;cancelAnimationFrame(raf);raf=requestAnimationFrame(loop);T=null;LOB=null;ov.querySelector('.tdLobby').hidden=true;bgm('lobby');if(V2)elv(!ariSeen('pro'),menu);else loading([],2.6,menu,1)}
 /* 화면 전환: 서바이버 → 디펜스 = iris, 디펜스 → 서바이버 = star iris */
 function irisC(mid){const im=IMG['fx/iris_c.png'];if(!ok(im)||window.__irisBusy){mid();return}window.__irisBusy=1;
   const c=document.createElement('canvas');c.style.cssText='position:fixed;inset:0;width:100%;height:100%;z-index:100000;pointer-events:auto;image-rendering:pixelated';document.body.appendChild(c);

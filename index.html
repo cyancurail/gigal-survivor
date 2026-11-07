@@ -6841,7 +6841,7 @@ function ariHolo(cv,f,t){const Z=224,g=cv.getContext('2d'),x=AHC.getContext('2d'
   if(gl){for(let y=0;y<Z;y+=16)g.drawImage(AHC,0,y,Z,16,Math.round((Math.random()-.5)*12),y,Z,16)}else g.drawImage(AHC,0,0);g.restore();
   g.globalAlpha=.45*on;const gr=g.createLinearGradient(0,Z*.78,0,Z);gr.addColorStop(0,'rgba(120,230,255,0)');gr.addColorStop(1,'rgba(120,230,255,.55)');g.fillStyle=gr;g.fillRect(Z*.08,Z*.78,Z*.84,Z*.22);g.globalAlpha=1}
 /* 튜토리얼 신호 (첫 판만) */
-function tutTick(){if(!T||T.bot||T.lab||T.over||ARC)return;const tt=T.tut;
+function tutTick(){if(!T||T.bot||T.lab||T.over||ARC)return;const tt=T.tut;if(T.t>.6)for(const m of T.sq)if(!ariSeen('u_'+m.id)){ari('u_'+m.id);return}
   if(T.stg==='2-1'&&T.t>1.2)ari('s_h1');if(T.stg==='3-1'&&T.t>1.2)ari('s_x1');if(!tt)return;
   if(T.wave>=1&&T.t>1.5)ari('t_w1');if(T.hit1)ari('t_hit');if(T.sq.length>=2)ari('t_sq');
   if(T.en.some(e=>!e.dead&&(e.frzT>T.t||(e.wpT>T.t&&e.wps>0)||e.po>0)))ari('t_st');if(T.wave>=7&&T.en.some(e=>e.boss))ari('t_boss')}
@@ -6875,9 +6875,11 @@ function elvAnim(now){if(!EV)return;const b=ov.querySelector('.tdElv'),t=(now-EV
     b.querySelector('.tdElvU').style.opacity=t<10.2?0:t<11.1?1:Math.max(0,1-(t-11.1)*2)}
   if(t>=EV.dur)elvEnd()}
 
+/* 기록이 하나도 없는 첫 입장: 로비를 거치지 않고 프롤로그 → 1-1 튜토리얼 전투 */
+function proFlow(){T=null;LOB=null;ov.querySelector('.tdLobby').hidden=true;bgm(null);const td=TDS();if(V2)td.un=w2Un();ari('pro',{done:()=>start('1-1',(td.un||[])[0]||'재건')})}
 function menu(){T=null;const td=TDS();if(V2)td.un=w2Un();ov.querySelectorAll('.tdPanel').forEach(p=>p.hidden=true);if(!V2&&td.un.length<5){LOB={t:LOB?LOB.t:0,tab:'go'};return firstPick()}
   LOB=LOB||{t:0};LOB.stg=LOB.stg||'1-1';LOB.d=LOB.d==null?0:LOB.d;bgm('lobby');lbRender();
-  if(V2){if(!ariSeen('pro'))ari('pro',{done:()=>{ari('u_재건');ari('u_박준형')}});else if(tutS().lbp)ari('t_lb')}}
+  if(V2){if(!ariSeen('pro'))ari('pro');else if(tutS().lbp)ari('t_lb')}}
 const cardSum=()=>Object.values(TDS().cd||{}).reduce((a,b)=>a+b,0);
 function lbRender(){const box=ov.querySelector('.tdLobby'),td=TDS(),L=LOB;if(V2)td.un=w2Un();if(!td.lead||!td.un.includes(td.lead)||(V2&&!W2I.has(td.lead)))td.lead=td.un[0];
   box.innerHTML=`<div class="lbHead"><button type="button" data-a="exit" class="lbX">🌙 트와일라잇으로 돌아가기</button>${tdDev()?'<button type="button" class="lbIcB" data-lab>🎬</button>':''}<div class="lbRes"><button type="button" class="lbIcB" data-icb>☰<i class="lbIcD" hidden></i></button><span>🔮 ${(td.od||0).toLocaleString()}</span><span>💠 ${cardSum().toLocaleString()}</span></div></div>
@@ -6961,10 +6963,10 @@ function upPanel(back){const box=ov.querySelector('.tdMenu'),td=TDS();td.up=td.u
   render();box.onclick=e=>{const b=e.target.closest('[data-u]');if(b&&!b.disabled){const id=b.dataset.u,u=td.up[id]||0;if(u<6&&(td.cd[id]||0)>=UPN[u]){td.cd[id]-=UPN[u];td.up[id]=u+1;sv();snd('evo');render()}return}
     if(e.target.closest('[data-dev]')){CHAR.forEach(c=>td.cd[c.id]=(td.cd[c.id]||0)+100);sv();render();return}
     if(e.target.closest('[data-back]')){back()}}}
-function start(stg,ld){const S=SOF(stg);T=null;ov.querySelector('.tdLobby').hidden=true;LOB&&(LOB.off=1);bgm(null);loading([],2.4,()=>{T=newRun(stg,ld);if(V2&&!tutS().done&&!Object.keys(TDS().best||{}).length)T.tut=1;ov.querySelector('.tdTop [data-a=spd]').textContent='⏩ 2배';snd('ult');T.ph='battle';bgm('battle')})}
+function start(stg,ld){const S=SOF(stg);T=null;ov.querySelector('.tdLobby').hidden=true;LOB&&(LOB.off=1);bgm(null);loading([],2.4,()=>{T=newRun(stg,ld);if(V2&&!tutS().done&&!Object.keys(TDS().best||{}).length)T.tut=1;ov.querySelector('.tdTop [data-a=spd]').textContent='⏩ 2배';snd('ult');T.ph='battle';bgm(T.tut?null:'battle')})}
 function loop(ts){raf=requestAnimationFrame(loop);const dt=Math.min(.05,(ts-(last||ts))/1000);last=ts;if(LD){ldStep(dt);if(LD){ldDraw();return}}if(T&&!T.paused&&!T.over){const n=T.speed;for(let i=0;i<n;i++)update(dt*(T.ts||1));if(!T.bossM&&T.wave>=WAVES&&T.en.some(e=>e.boss&&!e.dead))T.bossM=1;
-    if(!T.over&&T.ph){const low=T.hp/T.hpMax<(T.lowM?.25:.2);T.lowM=low;if(low&&T.ph==='battle')T.ph='fight';bgm(low?'low':T.bossM?'boss':T.ph)}}bgVol();if(!T&&LOB&&!ov.querySelector('.tdLobby').hidden){lbDraw(dt);return}draw();if(T&&T.lab)labDraw(ctx);dragDraw()}
-function open(){build();ov.hidden=false;window.__tdOn=1;document.body.classList.add('tdOn');resize();last=0;cancelAnimationFrame(raf);raf=requestAnimationFrame(loop);T=null;LOB=null;ov.querySelector('.tdLobby').hidden=true;bgm('lobby');if(V2)elv(!ariSeen('pro'),menu);else loading([],2.6,menu,1)}
+    if(!T.over&&T.ph){const low=T.hp/T.hpMax<(T.lowM?.25:.2);T.lowM=low;if(low&&T.ph==='battle')T.ph='fight';bgm(T.tut?null:low?'low':T.bossM?'boss':T.ph)}}bgVol();if(!T&&LOB&&!ov.querySelector('.tdLobby').hidden){lbDraw(dt);return}draw();if(T&&T.lab)labDraw(ctx);dragDraw()}
+function open(){build();ov.hidden=false;window.__tdOn=1;document.body.classList.add('tdOn');resize();last=0;cancelAnimationFrame(raf);raf=requestAnimationFrame(loop);T=null;LOB=null;ov.querySelector('.tdLobby').hidden=true;const nw0=V2&&!ariSeen('pro'),rec0=Object.keys(TDS().best||{}).length>0;if(!(nw0&&!rec0))bgm('lobby');if(V2)elv(nw0,nw0&&!rec0?proFlow:menu);else loading([],2.6,menu,1)}
 /* 화면 전환: 서바이버 → 디펜스 = iris, 디펜스 → 서바이버 = star iris */
 function irisC(mid){const im=IMG['fx/iris_c.png'];if(!ok(im)||window.__irisBusy){mid();return}window.__irisBusy=1;
   const c=document.createElement('canvas');c.style.cssText='position:fixed;inset:0;width:100%;height:100%;z-index:100000;pointer-events:auto;image-rendering:pixelated';document.body.appendChild(c);

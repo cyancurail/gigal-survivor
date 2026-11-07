@@ -5331,7 +5331,7 @@ function stgMigrate(t){t.s60=1;const ob=t.best||{},os=t.st||{},nb={},ns={},W1=22
   t.best=nb;t.st=ns}
 const sv=()=>{try{persist()}catch(e){}};
 /* 📈 스탯 강화 100단계 (오드로 강화): 공격력 +1(=피해 +1%) → 크리티컬 +0.1% → 마음의 선 +1 순서로 돌아가요 */
-const STN=100,STK=['atk','crit','line'],stOf=i=>STK[i%3],stCost=n=>5+Math.floor(n/2);
+const STN=100,STK=['atk','crit','line'],stOf=i=>STK[i%3],stCost=n=>20+10*n;/* 11-07: 예전 5+⌊n/2⌋ — 40단계 ≈ 오드 8,600 */
 const STL={atk:['⚔️','공격력 +3%'],crit:['🎯','크리티컬 확률 +0.1%'],line:['🌙','마음의 선 +3']};
 const stSum=lv=>{const o={atk:0,crit:0,line:0};for(let i=0;i<lv;i++)o[stOf(i)]++;return o};
 /* 🎵 BGM: lobby 로딩·로비 / battle 게임 시작(한 번) → fight 전투 지속(Sector Siege, 반복) / boss 최종 보스 / low 마음의 선 20% 미만 */
@@ -5784,7 +5784,7 @@ function finish(win){T.over=true;const td=TDS(),sid=T.stg,hpP=Math.round(T.hp/T.
   let rpc='',rpg=0;if(V2&&!T.bot&&!T.lab){const PI=Math.max(0,STAGES.indexOf(SOF(sid))),si=PI%20+1,prog=win?1:.5*T.wave/WAVES,base=RPB[dI]+.1*si;
     const pc=T.sq.map(q=>[q.id,Math.max(win?1:0,Math.round(base*prog))]).filter(x=>x[1]>0);for(const [id,n] of pc)td.cd[id]=(td.cd[id]||0)+n;
     rpc=pc.map(([id,n])=>`${CICON[id]||''}${W2N[id][0]} ${n}`).join(' · ');rpg=Math.round(RPG*(PI+1)*prog*(win?1.2:1));SAVE.gold=(SAVE.gold||0)+rpg}
-  const cmR=V2&&!T.bot?cmGain(Math.round((T.wave*10+(win?50:0)+stars*20)*Math.pow(1.05,Math.max(0,STAGES.indexOf(SOF(sid)))))):null;const odG=T.bot?0:Math.max(1,T.wave)+(win?10:0)+stars*5;td.od=(td.od||0)+odG;
+  const cmR=V2&&!T.bot?cmGain(Math.round((T.wave*10+(win?50:0)+stars*20)*Math.pow(1.03,Math.max(0,STAGES.indexOf(SOF(sid)))))):null;const odG=T.bot?0:Math.max(1,T.wave)+(win?10:0)+stars*5;td.od=(td.od||0)+odG;
   sv();if(T.bot){T.result={win,wave:T.wave,hpP,stars};return}
   const r=ov.querySelector('.tdRes');r.innerHTML=`<h2>${win?'🌙 마음의 선을 지켰어요':'💔 마음의 선이 무너졌어요'}</h2>
    <p>${SOF(sid).n} · 웨이브 ${T.wave}/${WAVES} · 처치 ${T.kills} · 남은 체력 ${hpP}%</p>
@@ -5797,7 +5797,7 @@ function finish(win){T.over=true;const td=TDS(),sid=T.stg,hpP=Math.round(T.hp/T.
 /* ---- 그리기 ---- */
 /* ===== 🚀 무기 v2 (2026-11-06 사용자 결정: 갤럭시 디펜스식 · 사령관 레벨 해금 · 판 안 무기 건설) ===== */
 var V2=1;
-const W2U=[['재건',1],['박준형',1],['송기호',3],['박계원',5],['김세진',7],['승태민',10],['창환이형',13],['박민규',16],['진형우',20],['박준영',24],['하도',28],['영규형',32],['조혁래',36],['임재영',40],['쥬은',45]];
+const W2U=[['재건',1],['박준형',1],['송기호',2],['박계원',3],['김세진',4],['승태민',5],['창환이형',7],['박민규',8],['진형우',10],['박준영',12],['하도',13],['영규형',15],['조혁래',17],['임재영',18],['쥬은',20]];/* 11-07: 해금 Lv20 안으로 (예전 3~45) */
 const W2N={'재건':['기갈탄','에너지','#3dffd0'],'박준형':['샤넬 미사일','불','#ff5a5a'],'송기호':['디올 레이저','에너지','#8dff6a'],'박계원':['마계의 나비','역장','#4fa8ff'],'김세진':['오라클 위성 시스템','물리','#ffd36a'],'승태민':['고전압 제네레이터','전기','#b07bff'],
   '창환이형':['네온 레이저','에너지','#5affc8'],'박민규':['크리오테라피','빙결','#9fe8ff'],'진형우':['에스테틱 드론','불','#ff8a3d'],'박준영':['팅커벨','물리','#fff0a0'],'하도':['애널라이징포','물리','#e8f0ff'],'영규형':['윈드 위스퍼','바람','#7dffd8'],'조혁래':['디바인 레일건','전기','#c9a0ff'],'임재영':['셀레스티얼 레인','불·물리','#ff9a5a'],'쥬은':['가르강튀아','역장','#5a8cff']};
 const W2I=new Set(['재건','박준형','송기호','박계원','김세진','승태민']);/* 구현된 무기 (나머지는 다음 단계) */
@@ -5841,7 +5841,7 @@ function w2Nm(id,k){if(k==='fam')return W2FAM[W2N[id][1]]||'계열 공명';const
 const W2CMAX={n:2,d:3,r:2,f:2};const w2Max=k=>W2CMAX[k]||1;
 const W2COMBO=[{k:'mz',a:'박준형',b:'재건',la:2,lb:2,n:'불꽃 탄환',d:'수호탄이 맞히면 작은 폭발'},{k:'jr',a:'송기호',b:'승태민',la:2,lb:1,n:'빛 에너지 마비',d:'관통 레이저에 맞은 적 0.4초 마비'}];
 const cmLv=()=>{const c=TDS().cl||{lv:1,xp:0};return c.lv||1};
-const cmNeed=l=>100+40*l;
+const cmNeed=l=>Math.round(100+60*Math.pow(l,1.5));/* 11-07: 경험치 통 키움(예전 100+40×Lv) — 플레이 시간 늘리기 */
 const w2Un=()=>W2U.filter(([id,l])=>l<=cmLv()).map(([id])=>id);
 const w2Lv=m=>1+Object.values(m.c||{}).reduce((a,b)=>a+b,0);
 const cc=(m,k)=>(m.c&&m.c[k])||0;

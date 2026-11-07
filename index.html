@@ -5883,7 +5883,7 @@ const w2Lv=m=>1+Object.values(m.c||{}).reduce((a,b)=>a+b,0);
 const cc=(m,k)=>(m.c&&m.c[k])||0;
 const mkW=id=>({id,c:{},lv:[0,0,0,0,0],ev:[],t:.3,up:0,f:[]});
 const w2Col=m=>W2N[m.id][2];
-const W2DMX=4.8;/* 11-07: 레벨업 20번 제한 뒤 ×2 → ×4.8 *//* 11-07 사용자: 체력 ×5·속도 20%에 맞춰 무기 화력 ×2 (A안) */
+const W2DMX=.96/* 11-08 사용자: 모든 무기 기본 공격력 −80% (4.8→0.96) */;/* 11-07: 레벨업 20번 제한 뒤 ×2 → ×4.8 *//* 11-07 사용자: 체력 ×5·속도 20%에 맞춰 무기 화력 ×2 (A안) */
 function w2Dm(m){let k=W2DMX*(T&&!T.lab?(T.cmb||1)*((T.wlm||(T.wlm={}))[m.id]||(T.wlm[m.id]=wlMul(m.id))):1)*Math.pow(1.5,cc(m,'d'))*(1+.06*(w2Lv(m)-1));const f=W2N[m.id][1];if(T&&T.sq)for(const w of T.sq)if(cc(w,'fam')&&W2N[w.id]&&famHit(W2N[w.id][1],f))k*=1.6;return k}
 /* 적마다 붙는 배율 (hurt 안에서 CURM 기준) */
 function w2Mul(m,e){let k=1;if(m.id==='재건'&&cc(m,'u5')){e.zs=(e.zs||0)+1;k*=1+Math.min(1,.1*(e.zs-1))}

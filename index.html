@@ -4083,7 +4083,7 @@ HX.push({k:'glass',a:'fairy',b:'photo',it:'stardust',q:'이 순간을, 영원히
 [['cubeB',116,112,36,15],['fnova',288,192,42,12],['scharge',120,86,24,15],['amiss',240,116,36,20],['lsteal',184,100,34,15]].forEach(([k,w,h,n,fps])=>{const im=new Image();im.src='fx/'+k+'.png';HXI[k]={im,w,h,n,fps}});
 
 const GL_REMAP={fairy:'glass',star:'glass',photo:'glass'};
-const HXRM={fairy:'glass',star:'glass',photo:'glass',laser:'prism',bag:'prism'};function HXR(k,ws){const h=HXRM[k];if(!h)return null;return(ws||(G&&G.weapons)||[]).some(w=>w.k===h)?h:null}
+const HXRM={fairy:'glass',star:'glass',photo:'glass',laser:'prism',cotton:'prism'};function HXR(k,ws){const h=HXRM[k];if(!h)return null;return(ws||(G&&G.weapons)||[]).some(w=>w.k===h)?h:null}
 function PHW(){const p=W('photo');if(p)return p;const g=W('glass');return g&&g.st.sub?g.st.sub.photo:null}
 // 반구(메탈 실드 위쪽 절반): 바닥선 y0 = c.y + h·0.45, 반지름 R = h·1.15
 function glIn(c,e,pad){pad=pad||0;const y0=c.y+c.h*.45,R=c.h*1.15+pad;return e.y<=y0+pad&&(e.x-c.x)**2+(e.y-y0)**2<=R*R}
@@ -5261,16 +5261,16 @@ setInterval(()=>{if(run){res();badges()}},3000);
 })();</script>
 
 <script>/* ===== 🌈 셀레스티얼 프리즘 (V125, 히든: QUEEN 레이저쇼★ + 블랙프라이데이★ + 밍조 리딤코드) ===== */
-Object.assign(WP,{prism:{name:'셀레스티얼 프리즘',icon:'🌈',evo:'redeem',evoName:'셀레스티얼 프리즘',hid:1,d:'화려한 쇼 뒤에 남겨진 고요한 흔적.',ed:'화려한 쇼 뒤에 남겨진 고요한 흔적.',extra:1}});
+Object.assign(WP,{prism:{name:'셀레스티얼 프리즘',icon:'🌈',evo:'sunglass',evoName:'셀레스티얼 프리즘',hid:1,d:'화려한 쇼 뒤에 남겨진 고요한 흔적.',ed:'화려한 쇼 뒤에 남겨진 고요한 흔적.',extra:1}});
 KC.prism='#ffb3f0';
-if(window.PRISM_ON)HX.push({k:'prism',a:'laser',b:'bag',it:'redeem',q:'그녀의 진정한 힘을 깨운다.',lore:'화려한 쇼 뒤에 남겨진 고요한 흔적.',col:'#ffb3f0',sub:'💗 QUEEN 레이저쇼 + 🛍️ 블랙프라이데이 + 🎫 밍조 리딤코드'});
+if(window.PRISM_ON)HX.push({k:'prism',a:'laser',b:'cotton',it:'sunglass',q:'그녀의 진정한 힘을 깨운다.',lore:'화려한 쇼 뒤에 남겨진 고요한 흔적.',col:'#ffb3f0',sub:'💗 QUEEN 레이저쇼 + 🍭 솜사탕 랜드 + 🕶️ 선글라스'});
 [['pcore',120,86,24,15],['pmana',208,150,28,15],['pplasma',224,200,27,15],['pimpact',320,180,10,30],['pwarpb',100,104,42,30],['pdebris',232,96,64,20],['pquake',288,104,48,15]].forEach(([k,w,h,n,fps])=>{const im=new Image();im.src='fx/'+k+'.png';HXI[k]={im,w,h,n,fps}});
-function hxDrawList(){const L=G.weapons;const p=L.find(w=>w.k==='prism');return p&&p.st.sub?L.concat([p.st.sub.laser]):L}
+function hxDrawList(){const L=G.weapons;const p=L.find(w=>w.k==='prism');return p&&p.st.sub?L.concat([p.st.sub.laser,p.st.sub.cotton].filter(Boolean)):L}
 const PR={T0:6,CD:13,AP:1.4,CH:2.4,FIRE:2.2,K:240};// 맘터 등장 → 충전(정전) → 발사
 function prDir(){const p=G.p,R=Math.max(VW,VH)*.75;let best=0,bn=-1;for(let i=0;i<16;i++){const a=i*Math.PI/8,ca=Math.cos(a),sa=Math.sin(a);let n=0;for(const e of G.enemies){if(e.dead)continue;const dx=e.x-p.x,dy=e.y-p.y,pr=dx*ca+dy*sa;if(pr<20||pr>R)continue;if(Math.abs(dx*sa-dy*ca)<pr*.5)n+=e.boss?6:e.elite?3:1}if(n>bn){bn=n;best=a}}return best}
 function prTick(w,dt){const S=G.S,st=w.st,p=G.p;
-  if(!st.sub)st.sub={laser:{k:'laser',lvl:8,evo:true,t:0,st:{}},bag:{k:'bag',lvl:8,evo:true,t:0,st:{}}};
-  WU.laser(st.sub.laser,dt);WU.bag(st.sub.bag,dt);
+  if(!st.sub||!st.sub.cotton)st.sub={laser:{k:'laser',lvl:8,evo:true,t:0,st:{}},cotton:{k:'cotton',lvl:8,evo:true,t:0,st:{}}};
+  WU.laser(st.sub.laser,dt);WU.cotton(st.sub.cotton,dt);
   st.burn=(st.burn||[]).filter(b=>(b.t+=dt)<b.L);if(st.qk)st.qk=st.qk.filter(q=>(q.t+=dt)<3.4);
   st.u=(st.u===undefined?PR.T0:st.u)-dt;
   if(st.u<=0&&!st.c){st.c={t:0,a:prDir(),shot:0,bt:0,mf:0,hp:prHelpers()};st.u=PR.CD*S.cd}
@@ -5285,10 +5285,10 @@ function prTick(w,dt){const S=G.S,st=w.st,p=G.p;
     c.cur=c.a0;{const v=c.bm?(T<2.5?72:T<4?72*(1-(T-2.5)/1.5):0):30+50*(T/CF);p.x-=Math.cos(c.a0)*v*dt;p.y-=Math.sin(c.a0)*v*dt;if(!G.bot&&v>20&&Math.random()<.7)px(p.x+rnd(-8,8),p.y+16,-Math.cos(c.a0)*rnd(20,60),-rnd(10,30),.5,pick(['#d8c8c0','#a89890','#ffffff']),2,1,1)}
     const len=Math.max(VW,VH)*1.25,hw=Math.min(VW,VH)/6*S.area*prBW(c,T),ca=Math.cos(c.cur),sa=Math.sin(c.cur);
     c.bt-=dt;if(c.bt<=0){c.bt=.1;const dmg=PR.K*S.might;
-      for(const e of G.enemies){if(e.dead)continue;const dx=e.x-p.x,dy=e.y-p.y,pr=dx*ca+dy*sa;if(pr<0||pr>len)continue;if(Math.abs(dx*sa-dy*ca)<Math.max(hw,pr*Math.tan(prFan(c,T)))+e.r){hurt(e,dmg*(c.bm&&e.boss?1.5:1),'prism',{kb:12});if(e.dead&&!G.bot&&G.texts.length<70&&Math.random()<.35)G.texts.push({x:e.x,y:e.y-e.r-8,v:pick(['-90%','SALE','품절','1+1','타임세일']),life:.8,col:pick(['#ffd34d','#ff7ac8','#7af0ff'])})}}
+      for(const e of G.enemies){if(e.dead)continue;const dx=e.x-p.x,dy=e.y-p.y,pr=dx*ca+dy*sa;if(pr<0||pr>len)continue;if(Math.abs(dx*sa-dy*ca)<Math.max(hw,pr*Math.tan(prFan(c,T)))+e.r){hurt(e,dmg*(c.bm&&e.boss?1.5:1),'prism',{kb:12});}}
       if(G.eb)for(const b of G.eb){const dx=b.x-p.x,dy=b.y-p.y,pr=dx*ca+dy*sa;if(pr>0&&pr<len&&Math.abs(dx*sa-dy*ca)<hw)b.life=0}}
-    // 길 위에 쇼핑백 (블랙프라이데이 연쇄)
-    c.bg=(c.bg||0)-dt;if(c.bg<=0){c.bg=.18;const d=rnd(.25,.95)*len,o=rnd(-.6,.6)*hw,x=p.x+ca*d-sa*o,y=p.y+sa*d+ca*o;G.zones.push({k:'bag',x,y,r:16,br:84*S.area,bw:40*S.area,life:99,fuse:rnd(.15,.6),arm:0,dmg:76*S.might,ev:true,ph:Math.random()*6})}
+    // 길 위에 솜사탕 폭탄 (솜사탕 랜드)
+    c.bg=(c.bg||0)-dt;if(c.bg<=0&&st.sub.cotton){c.bg=.18;const d=rnd(.25,.95)*len,o=rnd(-.6,.6)*hw,x=p.x+ca*d-sa*o,y=p.y+sa*d+ca*o,L8=8;st.sub.cotton.st.bs=st.sub.cotton.st.bs||[];st.sub.cotton.st.bs.push({sx:p.x,sy:p.y-10,tx:x,ty:y,x:p.x,y:p.y,t:0,dur:.35,h:60,r:(36+3*L8)*S.area,dmg:(20+6*L8)*S.might*1.5,ev:true,red:false,sp:rnd(6,12)})}
     c.pf=(c.pf||0)-dt;if(c.pf<=0){c.pf=.45;c.ex=c.ex||[];c.ex.push({x:p.x+ca*len*rnd(.55,.95),y:p.y+sa*len*rnd(.55,.95),t:0})}
     // 검게 탄 자국
     c.bk=(c.bk||0)-dt;if(c.bk<=0){c.bk=c.bm?.6:.12;st.burn.push({x:p.x,y:p.y,a:c.cur,len,hw:hw*.9,fa:prFan(c,T),t:0,L:c.bm?CF-T+4:CF-T+4})}

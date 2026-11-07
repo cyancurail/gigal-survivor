@@ -5263,7 +5263,7 @@ setInterval(()=>{if(run){res();badges()}},3000);
 Object.assign(WP,{prism:{name:'셀레스티얼 프리즘',icon:'🌈',evo:'sunglass',evoName:'셀레스티얼 프리즘',hid:1,d:'화려한 쇼 뒤에 남겨진 고요한 흔적.',ed:'화려한 쇼 뒤에 남겨진 고요한 흔적.',extra:1}});
 KC.prism='#ffb3f0';
 if(window.PRISM_ON)HX.push({k:'prism',a:'laser',b:'cotton',it:'sunglass',q:'그녀의 진정한 힘을 깨운다.',lore:'화려한 쇼 뒤에 남겨진 고요한 흔적.',col:'#ffb3f0',sub:'💗 QUEEN 레이저쇼 + 🍭 솜사탕 랜드 + 🕶️ 선글라스'});
-[['pcore',120,86,24,15],['pmana',208,150,28,15],['pplasma',224,200,27,15],['pimpact',320,180,10,30],['pwarpb',100,104,42,30],['pdebris',232,96,64,20],['pquake',288,104,48,15]].forEach(([k,w,h,n,fps])=>{const im=new Image();im.src='fx/'+k+'.png';HXI[k]={im,w,h,n,fps}});
+[['pcore',120,86,24,15],['pmana',208,150,28,15],['pplasma',224,200,27,15],['pimpact',320,180,10,30],['pwarpb',100,104,42,30],['pdebris',232,96,64,20],['pdisc',64,64,6,20],['pquake',288,104,48,15]].forEach(([k,w,h,n,fps])=>{const im=new Image();im.src='fx/'+k+'.png';HXI[k]={im,w,h,n,fps}});
 function hxDrawList(){const L=G.weapons;const p=L.find(w=>w.k==='prism');return p&&p.st.sub?L.concat([p.st.sub.laser,p.st.sub.cotton].filter(Boolean)):L}
 const PR={T0:6,CD:13,AP:1.4,CH:2.4,FIRE:2.2,K:240};// 맘터 등장 → 충전(정전) → 발사
 function prDir(){const p=G.p,R=Math.max(VW,VH)*.75;let best=0,bn=-1;for(let i=0;i<16;i++){const a=i*Math.PI/8,ca=Math.cos(a),sa=Math.sin(a);let n=0;for(const e of G.enemies){if(e.dead)continue;const dx=e.x-p.x,dy=e.y-p.y,pr=dx*ca+dy*sa;if(pr<20||pr>R)continue;if(Math.abs(dx*sa-dy*ca)<pr*.5)n+=e.boss?6:e.elite?3:1}if(n>bn){bn=n;best=a}}return best}
@@ -5344,8 +5344,8 @@ function prFdTick(w,dt){const st=w.st,S=G.S,p=G.p,g=st.g===undefined?1:st.g,n=Ma
       for(const e of near){hurt(e,150*m,'prism');const pts=[[d.x,d.y],[e.x,e.y]];const e2=G.enemies.find(o=>!o.dead&&o!==e&&!near.includes(o)&&(o.x-e.x)**2+(o.y-e.y)**2<160*160);if(e2){hurt(e2,105*m,'prism');pts.push([e2.x,e2.y])}if(!G.bot)st.rf.push({pts,t:0})}
       if(!G.bot&&near.length)sparks(d.x,d.y,6,['#ffb3f0','#c4a8ff','#bff4ff','#ffffff'],160,.25,2);break}})}
 function prFdDraw(w){const st=w.st;if(!st.fd)return;const g=st.g===undefined?1:st.g;
-  if(g>.02)for(const d of st.fd){const im=HXI.pdisc;ctx.save();ctx.translate(d.x,d.y);ctx.globalAlpha=Math.min(1,g*1.5);ctx.rotate(G.t*14);
-    if(im&&im.im.complete&&im.im.naturalWidth){const f=((G.t*20)|0)%im.n,s=34;ctx.imageSmoothingEnabled=false;ctx.drawImage(im.im,f*im.w,0,im.w,im.h,-s/2,-s/2,s,s)}
+  if(g>.02)for(const d of st.fd){const im=HXI.pdisc;ctx.save();ctx.translate(d.x,d.y);ctx.globalAlpha=Math.min(1,g*1.5);ctx.rotate(-G.t*6);
+    if(im&&im.im.complete&&im.im.naturalWidth){const f=((G.t*20)|0)%im.n,s=36;ctx.imageSmoothingEnabled=false;ctx.drawImage(im.im,f*im.w,0,im.w,im.h,-s/2,-s/2,s,s)}
     else{const r=13;const gr=ctx.createRadialGradient(0,0,2,0,0,r);gr.addColorStop(0,'#ffffff');gr.addColorStop(.45,'#ffb3e0');gr.addColorStop(1,'#9fdcff');ctx.fillStyle=gr;ctx.beginPath();ctx.arc(0,0,r,0,6.283);ctx.fill();ctx.strokeStyle='#ffffff';ctx.lineWidth=2;for(let k=0;k<3;k++){ctx.beginPath();ctx.arc(0,0,r*.55,k*2.09,k*2.09+1.2);ctx.stroke()}}
     ctx.restore()}
   if(st.rf&&st.rf.length){ctx.save();ctx.globalCompositeOperation='lighter';for(const r of st.rf){const al=1-r.t/.22;for(let j=0;j<r.pts.length-1;j++){const [x0,y0]=r.pts[j],[x1,y1]=r.pts[j+1];ctx.globalAlpha=al;ctx.strokeStyle=['#ff7ad9','#c4a8ff','#9fdcff'][j%3];ctx.lineWidth=3-j;ctx.beginPath();ctx.moveTo(x0,y0);ctx.lineTo(x1,y1);ctx.stroke();ctx.strokeStyle='#ffffff';ctx.lineWidth=1;ctx.stroke()}}ctx.restore()}}

@@ -5263,14 +5263,14 @@ setInterval(()=>{if(run){res();badges()}},3000);
 Object.assign(WP,{prism:{name:'셀레스티얼 프리즘',icon:'🌈',evo:'redeem',evoName:'셀레스티얼 프리즘',hid:1,d:'화려한 쇼 뒤에 남겨진 고요한 흔적.',ed:'화려한 쇼 뒤에 남겨진 고요한 흔적.',extra:1}});
 KC.prism='#ffb3f0';
 if(window.PRISM_ON)HX.push({k:'prism',a:'laser',b:'bag',it:'redeem',q:'그녀의 진정한 힘을 깨운다.',lore:'화려한 쇼 뒤에 남겨진 고요한 흔적.',col:'#ffb3f0',sub:'💗 QUEEN 레이저쇼 + 🛍️ 블랙프라이데이 + 🎫 밍조 리딤코드'});
-[['pcore',120,86,24,15],['pmana',208,150,28,15],['pplasma',224,200,27,15],['pimpact',320,180,10,30],['pwarpb',100,104,42,30],['pquake',288,104,48,15]].forEach(([k,w,h,n,fps])=>{const im=new Image();im.src='fx/'+k+'.png';HXI[k]={im,w,h,n,fps}});
+[['pcore',120,86,24,15],['pmana',208,150,28,15],['pplasma',224,200,27,15],['pimpact',320,180,10,30],['pwarpb',100,104,42,30],['pdebris',232,96,64,20]].forEach(([k,w,h,n,fps])=>{const im=new Image();im.src='fx/'+k+'.png';HXI[k]={im,w,h,n,fps}});
 function hxDrawList(){const L=G.weapons;const p=L.find(w=>w.k==='prism');return p&&p.st.sub?L.concat([p.st.sub.laser]):L}
 const PR={T0:6,CD:13,AP:1.4,CH:2.4,FIRE:2.2,K:240};// 맘터 등장 → 충전(정전) → 발사
 function prDir(){const p=G.p,R=Math.max(VW,VH)*.75;let best=0,bn=-1;for(let i=0;i<16;i++){const a=i*Math.PI/8,ca=Math.cos(a),sa=Math.sin(a);let n=0;for(const e of G.enemies){if(e.dead)continue;const dx=e.x-p.x,dy=e.y-p.y,pr=dx*ca+dy*sa;if(pr<20||pr>R)continue;if(Math.abs(dx*sa-dy*ca)<pr*.5)n+=e.boss?6:e.elite?3:1}if(n>bn){bn=n;best=a}}return best}
 function prTick(w,dt){const S=G.S,st=w.st,p=G.p;
   if(!st.sub)st.sub={laser:{k:'laser',lvl:8,evo:true,t:0,st:{}},bag:{k:'bag',lvl:8,evo:true,t:0,st:{}}};
   WU.laser(st.sub.laser,dt);WU.bag(st.sub.bag,dt);
-  st.burn=(st.burn||[]).filter(b=>(b.t+=dt)<b.L);
+  st.burn=(st.burn||[]).filter(b=>(b.t+=dt)<b.L);if(st.qk)st.qk=st.qk.filter(q=>(q.t+=dt)<3.4);
   st.u=(st.u===undefined?PR.T0:st.u)-dt;
   if(st.u<=0&&!st.c){st.c={t:0,a:prDir(),shot:0,bt:0,mf:0};st.u=PR.CD*S.cd}
   const c=st.c;if(!c)return;c.t+=dt;const CF=c.F||PR.FIRE;
@@ -5290,19 +5290,19 @@ function prTick(w,dt){const S=G.S,st=w.st,p=G.p;
     c.bg=(c.bg||0)-dt;if(c.bg<=0){c.bg=.18;const d=rnd(.25,.95)*len,o=rnd(-.6,.6)*hw,x=p.x+ca*d-sa*o,y=p.y+sa*d+ca*o;G.zones.push({k:'bag',x,y,r:16,br:84*S.area,bw:40*S.area,life:99,fuse:rnd(.15,.6),arm:0,dmg:76*S.might,ev:true,ph:Math.random()*6})}
     c.pf=(c.pf||0)-dt;if(c.pf<=0){c.pf=.45;c.ex=c.ex||[];c.ex.push({x:p.x+ca*len*rnd(.55,.95),y:p.y+sa*len*rnd(.55,.95),t:0})}
     // 검게 탄 자국
-    c.bk=(c.bk||0)-dt;if(c.bk<=0){c.bk=.12;st.burn.push({x:p.x,y:p.y,a:c.cur,len,hw:hw*.9,fa:prFan(c,T),t:0,L:c.bm?CF-T+2:5})}
+    c.bk=(c.bk||0)-dt;if(c.bk<=0){c.bk=c.bm?.6:.12;st.burn.push({x:p.x,y:p.y,a:c.cur,len,hw:hw*.9,fa:prFan(c,T),t:0,L:c.bm?CF-T+2:5})}
     if(!G.bot&&Math.random()<.9){const d=rnd(0,len),o=rnd(-1,1)*hw;px(p.x+ca*d-sa*o,p.y+sa*d+ca*o,ca*rnd(80,260),sa*rnd(80,260),.4,pick(['#ffffff','#ffb3f0','#7af0ff','#c89bff']),pick([2,3]),1,2)}
   }
   if(c.ex)c.ex=c.ex.filter(q=>(q.t+=dt)<1.8);
-  if(T>=CF&&!c.qk){c.qk=1;st.qk=st.qk||[];const len=Math.max(VW,VH)*1.1;for(const da of [-.3,0,.3])for(const f of [.28,.6,.92]){const a=c.a0+da;st.qk.push({x:p.x+Math.cos(a)*len*f,y:p.y+Math.sin(a)*len*f,a:a+rnd(-.15,.15),t:-Math.random()*.3})}if(!G.bot)SND.p('boom')}
-  if(st.qk)st.qk=st.qk.filter(q=>(q.t+=dt)<3.4);
+  if(T>=CF&&!c.qk){c.qk=1;st.qk=st.qk||[];const len=Math.max(VW,VH)*1.1;const hw=Math.min(VW,VH)/6*G.S.area*(c.bm?1.8:1),ca=Math.cos(c.a0),sa=Math.sin(c.a0);for(const f of [.12,.3,.48,.66,.84])for(const o of [-.6,0,.6]){const d=len*(f+rnd(-.05,.05)),oo=hw*(o+rnd(-.2,.2));st.qk.push({x:p.x+ca*d-sa*oo,y:p.y+sa*d+ca*oo,t:-Math.random()*.5,fl:Math.random()<.5})}if(!G.bot)SND.p('boom')}
   if(T>=CF+.4){if(c.bm)st.u=Math.max(st.u,PR.CD*G.S.cd);st.c=null;st.mt=0;st.gEnd=G.t}
 }
 WU.prism=prTick;
 function prMamter(){try{const id='진형우';return SPRF(id,(SAVE.fancy||{})[id]?'fancy':'plain',0)}catch(e){return null}}
-function prFloor(w){const st=w.st;if(st.qk)for(const q of st.qk){if(q.t<0)continue;const S=HXI.pquake;if(!S||!S.im.complete||!S.im.naturalWidth)break;const f=Math.min(S.n-1,q.t*15|0),sc=2.2,al=q.t>2.9?Math.max(0,(3.4-q.t)/.5):1;ctx.save();ctx.globalAlpha=al;ctx.translate(q.x,q.y);ctx.rotate(q.a);ctx.imageSmoothingEnabled=false;ctx.drawImage(S.im,f*S.w,0,S.w,S.h,-S.w*sc/2,-S.h*sc*.85,S.w*sc,S.h*sc);ctx.restore()}
-  if(!st.burn||!st.burn.length)return;ctx.save();for(const b of st.burn){const a=Math.min(1,(b.L-b.t)/(b.fa?.8:1.5))*(b.fa?.5:.13);if(a<=0)continue;ctx.save();ctx.fillStyle='#140a0e';ctx.translate(b.x,b.y);ctx.rotate(b.a);for(const [f,m] of [[1,.5],[.75,.8],[.5,1]]){ctx.globalAlpha=a*m;ctx.fillRect(0,-b.hw*f,b.len,b.hw*2*f)}if(b.fa){ctx.globalAlpha=a*.7;ctx.beginPath();ctx.moveTo(0,0);ctx.arc(0,0,b.len,-b.fa,b.fa);ctx.closePath();ctx.fill()}ctx.restore()}ctx.restore();
+function prFloor(w){const st=w.st;
+  if(st.burn&&st.burn.length){ctx.save();for(const b of st.burn){const a=Math.min(1,(b.L-b.t)/(b.fa?.8:1.5))*(b.fa?.5:.13);if(a<=0)continue;ctx.save();ctx.fillStyle='#140a0e';ctx.translate(b.x,b.y);ctx.rotate(b.a);for(const [f,m] of [[1,.5],[.75,.8],[.5,1]]){ctx.globalAlpha=a*m;ctx.fillRect(0,-b.hw*f,b.len,b.hw*2*f)}if(b.fa){ctx.globalAlpha=a*.7;ctx.beginPath();ctx.moveTo(0,0);ctx.arc(0,0,b.len,-b.fa,b.fa);ctx.closePath();ctx.fill()}ctx.restore()}ctx.restore();
   if(!G.bot&&Math.random()<.5){const b=pick(st.burn);if(b&&b.t<b.L-1){const d=rnd(0,b.len),o=rnd(-1,1)*b.hw;px(b.x+Math.cos(b.a)*d-Math.sin(b.a)*o,b.y+Math.sin(b.a)*d+Math.cos(b.a)*o,rnd(-8,8),-rnd(15,40),1.2,pick(['#3a3038','#2a2228','#5a4a50']),3,0,1)}}}
+  if(st.qk)for(const q of st.qk){if(q.t<0)continue;const S=HXI.pdebris;if(!S||!S.im.complete||!S.im.naturalWidth)break;const f=Math.min(S.n-1,q.t*20|0),sc=1.4,al=q.t>2.9?Math.max(0,(3.4-q.t)/.5):1;ctx.save();ctx.globalAlpha=al;ctx.translate(q.x,q.y);if(q.fl)ctx.scale(-1,1);ctx.imageSmoothingEnabled=false;ctx.drawImage(S.im,f*S.w,0,S.w,S.h,-(S.w/2-6)*sc,-(S.h/2+24)*sc,S.w*sc,S.h*sc);ctx.restore()}}
 function prDraw(w){const st=w.st,c=st.c,p=G.p;if(!c)return;const gh=!!G.__gh,T=c.t-PR.AP-PR.CH,CF=c.F||PR.FIRE;
   // 1) 맘터 등장 (아련한 반투명)
   if(!gh&&c.t<PR.AP+PR.CH+CF){const im=prMamter();const side=Math.cos(c.a)>0?-1:1;let mx=p.x+side*95,my=p.y-40+Math.sin(G.t*2)*4,al=Math.min(.62,c.t/.6*.62),rot=0;
@@ -5321,8 +5321,8 @@ function prDraw(w){const st=w.st,c=st.c,p=G.p;if(!c)return;const gh=!!G.__gh,T=c
   if(!(c.bm&&!gh&&T>=3.8))prBeam(c,T,CF,gh);
   if(c.ex)for(const q of c.ex)hxFrame('pplasma',q.t*15,q.x,q.y,1.1,1)}
 
-function prBW(c,T){return 1}
-function prFan(c,T){return c.bm&&T>3.8?.45*Math.min(1,(T-3.8)/.5):0}// 부채꼴 반각(라디안)
+function prBW(c,T){return c.bm&&T>3.8?1+.8*Math.min(1,(T-3.8)/.5):1}
+function prFan(c,T){return 0}// 부채꼴 반각(라디안)
 function prBeam(c,T,CF,gh){const p=G.p;
   if(T>=0&&T<CF+.25){const len=Math.max(VW,VH)*1.25,hw=Math.min(VW,VH)/6*G.S.area*prBW(c,T),a=c.cur===undefined?c.a:c.cur,fade=T>CF?1-(T-CF)/.25:Math.min(1,T/.12);
     ctx.save();ctx.translate(p.x,p.y-6);ctx.rotate(a);ctx.globalCompositeOperation='lighter';

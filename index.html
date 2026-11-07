@@ -4070,7 +4070,9 @@ function swDraw(w){swCastDraw(w.st);for(const q of w.st.g||[]){const sc=.62,bob=
 Object.assign(WU,{polaris(w,dt){plTick(w,dt)},soulwed(w,dt){swTick(w,dt)}});
 function hxFloor(){for(const w of G.weapons){if(w.k==='soulwed')swFloor(w);else if(w.k==='prism')prFloor(w);else if(w.k==='risha')rsFloor(w);else if(w.k==='stellar')szFloor(w)}}
 function plFzDraw(){if(G.bot)return;ctx.save();for(const e of G.enemies){if(!e.plF)continue;const on=e.plF>G.t&&!e.dead,R=e.r*(e.type&&e.type.slice(0,3)==='sb_'?1.7:1.25)+(e.boss?8:4);if(!on){e.plF=0;const m=pn(e.boss?40:14);for(let i=0;i<m;i++){const a=rnd(0,6.283),v=rnd(60,e.boss?260:170);px(e.x+Math.cos(a)*R*.5,e.y+Math.sin(a)*R*.5,Math.cos(a)*v,Math.sin(a)*v-50,rnd(.35,.8),pick(['#ffffff','#d8f4ff','#9fdcff','#5aa8ff']),pick([2,3,3]),2,1)}continue}const left=e.plF-G.t,cr=left<.6&&Math.floor(G.t*14)%2,hh=R*1.25,ww=R,x=e.x,y=e.y-R*.08;if(e.boss){ctx.globalAlpha=.55;ctx.strokeStyle='#bfefff';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(x,e.y+R*.7,R*1.25,R*.42,0,0,6.283);ctx.stroke();ctx.globalAlpha=.25;ctx.fillStyle='#9fdcff';ctx.fill()}const pts=[[0,-hh],[ww*.72,-hh*.45],[ww*.72,hh*.5],[0,hh*.8],[-ww*.72,hh*.5],[-ww*.72,-hh*.45]];const g=ctx.createLinearGradient(x-ww,y-hh,x+ww,y+hh);g.addColorStop(0,'rgba(240,252,255,.78)');g.addColorStop(.45,'rgba(150,215,255,.55)');g.addColorStop(1,'rgba(70,140,230,.6)');ctx.globalAlpha=cr?.55:1;ctx.fillStyle=g;ctx.beginPath();pts.forEach((q,i)=>i?ctx.lineTo(x+q[0],y+q[1]):ctx.moveTo(x+q[0],y+q[1]));ctx.closePath();ctx.fill();ctx.strokeStyle='#ffffff';ctx.lineWidth=1.6;ctx.stroke();ctx.globalAlpha=(cr?.4:.85);ctx.strokeStyle='rgba(255,255,255,.9)';ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(x,y-hh);ctx.lineTo(x,y+hh*.8);ctx.moveTo(x-ww*.72,y-hh*.45);ctx.lineTo(x,y-hh*.05);ctx.lineTo(x+ww*.72,y-hh*.45);ctx.stroke();ctx.globalAlpha=.9;ctx.fillStyle='#ffffff';ctx.fillRect(x-ww*.5,y-hh*.35,2,hh*.55);ctx.fillRect(x-ww*.36,y-hh*.4,1.5,hh*.3);for(let k=0;k<3;k++){const a=G.t*1.6+e.plS+k*2.09,sx=x+Math.cos(a)*ww*.95,sy=y+Math.sin(a)*hh*.7,tw=(Math.sin(G.t*7+k+e.plS)+1)/2,z=1.5+2.5*tw;ctx.globalAlpha=.5+.5*tw;ctx.fillRect(sx-z,sy-.6,z*2,1.2);ctx.fillRect(sx-.6,sy-z,1.2,z*2)}}ctx.restore()}
-function hxDraw(){try{plFzDraw()}catch(_){}for(const w of G.weapons){if(w.k==='polaris'){plDraw(w);plFlash(w)}else if(w.k==='soulwed')swDraw(w);else if(w.k==='glass')glDraw(w);else if(w.k==='prism')prDraw(w);else if(w.k==='risha')rsDraw(w);else if(w.k==='stellar')szDraw(w)}}
+// 🌈 프리즘 발사 중 흑백 (임팩트 프레임 뒤 ~ 레이저 끝, 0.5초 동안 색 복귀)
+let PRG=-1;function prGray(){if(G.__gh)return;let g=0;if(!G.bot){const w=G.weapons.find(w=>w.k==='prism');if(w){const c=w.st.c;if(c){const T=c.t-PR.AP-PR.CH;if(T>=0)g=1}else if(w.st.gEnd)g=Math.max(0,1-(G.t-w.st.gEnd)/.5)}}g=Math.round(g*20)/20;if(g!==PRG){PRG=g;document.getElementById('game').style.filter=g>0?'grayscale('+g+')':''}}
+function hxDraw(){try{plFzDraw()}catch(_){}try{prGray()}catch(_){}for(const w of G.weapons){if(w.k==='polaris'){plDraw(w);plFlash(w)}else if(w.k==='soulwed')swDraw(w);else if(w.k==='glass')glDraw(w);else if(w.k==='prism')prDraw(w);else if(w.k==='risha')rsDraw(w);else if(w.k==='stellar')szDraw(w)}}
 
 // ===== 요정의 유리정원 (V103) =====
 Object.assign(WP,{glass:{name:'요정의 유리정원',icon:'🧊',evo:'stardust',evoName:'요정의 유리정원',hid:1,d:'아름다운 건, 유리 안에서만 시들지 않아요.',ed:'아름다운 건, 유리 안에서만 시들지 않아요.',extra:1}});
@@ -5277,7 +5279,7 @@ function prTick(w,dt){const S=G.S,st=w.st,p=G.p;
   const T=c.t-PR.AP-PR.CH;
   if(T>=0&&T<PR.FIRE){
     if(!c.shot){c.shot=1;c.a0=c.a;if(!G.bot){SND.p('boom');G.fx.push({ring:1,x:p.x,y:p.y,r:0,R:120,life:.4,L:.4,c:'#ffb3f0'})}}
-    const sw=Math.sin(T/PR.FIRE*Math.PI*2)*.42;c.cur=c.a0+sw;
+    c.cur=c.a0;
     const len=Math.max(VW,VH)*1.25,hw=Math.min(VW,VH)/6*S.area,ca=Math.cos(c.cur),sa=Math.sin(c.cur);
     c.bt-=dt;if(c.bt<=0){c.bt=.1;const dmg=PR.K*S.might;
       for(const e of G.enemies){if(e.dead)continue;const dx=e.x-p.x,dy=e.y-p.y,pr=dx*ca+dy*sa;if(pr<0||pr>len)continue;if(Math.abs(dx*sa-dy*ca)<hw+e.r){hurt(e,dmg,'prism',{kb:12});if(e.dead&&!G.bot&&G.texts.length<70&&Math.random()<.35)G.texts.push({x:e.x,y:e.y-e.r-8,v:pick(['-90%','SALE','품절','1+1','타임세일']),life:.8,col:pick(['#ffd34d','#ff7ac8','#7af0ff'])})}}
@@ -5292,7 +5294,7 @@ function prTick(w,dt){const S=G.S,st=w.st,p=G.p;
   if(c.ex)c.ex=c.ex.filter(q=>(q.t+=dt)<1.8);
   if(T>=PR.FIRE&&!c.qk){c.qk=1;st.qk=st.qk||[];const len=Math.max(VW,VH)*1.1;for(const da of [-.3,0,.3])for(const f of [.28,.6,.92]){const a=c.a0+da;st.qk.push({x:p.x+Math.cos(a)*len*f,y:p.y+Math.sin(a)*len*f,a:a+rnd(-.15,.15),t:-Math.random()*.3})}if(!G.bot)SND.p('boom')}
   if(st.qk)st.qk=st.qk.filter(q=>(q.t+=dt)<3.4);
-  if(T>=PR.FIRE+.4){st.c=null;st.mt=0}
+  if(T>=PR.FIRE+.4){st.c=null;st.mt=0;st.gEnd=G.t}
 }
 WU.prism=prTick;
 function prMamter(){try{const id='진형우';return SPRF(id,(SAVE.fancy||{})[id]?'fancy':'plain',0)}catch(e){return null}}

@@ -3006,7 +3006,7 @@ const POOL_V15=POOL.length;MSK2L.forEach(o=>{const c=CHAR.find(q=>q.id===o.id);P
 /* V135 히든 무기 제작 업적 보상 신화 스킨 (뽑기 제외 nog) — POOL 맨 끝 */
 const POOL_V16=POOL.length;[['임재영',6,'폴라리스 사령관','msk2/hx_polaris.png'],['박계원',7,'유령신부','msk2/hx_soulwed.png'],['박준영',6,'미란타롯토','msk2/hx_glass.png']].forEach(([id,sl,n,f])=>{const o={id,s:sl,n,pid:'mx:'+id+'|'+sl,f};MSK2L.push(o);MSK2B[id+'|'+sl]=o;const c=CHAR.find(q=>q.id===id);POOL.push({id:o.pid,tier:'M',kind:'mskin',owner:id,s:sl,nog:1,n:`${c?c.nick:id} · ${n}`})});
 const POOL_V17=POOL.length;[['조혁래',6,'대천사','msk2/hx_rave.png'],['김세진',7,'세나 어센딩','msk2/hx_stellar.png']].forEach(([id,sl,n,f])=>{const o={id,s:sl,n,pid:'mx:'+id+'|'+sl,f};MSK2L.push(o);MSK2B[id+'|'+sl]=o;const c=CHAR.find(q=>q.id===id);POOL.push({id:o.pid,tier:'M',kind:'mskin',owner:id,s:sl,nog:1,n:`${c?c.nick:id} · ${n}`})});
-const POOL_V18=POOL.length;[['창환이형',6,'프리즘 디바','msk2/hx_prism_pn.png'],['진형우',6,'프리즘 스타','msk2/hx_prism_mt.png']].forEach(([id,sl,n,f])=>{const o={id,s:sl,n,pid:'mx:'+id+'|'+sl,f};MSK2L.push(o);MSK2B[id+'|'+sl]=o;const c=CHAR.find(q=>q.id===id);POOL.push({id:o.pid,tier:'M',kind:'mskin',owner:id,s:sl,nog:1,n:`${c?c.nick:id} · ${n}`})});
+const POOL_V18=POOL.length;[['창환이형',6,'셀레스티얼 디바','msk2/hx_prism_pn.png'],['진형우',6,'셀레스티얼 스타','msk2/hx_prism_mt.png']].forEach(([id,sl,n,f])=>{const o={id,s:sl,n,pid:'mx:'+id+'|'+sl,f};MSK2L.push(o);MSK2B[id+'|'+sl]=o;const c=CHAR.find(q=>q.id===id);POOL.push({id:o.pid,tier:'M',kind:'mskin',owner:id,s:sl,nog:1,n:`${c?c.nick:id} · ${n}`})});
 {const t=POOL.find(p=>p.id==='ms:임재영');if(t){t.vid='ult3/taetae.mp4';t.role='intro';t.vn='태태영 Ⅲ'}}
 const PBY={};POOL.forEach(p=>PBY[p.id]=p);
 const TIERN={C:'일반',R:'희귀',L:'전설',M:'신화'},TIERC={C:'#e8e8f0',R:'#ffd34d',L:'#ff7ac8',M:'#fff3b0'};
@@ -3047,7 +3047,7 @@ const ACH_HX=[
  {id:'hx_soulwed',hx:'soulwed',n:'죽음을 넘는 사랑에 빠진 여자',c:'영혼결혼식 제작',r:'👑 K1 신화 스킨 「유령신부」',inv:'mx:박계원|7'},
  {id:'hx_roadster',hx:'roadster',n:'억척스럽게 생긴 련들은 Out',c:'레이디 로드스터 제작',r:'👑 전용 신화 스킨 (준비 중)'},
  {id:'hx_stellar',hx:'stellar',n:'별들의 후손',c:'스텔라 디센던트 제작',r:'👑 세나 신화 스킨 「세나 어센딩」',inv:'mx:김세진|7'},
- {id:'hx_prism',hx:'prism',n:'하늘을 쪼갠 일곱 빛깔',c:'그레이스 프리즘 제작',r:'👑 쁘니 신화 스킨 「프리즘 디바」 + 맘터 신화 스킨 「프리즘 스타」',inv:'mx:창환이형|6',inv2:'mx:진형우|6'},
+ {id:'hx_prism',hx:'prism',n:'눈부신 우리의 순간',c:'그레이스 프리즘 제작',r:'👑 쁘니 신화 스킨 「셀레스티얼 디바」 + 맘터 신화 스킨 「셀레스티얼 스타」',inv:'mx:창환이형|6',inv2:'mx:진형우|6'},
  {id:'hx_rave',hx:'risha',n:'리샤 발렌타인',c:'R.A.V.E. 제작',r:'👑 무룩 신화 스킨 「대천사」',inv:'mx:조혁래|6'},
 ];
 const ACH_HX_ON=true;if(ACH_HX_ON)ACH.push(...ACH_HX);

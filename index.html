@@ -5272,7 +5272,7 @@ function prTick(w,dt){const S=G.S,st=w.st,p=G.p;
   if(!st.sub||!st.sub.cotton)st.sub={laser:{k:'laser',lvl:8,evo:true,t:0,st:{}},cotton:{k:'cotton',lvl:8,evo:true,t:0,st:{}}};
   // 에네르기파 동안 레이저·원반이 캐릭터에게 모였다가 사라지고, 끝나면 다시 펼쳐져요
   {const c0=st.c;let tg=1;if(c0&&c0.t>PR.AP)tg=0;st.g=st.g===undefined?1:st.g;st.g+=(tg-st.g)*Math.min(1,dt*(tg?2.2:3.5));if(Math.abs(st.g-tg)<.01)st.g=tg}
-  if(st.g>=1){WU.laser(st.sub.laser,dt);st.sub.laser.st.a+=1.08*dt}else{const L=st.sub.laser,n=5+(S.amount||0),len=273*S.area*st.g;L.st.a=(L.st.a||0)+2.9*dt;L.st.beams=[];if(st.g>.02)for(let i=0;i<n;i++){const a=L.st.a+i*Math.PI*2/n;L.st.beams.push([Math.cos(a),Math.sin(a),len])}}
+  if(st.g>=1){WU.laser(st.sub.laser,dt);st.sub.laser.st.a+=2.16*dt}else{const L=st.sub.laser,n=5+(S.amount||0),len=273*S.area*st.g;L.st.a=(L.st.a||0)+3.96*dt;L.st.beams=[];if(st.g>.02)for(let i=0;i<n;i++){const a=L.st.a+i*Math.PI*2/n;L.st.beams.push([Math.cos(a),Math.sin(a),len])}}
   st.sub.cotton.t=1e9;WU.cotton(st.sub.cotton,dt);
   prFdTick(w,dt);
   st.burn=(st.burn||[]).filter(b=>(b.t+=dt)<b.L);if(st.qk)st.qk=st.qk.filter(q=>(q.t+=dt)<3.4);
@@ -5335,20 +5335,28 @@ function prBeam(c,T,CF,gh){const p=G.p;
     if(!gh)hxFrame('pmana',Math.min(27,T*15),p.x,p.y-6,1.2,.9)}
 }
 // 🍭 솜사탕 프리스비 원반: 캐릭터 둘레를 레이저와 반대로 빠르게 돌고, 레이저가 닿으면 굴절돼 주변 적에게 튕겨요
-function prFdTick(w,dt){const st=w.st,S=G.S,p=G.p,g=st.g===undefined?1:st.g,n=Math.min(5,3+(S.amount||0)),R=92*S.area*g;st.fa=(st.fa||0)-5*dt;st.fc=st.fc||[];st.rf=(st.rf||[]).filter(r=>(r.t+=dt)<.22);
-  st.fd=[];for(let i=0;i<n;i++){const a=st.fa+i*Math.PI*2/n;st.fd.push({x:p.x+Math.cos(a)*R,y:p.y-6+Math.sin(a)*R,a})}
-  if(g<.98)return;const m=S.might,bs=(st.sub&&st.sub.laser.st.beams)||[];
-  st.fd.forEach((d,i)=>{for(const e of G.enemies){if(e.dead||(e.x-d.x)**2+(e.y-d.y)**2>(16+e.r)**2||!canHit(e,'pfd'+i,.25))continue;hurt(e,70*m,'prism',{kb:10})}
-    st.fc[i]=(st.fc[i]||0)-dt;if(st.fc[i]>0)return;
-    for(const [cx,cy,len] of bs){const dx=d.x-p.x,dy=d.y-p.y,pr=dx*cx+dy*cy;if(pr<0||pr>len||Math.abs(dx*cy-dy*cx)>16)continue;
-      st.fc[i]=.3;const near=G.enemies.filter(e=>!e.dead&&(e.x-d.x)**2+(e.y-d.y)**2<220*220).sort((a,b)=>((a.x-d.x)**2+(a.y-d.y)**2)-((b.x-d.x)**2+(b.y-d.y)**2)).slice(0,3);
+function prFdTick(w,dt){const st=w.st,S=G.S,p=G.p,g=st.g===undefined?1:st.g,m=S.might;st.fd=st.fd||[];st.fc=0;st.rf=(st.rf||[]).filter(r=>(r.t+=dt)<.22);
+  if(g<.98){for(const d of st.fd){d.x+=(p.x-d.x)*Math.min(1,dt*7);d.y+=(p.y-6-d.y)*Math.min(1,dt*7);d.al=Math.min(d.al||1,g)}st.fd=st.fd.filter(d=>(d.x-p.x)**2+(d.y-p.y)**2>100&&g>.05);return}
+  // 굴려 보내기: 레이저가 닿는 거리 안의 적 무리를 먼저
+  st.fu=(st.fu===undefined?.4:st.fu)-dt;if(st.fu<=0){st.fu=2.6*S.cd;const n=2+(S.amount||0),LR=250*S.area,vis=G.enemies.filter(e=>!e.dead&&onScreen(e));let pool=vis.filter(e=>(e.x-p.x)**2+(e.y-p.y)**2<LR*LR);if(!pool.length)pool=vis;
+    for(let i=0;i<n&&st.fd.length<8;i++){let tx,ty;if(pool.length){const e=pick(pool);tx=e.x+rnd(-15,15);ty=e.y+rnd(-15,15)}else{const a=rnd(0,6.283),r=rnd(90,220);tx=p.x+Math.cos(a)*r;ty=p.y+Math.sin(a)*r}st.fd.push({x:p.x,y:p.y-6,tx,ty,ph:0,t:0,L:4*S.dur,id:Math.random(),cd:0,k:0,al:1})}}
+  const bs=(st.sub&&st.sub.laser.st.beams)||[];
+  for(const d of st.fd){d.t+=dt;d.cd-=dt;
+    if(d.ph===0){const dx=d.tx-d.x,dy=d.ty-d.y,dd=Math.hypot(dx,dy),v=520*dt;if(dd<=v){d.x=d.tx;d.y=d.ty;d.ph=1;d.t=0}else{d.x+=dx/dd*v;d.y+=dy/dd*v}
+      for(const e of G.enemies)if(!e.dead&&(e.x-d.x)**2+(e.y-d.y)**2<(16+e.r)**2&&canHit(e,'pfr'+d.id,.6))hurt(e,45*m,'prism',{kb:14})}
+    else{const R=40*S.area;d.k-=dt;if(d.k<=0){d.k=.2;for(const e of G.enemies){if(e.dead||(e.x-d.x)**2+(e.y-d.y)**2>(R+e.r)**2)continue;hurt(e,28*m,'prism');if(!e.boss&&!e.elite){e.x+=(d.x-e.x)*.08;e.y+=(d.y-e.y)*.08}}}
+      if(!G.bot&&Math.random()<.4)px(d.x+rnd(-R,R)*.6,d.y+rnd(-R,R)*.6,rnd(-30,30),rnd(-30,30),.4,pick(['#ffb3e0','#bfefff','#ffffff']),2,1,1)}
+    // 🌈 레이저 분열
+    if(d.cd<=0)for(const [cx,cy,len] of bs){const dx=d.x-p.x,dy=d.y-p.y,pr=dx*cx+dy*cy;if(pr<0||pr>len||Math.abs(dx*cy-dy*cx)>16)continue;
+      d.cd=.3;const near=G.enemies.filter(e=>!e.dead&&(e.x-d.x)**2+(e.y-d.y)**2<220*220).sort((a,b)=>((a.x-d.x)**2+(a.y-d.y)**2)-((b.x-d.x)**2+(b.y-d.y)**2)).slice(0,3);
       for(const e of near){hurt(e,150*m,'prism');const pts=[[d.x,d.y],[e.x,e.y]];const e2=G.enemies.find(o=>!o.dead&&o!==e&&!near.includes(o)&&(o.x-e.x)**2+(o.y-e.y)**2<160*160);if(e2){hurt(e2,105*m,'prism');pts.push([e2.x,e2.y])}if(!G.bot)st.rf.push({pts,t:0})}
-      if(!G.bot&&near.length)sparks(d.x,d.y,6,['#ffb3f0','#c4a8ff','#bff4ff','#ffffff'],160,.25,2);break}})}
-function prFdDraw(w){const st=w.st;if(!st.fd)return;const g=st.g===undefined?1:st.g;
-  if(g>.02)for(const d of st.fd){const im=HXI.pdisc;ctx.save();ctx.translate(d.x,d.y);ctx.globalAlpha=Math.min(1,g*1.5);ctx.rotate(-G.t*6);
-    if(im&&im.im.complete&&im.im.naturalWidth){const f=((G.t*20)|0)%im.n,s=36;ctx.imageSmoothingEnabled=false;ctx.drawImage(im.im,f*im.w,0,im.w,im.h,-s/2,-s/2,s,s)}
-    else{const r=13;const gr=ctx.createRadialGradient(0,0,2,0,0,r);gr.addColorStop(0,'#ffffff');gr.addColorStop(.45,'#ffb3e0');gr.addColorStop(1,'#9fdcff');ctx.fillStyle=gr;ctx.beginPath();ctx.arc(0,0,r,0,6.283);ctx.fill();ctx.strokeStyle='#ffffff';ctx.lineWidth=2;for(let k=0;k<3;k++){ctx.beginPath();ctx.arc(0,0,r*.55,k*2.09,k*2.09+1.2);ctx.stroke()}}
-    ctx.restore()}
+      if(!G.bot&&near.length)sparks(d.x,d.y,6,['#ffb3f0','#c4a8ff','#bff4ff','#ffffff'],160,.25,2);break}}
+  st.fd=st.fd.filter(d=>d.ph===0||d.t<d.L)}
+function prFdDraw(w){const st=w.st;if(!st.fd)return;const im=HXI.pdisc;
+  for(const d of st.fd){let al=d.al===undefined?1:d.al,sc=1;if(d.ph===1){if(d.t<.15)sc=1+(.15-d.t)*2;if(d.t>d.L-.5){al*=Math.max(0,(d.L-d.t)/.5);sc*=1+(.5-(d.L-d.t))*.6}}
+    ctx.save();ctx.translate(d.x,d.y+(d.ph===1?Math.sin(d.t*14)*1.5:0));ctx.globalAlpha=al;ctx.rotate((d.ph===0?-G.t*22:-G.t*12)+d.id*6);
+    if(im&&im.im.complete&&im.im.naturalWidth){const f=((G.t*(d.ph?26:34))|0)%im.n,s=36*sc;ctx.imageSmoothingEnabled=false;ctx.drawImage(im.im,f*im.w,0,im.w,im.h,-s/2,-s/2,s,s)}
+    ctx.restore();if(d.ph===1&&al>.3){ctx.save();ctx.globalAlpha=al*.18;ctx.strokeStyle='#ffb3e0';ctx.lineWidth=2;ctx.beginPath();ctx.arc(d.x,d.y,40*G.S.area,0,6.283);ctx.stroke();ctx.restore()}}
   if(st.rf&&st.rf.length){ctx.save();ctx.globalCompositeOperation='lighter';for(const r of st.rf){const al=1-r.t/.22;for(let j=0;j<r.pts.length-1;j++){const [x0,y0]=r.pts[j],[x1,y1]=r.pts[j+1];ctx.globalAlpha=al;ctx.strokeStyle=['#ff7ad9','#c4a8ff','#9fdcff'][j%3];ctx.lineWidth=3-j;ctx.beginPath();ctx.moveTo(x0,y0);ctx.lineTo(x1,y1);ctx.stroke();ctx.strokeStyle='#ffffff';ctx.lineWidth=1;ctx.stroke()}}ctx.restore()}}
 // 맘터·쁘니: 기본판 = 한 명은 바짝 붙어 같이 쏘고, 한 명은 밀리다 데굴데굴 날아감 / 특별판 = 한 명이 같이 밀리다 날아갔다가 친구들 맨 끝에 돌아옴
 function prHelpers(){const ids=['진형우','창환이형'].filter(id=>id!==G.id);if(Math.random()<.5)ids.reverse();return{st:ids[0],bl:ids[1]||null}}

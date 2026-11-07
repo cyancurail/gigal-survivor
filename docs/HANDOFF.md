@@ -1,4 +1,4 @@
-# 기갈 서바이버 인수인계 문서 (2026-11-07 기준, 사이트 V136 / claude.ai V87)
+# 기갈 서바이버 인수인계 문서 (2026-11-07 기준, 사이트 V137 / claude.ai V87)
 
 새 대화(또는 프로젝트)에서 이 문서를 먼저 읽고 작업을 이어간다.
 
@@ -31,6 +31,7 @@
 | 홍보 이미지 캔버스 | https://claude.ai/artifact/CMEttteZbaj4VHwD5iTHst | 도트 키 비주얼 (참고용) |
 
 - 게임은 **HTML 한 파일**(V81 이후 약 2.4MB 이상). 소스는 claude-artifacts `read_file`에 slug(UUID)와 `paths:["index.html"]`을 주면 파일로 저장된다(대화에 통째로 붙이지 말 것). 수정 후 같은 slug로 publish.
+- **V137 배포 (2026-11-07 11:25, 사이트) — 👑 신화 스킨 35종 128px 고화질**: msk2/01~30·hx_polaris·hx_soulwed·hx_glass·hx_rave·hx_stellar를 1024×128(8프레임×128px, LANCZOS + 부드러운 가장자리, 256색 PNG, 합계 약 1.0MB)로 교체. `mskFrame`이 이미지 높이로 프레임 크기 결정(128이면 캔버스 128 + `_hq`). `CanvasRenderingContext2D.prototype.drawImage` 감쌈: `_hq` 캔버스만 그릴 때 imageSmoothing high로 잠깐 켬(나머지 도트는 그대로). 64px 처리본보다 128px이 낫다는 사용자 판단(비교 그림 확인). 원본 그림 없는 예전 신화 스킨 Ⅰ·Ⅱ·Ⅲ은 64px 그대로. 생성 스크립트 세션 로컬 /home/claude/w/hq.py. 패치내역(사용자 문구) 「게임 엔진 개선 업데이트 : "아리아드네" 인공지능 엔진 모델로 스킨 비쥬얼이 상향되었습니다.」 sw VERSION 'v137'. **앞으로 받는 스킨 시트도 128px로 정리.**
 - **V136 배포 (2026-11-07 11:12, 사이트) — 업적 보상 스킨 2종 (히든, 패치내역 미기재)**: POOL 맨 끝(`POOL_V17`) nog 신화 스킨 무룩 「대천사」 `mx:조혁래|6`(hx_rave 업적), 세나 「세나 어센딩」 `mx:김세진|7`(hx_stellar 업적), `msk2/hx_rave.png`·`hx_stellar.png`. 이미 보상 받은 사람은 achHx가 소급 지급. **SC_VER 18**(v17 코드 = POOL_V17 slice). 남은 「준비 중」: 로드스터·셀레스티얼 프리즘. sw VERSION 'v136'.
 - **V135 배포 (2026-11-07 03:58, 사이트) — 🏆 히든 무기 제작 업적 7종 · 보상 신화 스킨 3종 (히든, 패치내역 미기재)**: `ACH_HX`(ACH 맨 끝, 숨김 업적, `ACH_HX_ON=true`) = hx_polaris 「차가운 얼음 나라의 공주」 / hx_glass 「고대 요정의 마법 : 시공간 제어」 / hx_soulwed 「죽음을 넘는 사랑에 빠진 여자」 / hx_roadster 「억척스럽게 생긴 련들은 Out」 / hx_stellar 「별들의 후손」 / hx_prism 「하늘을 쪼갠 일곱 빛깔」(임시 이름) / hx_rave(hx:'risha') 「리샤 발렌타인」. 달성 = `SAVE.hxMade[hx]`(직접 합체, 트와일라잇 제외, 예전 기록 소급) → `achHx(k)`(achCheck·hxMade 기록 시). 보상 = POOL 맨 끝 nog 신화 스킨(`POOL_V16`): 태태영 「폴라리스 사령관」 mx:임재영|6, K1 「유령신부」 mx:박계원|7, 힐블 「미란타롯토」 mx:박준영|6 (msk2/hx_*.png). 로드스터·스텔라·프리즘·R.A.V.E.는 보상 「준비 중」 → 나중에 `inv` 채우면 이미 받은 사람에게 achHx가 소급 지급. 옷장 잠금 라벨 `mskLk`: nog 스킨은 「???」. **SC_VER 17**: POOL `POOL_V16` 분기 + 업적 25개(4바이트)라 v7~16 코드는 `ACH.slice(0,ACH_V16=18)`. 랭킹 아이콘 HXICO에 stellar(fx/hx_stellar.png 별자리)·risha(fx/hx_rave.png 네온 RAVE). sw VERSION 'v135'.
 - **V134 배포 (2026-11-07 03:30, 사이트 + claude.ai 위키) — ✕ 빼버리기 3회**: `G.bn` 기본 2→3(levelUp), 안내 「이번 판 N/3회 남음」, 위키 시작하기 문구 2번→3번. 멀티는 각자 3회. 패치내역 「⚖️ 이 련은 빼버리기 2회 → 3회」. sw VERSION 'v134'.

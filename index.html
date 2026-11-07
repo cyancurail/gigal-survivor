@@ -5311,13 +5311,15 @@ const ALL9=['n','f','t','r','p','d','a','s','e'];
    공격 A(n)=1+0.014(n−1)^1.83, 이후 +1.09 → 선 피해 배율 1+(A−1)×0.5. 어려움·헬은 마릿수로 이미 웨이브 총 체력 ×1.29·×1.83이라 한 마리 배율에서 나눔.
    hpm은 예전처럼 판 안에서 15%→100% 적용, 보통 1 = 예전 보통 1(1.3) */
 /* 11-07: 레벨업 20번 제한으로 판 안 화력이 줄어 뒤 스테이지일수록 모자람 → 몬스터 체력을 측정한 만큼 나눔 (보통 1 ÷1 · 보통 10 ÷3.2 · 보통 20 ÷4.5 · 어려움 20부터 ÷7) */
+/* 11-08 사용자: 보통 4부터는 「적정 성장」으로 처음 깰 때 선이 70% 정도 깎이고, 강화 후 다시 오면 100%로. 적정 성장(봇 기준) = 사령관 0.7×스테이지 · 무기 Lv 4→6(보통4)·11(보통10)·19(보통20) · 스탯 7·12·17. 이 성장에서 아슬아슬하도록 몬스터 체력 배율 */
+const STG_F=[[1,.7],[2,.9],[3,1.5],[4,6],[7,5.5],[10,5],[14,3],[17,1.6],[20,.8]];function stgF(d,i){if(d>0)return .8;for(let k=1;k<STG_F.length;k++){const[a,va]=STG_F[k-1],[b,vb]=STG_F[k];if(i<=b)return va+(vb-va)*(i-a)/(b-a)}return .85}
 const STG_DV=[[0,1],[9,3.2],[19,4.5],[39,7],[59,7]];function stgDv(x){for(let k=1;k<STG_DV.length;k++){const[a,va]=STG_DV[k-1],[b,vb]=STG_DV[k];if(x<=b)return Math.exp(Math.log(va)+(Math.log(vb)-Math.log(va))*(x-a)/(b-a))}return 7}
 const STG_TY=['n','f','t','r','p','a','d','s','e'],STG_NM=['보통','어려움','헬'];
 const stgB=s=>{const n=2*s-1;return n<=41?1+.0034*Math.pow(n-1,2.38):1+.0034*Math.pow(40,2.38)+2.63*(s-21)};
 const stgA=s=>{const n=2*s-1;return n<=41?1+.014*Math.pow(n-1,1.83):1+.014*Math.pow(40,1.83)+1.09*(s-21)};
 const STAGES=[];for(let d=0;d<3;d++)for(let i=1;i<=20;i++){const s=d*20+i,cnt=[1,1.29,1.83][d];let mix,rot=0;
   if(d===0&&i<19){const k=Math.min(9,1+Math.floor((i-1)/2));mix=[...new Set(['n',STG_TY[k-1],STG_TY[k-2],STG_TY[k-3]].filter(Boolean))]}else{mix=ALL9;rot=1}
-  STAGES.push({id:(d+1)+'-'+i,n:STG_NM[d]+' '+i,d,mix,rot,hpm:1.3*stgB(s)/cnt,hdv:stgDv(d*20+i-1),atm:1+(stgA(s)-1)*.5,mut:d===0?0:d===1?.10+.30*(i-1)/19:.45+.45*(i-1)/19,
+  STAGES.push({id:(d+1)+'-'+i,n:STG_NM[d]+' '+i,d,mix,rot,hpm:1.3*stgB(s)/cnt,hdv:stgDv(d*20+i-1)/(V2?stgF(d,i):1),atm:1+(stgA(s)-1)*(V2?.2:.5),/* 11-08: v2 선 피해 증가 완만하게 — 자주 새고 조금씩 깎이게 */mut:d===0?0:d===1?.10+.30*(i-1)/19:.45+.45*(i-1)/19,
     nw:d===0&&i<18&&i%2===1?STG_TY[Math.floor((i-1)/2)]:null})}
 const SOF=id=>STAGES.find(q=>q.id===id)||STAGES[0];
 const rnd=(a,b)=>a+Math.random()*(b-a),pick=a=>a[Math.floor(Math.random()*a.length)],cl=(v,a,b)=>v<a?a:v>b?b:v;
@@ -5447,7 +5449,7 @@ function elemHit(e,dd){const m=CURM;if(!m||!m.el||e.dead)return;const k=ELM[m.id
   else if(k==='독'){e.po=Math.min(8,(e.po||0)+1);e.pod=Math.max(e.pod||0,dd*.1);e.poT=3}
   else if(k==='전하'){e.c10=(e.c10||0)+1;if(e.c10>=10){e.c10=0;aoe(e.x,e.y,T.sq.some(q=>q.id==='승태민'&&aw(q))?100:50,dd*5);T.fx.push({k:'ring',x:e.x,y:e.y,r:50,t:.35,col:'#9fd6ff'})}}
   CURM=m}
-const gmX=m=>{const L=m.lv.reduce((a,b)=>a+b,0),g=GROW[m.id]||0;return g===0?1+.17*L:g===1?.8*(1+.14*L)*(L>=6?1.5:1):.6*(1+.12*L)*(L>=6?1.6:1)*(L>=9?2:1)};const FIRE=.6,DMGC=1.35,ESPD=.13;/* 11-07 사용자: 이동속도 지금의 20% (.65→.13) *//* 사용자 피드백(11-06): 연사·몬스터 속도 낮춤 */
+const gmX=m=>{const L=m.lv.reduce((a,b)=>a+b,0),g=GROW[m.id]||0;return g===0?1+.17*L:g===1?.8*(1+.14*L)*(L>=6?1.5:1):.6*(1+.12*L)*(L>=6?1.6:1)*(L>=9?2:1)};const FIRE=.6,DMGC=1.35,ESPD=.156;/* 11-08 사용자: +20% *//* 11-07 사용자: 이동속도 지금의 20% (.65→.13) *//* 사용자 피드백(11-06): 연사·몬스터 속도 낮춤 */
 /* 쿨타임 층(사용자 11-06: 기본형 최소 3초). [지금 실제 쿨(FIRE 반영), 목표 쿨] → 무기 시간 배율 CDK = 지금/목표, 피해는 1/CDK로 보정(화력 유지) */
 const CDT={'박준형':[1.58,3],'영규형':[.83,3],'김세진':[1.5,3],'재건':[1.17,3],'박준영':[1.33,3],
   '조혁래':[3.17,6],'승태민':[2.33,6],'임재영':[2.5,6],'박민규':[2.67,6],'박계원':[2.67,6],'송기호':[3.67,6],
@@ -5475,7 +5477,7 @@ const slotOf=m=>{if(m.slot==null||T.sq.some(q=>q!==m&&q.slot===m.slot&&T.sq.inde
 const mx=m=>SLOTX[slotOf(m)],my=m=>slotY(slotOf(m));
 
 /* ---- 적 ---- */
-const waveHp0=w=>55*Math.pow(1.14,w-1)*(w>7?Math.pow(1.06,w-7):1),waveHp=w=>V2&&w>18?waveHp0(18)*Math.pow(1.05,w-18):waveHp0(w);/* 11-07: v2는 레벨업이 끝나는 웨이브 18 뒤로 체력 증가 +5%/웨이브 *//* 11-07 밸런스 1단계: 초반 ×3·후반 완만 (이전 17×1.205^(w−1)) */
+const waveHp0=w=>55*Math.pow(1.14,w-1)*(w>7?Math.pow(1.06,w-7):1),waveHp=w=>(V2&&w>18?waveHp0(18)*Math.pow(1.05,w-18):waveHp0(w))*(V2?WCV[Math.min(w,21)]||1:1);/* 11-08: 압박을 판 전체에 고르게 — 초중반 체력↑, 마지막 보스 웨이브↓ */const WCV=[1,1,1.3,1.6,1.9,2.1,2.3,2.2,2.3,2.3,2.3,2.2,2.1,2,1.9,1.8,1.7,1.55,1.4,1.25,1.1,.55];/* 11-07: v2는 레벨업이 끝나는 웨이브 18 뒤로 체력 증가 +5%/웨이브 *//* 11-07 밸런스 1단계: 초반 ×3·후반 완만 (이전 17×1.205^(w−1)) */
 /* 쿨타임이 길어진 만큼 몬스터는 적게·단단하게(땡땡 마법사식) */
 let MCNT=.22,MHP=19.5;/* 11-07 사용자: 체력 ×5 (3.9→19.5) *//* 11-06 사용자: 몬스터가 너무 빨리 죽음 → 체력 ×3 */window.__tdTune=(c,h)=>{MCNT=c;MHP=h};
 /* 몬스터 10종 (그림 번호 = 사용자 제공 시트 순서) */
@@ -5508,20 +5510,23 @@ function mobC(im,w,h,gl,fl,tn){const K=Math.max(1,Math.min(3,sc*dpr)),key=im.src
   const pd=gl?12:0;c=document.createElement('canvas');c.width=Math.ceil((w+pd*2)*K);c.height=Math.ceil((h+pd*2)*K);const x=c.getContext('2d');x.scale(K,K);
   if(gl){x.shadowColor='rgba(255,70,110,.75)';x.shadowBlur=7}x.drawImage(im,pd,pd,w,h);if(tn){x.shadowBlur=0;x.globalCompositeOperation='source-atop';x.fillStyle=tn==='f'?'rgba(150,220,255,.62)':tn==='g'?'rgba(255,205,50,.75)':tn==='h'?'rgba(80,235,255,.6)':'rgba(120,230,90,.5)';x.fillRect(0,0,w+pd*2,h+pd*2);if(tn==='f'||tn==='g'){x.globalCompositeOperation='lighter';x.globalAlpha=.35;x.drawImage(im,pd,pd,w,h)}x.globalCompositeOperation='source-over';x.globalAlpha=1}
   if(fl){x.shadowBlur=0;x.shadowColor='transparent';x.globalCompositeOperation='lighter';x.drawImage(im,pd,pd,w,h);x.globalAlpha=.25;x.drawImage(im,pd,pd,w,h)}MOBC.set(key,c);return c}
-function planWave(w){if(T.tut)return tutPlan(w);const q=[],boss=BOSSW.includes(w),dur=boss?BDUR:WDUR,n0=Math.max(4,Math.round(((boss?10:16)+w*2.1)*MCNT)),n=[9,15,30][SOF(T.stg).d]||9;T.cntH=n0/9*Math.sqrt(9/n);T.cntX=n0/n;/* 11-07: 보통 9·어려움 15·헬 30마리, 한 마리 체력은 예전 총량 기준(어려움·헬은 마릿수가 늘수록 웨이브 총 체력 ×1.3·×1.8), 경험치는 카드 속도 유지 */
+function planWave(w){if(T.tut)return tutPlan(w);const q=[],boss=BOSSW.includes(w),dur=boss?BDUR:WDUR,n0=Math.max(4,Math.round(((boss?10:16)+w*2.1)*MCNT)),dI=SOF(T.stg).d||0,n=V2?[18,30,50][dI]:[9,15,30][dI]||9;T.cntH=V2?n0/n*[1,1.29,1.83][dI]:n0/9*Math.sqrt(9/n);T.cntX=n0/n;/* 11-08 사용자: v2 마릿수 2배(보통 18·어려움 30·헬 50), 한 마리 체력은 나눠서 웨이브 총량 그대로 *//* 11-07: 보통 9·어려움 15·헬 30마리, 한 마리 체력은 예전 총량 기준(어려움·헬은 마릿수가 늘수록 웨이브 총 체력 ×1.3·×1.8), 경험치는 카드 속도 유지 */
   const S=SOF(T.stg);let ks;if(S.rot){let L=S.mix.filter(k=>w>=6||!['e','a','s','p','d'].includes(k));if(!L.length)L=['n','f'];let sd=w*7+S.mix.length;const rr=()=>(sd=(sd*9301+49297)%233280)/233280;ks=[];while(ks.length<Math.min(3,L.length))ks.push(L.splice(Math.floor(rr()*L.length),1)[0])}
   else ks=S.mix.filter((k,i)=>w>=1+4*i);
   const wt=ks.map((k,i)=>k==='e'?.25:k==='n'?2:1);const tw=wt.reduce((a,b)=>a+b,0);
-  for(let i=0;i<n;i++){let r=Math.random()*tw,k=ks[0];for(let j=0;j<ks.length;j++){r-=wt[j];if(r<=0){k=ks[j];break}}q.push({at:(i+Math.random())/n*dur*.92,k})}
+  const rk=()=>{let r=Math.random()*tw,k=ks[0];for(let j=0;j<ks.length;j++){r-=wt[j];if(r<=0){k=ks[j];break}}return k};
+  /* 11-08 사용자: 무수리 떼 — 웨이브마다 2~3번 5~8마리가 한 덩어리로(전체의 약 45%), 나머지는 낱마리. 떼 1.3초 전 ⚠️ 경고 */
+  let nP=0;if(V2&&!T.lab&&w>1){const np=w<4?2:Math.random()<.5?2:3;let left=Math.round(n*.45);const tm=np===2?[.3,.68]:[.22,.5,.78];for(let j=0;j<np&&left>=4;j++){const c=Math.min(left,Math.max(5,Math.min(8,Math.round(left/(np-j))))),at=dur*(tm[j]+rnd(-.05,.05)),cx=rnd(70,W-70);left-=c;nP+=c;q.push({at:Math.max(0,at-1.3),warn:1,x0:cx});for(let i=0;i<c;i++)q.push({at:at+i*.09,k:rk(),x0:cx+rnd(-38,38),y0:-20-(i%3)*16})}}
+  for(let i=0;i<n-nP;i++)q.push({at:(i+Math.random())/(n-nP)*dur*.92,k:rk()})
   if(V2&&!T.lab&&!boss&&!T.tut&&ELW.includes(w)){const kk=ks.filter(k=>k!=='e'&&k!=='r');q.push({at:dur*.45,k:kk.includes('t')?'t':kk[0]||'n',g:1})}
   T.wxp=q.reduce((a,o)=>a+(ETY[o.k]?ETY[o.k].xp:0),0)*T.cntX/MCNT;if(V2&&!T.lab)T.need=Math.max(4,(w===1?.35:PKF)*T.wxp);/* 11-07: 레벨업은 한 판 20번, 웨이브마다 1번까지 — 이번 웨이브 몬스터 경험치의 PKF만큼 잡으면 1번 */
   if(boss)q.push({at:1,k:'b'});q.sort((a,b)=>a.at-b.at);if(w===1&&V2)q.slice(0,3).forEach((o,i)=>{o.at=i*.4;o.y0=170+Math.random()*70});/* 11-07: 첫 웨이브 3마리는 화면 안에서 시작 */T.spawnQ=q;T.wt=0;T.wdur=dur}
-function spawn(k,x0,y0,mu,gd){const w=T.wave,S=SOF(T.stg),bt=k==='b'?S.mix[0]:null,y=bt?ETY[bt]:ETY[k],hp=(k==='b'?waveHp(w)*(w>=21?BOSSF:w>=14?400:70):waveHp(w)*y.hp*MHP*(k==='sm'?1:(T.cntH||1)))*(1+(S.hpm-1)*(.15+.85*Math.pow(w/WAVES,1.3)))/(V2&&S.hdv||1);
+function spawn(k,x0,y0,mu,gd){if(V2&&k==='sm'&&T.en.length>160)return;const w=T.wave,S=SOF(T.stg),bt=k==='b'?S.mix[0]:null,y=bt?ETY[bt]:ETY[k],hp=(k==='b'?waveHp(w)*(w>=21?BOSSF:w>=14?400:70):waveHp(w)*y.hp*MHP*(k==='sm'?1:(T.cntH||1)))*(1+(S.hpm-1)*(.15+.85*Math.pow(w/WAVES,1.3)))/(V2&&S.hdv||1);
   const e={id:T.eid++,k,s:y.s,x:x0!=null?cl(x0+rnd(-14,14),16,W-16):rnd(30,W-30),y:y0!=null?y0+rnd(-8,8):-20,r:y.r,spd:y.spd*(1+w*.012),hp,max:hp,dmg:y.dmg,xp:y.xp,xk:k==='b'?1:(T.cntX||1),col:y.col,boss:!!y.boss,elite:!!y.elite,arm:y.arm||1,
    rng:y.rng,lay:y.lay,split:y.split,dash:y.dash,ph:rnd(0,6.28),cd:rnd(1.5,3),stopY:rnd(430,520),dsT:0,slow:0,slowF:1,stun:0,fl:0,dead:false};
   if(bt){Object.assign(e,{k:'b',bt,boss:true,elite:false,r:Math.min(54,y.r*3.2),x:W/2+rnd(-60,60),spd:y.spd*.42,dmg:w===21?60:40,xp:20,arm:bt==='a'?.3:bt==='t'?.5:bt==='e'?.7:1,cd2:3,hpS:4,stopY:rnd(400,460),
     nm:(w===21?'👑 여왕 ':'👑 거대 ')+y.nm})}
-  e.dmg*=S.atm||1;
+  e.dmg*=S.atm||1;if(V2&&k!=='b')e.dmg*=.5;/* 11-08: 마릿수 2배라 한 마리 선 피해 ½ */
   if(T.tut&&k==='b'){e.hp=e.max=waveHp(4)*6;e.spd*=1.4;e.nm='👑 홀로그램 '+y.nm}
   if(T.tut&&k!=='b')e.spd*=1.35;
   if(gd){const eh=T.tut?1.2:ELH;Object.assign(e,{gold:1,elite:true,hp:e.hp*eh,max:e.hp*eh,r:e.r*1.55,spd:e.spd*.75,xp:e.xp*4,stopY:Math.min(e.stopY,470)});banner('✨ 황금 무수리 등장! 잡으면 카드 보너스');snd('ach')}
@@ -5768,7 +5773,7 @@ let bannerT=0,bannerV='';function banner(v){bannerV=v;bannerT=2.2}
 function update(dt){if(!T||T.paused||T.over)return;T.t+=dt;if(T.lab)labTick(dt);gStep(dt);
   if(T.lab)labFill();else if(T.wave===0||T.wt>=T.wdur&&T.wave<WAVES){T.wave++;planWave(T.wave);if(!BOSSW.includes(T.wave)&&!T.tut)banner(`웨이브 ${T.wave}`)}
   if(T.wave>=WAVES&&T.wt>=T.wdur&&!T.rush){T.rush=1;if(!V2){for(const e of T.en)e.spd*=2.5;banner('⚠️ 마지막 돌격!')}}
-  T.wt+=dt;while(T.spawnQ.length&&T.spawnQ[0].at<=T.wt){const o=T.spawnQ.shift();spawn(o.k,null,o.y0,0,o.g)}
+  T.wt+=dt;while(T.spawnQ.length&&T.spawnQ[0].at<=T.wt){const o=T.spawnQ.shift();if(o.warn){T.fx.push({k:'warn',x:o.x0,t:1.3});banner('⚠️ 무수리 떼!');continue}spawn(o.k,o.x0,o.y0,0,o.g)}
   for(const e of T.en){if(e.dead)continue;if(e.fl>0)e.fl-=dt;if(e.stun>0){e.stun-=dt;continue}if(e.slow>0){e.slow-=dt;if(e.slow<=0)e.slowF=1}
     if(e.zp>0){e.zp-=dt;e.zk=(e.zk||0)+dt;if(e.zk>=.25){e.zk=0;hurt(e,e.zpd*.25)}if(e.dead)continue}
     if(e.bu>0){e.bu-=dt;e.bk=(e.bk||0)+dt;if(e.bk>=.5){e.bk=0;hurt(e,e.bud*.5)}if(e.dead)continue}
@@ -6644,6 +6649,7 @@ function draw(){const g=ctx;g.setTransform(sc*dpr,0,0,sc*dpr,0,0);
     else if(f.k==='flash'){g.fillStyle=f.col;g.globalAlpha=Math.min(.6,f.t);g.fillRect(0,0,W,H);g.globalAlpha=1}
     else if(f.k==='shot'){g.strokeStyle=f.col||'#fff2f6';g.globalAlpha=Math.min(1,f.t*8);g.lineWidth=2;g.beginPath();g.moveTo(f.x,f.y);g.lineTo(f.x2,f.y2);g.stroke();g.globalAlpha=1}
     else if(f.k==='txt'){g.fillStyle=f.col;g.font='bold 13px sans-serif';g.textAlign='center';g.fillText(f.v,f.x,f.y-(1-f.t)*16)}
+    else if(f.k==='warn'){const a=Math.min(1,f.t*3)*(.55+.45*Math.abs(Math.sin(f.t*14)));g.globalAlpha=a;g.fillStyle='#ff3b5c';for(let i=0;i<2;i++){const y=70+i*16;g.beginPath();g.moveTo(f.x-16,y);g.lineTo(f.x+16,y);g.lineTo(f.x,y+14);g.closePath();g.fill()}g.globalAlpha=1}
     else if(f.k==='hit'){g.fillStyle=`rgba(255,40,80,${f.t*.45})`;g.fillRect(0,LINE-40,W,H-LINE+40)}};for(const f of T.fx)_d(f.ink?inkG():g,f)}inkFlush(g);gDraw(g);if(V2)w2Draw(g);if(!T.paused)dnDraw(g);else dnL=performance.now();
   // 대원
   SLOTX.forEach((x,i)=>{if(memAt(i))return;const y=slotY(i);g.fillStyle='rgba(255,255,255,.08)';g.beginPath();g.ellipse(x,y+16,22,7,0,0,6.283);g.fill()});

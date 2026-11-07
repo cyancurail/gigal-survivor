@@ -3046,7 +3046,7 @@ const ACH_HX=[
  {id:'hx_soulwed',hx:'soulwed',n:'죽음을 넘는 사랑에 빠진 여자',c:'영혼결혼식 제작',r:'👑 K1 신화 스킨 「유령신부」',inv:'mx:박계원|7'},
  {id:'hx_roadster',hx:'roadster',n:'억척스럽게 생긴 련들은 Out',c:'레이디 로드스터 제작',r:'👑 전용 신화 스킨 (준비 중)'},
  {id:'hx_stellar',hx:'stellar',n:'별들의 후손',c:'스텔라 디센던트 제작',r:'👑 세나 신화 스킨 「세나 어센딩」',inv:'mx:김세진|7'},
- {id:'hx_prism',hx:'prism',n:'하늘을 쪼갠 일곱 빛깔',c:'셀레스티얼 프리즘 제작',r:'👑 전용 신화 스킨 (준비 중)'},
+ {id:'hx_prism',hx:'prism',n:'하늘을 쪼갠 일곱 빛깔',c:'그레이스 프리즘 제작',r:'👑 전용 신화 스킨 (준비 중)'},
  {id:'hx_rave',hx:'risha',n:'리샤 발렌타인',c:'R.A.V.E. 제작',r:'👑 무룩 신화 스킨 「대천사」',inv:'mx:조혁래|6'},
 ];
 const ACH_HX_ON=true;if(ACH_HX_ON)ACH.push(...ACH_HX);
@@ -5260,8 +5260,8 @@ if(!$('#select').hidden||!$('#title').hidden)titleScreen();
 setInterval(()=>{if(run){res();badges()}},3000);
 })();</script>
 
-<script>/* ===== 🌈 셀레스티얼 프리즘 (V125, 히든: QUEEN 레이저쇼★ + 블랙프라이데이★ + 밍조 리딤코드) ===== */
-Object.assign(WP,{prism:{name:'셀레스티얼 프리즘',icon:'🌈',evo:'sunglass',evoName:'셀레스티얼 프리즘',hid:1,d:'화려한 쇼 뒤에 남겨진 고요한 흔적.',ed:'화려한 쇼 뒤에 남겨진 고요한 흔적.',extra:1}});
+<script>/* ===== 🌈 그레이스 프리즘 (히든: QUEEN 레이저쇼★ + 솜사탕 랜드★ + 선글라스) ===== */
+Object.assign(WP,{prism:{name:'그레이스 프리즘',icon:'🌈',evo:'sunglass',evoName:'그레이스 프리즘',hid:1,d:'화려한 쇼 뒤에 남겨진 고요한 흔적.',ed:'화려한 쇼 뒤에 남겨진 고요한 흔적.',extra:1}});
 KC.prism='#ffb3f0';
 if(window.PRISM_ON)HX.push({k:'prism',a:'laser',b:'cotton',it:'sunglass',q:'그녀의 진정한 힘을 깨운다.',lore:'화려한 쇼 뒤에 남겨진 고요한 흔적.',col:'#ffb3f0',sub:'💗 QUEEN 레이저쇼 + 🍭 솜사탕 랜드 + 🕶️ 선글라스'});
 [['pcore',120,86,24,15],['pmana',208,150,28,15],['pplasma',224,200,27,15],['pimpact',320,180,10,30],['pwarpb',100,104,42,30],['pdebris',232,96,64,20],['pdisc',64,64,6,20],['pquake',288,104,48,15]].forEach(([k,w,h,n,fps])=>{const im=new Image();im.src='fx/'+k+'.png';HXI[k]={im,w,h,n,fps}});

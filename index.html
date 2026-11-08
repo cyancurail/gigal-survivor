@@ -714,7 +714,7 @@ function fmChunk(cx,cy){const key=cx+','+cy;let L=FM.cache.get(key);if(L)return 
   for(let i=0;i<FM_PF[pf].length;i++){const [t,px0,py0]=FM_PF[pf][i];const x=Math.round(cx*FMC+(fl?FMC-px0:px0)+jx),y=Math.round(cy*FMC+py0+jy);
     if(x*x+y*y<260*260)continue;
     const bx=(FM_BOX[t]||[]).map(([a,b,c,d])=>fl?{L:x-b,R:x-a,T:y+c,B:y+d}:{L:x+a,R:x+b,T:y+c,B:y+d});
-    const P0={t,x,y,fl,bx,soft:!!FM_SOFT[t],pf,id:key+':'+i,gone:-1};L.push(P0);
+    const P0={t,x,y,fl,bx,soft:!!FM_SOFT[t],pf,id:key+':'+i,gone:-1,amb:sbH(cx,cy,50+i)<.5};L.push(P0);
     const CL=FM_CL[t];if(CL){const n=CL[0]+Math.floor(sbH(cx,cy,60+i)*(CL[1]-CL[0]+1));for(let j=0;j<n;j++){const h1=sbH(cx,cy,70+i*7+j),h2=sbH(cx,cy,90+i*7+j),a=j/n*6.283+h1*1.2,r=CL[2]*(.6+.5*h2),t2=CL[3][Math.floor(sbH(cx,cy,110+i*7+j)*CL[3].length)];const x2=Math.round(x+Math.cos(a)*r),y2=Math.round(y+Math.sin(a)*r*.55);if(x2*x2+y2*y2<260*260)continue;const c={t:t2,x:x2,y:y2,fl:h2<.5,bx:[],soft:true,pf,id:key+':'+i+'c'+j,gone:-1,dec:1};L.push(c);c.par=P0;(P0.cl||(P0.cl=[])).push(c)}}}
   FM.cache.set(key,L);return L}
 function fmFrame(){fmLoad();const p=G.p,A=G.arena,mx=VW*.62+200,my=VH*.62+260,L=[],B=[];
@@ -740,7 +740,7 @@ function fmDraw(front){if(!G.fmL)return;const p=G.p,fy=p.y+18;const sm=ctx.image
     if(sx){ctx.save();ctx.translate(sx,0)}
     if(o.turn>0?!o.fl:o.fl){ctx.save();ctx.translate(o.x,0);ctx.scale(-1,1);ctx.drawImage(im,-w/2,y,w,h);ctx.restore()}else ctx.drawImage(im,o.x-w/2,y,w,h);
     if(sx)ctx.restore();if(o.dead)ctx.filter='none';ctx.globalAlpha=1;
-    if(o.soft&&fmLv()&&FM_TR[pr.t]&&!(pr.cd>G.t)&&!(pr.tel>0)&&(pr.cl||o.par)){const ph=(G.t*.45+sbH(o.x|0,o.y|0,3)*9)%6;if(ph<.55){const k=Math.sin(ph/.55*Math.PI),ey=o.y-h*.38,ex=o.x+(sbH(o.x|0,o.y|0,4)-.5)*w*.4;ctx.globalAlpha=k*(fmLv()===2?.95:.7);ctx.fillStyle=fmLv()===2?'#ff2a2a':'#ffd34d';ctx.fillRect(ex-5,ey,3,2);ctx.fillRect(ex+3,ey,3,2);ctx.globalAlpha=1}}}
+    if(o.soft&&fmLv()===2&&pr.amb&&FM_TR[pr.t]&&!(pr.cd>G.t)&&!(pr.tel>0)&&(pr.cl||o.par)){const ph=(G.t*.45+sbH(o.x|0,o.y|0,3)*9)%6;if(ph<.55){const k=Math.sin(ph/.55*Math.PI),ey=o.y-h*.38,ex=o.x+(sbH(o.x|0,o.y|0,4)-.5)*w*.4;ctx.globalAlpha=k*(fmLv()===2?.95:.7);ctx.fillStyle=fmLv()===2?'#ff2a2a':'#ffd34d';ctx.fillRect(ex-5,ey,3,2);ctx.fillRect(ex+3,ey,3,2);ctx.globalAlpha=1}}}
   ctx.imageSmoothingEnabled=sm;
   if(window.__fmBox&&front){ctx.strokeStyle='#ff2a2a';ctx.lineWidth=1;for(const b of G.sbL)ctx.strokeRect(b.L,b.T,b.R-b.L,b.B-b.T)}}
 
@@ -764,7 +764,7 @@ function fmEmerge(o,n,kind){const lv=fmLv(),p=G.p;let live=0;for(const e of G.en
 function fmTrig(dt){const p=G.p,lv=fmLv(),tel=[.75,.5,.32][lv];
   for(const o of G.fmL){
     if(o.t==='scary_hut'){fmHut(o,dt);continue}
-    const T=FM_TR[o.t];if(!T||o.dec)continue;
+    const T=FM_TR[o.t];if(!T||o.dec)continue;if(T.mob==='mu'&&!(lv===2&&o.amb))continue; // 풀숲: 보통·어려움은 숨는 곳, 헬은 매복 덩어리만
     if(o.tel>0){o.tel-=dt;if(o.tel<=0&&(o.t==='house_full'||o.t==='trellis')&&em()>=6&&Math.random()<.45){fmMelon(o.x,o.y+20);if(!G.bot)SND.p('boom');o.cd=G.t+T.cd;continue}if(o.tel<=0){const n=T.n+Math.round((o.cl?o.cl.length:0)*1.6)+Math.floor(em()/5)*(T.door?2:1)+(lv===2?1:0);fmEmerge(o,n,T.mob);o.cd=G.t+T.cd*(lv===2?.75:1)}continue}
     if((o.cd||0)>G.t)continue;
     let dx=p.x-o.x,dy=p.y-(o.y-20),d=Math.hypot(dx,dy);if(o.cl)for(const c of o.cl){const d2=Math.hypot(p.x-c.x,p.y-(c.y-20));if(d2<d){d=d2;dx=p.x-c.x;dy=p.y-(c.y-20)}}if(d>T.r)continue;
@@ -780,9 +780,10 @@ function fmHut(o,dt){const p=G.p,d=Math.hypot(p.x-o.x,p.y-(o.y-60));
   o.heat=Math.max(0,Math.min(1,(o.heat||0)+(d<300?dt*.8:-dt*.4)));
   if(d<300&&!G.arena){o.sp=(o.sp||0)-dt;if(o.sp<=0){o.sp=[1.1,.75,.5][fmLv()];fmEmerge({x:o.x,y:o.y-30,t:'barn'},G.hell?2:1,'swarm')}}}
 // 숨는 수풀
+const FM_HIDE={hide_grass:1,tallgrass:1,corn:1}; // 모든 풀숲이 숨는 곳
 function fmHide(dt){const p=G.p,lv=fmLv(),H=G.fmH||(G.fmH={t:0,cd:0,on:0,x:0,y:0});
-  const inG=G.fmIn&&G.fmIn.t==='hide_grass';H.cd=Math.max(0,H.cd-dt);
-  if(inG&&H.cd<=0&&!G.arena){if(!H.on){H.on=1;H.t=[5,4,3][lv];H.x=G.fmIn.x;H.y=G.fmIn.y-30;if(!G.bot){G.texts.push({x:p.x,y:p.y-40,v:'쉿…',life:.8,col:'#bfffb0'})}}
+  const inG=G.fmIn&&FM_HIDE[G.fmIn.t];H.cd=Math.max(0,H.cd-dt);
+  if(inG&&H.cd<=0&&!G.arena){if(!H.on){H.on=1;H.t=[16,13,10][lv];H.x=G.fmIn.x;H.y=G.fmIn.y-30;if(!G.bot){G.texts.push({x:p.x,y:p.y-40,v:'쉿…',life:.8,col:'#bfffb0'})}}
     H.t-=dt;if(H.t<=0){H.on=0;H.cd=8;if(!G.bot){G.texts.push({x:p.x,y:p.y-40,v:'들켰다!',life:.9,col:'#ff6a6a'});SND.p('yell')}}}
   else if(H.on){H.on=0;H.cd=Math.max(H.cd,3)}
   if(H.on){for(const e of G.enemies){if(e.boss||e.fixed||e.fmT===2)continue;const d=Math.hypot(e.x-p.x,e.y-p.y);if(d<46)continue;if(!e.tnt||!e.tnt.hid||e.tntT<G.t){const a=rnd(0,6.283),r=rnd(120,260);e.tnt={x:H.x+Math.cos(a)*r,y:H.y+Math.sin(a)*r,on:true,hid:1}}e.tntT=G.t+.4}}}

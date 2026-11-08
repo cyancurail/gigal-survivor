@@ -5748,7 +5748,7 @@ const ALL9=['n','f','t','r','p','d','a','s','e'];
    hpm은 예전처럼 판 안에서 15%→100% 적용, 보통 1 = 예전 보통 1(1.3) */
 /* 11-07: 레벨업 20번 제한으로 판 안 화력이 줄어 뒤 스테이지일수록 모자람 → 몬스터 체력을 측정한 만큼 나눔 (보통 1 ÷1 · 보통 10 ÷3.2 · 보통 20 ÷4.5 · 어려움 20부터 ÷7) */
 /* 11-08 사용자: 보통 4부터는 「적정 성장」으로 처음 깰 때 선이 70% 정도 깎이고, 강화 후 다시 오면 100%로. 적정 성장(봇 기준) = 사령관 0.7×스테이지 · 무기 Lv 4→6(보통4)·11(보통10)·19(보통20) · 스탯 7·12·17. 이 성장에서 아슬아슬하도록 몬스터 체력 배율 */
-const STG_F=[[1,.8],[2,.9],[3,1],[4,1.8],[7,1.2],[10,.75],[14,.45],[17,.3],[20,.2]],STG_FH=[[1,.2],[10,.16],[20,.13]],STG_FX=[[1,.35],[10,.2],[20,.11]];/* 11-08 봇: 보통 20·어려움·헬은 적정 성장에서 웨이브 13~16에 무너져서 크게 낮춤 */
+const STG_F=/* 11-08 카드 개편 뒤 보통 초중반 낮춤 */[[1,.3],[2,.33],[3,.38],[4,.42],[7,.28],[10,.27],[14,.34],[17,.28],[20,.2]],STG_FH=[[1,.2],[10,.22],[20,.26]],STG_FX=[[1,.35],[10,.3],[20,.3]];/* 11-08 봇: 보통 20·어려움·헬은 적정 성장에서 웨이브 13~16에 무너져서 크게 낮춤 */
 function stgF(d,i){const T0=d===0?STG_F:d===1?STG_FH:STG_FX;for(let k=1;k<T0.length;k++){const[a,va]=T0[k-1],[b,vb]=T0[k];if(i<=b)return va+(vb-va)*(i-a)/(b-a)}return T0[T0.length-1][1]}
 const STG_DV=[[0,1],[9,3.2],[19,4.5],[39,7],[59,7]];function stgDv(x){for(let k=1;k<STG_DV.length;k++){const[a,va]=STG_DV[k-1],[b,vb]=STG_DV[k];if(x<=b)return Math.exp(Math.log(va)+(Math.log(vb)-Math.log(va))*(x-a)/(b-a))}return 7}
 const STG_TY=['n','f','t','r','p','a','d','s','e'],STG_NM=['보통','어려움','헬'];
@@ -5902,7 +5902,7 @@ const newRun=(stg,leader)=>stApply({stg,t:0,wave:0,wt:0,spawnQ:[],en:[],pr:[],fx
   later:[],vfx:[],duo:[],bl:{},evoQ:[],sh:0,hp:100,hpMax:100,en_:0,need:8,picks:0,kills:0,paused:false,over:false,speed:1,bot:false,drag:null,heal:0,eid:1,cardsLeft:0});
 const hkRun=r=>{['fx','pr','vfx','zn'].forEach(k=>hk(r[k]));return r};
 function stApply(r){hkRun(r);const td=TDS(),s=stSum(td.sl||0);r.hp=r.hpMax=V2?lnHp(llOf()):100+3*s.line;if(V2)r.ll=llOf();r.atkM=1+(V2?.01:.03)*s.atk;r.crit=s.crit*.001;
-  if(V2){r.cmb=1+.01*(((td.cl||{}).lv||1)-1);const m=r.sq&&r.sq[0];if(m&&m.c&&wlOf(m.id)>=20){const ks=w2Keys(m.id).filter(k=>!W2BASE.includes(k)&&k!=='fam'&&w2Rk(m.id,k)[0]===1&&!w2Trade(m.id,k)&&!w2Pre(m.id,k));if(ks.length){const k=pick(ks);m.c[k]=1;r.freeC=w2Nm(m.id,k)}}}return r}
+  if(V2){r.cmb=1+.01*(((td.cl||{}).lv||1)-1);const m=r.sq&&r.sq[0];if(m&&m.c&&wlOf(m.id)>=20){const ks=w2Keys(m.id).filter(k=>!W2BASE.includes(k)&&k!=='fam'&&w2Rk(m.id,k)[0]===1&&!w2Trade(m.id,k)&&!w2Pre(m.id,k)&&wlOf(m.id)>=w2UL(m.id,k));if(ks.length){const k=pick(ks);m.c[k]=1;r.freeC=w2Nm(m.id,k)}}}return r}
 /* 무기 강화 Lv1~40 (11-07 3단계): 레벨당 피해 +25%, 특성 Lv10·30·40 피해 +25%, Lv20 시작 카드 1장, Lv40 희귀 확률 2배 */
 const WLMAX=40,wlOf=id=>Math.max(1,(TDS().wl||{})[id]||1);
 const wlMul=id=>{const l=wlOf(id);return(1+.1*(l-1))*(l>=10?1.1:1)*(l>=30?1.1:1)*(l>=40?1.1:1)}/* 11-08 사용자 A안: 레벨당 +10%, 특성 +10% */;
@@ -6319,8 +6319,15 @@ const W2FAM={'에너지':'에너지 공명','불':'불꽃 공명','전기':'전�
 const W2BASE=['n','d','r','f'];
 /* 11-08 사용자: 기본 카드 수치는 무기마다 다르게 — d 피해 배율/장, r 범위·지속 +비율/장, f 공격 속도 +비율/장 */
 const W2BV={'재건':{d:1.35,r:.25,f:.3},'박준형':{d:1.45,r:.35,f:.2},'송기호':{d:1.4,r:.3,f:.2},'박계원':{d:1.3,r:.4,f:.25},'김세진':{d:1.6,r:.3,f:.15},'승태민':{d:1.4,r:.3,f:.25},'창환이형':{d:1.35,r:.25,f:.35},'박민규':{d:1.3,r:.35,f:.2},'진형우':{d:1.4,r:.3,f:.25},'박준영':{d:1.35,r:.3,f:.3},'하도':{d:1.55,r:.25,f:.15},'영규형':{d:1.3,r:.4,f:.25},'조혁래':{d:1.65,r:.25,f:.12},'임재영':{d:1.45,r:.35,f:.18},'쥬은':{d:1.5,r:.4,f:.15}};
-const w2BV=id=>W2BV[id]||{d:1.5,r:.3,f:.3};
-function w2BVText(){for(const id in W2K){const K=W2K[id],B=w2BV(id),pc=v=>Math.round(v*100);if(K.d)K.d[1]=K.d[1].replace(/\+50%/,'+'+pc(B.d-1)+'%');if(K.r)K.r[1]=K.r[1].replace(/\+30%/,'+'+pc(B.r)+'%');if(K.f)K.f[1]=K.f[1].replace(/−23%/,'−'+pc(1-1/(1+B.f))+'%')}}
+const w2BV=id=>({d:1.1,r:.06,f:.05});
+function w2BVText(){for(const id in W2K){const K=W2K[id];if(K.d)K.d[1]=K.d[1].replace(/\+50%/,'+10%');if(K.r)K.r[1]=K.r[1].replace(/\+30%/,'+6%').replace('사거리 +15%','사거리 +3%');if(K.f)K.f[1]=K.f[1].replace(/−23%/,'−5%')}}
+/* 11-08 사용자 승인: 고유 카드는 대원 관리 무기 강화 Lv로 해금 — 랭크1·2를 Lv2부터 2레벨마다 1장, 랭크3 26·28(…), 계열 30, 각성 34. 먼저 받아야 하는 카드가 먼저 */
+const W2ULC={};function w2ULm(id){if(W2ULC[id])return W2ULC[id];const K=W2K[id]||{},ks=Object.keys(K).filter(k=>!W2BASE.includes(k)),rk=k=>w2Rk(id,k)[0],M={};
+  const ord=L=>{const out=[],left=L.slice();let g=0;while(left.length&&g++<99){for(let i=0;i<left.length;i++){const p=w2Pre(id,left[i]);if(!p||out.includes(p)||!L.includes(p)){out.push(left.splice(i,1)[0]);i--}}}return out.concat(left)};
+  const isP=k=>Object.keys(K).some(q=>w2Pre(id,q)===k);const seq=ord(ks.filter(k=>rk(k)<=2).sort((a,b)=>rk(a)-rk(b)||isP(b)-isP(a)));seq.forEach((k,i)=>M[k]=2+2*i);
+  const r3=ks.filter(k=>rk(k)>=3&&k!=='u4');const L3=[26,28,32,36,38];r3.forEach((k,i)=>M[k]=L3[Math.min(i,4)]);M.fam=30;if(K.u4)M.u4=34;
+  for(const k of ks){const p=w2Pre(id,k);if(p&&M[p]&&M[k]<M[p])M[k]=M[p]}return W2ULC[id]=M}
+function w2UL(id,k){return W2BASE.includes(k)?1:(w2ULm(id)[k]||40)}
 const w2Keys=id=>W2K[id]?Object.keys(W2K[id]).concat('fam'):[];
 const w2E=(id,k)=>W2K[id]&&W2K[id][k];
 const w2Rk=(id,k)=>{if(k==='fam')return[3,0];const e=w2E(id,k);return e?[e[2]||1,e[3]||0]:[1,0]};
@@ -6328,7 +6335,8 @@ const w2Pre=(id,k)=>{const e=w2E(id,k);return e&&e[4]||null};
 const w2Trade=(id,k)=>{const e=w2E(id,k);return!!(e&&e[5])};
 function w2Txt(id,k){if(k==='fam')return`모든 ${W2N[id][1]} 계열 무기 피해 +60%`;const e=w2E(id,k);return e?e[1]:''}
 function w2Nm(id,k){if(k==='fam')return W2FAM[W2N[id][1]]||'계열 공명';const e=w2E(id,k);return e?e[0]:''}
-const W2CMAX={n:4,d:4,r:4,f:4};/* 11-08 사용자: 기본 4종 각 4장까지 */const w2Max=k=>W2CMAX[k]||1;
+/* 11-08 사용자: 판 안 공통 카드는 같은 카드가 여러 번, 1장 수치는 작게(피해 +10% · 간격 −5% · 범위 +6%) — 강해지는 맛은 대원 관리 강화로 해금되는 고유 카드에서 */
+const W2CMAX={n:2,d:10,r:8,f:6},W2RDISC={'재건':1,'승태민':1};const w2Max=(k,id)=>k==='r'&&W2RDISC[id]?2:(W2CMAX[k]||1);
 const W2COMBO=[{k:'mz',a:'박준형',b:'재건',la:2,lb:2,n:'불꽃 탄환',d:'수호탄이 맞히면 작은 폭발'},{k:'jr',a:'송기호',b:'승태민',la:2,lb:1,n:'빛 에너지 마비',d:'관통 레이저에 맞은 적 0.4초 마비'}];
 const cmLv=()=>{const c=TDS().cl||{lv:1,xp:0};return c.lv||1};
 const cmNeed=l=>Math.round(100+60*Math.pow(l,1.5));/* 11-07: 경험치 통 키움(예전 100+40×Lv) — 플레이 시간 늘리기 */
@@ -6337,8 +6345,8 @@ const w2Lv=m=>1+Object.values(m.c||{}).reduce((a,b)=>a+b,0);
 const cc=(m,k)=>(m.c&&m.c[k])||0;
 const mkW=id=>({id,c:{},lv:[0,0,0,0,0],ev:[],t:.3,up:0,f:[]});
 const w2Col=m=>W2N[m.id][2];
-const W2DMX=2.88/* 11-08 사용자: 모든 무기 기본 공격력 −80% (4.8→0.96) */;/* 11-07: 레벨업 20번 제한 뒤 ×2 → ×4.8 *//* 11-07 사용자: 체력 ×5·속도 20%에 맞춰 무기 화력 ×2 (A안) */
-function w2Dm(m){let k=W2DMX*(T&&!T.lab?(T.cmb||1)*((T.wlm||(T.wlm={}))[m.id]||(T.wlm[m.id]=wlMul(m.id))):1)*Math.pow(w2BV(m.id).d,cc(m,'d'))*(1+.06*(w2Lv(m)-1));const f=W2N[m.id][1];if(T&&T.sq)for(const w of T.sq)if(cc(w,'fam')&&W2N[w.id]&&famHit(W2N[w.id][1],f))k*=1.6;return k}
+const W2DMX=10/* 11-08 사용자: 판 안 카드 약화(공통 카드 소폭·고유 카드는 강화 해금) → 기본 화력 ×3.5 */;/* 11-08 사용자: 모든 무기 기본 공격력 −80% (4.8→0.96) */;/* 11-07: 레벨업 20번 제한 뒤 ×2 → ×4.8 *//* 11-07 사용자: 체력 ×5·속도 20%에 맞춰 무기 화력 ×2 (A안) */
+function w2Dm(m){let k=W2DMX*(T&&!T.lab?(T.cmb||1)*((T.wlm||(T.wlm={}))[m.id]||(T.wlm[m.id]=wlMul(m.id))):1)*(1+.1*cc(m,'d'))*(1+.02*(w2Lv(m)-1));const f=W2N[m.id][1];if(T&&T.sq)for(const w of T.sq)if(cc(w,'fam')&&W2N[w.id]&&famHit(W2N[w.id][1],f))k*=1.6;return k}
 /* 적마다 붙는 배율 (hurt 안에서 CURM 기준) */
 /* 11-08 사용자 승인: 무기 강화 특성 — Lv5·15·25·35는 무기마다 (특성표 문서) */
 const wt=(m,l)=>!!(T&&!T.lab&&m&&wlOf(m.id)>=l),pr=id=>!!(T&&T.sq.some(q=>q.id===id)),w2Np=m=>wt(m,15)?1:Math.pow(.85,cc(m,'n'));
@@ -6392,7 +6400,7 @@ const inRg=(m,e)=>!e.dead&&e.y>-10&&Math.hypot(e.x-(m.wx===undefined?W/2:m.wx),e
 const enR=m=>T.en.filter(e=>inRg(m,e));
 function nearR(m,x,y){let b=null,bd=1e18;for(const e of T.en){if(!inRg(m,e))continue;const d=(e.x-x)**2+(e.y-y)**2;if(d<bd){bd=d;b=e}}return b}
 function densestR(m){const L=enR(m);let best=null,bs=-1;for(const a of L){let k=0;for(const b of L)if((a.x-b.x)**2+(a.y-b.y)**2<4900)k++;k+=a.y/400;if(k>bs){bs=k;best=a}}return best}
-function w2Tick(m,dt,x,Y){const F=W2T[m.id];m.wx=x;m.wy=Y-22;if(F)F(m,dt*(1+w2BV(m.id).f*cc(m,'f'))*w2Spd(m),x,Y-22)}
+function w2Tick(m,dt,x,Y){const F=W2T[m.id];m.wx=x;m.wy=Y-22;if(F)F(m,dt/Math.max(.3,1-.05*cc(m,'f'))*w2Spd(m),x,Y-22)}
 const W2T={
  '재건'(m,dt,x,Y){m.t-=dt;if(m.t>0)return;const e=nearR(m,x,Y);if(!e){m.t=.2;return}m.t=cc(m,'c2')?.75:1.5;const z7=cc(m,'u7'),n=z7?1:1+cc(m,'n'),d=18*w2Dm(m)*(z7?2.2:w2Np(m))*(cc(m,'c2')?.6:1),aw=cc(m,'u4');
    m.chg=(m.chg||0);if(FXV===2&&!T.bot)f2({k:'arc',x,y:Y-6,R:16,a:Math.atan2(e.y-Y,e.x-x),col:w2Col(m),T:.14});for(let i=0;i<3;i++)setTimeout0(i*.12,()=>{for(let k=0;k<n;k++){const a=Math.atan2(e.y-Y,e.x-x),bk=k*16;/* 11-08 사용자: 탄 추가는 부채꼴 말고 일렬로(같은 방향, 앞뒤로 줄지어) */const dbl=m.chg>=10;if(dbl)m.chg=0;else if(cc(m,'u3'))m.chg++;
@@ -6406,7 +6414,7 @@ const W2T={
    const ls=[[a0,1]];for(let i=0;i<cc(m,'n');i++)ls.push([a0+(i%2?1:-1)*(.12+.1*Math.floor(i/2)),wt(m,15)?.85:.6]);if(cc(m,'u3'))ls.push([a0-.35,.6],[a0+.35,.6]);
    if(cc(m,'b4'))for(const j of[-1,0,1])setTimeout0((j+1)*.12,()=>{for(const [a,k] of ls)w2Laser(m,x,Y,a+j*.28,w*k,d*k*.6,cc(m,'u1'))});else for(const [a,k] of ls)w2Laser(m,x,Y,a,w*k,d*k,cc(m,'u1'));
    if(cc(m,'c1')&&m.fc%5===0){w2Laser(m,W/2,Y,-Math.PI/2,W*.45,d*1.5,0,1);T.fx.push({k:'flash',t:.08,col:'#eaffd0'})}snd('t')},
- '박계원'(m,dt,x,Y){m.t-=dt;if(m.t>0)return;const e=densestR(m);if(!e){m.t=.3;return}m.t=6;const n=1+cc(m,'n')+cc(m,'b2'),k=1+.3*cc(m,'r'),z7=cc(m,'u7')?.7:1;
+ '박계원'(m,dt,x,Y){m.t-=dt;if(m.t>0)return;const e=densestR(m);if(!e){m.t=.3;return}m.t=6;const n=1+cc(m,'n')+cc(m,'b2'),k=1+.06*cc(m,'r'),z7=cc(m,'u7')?.7:1;
    for(let i=0;i<n;i++){const tg=i?pick(enR(m))||e:e;w2Shoot({k:'drn',m,x,y:Y,tx:tg.x,ty:Math.min(tg.y,560),t:0,ph:'fly',R:55*k,T:3*k+(wt(m,5)?1:0),d:12*w2Dm(m)*z7,ex:40*w2Dm(m)*z7})}snd('glass')},
  '김세진'(m,dt,x,Y){if(cc(m,'c1')){m.rq=(m.rq||0)-dt;if(m.rq<=0){const t=T.en.find(q=>!q.dead&&(q.elite||q.boss)&&q.hp<q.max*.5&&q.y>10);if(t){m.rq=10;const d=55*w2Dm(m);for(let i=0;i<3;i++)setTimeout0(i*.15,()=>w2Shoot({k:'shl',m,x:cl(t.x+rnd(-10,10),20,W-20),y:cl(t.y+rnd(-5,15),40,600),t:0,T:.45,d,R:40*(1+w2BV(m.id).r*cc(m,'r'))*(wt(m,5)?1.15:1)}))}}}
    m.t-=dt;if(m.t>0)return;const L=T.en.filter(e=>!e.dead&&e.y>10);if(!L.length){m.t=.3;return}m.t=6;const z7=cc(m,'u7'),zc=cc(m,'c2'),volley=()=>{const n0=3+cc(m,'n'),n=(z7?Math.ceil(n0/2):n0)*(zc?2:1),d=55*w2Dm(m)*w2Np(m)*(z7?2:1)*(zc?.7:1);
@@ -6974,7 +6982,7 @@ window.F3D={
 /* ---- 레벨업 카드 ---- */
 function w2Offers(n){const L=[],un=w2Un().filter(id=>W2I.has(id)&&!T.sq.some(m=>m.id===id));
   if(T.sq.length<5)for(const id of un)L.push({k:'new',id,w:T.sq.length<3?2.2:1.2});
-  for(const m of T.sq){const C=W2C[m.id];if(!C)continue;const lv=w2Lv(m),rk=lv>=11?3:lv>=6?2:1;/* 11-08: 카드 5장→2랭크, 10장→3랭크 */for(const k of w2Keys(m.id)){if(cc(m,k)>=w2Max(k))continue;const pre=w2Pre(m.id,k);if(pre&&!cc(m,pre))continue;const [r,rare]=w2Rk(m.id,k);if(r>rk)continue;
+  for(const m of T.sq){const C=W2C[m.id];if(!C)continue;const lv=w2Lv(m),rk=lv>=11?3:lv>=6?2:1;/* 11-08: 카드 5장→2랭크, 10장→3랭크 */for(const k of w2Keys(m.id)){if(cc(m,k)>=w2Max(k,m.id))continue;if(!T.lab&&!W2BASE.includes(k)&&wlOf(m.id)<w2UL(m.id,k))continue;const pre=w2Pre(m.id,k);if(pre&&!cc(m,pre))continue;const [r,rare]=w2Rk(m.id,k);if(r>rk)continue;
     if(k==='n'&&cc(m,'u7')&&(m.id==='재건'))continue;if(k==='r'&&cc(m,'c2')&&m.id==='승태민')continue;if(k==='c2'&&m.id==='승태민'&&cc(m,'r'))continue;if(k==='u7'&&m.id==='재건'&&cc(m,'n'))continue;
     if(k==='fam'&&T.sq.some(q=>cc(q,'fam')&&W2N[q.id][1]===W2N[m.id][1]))continue;
     L.push({k:'wc',id:m.id,c:k,rare:rare?1:0,rk:r,w:(W2BASE.includes(k)?2.5:1)*(rare?(k==='u4'?.9:.55)*(wlOf(m.id)>=40?2:1):k[0]==='u'?1.3:k==='fam'?.8:1)*(rk===3&&r<3?1.8:1)})}}
@@ -6987,7 +6995,7 @@ function w2Apply(c){if(c.k==='new'){T.sq.push(mkW(c.id));banner(`🚀 ${W2N[c.id
   if(c.k==='combo'){T.duo2=T.duo2||{};T.duo2[c.d]=1;const C=W2COMBO.find(q=>q.k===c.d);banner(`✨ ${C.n}`);snd('evo');return true}return false}
 function w2Card(c){const dots=(m)=>`<i>Lv${w2Lv(m)} ${'◆'.repeat(Math.min(5,w2Lv(m)))}${'◇'.repeat(Math.max(0,5-w2Lv(m)))}</i>`;
   if(c.k==='new')return`<b>🆕 ${wic(c.id,'big')} ${W2N[c.id][0]} <em style="font-style:normal;font-size:11px;color:#9fe8ff">${W2N[c.id][1]}</em></b><small>${nick(c.id)} · ${W2D[c.id]||''}</small>`;
-  if(c.k==='wc'){const m=T.sq.find(q=>q.id===c.id),C=W2C[c.id];const t=w2Txt(c.id,c.c),rk=c.rk||w2Rk(c.id,c.c)[0],tr=w2Trade(c.id,c.c);return`<b>${wic(c.id)} ${w2Nm(c.id,c.c)}${c.rare?' <em class="w2Rk">💜</em>':''}</b><small>${W2N[c.id][0]} · ${t}</small>${dots(m)}`}
+  if(c.k==='wc'){const m=T.sq.find(q=>q.id===c.id),C=W2C[c.id];const t=w2Txt(c.id,c.c),rk=c.rk||w2Rk(c.id,c.c)[0],tr=w2Trade(c.id,c.c),q=cc(m,c.c),now=!q?'':c.c==='d'?` (지금 +${10*q}%)`:c.c==='f'?` (지금 −${5*q}%)`:c.c==='r'&&!W2RDISC[c.id]?` (지금 +${6*q}%)`:'';return`<b>${wic(c.id)} ${w2Nm(c.id,c.c)}${c.rare?' <em class="w2Rk">💜</em>':''}</b><small>${W2N[c.id][0]} · ${t}${now}</small>${dots(m)}`}
   if(c.k==='combo'){const C=W2COMBO.find(q=>q.k===c.d);return`<b>✨ ${C.n}</b><small>${W2N[C.a][0]} + ${W2N[C.b][0]} · ${C.d}</small>`}return null}
 /* ---- 사령관 경험치 ---- */
 function cmGain(xp){const td=TDS();td.cl=td.cl||{lv:1,xp:0};const c=td.cl;const before=w2Un();c.xp+=xp;let up=0;while(c.lv<50&&c.xp>=cmNeed(c.lv)){c.xp-=cmNeed(c.lv);c.lv++;up++}const nw=w2Un().filter(id=>!before.includes(id));td.un=w2Un();return{up,nw,g:xp}}
@@ -7183,6 +7191,7 @@ function css(){if(document.getElementById('tdCss'))return;const st=document.crea
 #tdOv .tdCL{display:grid;gap:10px}
 #tdOv .tdCL button{display:flex;flex-direction:column;gap:4px;text-align:left;padding:12px 14px;border-radius:14px;border:1.5px solid #ff9ad5;background:#2a1240;color:#fff;font-family:inherit}
 #tdOv .tdCL button.w2R{border-color:#c49bff;background:linear-gradient(160deg,#4a1d80,#241048);box-shadow:0 0 16px #a46bff99,inset 0 0 12px #c49bff44}#tdOv .tdCL .w2Rk{font-style:normal;font-size:11px;color:#9fe8ff;margin-left:4px}#tdOv .tdCL button.w2R .w2Rk{color:#e2c8ff}#tdOv .tdCL b{font-size:16px}#tdOv .tdCL small{font-size:13px;color:#ffd6ea}#tdOv .tdCL i{font-style:normal;color:#ffd34d;font-size:12px;letter-spacing:2px}
+#tdOv .tdCU{color:#9fe8ff}
 #tdOv .tdRR{margin-top:10px;width:100%;padding:10px;border-radius:12px;border:1.5px dashed #ffd34d;background:rgba(255,211,77,.1);color:#ffe7a8;font:800 14px 'Noto Sans KR',sans-serif}#tdOv .tdRR:disabled{opacity:.4}
 #tdOv .tdFlT{margin:0 0 10px;font-size:13px;color:#ffd6ea;min-height:22px}#tdOv .tdOM{display:inline-block;animation:tdOM .45s ease-out}@keyframes tdOM{0%{transform:scale(2.2);opacity:0}60%{transform:scale(.9);opacity:1}100%{transform:none}}#tdOv .tdFlT b{color:#ffd34d;font-size:16px}
 #tdOv .tdFL{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}#tdOv .tdFC{grid-column:span 2;min-height:118px;border-radius:12px;box-sizing:border-box;font-family:inherit;color:#fff}#tdOv .tdFC:nth-child(4){grid-column:2/span 2}
@@ -7481,7 +7490,7 @@ function sqTab(){const td=TDS(),L=LOB,un=w2Un();td.cd=td.cd||{};
    <div class="tdWG">${W2U.map(([id,ul])=>{const o=un.includes(id);return`<button type="button" data-wq="${id}" class="${L.sq===id?'on':''} ${o?'':'lk'}">${can(id)?'<i class="dot"></i>':''}${wic(id,'big')}<span>${W2N[id][0]}</span><em>${o?'Lv'+wlOf(id):'🔒 사령관 Lv'+ul}</em></button>`}).join('')}</div>
    ${tdDev()?'<div class="tdBtns"><button type="button" data-dev>🧪 경험치 모두 +100</button><button type="button" data-devg>🧪 골드 +10만</button></div>':''}`}
 function wqPop(id){const td=TDS(),un=w2Un(),o=un.includes(id),l=wlOf(id),h=(td.cd||{})[id]||0,c=wlCost(l),ok2=o&&l<WLMAX&&h>=c.c&&(SAVE.gold||0)>=c.g,ul=(W2U.find(q=>q[0]===id)||[])[1];
-  const rows=[],TR=W2TR[id]||[];for(let n=2;n<=WLMAX;n++){const t=WLT.find(q=>q[0]===n)||([5,15,25,35].includes(n)&&TR[[5,15,25,35].indexOf(n)]?[n,['🌱','🩹','🔗','🤝'][[5,15,25,35].indexOf(n)]+' '+TR[[5,15,25,35].indexOf(n)]]:null),k=wlCost(n-1),m=(1+.1*(n-1))*(n>=10?1.1:1)*(n>=30?1.1:1)*(n>=40?1.1:1);rows.push(`<div class="${n<=l?'done':n===l+1?'nx':''}"><em>Lv${n}</em><span>피해 +10%${t?` · <b>${t[1]}</b>`:''}<small>×${m.toFixed(2)}</small></span>${n<=l?'<i>✔</i>':`<i>💠${k.c} · 🪙${k.g}</i>`}</div>`)}
+  const rows=[],TR=W2TR[id]||[];for(let n=2;n<=WLMAX;n++){const t=WLT.find(q=>q[0]===n)||([5,15,25,35].includes(n)&&TR[[5,15,25,35].indexOf(n)]?[n,['🌱','🩹','🔗','🤝'][[5,15,25,35].indexOf(n)]+' '+TR[[5,15,25,35].indexOf(n)]]:null),k=wlCost(n-1),m=(1+.1*(n-1))*(n>=10?1.1:1)*(n>=30?1.1:1)*(n>=40?1.1:1),cu=Object.entries(w2ULm(id)).filter(([q,v])=>v===n).map(([q])=>w2Nm(id,q)+(w2Rk(id,q)[1]?'💜':''));rows.push(`<div class="${n<=l?'done':n===l+1?'nx':''}"><em>Lv${n}</em><span>피해 +10%${t?` · <b>${t[1]}</b>`:''}${cu.length?` · <b class="tdCU">🃏 ${cu.join(', ')}</b>`:''}<small>×${m.toFixed(2)}</small></span>${n<=l?'<i>✔</i>':`<i>💠${k.c} · 🪙${k.g}</i>`}</div>`)}
   return`<div class="tdWD"><div class="tdWDh">${wic(id,'big')}<div><b>${W2N[id][0]}</b><small>${nick(id)} · ${W2N[id][1]} · ${W2D[id]||''}</small><small>Lv${l} · 피해 ×${wlMul(id).toFixed(2)}</small></div><button type="button" class="tdX" data-wqx>✕</button></div>
    <div class="tdWDc"><span>💠 경험치 <b>${h}</b>${l<WLMAX?' / '+c.c:''}</span><span>🪙 <b>${(SAVE.gold||0).toLocaleString()}</b>${l<WLMAX?' / '+c.g:''}</span></div>
    ${o?(l<WLMAX?`<button type="button" class="go lbGo" data-wu="${id}" ${ok2?'':'disabled'}>강화 → Lv${l+1}</button>`:'<p>✨ 최대 강화</p>'):`<p>🔒 사령관 Lv${ul}에 합류해요</p>`}
@@ -7612,7 +7621,7 @@ function lobbyBtn(){const row=document.getElementById('lbGoRow');const mp=docume
 css();setInterval(lobbyBtn,1000);setTimeout(lobbyBtn,500);
 /* 테스트용: TD.sim(초) = 봇이 빠르게 플레이 */
 w2BVText();
-window.TD={ari:k=>ari(k,{force:1}),w2Lv:m=>w2Lv(m),cards(){openCards()},open,close,enter,lab(){labApply()},get run(){return T},get bgm(){return bgCur},start(stg,ld){build();T=newRun(stg||'1-1',ld||TDS().un[0]||'박준형');return T},
+window.TD={ul:id=>w2ULm(id),ari:k=>ari(k,{force:1}),w2Lv:m=>w2Lv(m),cards(){openCards()},open,close,enter,lab(){labApply()},get run(){return T},get bgm(){return bgCur},start(stg,ld){build();T=newRun(stg||'1-1',ld||TDS().un[0]||'박준형');return T},
   sim(sec,o){o=o||{};if(!T)this.start(o.stg,o.ld);T.bot=true;const dt=1/30;let n=Math.round(sec/dt);while(n--&&!T.over){if(T.paused)T.paused=false;update(dt)}return{wave:T.wave,hp:Math.round(T.hp),kills:T.kills,picks:T.picks,sq:T.sq.map(m=>nick(m.id)+lvSum(m)),over:T.over,res:T.result}}};
 })();
 </script>

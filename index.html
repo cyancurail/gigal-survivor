@@ -918,7 +918,7 @@ function fmMobTick(dt){const p=G.p,lv=fmLv();
 // 처치 연출 + 부가 효과
 // 과일 몹(토마토·새싹·가지·수박)은 평소엔 그냥 사라지고, 캐릭터 근처에서 자폭할 때만 터짐
 const FM_BOOM={fm_angry:{k:'burst_tomato',s:1,R:48,m:1.6},fm_sprout:{k:'burst_tomato',s:.75,R:38,m:1.4},fm_egg:{k:'burst_eggplant',s:1,R:54,m:1.6},fm_melon:{k:'burst_melon',s:1.2,R:74,m:1.8},fm_melon_s:{k:'burst_melon',s:.65,R:42,m:1.4}};
-function fmBoomTick(e,dt){const B=FM_BOOM[e.type];if(!B||e.orb||e.boss)return;const p=G.p,d=Math.hypot(p.x-e.x,p.y-e.y),F=fmLv()?.45:.6;
+function fmBoomTick(e,dt){const B=FM_BOOM[e.type];if(!B||e.orb||e.boss||e.fmSplit)return;const p=G.p,d=Math.hypot(p.x-e.x,p.y-e.y),F=fmLv()?.45:.6;
   if(!e.fz){if(d<e.r+34&&e.stun<=0&&!(e.tnt&&e.tntT>G.t)){e.fz=F;e.fzF=F;e.sp0=e.spd;e.spd=0}return}
   e.fz-=dt;e.kx=0;e.ky=0;e.spd=0;if(e.fz>0)return;e.fz=0;fmBoom(e,B)}
 function fmBoom(e,B){const lv=fmLv(),p=G.p,t=e.type;e.dead=true;
@@ -926,6 +926,8 @@ function fmBoom(e,B){const lv=fmLv(),p=G.p,t=e.type;e.dead=true;
   if((t==='fm_angry'||t==='fm_sprout')&&lv)(G.fmZ||(G.fmZ=[])).push({k:'juice',x:e.x,y:e.y+6,r:B.R*.6,t:2.5});
   if(t==='fm_egg'&&lv)(G.fmZ||(G.fmZ=[])).push({k:'gas',x:e.x,y:e.y,r:56,t:2.4,dmg:e.dmg*.6});
   if(t==='fm_melon'&&lv){const n=lv===2?14:10,v=150;for(let i=0;i<n;i++){const a=i/n*6.283;G.eb.push({x:e.x,y:e.y,vx:Math.cos(a)*v,vy:Math.sin(a)*v,r:4,dmg:e.dmg*.45,life:2.6,src:e,c:'#2a1a1a'})}}
+  // 11-09 사용자: 자폭하면 작은 과일 2마리로 분열(다시 자폭 안 함, 경험치 손실 보전)
+  if(G.enemies.length<480)for(let i=0;i<2;i++){const a=rnd(0,6.283),c=fmPop(mkEnemy(t,e.x+Math.cos(a)*10,e.y+Math.sin(a)*10));c.fmSplit=1;c.esz=.65;c.r=Math.max(6,c.r*.65);c.max=c.hp=Math.max(1,c.max*.45);c.xp=Math.max(1,(c.xp||1)*.6);c.kx=Math.cos(a)*90;c.ky=Math.sin(a)*90}
   if(G.bot)return;const L=G.fmB||(G.fmB=[]);if(L.length<60)L.push({k:B.k,x:e.x,y:e.y,t:0,s:B.s*1.25});if(Math.random()<.5)SND.p('boom');if(Math.hypot(p.x-e.x,p.y-e.y)<B.R+10)G.shk=Math.max(G.shk||0,.12)}
 function fmDie(e){const lv=fmLv(),t=e.type;
   if(t==='fm_mu_blob'&&lv){let sp=0;for(const q of G.enemies)if(q.fmSp)sp++;for(let i=0;i<2&&sp<(lv===2?30:20);i++,sp++){const c=fmPop(mkEnemy('fm_mu_spider',e.x+rnd(-12,12),e.y+rnd(-12,12)));c.sk=e.sk;c.fmSp=1}}}

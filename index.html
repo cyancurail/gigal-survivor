@@ -669,6 +669,8 @@ function sbDraw(front){const p=G.p,fy=p.y+18;
 const FM={img:{},pat:null,cache:new Map(),ld:0};
 const FMC=560;
 // 해금(⑥에서 상봉 헬 15분으로) — 지금은 개발자·테스트만
+/* 🔒 농장 헬·트와일라잇 임시 잠금 (11-08): 0으로 바꾸면 그대로 다시 열림 · 테스트 페이지(__devAll)는 열림 */
+const FM_HELL_LOCK=1;function fmHellOff(){return FM_HELL_LOCK&&!window.__devAll}
 function fmU(){let d=!!window.__devAll||!!SAVE.fmU;try{d=d||localStorage.getItem('gs_tddev')==='1'||localStorage.getItem('gs_fm')==='1'}catch(e){}return d}
 // 그림: farm/*.png 는 월드 크기의 2배로 저장 → ½로 그림
 const FM_K=['floor','tomato_bush','shovel','watering_can','mini_house','crate_tomato','scarecrow','house_full','house_empty','tallgrass','hay','crates','vine_fence','bush','barrel','barn','trellis','corn','crate_pile','hut_thatch','hide_grass','scary_hut','fence_long','fence_short','fence_corner','fence_t','maze_0','maze_1','maze_2','maze_3','maze_4','maze_5','maze_6','maze_7','maze_8','m_ally','m_angry','m_sprout'];
@@ -1010,7 +1012,7 @@ function fmFenceTick(dt){if(!G.hell)return;G.fmFT=(G.fmFT||0)-dt;if(G.fmFT>0)ret
     if(n>=4||brk){o.press=(o.press||0)+.2*(n/5)+(brk?.7:0);o.shk=.22+Math.min(.3,o.press*.05);if(!G.bot&&(G.fmCrk||0)<G.t&&Math.abs(o.x-p.x)<VW*.5){G.fmCrk=G.t+1.1;SND.p('paper')}}
     else o.press=Math.max(0,(o.press||0)-.1);
     if(o.press>=3.5){o.broken=1;if(!G.bot){sparks(o.x,o.y-16,26,['#8a5a2a','#c89060','#3a2410'],230,.6,3);G.texts.push({x:o.x,y:o.y-46,v:'와장창!',life:.9,col:'#ffd34d'});SND.p('boom');if(Math.abs(o.x-p.x)<VW*.5)G.shk=Math.max(G.shk||0,.2)}}}}
-function newGame(ci,fancy,hard,hell,tw){s2Desc();FM.cache.clear();
+function newGame(ci,fancy,hard,hell,tw){if(SAVE.map==='farm'&&fmU()&&fmHellOff()&&(hell||tw)){hell=false;tw=false;hard=true}s2Desc();FM.cache.clear();
   HELLFX=hellFxOn();
   G={map:SAVE.map==='sangbong'?'sangbong':(SAVE.map==='farm'&&fmU())?'farm':'gigal',sbL:null,wb:[],witch:null,knN:0,ci,fancy,tw:!!tw,twNext:180,twK:0,hard:!!hard||!!hell||!!tw,hell:!!hell||!!tw,hevT:120,eb:[],id:CHAR[ci].id,t:0,running:true,paused:false,freeze:0,kills:0,lvl:1,xp:0,next:5,items:{},weapons:[],enemies:[],projs:[],gems:[],fx:[],texts:[],pickups:[],zones:[],chests:0,
      p:{x:0,y:0,hp:100,fx:1,fy:0,inv:0,walk:0,frame:0},spawnAcc:0,eliteT:45,bossIdx:0,swarms:[260,560,820,1040,1320,1560,1760],ult:null,ultReady:false,ultCd:0,energy:30,xpMul:1,xpMulT:0,
@@ -1120,11 +1122,11 @@ function juInv(){return!!(G.ultOn&&G.ultOn.juInv)}
 function juCardFix(){const b=$('#selgrid').querySelector(`.pc[data-i="${CHAR.indexOf(JU)}"]`);if(!b)return;const J=juJ();
   if(!J.n){b.classList.add('jlock');b.innerHTML=`<canvas width="64" height="64"></canvas><b>???</b><small>💎 ???</small><span class="badges"><span class="bd">🔒 상봉의 마녀</span></span>`;const x=b.querySelector('canvas').getContext('2d');x.imageSmoothingEnabled=false;x.drawImage(juFrame('wt0',1),0,0,64,64);b.onclick=()=>toast('🔒 ???','「외로운 축제의 도시, 상봉」의 마지막 보스를 쓰러뜨리면…');return}
   const bd=b.querySelector('.badges');if(bd)bd.innerHTML=['💚','💙','🤍','🩷'].map((e,i)=>`<span class="bd ${[J.n,J.h,J.x,J.x][i]?'on':''}">${[J.n,J.h,J.x,J.x][i]?e:'🔒'}</span>`).join('')}
-function juDetail(c){const J=juJ();if(!SAVE.twU)selTw=false;if(selTw){selHard=false;selHell=false}selFancy=false;
+function juDetail(c){const J=juJ();const FMX=SAVE.map==='farm'&&fmU()&&fmHellOff();if(FMX){selHell=false;selTw=false}if(!SAVE.twU)selTw=false;if(selTw){selHard=false;selHell=false}selFancy=false;
   const gem=(e,n,ok,how)=>`<div style="display:flex;gap:8px;align-items:center;opacity:${ok?1:.55}"><span style="font-size:20px">${ok?e:'🔒'}</span><span><b>${ok?esc(n):'???'}</b><br><small>${ok?'해금':esc(how)}</small></span></div>`;
   $('#detail').innerHTML=`<div class="dscroll"><div class="row"><canvas width="64" height="64"></canvas><div><h3>쥬은 <small style="font-size:12px;opacity:.8">보석의 마녀</small></h3><p>${WP.emerald.icon} ${esc(WP.emerald.name)}: ${esc(WP.emerald.d)}<br>특성: ${esc(c.perk)} · 화려한 모습 없음</p></div></div>
-  <div class="forms"><button type="button" data-m="gigal" aria-pressed="${SAVE.map!=='sangbong'&&!(SAVE.map==='farm'&&fmU())}">🌃 기본 맵</button><button type="button" data-m="sangbong" aria-pressed="${SAVE.map==='sangbong'}">🎡 상봉 · Act.2</button>${fmU()?`<button type="button" data-m="farm" aria-pressed="${SAVE.map==='farm'}">🍅 농장 · S3</button>`:''}</div>
-  <div class="forms"><button type="button" data-h="0" aria-pressed="${!selHard&&!selTw}">보통</button><button type="button" data-h="1" class="hardb" aria-pressed="${selHard&&!selHell}" ${SAVE.map==='sangbong'&&sbU('쥬은')<1?'disabled':''}>${SAVE.map==='sangbong'&&sbU('쥬은')<1?'🔒 어려움 (상봉 보통 10분)':'🔥 어려움'}</button><button type="button" data-h="2" class="hellb" aria-pressed="${selHell}" ${SAVE.map==='sangbong'&&sbU('쥬은')<2?'disabled':''}>${SAVE.map==='sangbong'&&sbU('쥬은')<2?'🔒 헬 (상봉 어려움 10분)':'💀 헬'}</button><button type="button" data-h="3" class="twb" aria-pressed="${selTw}" ${SAVE.twU?'':'disabled'}>${SAVE.twU?'🌙 트와일라잇':'🔒 트와일라잇'}</button></div>${selTw?twPicker(c):''}
+  <div class="forms"><button type="button" data-m="gigal" aria-pressed="${SAVE.map!=='sangbong'&&!(SAVE.map==='farm'&&fmU())}">🌃 기본 맵</button><button type="button" data-m="sangbong" aria-pressed="${SAVE.map==='sangbong'}">🎡 상봉 · Act.2</button>${fmU()?`<button type="button" data-m="farm" aria-pressed="${SAVE.map==='farm'}">🍅 농장 · S3</button>`:'<button type="button" disabled>🔒 농장 (상봉 헬 15분)</button>'}</div>
+  <div class="forms"><button type="button" data-h="0" aria-pressed="${!selHard&&!selTw}">보통</button><button type="button" data-h="1" class="hardb" aria-pressed="${selHard&&!selHell}" ${SAVE.map==='sangbong'&&sbU('쥬은')<1?'disabled':''}>${SAVE.map==='sangbong'&&sbU('쥬은')<1?'🔒 어려움 (상봉 보통 10분)':'🔥 어려움'}</button><button type="button" data-h="2" class="hellb" aria-pressed="${selHell}" ${FMX||SAVE.map==='sangbong'&&sbU('쥬은')<2?'disabled':''}>${FMX?'🔒 헬 (곧 열려요)':SAVE.map==='sangbong'&&sbU('쥬은')<2?'🔒 헬 (상봉 어려움 10분)':'💀 헬'}</button><button type="button" data-h="3" class="twb" aria-pressed="${selTw}" ${SAVE.twU&&!FMX?'':'disabled'}>${FMX?'🔒 트와일라잇 (곧 열려요)':SAVE.twU?'🌙 트와일라잇':'🔒 트와일라잇'}</button></div>${selTw?twPicker(c):''}
   ${stuRow(c)}${jmsRow()}<div class="wardrobe" style="display:grid;grid-template-columns:1fr 1fr;gap:8px">${gem('💚','해방하는 5월',J.n,'')}${gem('💙','추억하는 9월',J.h,'어려움 보석의 마녀 처치')}${gem('🤍','공명하는 4월',J.x,'헬 보석의 마녀 처치')}${gem('🩷','사랑하는 자들의 6월',J.x,'헬 보석의 마녀 처치')}</div>
   <p style="font-size:12px;opacity:.85">🌙 트와일라잇에서는 일반 모드에서 한 번 진화시킨 보석만 쓸 수 있어요 · 진화 기록: ${['emerald','sapphire','diamond','pearl'].map(k=>(SAVE.juEvo||{})[k]?WP[k].icon:'·').join(' ')}</p>
   <p>💌 짝 아이템 「사랑의 기억」(적 공격력 −6%) · 진화 짝: 모든 보석의 기억들<br>💥 필살기 「${esc(ULT['쥬은'].n)}」 (${esc(ULT['쥬은'].type)}): ${esc(ULT['쥬은'].d)} · 쿨타임 3분</p>
@@ -1834,6 +1836,7 @@ function bossTick(dt){const wN=!G.hard;if(wN&&!(G.witch&&!G.witch.dead))return;c
 function hellTick(dt){const p=G.p;
   if(G.eb.length){const pw=W('pet'),D=pw&&pw.st.dome;for(const b of G.eb){b.x+=b.vx*dt;b.y+=b.vy*dt;b.life-=dt;const d2=(b.x-p.x)**2+(b.y-p.y)**2;if(D&&d2<D.R*D.R){b.life=0;hpB('pet',b.dmg*edm());if(!G.bot&&Math.random()<.5)sparks(b.x,b.y,4,['#7dffb0','#ffffff'],120,.2);continue}if(d2<(b.r+9)**2){b.life=0;rangedHit(b.dmg,b)}}G.eb=G.eb.filter(b=>b.life>0);if(G.eb.length>400)G.eb.splice(0,G.eb.length-400)}
   if(G.map==='sangbong'&&!G.tw&&!G.bot&&G.t>=600&&!G.hell){const nv=G.hard?2:1;if(sbU(G.id)<nv){SAVE.sbU=SAVE.sbU||{};SAVE.sbU[G.id]=nv;persist();const t=nv===2?'💀 상봉 헬 모드 해금!':'🔥 상봉 어려움 모드 해금!';G.unlockedNow.push(`${t.slice(0,2)} ${esc(CHAR[G.ci].nick)}의 ${t.slice(3,-1)}`);toast(t,CHAR[G.ci].nick+' · 상봉에서 10분 생존',true)}}
+  if(G.map==='sangbong'&&G.hell&&!G.tw&&!G.bot&&G.t>=900&&!SAVE.fmU){SAVE.fmU=1;persist();G.unlockedNow.push('🍅 새 맵 「위기의 토마토 농장」 해금!');toast('🍅 농장 맵 해금!','상봉 헬 15분 생존 · 맵 선택에서 고를 수 있어요',true)}
   if(G.map==='gigal'&&G.hard&&!G.hell&&!G.tw&&!G.bot&&G.t>=600&&!hellUnl(G.id)){SAVE.hellU=SAVE.hellU||{};SAVE.hellU[G.id]=1;persist();achCheck();G.unlockedNow.push(`💀 ${esc(CHAR[G.ci].nick)}의 헬모드 해금!`);toast('💀 헬모드 해금!',CHAR[G.ci].nick+'의 헬모드가 열렸어요',true)}
   if(!G.hell)return;
   if(G.t>=600&&!G.h10){G.h10=1;if(!G.bot)achGet('hell10')}
@@ -3559,6 +3562,11 @@ const SND=(()=>{
     sbHell:{bpm:110,cp:1,hot:1,roots:['C3'],ch:[{b:'D2',n:['F3','A3','C4','E4']},{b:'Bb1',n:['D4','F4','A4','A3']},{b:'G2',n:['Bb3','D4','F4','A4']},{b:'A2',n:['C#4','E4','G4','Bb4']},{b:'D2',n:['F3','A3','C4','E4']},{b:'Bb1',n:['D4','F4','A4','A3']},{b:'E2',n:['G3','Bb3','D4','E4']},{b:'A2',n:['C#4','E4','G4','A4']}],
       mel:['A5 - F5 E5 D5 - E5 F5','F5 - D5 - A4 - D5 -','Bb5 - A5 G5 F5 - D5 -','E5 - C#5 - A4 - E5 G5','A5 - C6 A5 - F5 E5 D5','D6 - - A5 F5 - D5 -','G5 - Bb5 - A5 G5 F5 E5','C#5 - E5 - A5 - - -'],
       bass:'0 . 12 0 . 0 12 . 0 . 7 0 . 10 12 .',dr:'cp'},
+    /* 🍅 농장 (11-08) — 보통: 통통 튀는 컨트리 투스텝(밴조 롤·쿵짝·빨래판) / 어려움: 같은 곡을 단조로 비튼 "뭔가 이상한 농장"(삐걱 음·오르골·심장 박동) */
+    fmField:{bpm:118,fm:1,roots:['G2'],ch:[{b:'G2',f:'D2',n:['G4','B4','D5']},{b:'C3',f:'G2',n:['C4','E4','G4']},{b:'G2',f:'D2',n:['G4','B4','D5']},{b:'D3',f:'A2',n:['D4','F#4','A4']},{b:'G2',f:'D2',n:['G4','B4','D5']},{b:'C3',f:'G2',n:['C4','E4','G4']},{b:'D3',f:'A2',n:['D4','F#4','A4','C5']},{b:'G2',f:'D2',n:['G4','B4','D5']}],
+      mel:['D5 - B4 D5 G5 - D5 B4','C5 E5 G5 E5 C5 - E5 -','D5 - G5 A5 B5 A5 G5 D5','F#5 - E5 - D5 - . .','B4 D5 G5 - B5 - A5 G5','E5 - G5 E5 C6 - B5 A5','A5 - F#5 - D5 E5 F#5 A5','G5 - - D5 G5 - . .']},
+    fmHard:{bpm:92,fm:1,eerie:1,roots:['E2'],ch:[{b:'E2',f:'B1',n:['E4','G4','B4']},{b:'C2',f:'G1',n:['C4','E4','G4']},{b:'E2',f:'B1',n:['E4','G4','B4']},{b:'B1',f:'F#1',n:['B3','D#4','F#4','A4']},{b:'A1',f:'E2',n:['A3','C4','E4']},{b:'E2',f:'B1',n:['E4','G4','B4']},{b:'B1',f:'F#1',n:['B3','D#4','F#4','A4']},{b:'E2',f:'B1',n:['E4','G4','B4']}],
+      mel:['B4 - G4 B4 E5 - B4 G4','C5 E5 G5 E5 C5 - . .','B4 - E5 F#5 G5 F#5 E5 B4','D#5 - C5 - B4 - . .','A4 C5 E5 - A5 - G5 E5','G5 - E5 B4 G5 - F#5 E5','F#5 - D#5 - B4 C5 D#5 F#5','E5 - - B4 E5 - . .']},
     clear:{bpm:128,lead:'pulse',roots:['F2','Bb2','C3','F2'],mel:['C5 F5 A5 C6 . A5 C6 .','D6 C6 Bb5 A5 G5 A5 Bb5 .','C6 . G5 A5 Bb5 C6 D6 E6','F6 . C6 . A5 . F5 .'],dr:'khs'},
   };
   function sched(){if(!ok()||!cur){return}const tr=T[cur],sd=60/tr.bpm/4;
@@ -3581,6 +3589,24 @@ const SND=(()=>{
         if(s16===4||s16===12){noise({f:1600,d:.11,v:.12,q:.9},MG,t);noise({ft:'highpass',f:5000,d:.06,v:.05},MG,t)}
         noise({ft:'highpass',f:8500,d:.025,v:s16%4===2?.04:.018},MG,t);
         if(s16===14)noise({ft:'highpass',f:7000,d:.16,v:.03},MG,t);
+        nextT+=sd;step++;continue}
+      if(tr.fm){const C=tr.ch[bar%tr.ch.length],E=tr.eerie;
+        // 베이스: 쿵(근음)–짝–쿵(5음)–짝 · 투스텝
+        if(s16===0||s16===8){const f=hz(mid(s16?C.f:C.b));tone({w:'triangle',f,d:sd*(E?3.6:2.2),v:.2,hold:.4},MG,t);if(!E)tone({w:'square',f:f*2,d:sd*.9,v:.018,hold:.2},MG,t)}
+        if(!E&&(s16===14&&bar%2))tone({w:'triangle',f:hz(mid(C.f)+2),d:sd*1.6,v:.14,hold:.3},MG,t);
+        // 짝: 밴조처럼 짧게 튕기는 화음 (어려움은 더 작게, 박이 비어 보이게)
+        if(s16===4||s16===12){for(const n of C.n)tone({w:'pulse',f:hz(mid(n)),d:sd*(E?2.4:1.1),v:E?.012:.03,hold:.08,a:.002},MG,t)}
+        if(E&&s16===0)for(const n of C.n)tone({w:'sine',f:hz(mid(n)-12),d:sd*17,v:.016,a:sd*5,hold:.7},MG,t); // 어려움: 바닥에 깔리는 낮은 안개 화음 (빈 공간 메우기)
+        // 밴조 롤 / 오르골
+        if(!E){if(s16%2===1){const n=C.n[((s16>>1)+bar)%C.n.length];tone({w:'pulse',f:hz(mid(n)+12),d:sd*1.1,v:.014,hold:.04,a:.001},MG,t)}}
+        else if(s16===2||s16===10||(s16===6&&bar%2)){const n=C.n[((s16>>2)+bar)%C.n.length];tone({w:'sine',f:hz(mid(n)+24),d:sd*6,v:.022,hold:.03,a:.002},MG,t);tone({w:'sine',f:hz(mid(n)+24)*2.76,d:sd*2,v:.005,hold:.02,a:.001},MG,t)}
+        // 멜로디: 보통은 피들처럼 밝게, 어려움은 반 박자 늦게 휘청 + 살짝 어긋난 두 번째 목소리 + 마디 끝 삐걱
+        if(s16%2===0){const ms=tr.mel[bar].split(' '),i=s16/2,n=ms[i];if(n&&n!=='.'&&n!=='-'){let L=1;while(ms[i+L]==='-')L++;const f=hz(mid(n)),d=sd*2*L+sd*(E?2.5:1);
+          if(!E){tone({w:'pulse',f,d,v:.07,hold:.55,vib:5.5,vd:.004},MG,t);tone({w:'triangle',f:f*2,d:d*.5,v:.022,hold:.3},MG,t)}
+          else{const lag=(i%2?sd*.35:0),creak=(bar%4===3&&i>=4);tone({w:'triangle',f,f2:creak?f*.94:undefined,sl:creak?d*.8:undefined,d,v:.075,hold:.6,vib:3.2,vd:.012,a:.03},MG,t+lag);tone({w:'sawtooth',f:f*1.012,d,v:.01,hold:.6,a:.06},MG,t+lag)}}}
+        // 드럼: 보통 = 킥·박수·빨래판(셰이커) / 어려움 = 심장 박동 + 째깍 시계
+        if(!E){if(s16===0||s16===8)tone({w:'sine',f:120,f2:45,sl:.08,d:.12,v:.3},MG,t);if(s16===4||s16===12)noise({f:2200,d:.07,v:.09,q:1.4},MG,t);noise({ft:'bandpass',f:6000,d:.03,v:s16%4===2?.035:.016,q:2},MG,t)}
+        else{if(s16===0||s16===3)tone({w:'sine',f:s16?60:70,f2:40,d:.14,v:s16?.26:.32},MG,t);if(s16%4===0)noise({ft:'highpass',f:9500,d:.015,v:.03},MG,t);if(s16===0&&bar%4===0)tone({w:'sawtooth',f:hz(mid(C.b)-12),d:sd*30,v:.012,a:sd*8,hold:.7,vib:.6,vd:.01},MG,t)}
         nextT+=sd;step++;continue}
       if(tr.jazz){if(s16%4===0)tone({w:'triangle',f:hz(mid(tr.walk[bar%tr.walk.length].split(' ')[s16/4])),d:sd*3.4,v:.2,hold:.4},MG,t);if(s16%4===0)noise({ft:'bandpass',f:3200,d:.2,v:(s16===4||s16===12)?.045:.02,q:.5},MG,t);if(s16===0||s16===7||s16===8||s16===15)noise({ft:'highpass',f:7000,d:.07,v:.02},MG,t);if(s16===6||s16===14)for(const n of tr.ch[bar%tr.ch.length])tone({w:'sine',f:hz(mid(n)),d:sd*3.2,v:.04,a:.02,hold:.4},MG,t);if(s16%2===0){const n=tr.mel[bar].split(' ')[s16/2];if(n&&n!=='.')tone({w:'triangle',f:hz(mid(n)),d:sd*3,v:.07,a:.01,hold:.3,vib:5},MG,t)}nextT+=sd;step++;continue}
       // bass
@@ -3608,7 +3634,7 @@ const SND=(()=>{
     if(!AC)return;if(AC.state!=='running'){return}
     if(window.__tdOn){if(cur)cur=null;lowA(false);lbStop();return} // 디펜스 모드는 자체 BGM (서바이버 로비 음악도 끔)
     let w;const vid=!$('#ultvid').hidden,cin=!$('#cine').hidden;
-    if(vid)w=null;else if(G&&G.running){const bs=G.enemies.some(e=>e.boss);w=G.escOpen?'clear':G.hell?(bs?'hellboss':(G.map==='sangbong'&&!G.tw?'sbHell':'hell')):bs?'boss':(G.map==='sangbong'?'sbField':'field')}else w=cin?null:'title';
+    if(vid)w=null;else if(G&&G.running){const bs=G.enemies.some(e=>e.boss);w=G.escOpen?'clear':G.hell?(bs?'hellboss':(G.map==='sangbong'&&!G.tw?'sbHell':'hell')):bs?'boss':(G.map==='sangbong'?'sbField':G.map==='farm'?(G.hard?'fmHard':'fmField'):'field')}else w=cin?null:'title';
     if(cin&&G&&G.running)w=cur; // 게임 중 필살기 연출은 음악 유지
     // 🚨 위기 곡: 체력 20% 미만이면 합성 음악을 줄이고 mp3 반복, 25% 이상 회복하면 원래대로
     let low=false;if(w&&G&&G.running&&!G.paused&&!G.escOpen&&!cin&&G.p&&G.S&&G.p.hp>0){low=G.p.hp/G.S.maxHp<(G._low?.25:.2)}if(G)G._low=low;lowA(low);
@@ -4012,11 +4038,11 @@ function twPicker(c){const B=twBuild(),own=c.w,ws=B.w.filter(k=>k!==own&&juTwAll
   <button type="button" class="ghost small" id="twRnd">🎲 랜덤으로 채우기</button></div>`}
 function renderDetail(){
   if(CHAR[selI].ju){if(SAVE.map==='sangbong'){if(sbU('쥬은')<2)selHell=false;if(sbU('쥬은')<1)selHard=false;if(selHell)selHard=true}juDetail(CHAR[selI]);return}
-  const c=CHAR[selI],f=SAVE.fancy[c.id],u=SAVE.ult[c.id],cn=SAVE.cine[c.id],SBM=SAVE.map==='sangbong',hdU=SBM?sbU(c.id)>=1:(u||anyHell());if(!f)selFancy=false;if(!hdU)selHard=false;const hu=SBM?sbU(c.id)>=2:hellUnl(c.id);if(!hu)selHell=false;if(selHell)selHard=true;if(!SAVE.twU)selTw=false;if(selTw){selHard=false;selHell=false}
+  const c=CHAR[selI],f=SAVE.fancy[c.id],u=SAVE.ult[c.id],cn=SAVE.cine[c.id],SBM=SAVE.map==='sangbong',hdU=SBM?sbU(c.id)>=1:(u||anyHell());if(!f)selFancy=false;if(!hdU)selHard=false;const FMX=SAVE.map==='farm'&&fmU()&&fmHellOff();const hu=!FMX&&(SBM?sbU(c.id)>=2:hellUnl(c.id));if(!hu)selHell=false;if(FMX)selTw=false;if(selHell)selHard=true;if(!SAVE.twU)selTw=false;if(selTw){selHard=false;selHell=false}
   $('#detail').innerHTML=`<div class="dscroll"><div class="row"><canvas width="64" height="64"></canvas><div><h3>${esc(c.nick)}</h3><p>${WP[c.w].icon} ${esc(WP[c.w].name)}: ${esc(WP[c.w].d)}<br>특성: ${esc(c.perk)}</p></div></div>
-  <div class="forms"><button type="button" data-m="gigal" aria-pressed="${SAVE.map!=='sangbong'&&!(SAVE.map==='farm'&&fmU())}">🌃 기본 맵</button><button type="button" data-m="sangbong" aria-pressed="${SAVE.map==='sangbong'}">🎡 상봉 · Act.2</button>${fmU()?`<button type="button" data-m="farm" aria-pressed="${SAVE.map==='farm'}">🍅 농장 · S3</button>`:''}</div>
+  <div class="forms"><button type="button" data-m="gigal" aria-pressed="${SAVE.map!=='sangbong'&&!(SAVE.map==='farm'&&fmU())}">🌃 기본 맵</button><button type="button" data-m="sangbong" aria-pressed="${SAVE.map==='sangbong'}">🎡 상봉 · Act.2</button>${fmU()?`<button type="button" data-m="farm" aria-pressed="${SAVE.map==='farm'}">🍅 농장 · S3</button>`:'<button type="button" disabled>🔒 농장 (상봉 헬 15분)</button>'}</div>
   <div class="forms"><button type="button" data-f="0" aria-pressed="${!selFancy}">기본 모습</button><button type="button" data-f="1" aria-pressed="${selFancy}" ${f?'':'disabled'}>${f?'👗 화려한 모습':'🔒 10분 이상 버티면 해금'}</button></div>
-  <div class="forms"><button type="button" data-h="0" aria-pressed="${!selHard&&!selTw}">보통</button><button type="button" data-h="1" class="hardb" aria-pressed="${selHard&&!selHell}" ${hdU?'':'disabled'}>${hdU?'🔥 어려움':SBM?'🔒 어려움 (상봉 보통 10분)':'🔒 어려움 (필살기 해금 후)'}</button><button type="button" data-h="2" class="hellb" aria-pressed="${selHell}" ${hu?'':'disabled'}>${hu?'💀 헬':SBM?'🔒 헬 (상봉 어려움 10분)':'🔒 헬'}</button><button type="button" data-h="3" class="twb" aria-pressed="${selTw}" ${SAVE.twU?'':'disabled'}>${SAVE.twU?'🌙 트와일라잇':'🔒 트와일라잇'}</button></div>${SAVE.twU?'':'<p class="c" style="margin:0;font-size:12px">🌙 트와일라잇: 헬 모드에 한 번 입장하면 열려요</p>'}${selTw?twPicker(c):''}${selHell?`<p class="hardnote">💀 헬모드 · 적 체력 어려움의 1.3배 → 5~10분에 걸쳐 ×5 · 경험치 ×1.3 · 공격력 ×2 · 엘리트 체력 +200% · 원거리 몬스터 · 단톡방 이벤트 · 순대국 회복 10 · 골드 4배</p>`:!hu&&u?`<p class="c" style="margin:0">💀 헬모드: 어려움 모드 10분을 버티면 열려요</p>`:''}
+  <div class="forms"><button type="button" data-h="0" aria-pressed="${!selHard&&!selTw}">보통</button><button type="button" data-h="1" class="hardb" aria-pressed="${selHard&&!selHell}" ${hdU?'':'disabled'}>${hdU?'🔥 어려움':SBM?'🔒 어려움 (상봉 보통 10분)':'🔒 어려움 (필살기 해금 후)'}</button><button type="button" data-h="2" class="hellb" aria-pressed="${selHell}" ${hu?'':'disabled'}>${hu?'💀 헬':FMX?'🔒 헬 (곧 열려요)':SBM?'🔒 헬 (상봉 어려움 10분)':'🔒 헬'}</button><button type="button" data-h="3" class="twb" aria-pressed="${selTw}" ${SAVE.twU&&!FMX?'':'disabled'}>${FMX?'🔒 트와일라잇 (곧 열려요)':SAVE.twU?'🌙 트와일라잇':'🔒 트와일라잇'}</button></div>${SAVE.twU?'':'<p class="c" style="margin:0;font-size:12px">🌙 트와일라잇: 헬 모드에 한 번 입장하면 열려요</p>'}${selTw?twPicker(c):''}${selHell?`<p class="hardnote">💀 헬모드 · 적 체력 어려움의 1.3배 → 5~10분에 걸쳐 ×5 · 경험치 ×1.3 · 공격력 ×2 · 엘리트 체력 +200% · 원거리 몬스터 · 단톡방 이벤트 · 순대국 회복 10 · 골드 4배</p>`:!hu&&u?`<p class="c" style="margin:0">💀 헬모드: 어려움 모드 10분을 버티면 열려요</p>`:''}
   ${stuRow(c)}<div class="wardrobe"><b>👗 스킨: ${curSkin(c.id)?esc(PBY[curSkin(c.id)].kind==='color'?PBY[curSkin(c.id)].n:PBY[curSkin(c.id)].n.split(' · ')[1]):'기본'}${selFancy?'':' (화려한 모습에서 적용)'}</b><button type="button" id="detCloset">👗 옷장 열기</button></div>
   ${selHard&&!selHell?`<p class="hardnote">🔥 적 체력 ×${HARD.hp} · 공격력 ×${HARD.dmg} · 물량 ×${HARD.spawn} · 엘리트 ${HARD.elite}초마다 · 순대국 절반<br>${cn?'🎬 필살기 연출 해금 완료':`❓ <b>비밀 보상</b> ${selFancy?'· 화려한 모습으로 10분 이상 버티면 해금':'· <b>화려한 모습</b>으로 버텨야 해금돼요'}`}</p>`:''}
   ${introItems(c.id).length?`<p class="mythnote">🎬 신화 영상 ${introItems(c.id).length}개 · ${(SAVE.introOff||{})[c.id]?'꺼짐 (옷장에서 켜기)':'게임 시작 시 재생'}</p>`:''}

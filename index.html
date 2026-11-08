@@ -761,10 +761,12 @@ function fmEmerge(o,n,kind){const lv=fmLv(),p=G.p;let live=0;for(const e of G.en
   if(G.bot)return;
   if(lv===0){G.texts.push({x:ox,y:oy-30,v:'뿅!',life:.7,col:'#ffd0e4'});for(const q of SR)sparks(q.x,q.y-24,8,['#ffd0e4','#ffffff','#9be15d'],110,.45,2);SND.p('pop')}
   else{for(const q of SR)sparks(q.x,q.y-24,10,['#5a3a1a','#9be15d','#2a1a0a'],150,.5,2);if(SR.length>3&&!G.bot)G.texts.push({x:ox,y:oy-44,v:'우르르…!',life:.8,col:'#ff8a8a'});SND.p(FM_TR[o.t]&&FM_TR[o.t].door?'boom':'whoosh');if(lv===2)G.shk=Math.max(G.shk||0,.18)}}
+const FM_NQ={barn:1,hut_thatch:1,house_full:1};
 function fmTrig(dt){const p=G.p,lv=fmLv(),tel=[.75,.5,.32][lv];
   for(const o of G.fmL){
     if(o.t==='scary_hut'){fmHut(o,dt);continue}
-    const T=FM_TR[o.t];if(!T||o.dec)continue;if(T.mob==='mu'&&!(lv===2&&o.amb))continue; // 풀숲: 보통·어려움은 숨는 곳, 헬은 매복 덩어리만
+    const T=FM_TR[o.t];if(!T||o.dec)continue;if(T.mob==='mu'&&!(lv===2&&o.amb))continue;if(lv===0&&FM_NQ[o.t])continue; // 보통: 헛간·초가집·토마토 하우스는 조용
+ // 풀숲: 보통·어려움은 숨는 곳, 헬은 매복 덩어리만
     if(o.tel>0){o.tel-=dt;if(o.tel<=0&&(o.t==='house_full'||o.t==='trellis')&&em()>=6&&Math.random()<.45){fmMelon(o.x,o.y+20);if(!G.bot)SND.p('boom');o.cd=G.t+T.cd;continue}if(o.tel<=0){const n=T.n+Math.round((o.cl?o.cl.length:0)*1.6)+Math.floor(em()/5)*(T.door?2:1)+(lv===2?1:0);fmEmerge(o,n,T.mob);o.cd=G.t+T.cd*(lv===2?.75:1)}continue}
     if((o.cd||0)>G.t)continue;
     let dx=p.x-o.x,dy=p.y-(o.y-20),d=Math.hypot(dx,dy);if(o.cl)for(const c of o.cl){const d2=Math.hypot(p.x-c.x,p.y-(c.y-20));if(d2<d){d=d2;dx=p.x-c.x;dy=p.y-(c.y-20)}}if(d>T.r)continue;

@@ -3243,7 +3243,7 @@ const SND=(()=>{
   function lbStop(){if(!LB.src)return;const now=AC.currentTime,s=LB.src;LB.off=(now-LB.t0)%LB.buf.duration;LB.src=null;LB.g.gain.cancelScheduledValues(now);LB.g.gain.setValueAtTime(LB.g.gain.value,now);LB.g.gain.linearRampToValueAtTime(0,now+.35);try{s.stop(now+.4)}catch(e){}}
   function tick(){ // decide track every frame
     if(!AC)return;if(AC.state!=='running'){return}
-    if(window.__tdOn){if(cur)cur=null;lowA(false);return} // 디펜스 모드는 자체 BGM
+    if(window.__tdOn){if(cur)cur=null;lowA(false);lbStop();return} // 디펜스 모드는 자체 BGM (서바이버 로비 음악도 끔)
     let w;const vid=!$('#ultvid').hidden,cin=!$('#cine').hidden;
     if(vid)w=null;else if(G&&G.running){const bs=G.enemies.some(e=>e.boss);w=G.escOpen?'clear':G.hell?(bs?'hellboss':(G.map==='sangbong'&&!G.tw?'sbHell':'hell')):bs?'boss':(G.map==='sangbong'?'sbField':'field')}else w=cin?null:'title';
     if(cin&&G&&G.running)w=cur; // 게임 중 필살기 연출은 음악 유지
@@ -7625,7 +7625,7 @@ function ov(){css();if(OV)return OV;OV=document.createElement('div');OV.id='aric
     else if(b.dataset.nx!=null)next();else if(b.dataset.sk!=null){if(V){V.i=V.ep.L.length-1;V.n=1e9;line();finish()}}});
   OV.addEventListener('pointerdown',e=>{if(V&&e.target.closest('.acStage,.acBox'))next()});return OV}
 function list(){const s=SV(),op=open_(),tab=OV.dataset.tab||'new';const nN=op.filter(e=>!s.seen[e.id]).length;
-  let h=`<div class="acTabs"><button type="button" data-tab="new" aria-pressed="${tab==='new'}">📡 새 통신${nN?`<span class="dt">${nN}</span>`:''}</button><button type="button" data-tab="log" aria-pressed="${tab==='log'}">🗂️ 통신 기록</button><button type="button" data-tab="day" aria-pressed="${tab==='day'}">💬 오늘의 한마디</button></div><div class="acList">`;
+  let h=`<div class="acTabs"><button type="button" data-tab="new" aria-pressed="${tab==='new'}">📡 새 통신${nN?`<span class="dt">${nN}</span>`:''}</button><button type="button" data-tab="log" aria-pressed="${tab==='log'}">🗂️ 통신 기록</button>${DAYOFF?'':`<button type="button" data-tab="day" aria-pressed="${tab==='day'}">💬 오늘의 한마디</button>`}</div><div class="acList">`;
   if(tab==='new'){const nw=op.filter(e=>!s.seen[e.id]);
     h+=nw.length?nw.map(e=>it(e,1)).join(''):`<p class="acLock">새 통신이 없어요.<br>내일 오전 4시가 지나거나, 한 판을 5분 넘게 버티고 오면 아리아드네가 다시 연락해요.</p>`;
     const left=D.E.length-op.length;if(left)h+=`<p class="acLock">🔒 아직 도착하지 않은 통신 ${left}편</p>`}
@@ -7658,11 +7658,12 @@ function loop(){cancelAnimationFrame(RAF);const f=now=>{if(!V||!OV||OV.hidden){R
   const im=img('td/ari/'+f2+'.png'),sz=Math.min(W*.8,H*.98),X=(W-sz)/2,Y=H-sz;
   const gr=g.createRadialGradient(W/2,H*.98,4,W/2,H*.98,sz*.6);gr.addColorStop(0,'rgba(120,230,255,.35)');gr.addColorStop(1,'rgba(120,230,255,0)');g.fillStyle=gr;g.fillRect(0,0,W,H);
   holo(g,im,X,Y,sz,sz,t,V.sp==='ari'||V.sp==='sys'?1:.45)};RAF=requestAnimationFrame(f)}
-function open(tab){if(!on()){try{toast('📡 통신기','아스가르드 디펜스 튜토리얼을 마치면 열려요')}catch(e){}return}tick();const o=ov();o.dataset.tab=tab||(unseen()?'new':'day');V=null;o.hidden=false;render()}
+function open(tab){if(!on()){try{toast('📡 통신기','아스가르드 디펜스 튜토리얼을 마치면 열려요')}catch(e){}return}tick();const o=ov();o.dataset.tab=(DAYOFF&&tab==='day'?'log':tab)||(unseen()?'new':DAYOFF?'log':'day');V=null;o.hidden=false;render()}
 function close(){if(OV)OV.hidden=true;V=null;cancelAnimationFrame(RAF);ui()}
 
 /* ---- 🔴 로비 버튼·점 · 💬 오늘의 한마디 알약 ---- */
-function pill(host){if(!host)return;let p=host.querySelector(':scope > .aricPill');if(!on()){if(p)p.remove();return}const t=todayH();
+const DAYOFF=true;/* 11-08 사용자: 오늘의 한마디는 일단 숨김 */
+function pill(host){if(!host)return;let p=host.querySelector(':scope > .aricPill');if(!on()||DAYOFF){if(p)p.remove();return}const t=todayH();
   if(!p){p=document.createElement('button');p.type='button';p.className='aricPill';p.innerHTML='<img src="td/ari/n.png" alt=""><span></span>';p.onclick=e=>{e.stopPropagation();try{SND.p('click')}catch(x){}open('day');play(todayH())};host.appendChild(p)}
   const s=p.querySelector('span'),h=`<b>💬 오늘의 한마디</b>${E(t.who[0])}: ${E(t.L[0][1])}`;if(s.innerHTML!==h)s.innerHTML=h}
 function ui(){css();const b=document.querySelector('#lbIcons [data-lb="comm"]');if(b){b.hidden=!on();let d=b.querySelector('.dot');const n=on()?unseen():0;if(!n){if(d)d.remove()}else{if(!d){d=document.createElement('span');d.className='dot';b.appendChild(d)}d.textContent=n>99?'99+':n}}

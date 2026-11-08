@@ -7707,6 +7707,15 @@ function css(){if(document.getElementById('aricCss'))return;const st=document.cr
 #aricOv .acBtns{display:flex;gap:8px;padding:10px 10px calc(12px + env(safe-area-inset-bottom,0px))}
 #aricOv .acBtns button{background:rgba(255,255,255,.07);border:1px solid rgba(140,235,255,.45);color:#cff;border-radius:12px;padding:10px 14px;font-size:14px}
 #aricOv .acBtns .go{flex:1;background:#1d6f8a;color:#fff;border-color:#9ff0ff;font-weight:700}
+/* 11-08 사용자: PC에서 통신기 글씨가 너무 작음 → 넓은 화면은 가운데 큰 창 + 글씨 크게 */
+@media (min-width:900px){#aricOv .acH,#aricOv .acTabs,#aricOv .acList,#aricOv .acV{width:min(980px,94vw);margin-left:auto;margin-right:auto;box-sizing:border-box}
+ #aricOv .acH b{font-size:24px}#aricOv .acH small{font-size:16px}#aricOv .acX{font-size:18px;padding:8px 16px}
+ #aricOv .acTabs button{font-size:17px;padding:8px 18px}
+ #aricOv .acSec{font-size:17px}#aricOv .acIt{font-size:19px;padding:14px 18px;gap:14px}#aricOv .acIt i{font-size:15px;min-width:56px}#aricOv .acIt em{font-size:14px}
+ #aricOv .acLock{font-size:17px}#aricOv .acTd b{font-size:16px}#aricOv .acTd p{font-size:18px}
+ #aricOv .acWho{font-size:17px}#aricOv .acNp{font-size:16px;padding:3px 14px}
+ #aricOv .acBox{padding:16px 22px 18px;min-height:160px}#aricOv .acTx{font-size:23px;line-height:1.7;min-height:80px}
+ #aricOv .acBtns button{font-size:18px;padding:12px 20px}}
 .aricPill{position:absolute;z-index:6;display:flex;align-items:center;gap:6px;max-width:min(46vw,230px);background:linear-gradient(135deg,rgba(18,40,66,.88),rgba(40,18,62,.88));border:1px solid rgba(140,235,255,.7);border-radius:14px;padding:6px 10px 6px 6px;color:#eafcff;font:600 12px 'Noto Sans KR',sans-serif;box-shadow:0 0 10px rgba(120,230,255,.35);cursor:pointer;text-align:left}
 .aricPill img{width:30px;height:30px;image-rendering:pixelated;flex:none;filter:drop-shadow(0 0 4px rgba(120,230,255,.8))}
 .aricPill span{overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;line-height:1.35}.aricPill b{color:#ffd76a;display:block;font-size:11px}

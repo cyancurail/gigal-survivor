@@ -5682,7 +5682,8 @@ const ALL9=['n','f','t','r','p','d','a','s','e'];
    hpm은 예전처럼 판 안에서 15%→100% 적용, 보통 1 = 예전 보통 1(1.3) */
 /* 11-07: 레벨업 20번 제한으로 판 안 화력이 줄어 뒤 스테이지일수록 모자람 → 몬스터 체력을 측정한 만큼 나눔 (보통 1 ÷1 · 보통 10 ÷3.2 · 보통 20 ÷4.5 · 어려움 20부터 ÷7) */
 /* 11-08 사용자: 보통 4부터는 「적정 성장」으로 처음 깰 때 선이 70% 정도 깎이고, 강화 후 다시 오면 100%로. 적정 성장(봇 기준) = 사령관 0.7×스테이지 · 무기 Lv 4→6(보통4)·11(보통10)·19(보통20) · 스탯 7·12·17. 이 성장에서 아슬아슬하도록 몬스터 체력 배율 */
-const STG_F=[[1,.8],[2,.9],[3,1],[4,1.8],[7,1.2],[10,.75],[14,.6],[17,.5],[20,.45]];function stgF(d,i){if(d>0)return .45;for(let k=1;k<STG_F.length;k++){const[a,va]=STG_F[k-1],[b,vb]=STG_F[k];if(i<=b)return va+(vb-va)*(i-a)/(b-a)}return .45}
+const STG_F=[[1,.8],[2,.9],[3,1],[4,1.8],[7,1.2],[10,.75],[14,.45],[17,.3],[20,.2]],STG_FH=[[1,.2],[10,.16],[20,.13]],STG_FX=[[1,.35],[10,.2],[20,.11]];/* 11-08 봇: 보통 20·어려움·헬은 적정 성장에서 웨이브 13~16에 무너져서 크게 낮춤 */
+function stgF(d,i){const T0=d===0?STG_F:d===1?STG_FH:STG_FX;for(let k=1;k<T0.length;k++){const[a,va]=T0[k-1],[b,vb]=T0[k];if(i<=b)return va+(vb-va)*(i-a)/(b-a)}return T0[T0.length-1][1]}
 const STG_DV=[[0,1],[9,3.2],[19,4.5],[39,7],[59,7]];function stgDv(x){for(let k=1;k<STG_DV.length;k++){const[a,va]=STG_DV[k-1],[b,vb]=STG_DV[k];if(x<=b)return Math.exp(Math.log(va)+(Math.log(vb)-Math.log(va))*(x-a)/(b-a))}return 7}
 const STG_TY=['n','f','t','r','p','a','d','s','e'],STG_NM=['보통','어려움','헬'];
 const stgB=s=>{const n=2*s-1;return n<=41?1+.0034*Math.pow(n-1,2.38):1+.0034*Math.pow(40,2.38)+2.63*(s-21)};
@@ -5703,7 +5704,7 @@ function stgMigrate(t){t.s60=1;const ob=t.best||{},os=t.st||{},nb={},ns={},W1=22
   t.best=nb;t.st=ns}
 const sv=()=>{try{persist()}catch(e){}};
 /* 📈 스탯 강화 100단계 (오드로 강화): 공격력 +1(=피해 +1%) → 크리티컬 +0.1% → 마음의 선 +1 순서로 돌아가요 */
-const STN=100,STK=['atk','crit','line'],stOf=i=>STK[i%3],stCost=n=>20+10*n;/* 11-07: 예전 5+⌊n/2⌋ — 40단계 ≈ 오드 8,600 */
+const STN=100,STK=['atk','crit','line'],stOf=i=>V2?STK[i%2]:STK[i%3],/* 11-08: v2는 마음의 선이 따로(🌙 탭) → 공통 강화는 공격력·크리티컬만 번갈아 */stCost=n=>20+10*n;/* 11-07: 예전 5+⌊n/2⌋ — 40단계 ≈ 오드 8,600 */
 const STL={atk:['⚔️',V2?'공격력 +1%':'공격력 +3%'],crit:['🎯','크리티컬 확률 +0.1%'],line:['🌙','마음의 선 +3']};
 const stSum=lv=>{const o={atk:0,crit:0,line:0};for(let i=0;i<lv;i++)o[stOf(i)]++;return o};
 /* 🎵 BGM: lobby 로딩·로비 / battle 게임 시작(한 번) → fight 전투 지속(Sector Siege, 반복) / boss 최종 보스 / low 마음의 선 20% 미만 */
@@ -7333,7 +7334,7 @@ function lbRender(){const box=ov.querySelector('.tdLobby'),td=TDS(),L=LOB;if(V2)
    <div class="lbTabs">${TABS.map(([k,ic,n])=>`<button type="button" data-tab="${k}" class="${L.tab===k?'on':''}"><i>${ic}</i>${n}</button>`).join('')}</div>`;
   box.hidden=false;ov.querySelector('.tdTop').style.visibility='hidden';fillFaces(box);icDot()}
 /* ===== 11-08 사용자: 디펜스 로비 개편 — 🛒 상점(서바이버 상점) · 🌙 마음의 선 · ⚔️ 출격(스테이지 카드) · 👥 대원 관리 · 👗 옷장, 🎖️ 사령관은 왼쪽 위 배지 ===== */
-const LLMAX=30,lnHp=l=>100+8*(l-1),llCost=l=>30+15*l,llOf=()=>{const td=TDS();if(td.ll==null){td.ll=1+Math.floor(stSum(td.sl||0).line/2)}return td.ll};
+const LLMAX=30,lnHp=l=>100+8*(l-1),llCost=l=>30+15*l,llOf=()=>{const td=TDS();if(td.ll==null){td.ll=1+Math.floor(Math.floor((td.sl||0)/3)/2)}return td.ll};
 const LLS=[[5,'🛡️','마음의 선이 받는 피해가 1 줄어요'],[10,'💥','무수리가 선에 닿으면 그 자리에서 터져 주변 적에게 피해'],[15,'🔥','선이 30% 아래면 모든 피해 +20%'],[20,'🧊','45초마다 선 가까이 온 적을 얼리는 얼음 벽']];
 const RWD=d=>[[7,1000,21],[10,2000,30],[10,5000,30]][d]||[7,1000,21];
 function stgCard(){const td=TDS(),L=LOB,ss=STAGES.filter(s=>s.d===L.d),S=SOF(L.stg),i=ss.indexOf(S),o=stOpen(S),st=td.st[S.id]||0,cl=(td.best[S.id]||0)>WAVES,rw=RWD(S.d);

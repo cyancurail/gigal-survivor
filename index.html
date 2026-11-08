@@ -820,7 +820,7 @@ function fmAllyArrows(){const A=G.fmA;if(!A||!A.length||G.bot)return;const p=G.p
     const [sx,sy]=W2S(p.x+dx*k,p.y+dy*k);ctx.save();ctx.globalAlpha=.75+.25*Math.sin(G.t*6);ctx.font='18px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('🍅',sx,sy);
     const an=Math.atan2(dy,dx);ctx.translate(sx+Math.cos(an)*16,sy+Math.sin(an)*16);ctx.rotate(an);ctx.fillStyle='#ffd0e4';ctx.beginPath();ctx.moveTo(6,0);ctx.lineTo(-3,-5);ctx.lineTo(-3,5);ctx.fill();ctx.restore()}}
 // 제자리 버티기 방지: 오래 한곳에 있으면 흙에서 새싹 토마토
-function fmCamp(dt){const p=G.p,C=G.fmC||(G.fmC={x:p.x,y:p.y,t:0});if(Math.hypot(p.x-C.x,p.y-C.y)>90){C.x=p.x;C.y=p.y;C.t=0;return}C.t+=dt;
+function fmCamp(dt){const p=G.p,C=G.fmC||(G.fmC={x:p.x,y:p.y,t:0});if(G.fmH&&G.fmH.on){C.t=0;return}if(Math.hypot(p.x-C.x,p.y-C.y)>90){C.x=p.x;C.y=p.y;C.t=0;return}C.t+=dt;
   const lim=[14,11,8][fmLv()];let live=0;for(const e of G.enemies)if(e.fmT)live++;if(C.t>lim&&!G.arena&&live<fmCap()){C.t=lim-5;const n=Math.min(fmCap()-live,3+fmLv()+Math.floor(em()/6));for(let i=0;i<n;i++){const a=rnd(0,6.283),r=rnd(110,170),x=p.x+Math.cos(a)*r,y=p.y+Math.sin(a)*r;const e=fmPop(mkEnemy('fm_sprout',x,y));if(!G.bot)sparks(x,y,8,['#5a3a1a','#9be15d'],90,.4,2)}if(!G.bot){G.texts.push({x:p.x,y:p.y-46,v:'흙이 들썩…',life:1,col:'#c8a070'})}}}
 function fmTick(dt){if(!G.fmL)return;fmTrig(dt);fmTick4(dt);fmHide(dt);fmDarkTick(dt);fmAllyTick(dt);fmCamp(dt);for(const o of G.fmL)if(o.shk>0)o.shk-=dt;for(const e of G.enemies)if(e.pop>0)e.pop-=dt}
 // 농장 몹 그리기(③: 화난 토마토·새싹 — ④에서 늘림)

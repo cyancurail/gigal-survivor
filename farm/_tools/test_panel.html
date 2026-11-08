@@ -1,0 +1,22 @@
+<style>#tstB{position:fixed;left:50%;transform:translateX(-50%);top:calc(6px + env(safe-area-inset-top,0px));z-index:100001;border:2px solid #7fffd4;background:#0d2a26;color:#7fffd4;font:900 12px 'Noto Sans KR',sans-serif;padding:5px 12px;border-radius:999px}
+#tstP{position:fixed;left:50%;transform:translateX(-50%);top:44px;z-index:100001;background:#0d1a1a;border:2px solid #7fffd4;border-radius:14px;padding:10px;display:none;flex-direction:column;gap:6px;width:min(92vw,300px);color:#dff;font:700 12px 'Noto Sans KR',sans-serif}
+#tstP.on{display:flex}#tstP button{padding:8px;border-radius:10px;border:1.5px solid #7fffd4;background:#123;color:#fff;font-weight:800}#tstP i{font-style:normal;color:#ffd34d;margin-top:4px}</style>
+<button id="tstB" type="button">🧪 테스트 버전</button><div id="tstP"><b>친구들 게임과 저장이 섞이지 않는 테스트용이에요</b>
+<button data-t="g">💰 골드 +10,000</button><button data-t="x">🎫 패스 XP +1,000</button><button data-t="m">📅 오늘·이번 주 미션 모두 완료 상태로</button><button data-t="a">🎉 출석 다시 받을 수 있게</button>
+<i>🌌 아스가르드 디펜스</i><button data-t="fxv" id="tstFx">✨ 이펙트: B (Fable)</button><button data-t="pxv" id="tstPx">🎞️ 픽셀 이펙트: 켜짐</button><button data-t="lab">🎬 이펙트 연습장</button><button data-t="tdu">👥 대원 15명 모두 합류</button><button data-t="tdo">🔮 오드 +1,000</button><button data-t="tdc">💠 모든 대원 경험치 +100</button><button data-t="tdr">🧹 디펜스 기록만 초기화</button>
+<i>🍅 농장 (시즌3 Act.2)</i><button data-t="fmmap">🍅 출격 맵을 농장으로</button><button data-t="fmt">⏩ 지금 판 시간 +3분</button><button data-t="fminv">🛡️ 지금 판 무적 켜기/끄기</button><button data-t="fmbox">🟥 울타리·구조물 충돌 상자 보기</button>
+<button data-t="r">🧹 테스트 기록 전부 초기화</button></div>
+<script>(()=>{try{SP.start=Date.now()-3600e3;SP.end=SP.start+SP.days*864e5}catch(e){}window.__devAll=1;
+const B=document.getElementById('tstB'),P=document.getElementById('tstP');try{document.getElementById('tstPx').textContent='🎞️ 픽셀 이펙트: '+((window.__tdPxvGet?window.__tdPxvGet():1)?'켜짐':'꺼짐')}catch(e){}try{const v=window.__tdFxvGet?window.__tdFxvGet():2;document.getElementById('tstFx').textContent='✨ 이펙트: '+(v===2?'B (Fable)':'A (Opus)')}catch(e){}B.onclick=()=>P.classList.toggle('on');
+P.addEventListener('click',e=>{const k=e.target.dataset&&e.target.dataset.t;if(!k)return;
+ if(k==='g')SAVE.gold+=10000;if(k==='x')spAdd(1000);if(k==='m'){const M=SAVE.ms;if(M){for(const q of [...(M.dl||[]),...(M.wl||[])]){q.v=1e9}}}if(k==='a'&&SAVE.att)SAVE.att.d='';
+ const td=()=>{SAVE.td=SAVE.td||{};return SAVE.td};
+ if(k==='tdu')td().un=CHAR.map(c=>c.id);if(k==='tdo')td().od=(td().od||0)+1000;if(k==='tdc'){const t=td();t.cd=t.cd||{};CHAR.forEach(c=>t.cd[c.id]=(t.cd[c.id]||0)+100)}if(k==='tdr')SAVE.td={};if(k==='lab'){P.classList.remove('on');TD.lab();return}
+ if(k==='pxv'){const v=(window.__tdPxvGet?window.__tdPxvGet():1)?0:1;window.__tdPxv(v);document.getElementById('tstPx').textContent='🎞️ 픽셀 이펙트: '+(v?'켜짐':'꺼짐');toast('🧪 테스트','픽셀 이펙트 '+(v?'켜짐':'꺼짐'));return}
+ if(k==='fxv'){const v=(window.__tdFxvGet?window.__tdFxvGet():2)===2?1:2;window.__tdFxv(v);document.getElementById('tstFx').textContent='✨ 이펙트: '+(v===2?'B (Fable)':'A (Opus)');toast('🧪 테스트','이펙트 '+(v===2?'B안(Fable)':'A안(Opus)'));return}
+ if(k==='fmmap'){SAVE.map='farm';try{persist()}catch(x){}toast('🧪 테스트','출격 맵이 농장이 됐어요');return}
+ if(k==='fmt'){if(G&&G.running){G.t+=180;toast('🧪 테스트','⏩ +3분')}else toast('🧪 테스트','게임 중에 눌러 주세요');return}
+ if(k==='fminv'){if(G&&G.p){G.p.inv=G.p.inv>1e8?0:1e9;toast('🧪 테스트','무적 '+(G.p.inv>1e8?'켜짐':'꺼짐'))}return}
+ if(k==='fmbox'){window.__fmBox=!window.__fmBox;toast('🧪 테스트','충돌 상자 '+(window.__fmBox?'보기':'숨기기'));return}
+ if(k==='r'){try{localStorage.clear()}catch(x){}location.reload();return}
+ try{persist()}catch(x){}toast('🧪 테스트','적용했어요');try{lbBadges()}catch(x){}})})();</script>

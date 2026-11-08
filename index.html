@@ -3235,7 +3235,7 @@ const SND=(()=>{
   // ---- 🎵 로비 배경음 (V131, 사용자 곡 bgm/lobby.mp3 · 로비와 로비에서 여는 화면에서만, 시작 화면은 칩튠 그대로) ----
   const LB={buf:null,ld:0,src:null,g:null,t0:0,off:0};
   function lbLoad(){if(LB.ld)return;LB.ld=1;fetch('bgm/lobby.mp3').then(r=>{if(!r.ok)throw 0;return r.arrayBuffer()}).then(a=>new Promise((res,rej)=>AC.decodeAudioData(a,res,rej))).then(b=>{LB.buf=b}).catch(()=>{setTimeout(()=>{LB.ld=0},15000)})}
-  function lbVis(){if(G&&G.running)return false;const rv=$('#resov');if(rv&&!rv.hidden)return false;const t=$('#title');if(t&&!t.hidden&&t.classList.contains('tonly'))return false;return ['lobby','select','shop','closet','ach','savescr'].some(id=>{const e=document.getElementById(id);return e&&!e.hidden})}
+  function lbVis(){if(G&&G.running)return false;if(window.__tdOn){const o=document.getElementById('tdOv');if(o&&!o.hidden)return false}/* 디펜스 화면 위에서는 서바이버 로비 음악 끔 */const rv=$('#resov');if(rv&&!rv.hidden)return false;const t=$('#title');if(t&&!t.hidden&&t.classList.contains('tonly'))return false;return ['lobby','select','shop','closet','ach','savescr'].some(id=>{const e=document.getElementById(id);return e&&!e.hidden})}
   function lbVol(){return SAVE.snd.m?.55*duck*VOL('m'):0}
   function lbStart(){if(LB.src)return;if(!LB.g){LB.g=AC.createGain();LB.g.connect(M)}const now=AC.currentTime;LB.g.gain.cancelScheduledValues(now);LB.g.gain.setValueAtTime(0,now);LB.g.gain.linearRampToValueAtTime(lbVol(),now+.6);
     const s=AC.createBufferSource();s.buffer=LB.buf;s.loop=true;s.connect(LB.g);const off=LB.off%LB.buf.duration;s.start(now,off);LB.src=s;LB.t0=now-off}
@@ -5898,9 +5898,9 @@ function spawn(k,x0,y0,mu,gd){if(V2&&k==='sm'&&T.en.length>160)return;const w=T.
   if(bt){Object.assign(e,{k:'b',bt,boss:true,elite:false,r:Math.min(54,y.r*3.2),x:W/2+rnd(-60,60),spd:y.spd*.42,dmg:w===21?60:40,xp:20,arm:bt==='a'?.3:bt==='t'?.5:bt==='e'?.7:1,cd2:3,hpS:4,stopY:rnd(400,460),
     nm:(w===21?'👑 여왕 ':'👑 거대 ')+y.nm})}
   e.dmg*=S.atm||1;if(V2&&k!=='b')e.dmg*=.5;/* 11-08: 마릿수 2배라 한 마리 선 피해 ½ */
-  if(T.tut&&k==='b'){e.hp=e.max=waveHp(4)*6;e.spd*=1.4;e.nm='👑 홀로그램 '+y.nm}
+  if(T.tut&&k==='b'){e.hp=e.max=waveHp(4)*1.2;e.spd*=1.4;e.nm='👑 홀로그램 '+y.nm}
   if(T.tut&&k!=='b')e.spd*=1.35;
-  if(gd){const eh=T.tut?1.2:ELH;Object.assign(e,{gold:1,elite:true,hp:e.hp*eh,max:e.hp*eh,r:e.r*1.55,spd:e.spd*.75,xp:e.xp*4,stopY:Math.min(e.stopY,470)});banner('✨ 황금 무수리 등장! 잡으면 카드 보너스');snd('ach')}
+  if(gd){const eh=T.tut?.5:ELH;Object.assign(e,{gold:1,elite:true,hp:e.hp*eh,max:e.hp*eh,r:e.r*1.55,spd:e.spd*.75,xp:e.xp*4,stopY:Math.min(e.stopY,470)});banner('✨ 황금 무수리 등장! 잡으면 카드 보너스');snd('ach')}
   if(mu||(k!=='b'&&k!=='sm'&&Math.random()<S.mut*Math.min(1,w/8))||(k==='b'&&S.d===2&&w===21)){e.mut=1;if(k!=='b'){e.hp*=2.5;e.max=e.hp;e.spd*=1.15;e.dmg*=1.5;e.xp*=3}T.fx.push({k:'txt',x:e.x,y:Math.max(60,e.y+30),v:'✨ 변이!',t:1,col:'#ff9ad5'})}
   T.en.push(e);
   if(k==='b'){px('bs_portal',e.x,Math.max(e.y+e.r,95),{sc:1.1,sp:1.2});snd('boss');banner(`${e.nm} 등장!`)}}
@@ -7269,9 +7269,9 @@ function tutTick(){if(!T||T.bot||T.lab||T.over||ARC)return;const tt=T.tut;if(tt&
   if(S===8){const g=T.en.find(e=>e.gold&&!e.dead&&e.y>70);if(g){T.tsp=9;ari('t_gold',{done:()=>ptr(()=>!g.dead&&{x:g.x,y:g.y,r:g.r+6},{lb:'황금 무수리!',dur:3.5})})}else if(T.wave>=4)T.tsp=9}}
 /* 11-08 사용자 승인: 첫 전투 = 홀로그램 시뮬레이션. 짱재 강화 → 마녀 영입 → 자리 옮기기 → 📋 → 마녀 강화 → 황금 무수리 → 4웨이브 보스 → 승리. 기록·보상 없음 */
 function tutCard(L,k,hi){ari(k,{done:()=>{T.tutL=L;T.picks++;openCards('🎓 시뮬레이션 카드');ptr(`.tdCards button[data-i="${hi||0}"]`,{lb:'골라요'})}})}
-function tutPlan(w){const D=[,[7,'n'],[9,'nf'],[9,'nf'],[5,'n']][w]||[0,'n'],q=[];for(let i=0;i<D[0];i++)q.push({at:.8+i*1.5+Math.random()*.5,k:D[1][i%D[1].length]});
-  if(w===1)q.slice(0,3).forEach((o,i)=>{o.at=i*.4;o.y0=170+Math.random()*70});if(w===3)q.push({at:4,k:'t',g:1});if(w===4)q.push({at:.5,k:'b'});q.sort((a,b)=>a.at-b.at);
-  T.cntH=.7;T.cntX=1;T.need=1e9;T.wxp=0;T.spawnQ=q;T.wt=0;T.wdur=w>=4?1e9:D[0]*1.5+9;banner(w>=4?'🎓 시뮬레이션 마지막 웨이브':`🎓 시뮬레이션 웨이브 ${w}/4`)}
+function tutPlan(w){const D=[,[7,'n'],[9,'nf'],[9,'nf'],[5,'n']][w]||[0,'n'],q=[];for(let i=0;i<D[0];i++)q.push({at:.5+i*.7+Math.random()*.3,k:D[1][i%D[1].length]});
+  if(w===1)q.slice(0,3).forEach((o,i)=>{o.at=i*.4;o.y0=170+Math.random()*70});if(w===3)q.push({at:1.5,k:'t',g:1});if(w===4)q.push({at:.5,k:'b'});q.sort((a,b)=>a.at-b.at);
+  T.cntH=.15;T.cntX=1;T.need=1e9;T.wxp=0;T.spawnQ=q;T.wt=0;T.wdur=w>=4?1e9:D[0]*.7+6;/* 11-08 사용자: 시뮬레이션 1분 안에 — 체력 확 낮춤 */banner(w>=4?'🎓 시뮬레이션 마지막 웨이브':`🎓 시뮬레이션 웨이브 ${w}/4`)}
 function simEnd(win){T.over=true;ptrOff();const r=ov.querySelector('.tdRes');tutS().lbp=1;tutS().done=1;sv();
   r.innerHTML=`<h2>🎓 시뮬레이션 완료</h2><p>홀로그램 무수리 ${T.kills}마리 처치 · 웨이브 ${Math.min(T.wave,4)}/4</p><p class="tdJoin">시뮬레이션은 기록도 보상도 없어요.<br>진짜 전투는 1-1부터예요.</p><div class="tdBtns"><button type="button" data-a="menu">디펜스 로비로</button></div>`;r.hidden=false;bgm(null);snd('ach');ari('t_clear')}
 /* ===== 👆 손가락 안내 (11-08) — ptr(대상, {lb, drag:[a,b], dur}) · 대상 = CSS 선택자 | 캔버스 좌표 {x,y,r} | 함수 ===== */

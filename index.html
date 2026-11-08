@@ -714,8 +714,8 @@ function fmChunk(cx,cy){const key=cx+','+cy;let L=FM.cache.get(key);if(L)return 
   for(let i=0;i<FM_PF[pf].length;i++){const [t,px0,py0]=FM_PF[pf][i];const x=Math.round(cx*FMC+(fl?FMC-px0:px0)+jx),y=Math.round(cy*FMC+py0+jy);
     if(x*x+y*y<260*260)continue;
     const bx=(FM_BOX[t]||[]).map(([a,b,c,d])=>fl?{L:x-b,R:x-a,T:y+c,B:y+d}:{L:x+a,R:x+b,T:y+c,B:y+d});
-    L.push({t,x,y,fl,bx,soft:!!FM_SOFT[t],pf,id:key+':'+i,gone:-1});
-    const CL=FM_CL[t];if(CL){const n=CL[0]+Math.floor(sbH(cx,cy,60+i)*(CL[1]-CL[0]+1));for(let j=0;j<n;j++){const h1=sbH(cx,cy,70+i*7+j),h2=sbH(cx,cy,90+i*7+j),a=j/n*6.283+h1*1.2,r=CL[2]*(.6+.5*h2),t2=CL[3][Math.floor(sbH(cx,cy,110+i*7+j)*CL[3].length)];const x2=Math.round(x+Math.cos(a)*r),y2=Math.round(y+Math.sin(a)*r*.55);if(x2*x2+y2*y2<260*260)continue;L.push({t:t2,x:x2,y:y2,fl:h2<.5,bx:[],soft:true,pf,id:key+':'+i+'c'+j,gone:-1,dec:t2!=='hide_grass'})}}}
+    const P0={t,x,y,fl,bx,soft:!!FM_SOFT[t],pf,id:key+':'+i,gone:-1};L.push(P0);
+    const CL=FM_CL[t];if(CL){const n=CL[0]+Math.floor(sbH(cx,cy,60+i)*(CL[1]-CL[0]+1));for(let j=0;j<n;j++){const h1=sbH(cx,cy,70+i*7+j),h2=sbH(cx,cy,90+i*7+j),a=j/n*6.283+h1*1.2,r=CL[2]*(.6+.5*h2),t2=CL[3][Math.floor(sbH(cx,cy,110+i*7+j)*CL[3].length)];const x2=Math.round(x+Math.cos(a)*r),y2=Math.round(y+Math.sin(a)*r*.55);if(x2*x2+y2*y2<260*260)continue;const c={t:t2,x:x2,y:y2,fl:h2<.5,bx:[],soft:true,pf,id:key+':'+i+'c'+j,gone:-1,dec:1};L.push(c);c.par=P0;(P0.cl||(P0.cl=[])).push(c)}}}
   FM.cache.set(key,L);return L}
 function fmFrame(){fmLoad();const p=G.p,A=G.arena,mx=VW*.62+200,my=VH*.62+260,L=[],B=[];
   const c0=Math.floor((p.x-mx)/FMC),c1=Math.floor((p.x+mx)/FMC),r0=Math.floor((p.y-my)/FMC),r1=Math.floor((p.y+my)/FMC);
@@ -736,16 +736,17 @@ function fmDraw(front){if(!G.fmL)return;const p=G.p,fy=p.y+18;const sm=ctx.image
     let a=1;if(front&&Math.abs(p.x-o.x)<w/2+10&&p.y>o.y-h-14)a=o.soft?(G.fmIn===o?.62:.75):.5;
     if(!o.soft&&o.t.indexOf('fence')<0&&o.t.indexOf('maze')<0){ctx.globalAlpha=.32*a;ctx.fillStyle='#120a04';ctx.beginPath();ctx.ellipse(o.x,o.y-2,w*.44,Math.max(5,h*.06),0,0,7);ctx.fill()}
     if(o.t==='scary_hut'&&!o.dead&&o.heat>0){ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=o.heat*(.25+.1*Math.sin(G.t*6));ctx.fillStyle='#7a2aff';ctx.beginPath();ctx.ellipse(o.x,o.y-50,w*.6,h*.45,0,0,7);ctx.fill();ctx.restore()}
-    const sx=o.shk>0?Math.sin(G.t*70)*2.2:0;ctx.globalAlpha=a;if(o.dead)ctx.filter='brightness(.45) grayscale(.6)';
+    const pr=o.par||o,sx=(pr.shk>0)?Math.sin(G.t*70+o.x)*2.2:0;ctx.globalAlpha=a;if(o.dead)ctx.filter='brightness(.45) grayscale(.6)';
     if(sx){ctx.save();ctx.translate(sx,0)}
     if(o.turn>0?!o.fl:o.fl){ctx.save();ctx.translate(o.x,0);ctx.scale(-1,1);ctx.drawImage(im,-w/2,y,w,h);ctx.restore()}else ctx.drawImage(im,o.x-w/2,y,w,h);
-    if(sx)ctx.restore();if(o.dead)ctx.filter='none';ctx.globalAlpha=1}
+    if(sx)ctx.restore();if(o.dead)ctx.filter='none';ctx.globalAlpha=1;
+    if(o.soft&&fmLv()&&FM_TR[pr.t]&&!(pr.cd>G.t)&&!(pr.tel>0)&&(pr.cl||o.par)){const ph=(G.t*.45+sbH(o.x|0,o.y|0,3)*9)%6;if(ph<.55){const k=Math.sin(ph/.55*Math.PI),ey=o.y-h*.38,ex=o.x+(sbH(o.x|0,o.y|0,4)-.5)*w*.4;ctx.globalAlpha=k*(fmLv()===2?.95:.7);ctx.fillStyle=fmLv()===2?'#ff2a2a':'#ffd34d';ctx.fillRect(ex-5,ey,3,2);ctx.fillRect(ex+3,ey,3,2);ctx.globalAlpha=1}}}
   ctx.imageSmoothingEnabled=sm;
   if(window.__fmBox&&front){ctx.strokeStyle='#ff2a2a';ctx.lineWidth=1;for(const b of G.sbL)ctx.strokeRect(b.L,b.T,b.R-b.L,b.B-b.T)}}
 
 /* ---- 농장 ③: 튀어나옴 · 숨기 · 시야 · 착한 토마토 ---- */
 const FM_TR={ // 튀어나오는 구조물: r 반경, n 기본 마릿수, cd 쿨(초), mob 종류
- tallgrass:{r:110,n:3,cd:28,mob:'grass'},bush:{r:100,n:2,cd:28,mob:'grass'},corn:{r:120,n:4,cd:30,mob:'grass'},trellis:{r:120,n:3,cd:30,mob:'tomato'},
+ tallgrass:{r:95,n:3,cd:30,mob:'mu'},bush:{r:90,n:2,cd:30,mob:'mu'},corn:{r:100,n:4,cd:32,mob:'mu'},trellis:{r:120,n:3,cd:30,mob:'tomato'},
  tomato_bush:{r:80,n:1,cd:35,mob:'sprout'},house_full:{r:200,n:4,cd:40,mob:'tomato'},crate_pile:{r:90,n:2,cd:35,mob:'grass'},hay:{r:90,n:2,cd:35,mob:'grass'},
  barn:{r:180,n:8,cd:45,mob:'swarm',door:1},hut_thatch:{r:170,n:6,cd:45,mob:'swarm',door:1}};
 const FM_HOME={barn:1,hut_thatch:1,house_full:1,house_empty:1,mini_house:1,scary_hut:1}; // 착한 토마토가 들어가는 곳
@@ -755,18 +756,18 @@ const fmLv=()=>G.hell?2:G.hard?1:0;
 function fmCap(){return[45,65,90][fmLv()]}
 function fmPop(e){e.pop=.35;e.fmT=1;return e}
 function fmEmerge(o,n,kind){const lv=fmLv(),p=G.p;let live=0;for(const e of G.enemies)if(e.fmT)live++;n=Math.min(n,fmCap()-live);if(n<=0)return;
-  const ox=o.x,oy=o.y-(FM_TR[o.t]&&FM_TR[o.t].door?24:14);
-  for(let i=0;i<n;i++){const a=Math.atan2(p.y-oy,p.x-ox)+rnd(-1.1,1.1),x=ox+Math.cos(a)*rnd(8,30),y=oy+Math.sin(a)*rnd(4,16);const e=fmPop(mkEnemy(fmMob(kind),x,y));const v=rnd(140,240);e.kx=Math.cos(a)*v/6;e.ky=Math.sin(a)*v/6}
+  const ox=o.x,oy=o.y-(FM_TR[o.t]&&FM_TR[o.t].door?24:14),SR=[o].concat(o.cl||[]);
+  for(let i=0;i<n;i++){const q=SR[i%SR.length],qx=q.x,sy0=q===o?oy:q.y-14;const a=Math.atan2(p.y-sy0,p.x-qx)+rnd(-1.1,1.1),x=qx+Math.cos(a)*rnd(8,30),y=sy0+Math.sin(a)*rnd(4,16);const e=fmPop(mkEnemy(fmMob(kind),x,y));const v=rnd(140,240);e.kx=Math.cos(a)*v/6;e.ky=Math.sin(a)*v/6}
   if(G.bot)return;
-  if(lv===0){G.texts.push({x:ox,y:oy-30,v:'뿅!',life:.7,col:'#ffd0e4'});sparks(ox,oy-10,12,['#ffd0e4','#ffffff','#9be15d'],110,.45,2);SND.p('pop')}
-  else{sparks(ox,oy-10,16,['#5a3a1a','#9be15d','#2a1a0a'],150,.5,2);SND.p(FM_TR[o.t]&&FM_TR[o.t].door?'boom':'whoosh');if(lv===2)G.shk=Math.max(G.shk||0,.18)}}
+  if(lv===0){G.texts.push({x:ox,y:oy-30,v:'뿅!',life:.7,col:'#ffd0e4'});for(const q of SR)sparks(q.x,q.y-24,8,['#ffd0e4','#ffffff','#9be15d'],110,.45,2);SND.p('pop')}
+  else{for(const q of SR)sparks(q.x,q.y-24,10,['#5a3a1a','#9be15d','#2a1a0a'],150,.5,2);if(SR.length>3&&!G.bot)G.texts.push({x:ox,y:oy-44,v:'우르르…!',life:.8,col:'#ff8a8a'});SND.p(FM_TR[o.t]&&FM_TR[o.t].door?'boom':'whoosh');if(lv===2)G.shk=Math.max(G.shk||0,.18)}}
 function fmTrig(dt){const p=G.p,lv=fmLv(),tel=[.75,.5,.32][lv];
   for(const o of G.fmL){
     if(o.t==='scary_hut'){fmHut(o,dt);continue}
     const T=FM_TR[o.t];if(!T||o.dec)continue;
-    if(o.tel>0){o.tel-=dt;if(o.tel<=0&&(o.t==='house_full'||o.t==='trellis')&&em()>=6&&Math.random()<.45){fmMelon(o.x,o.y+20);if(!G.bot)SND.p('boom');o.cd=G.t+T.cd;continue}if(o.tel<=0){const n=T.n+Math.floor(em()/5)*(T.door?2:1)+(lv===2?1:0);fmEmerge(o,n,T.mob);o.cd=G.t+T.cd*(lv===2?.75:1)}continue}
+    if(o.tel>0){o.tel-=dt;if(o.tel<=0&&(o.t==='house_full'||o.t==='trellis')&&em()>=6&&Math.random()<.45){fmMelon(o.x,o.y+20);if(!G.bot)SND.p('boom');o.cd=G.t+T.cd;continue}if(o.tel<=0){const n=T.n+Math.round((o.cl?o.cl.length:0)*1.6)+Math.floor(em()/5)*(T.door?2:1)+(lv===2?1:0);fmEmerge(o,n,T.mob);o.cd=G.t+T.cd*(lv===2?.75:1)}continue}
     if((o.cd||0)>G.t)continue;
-    const dx=p.x-o.x,dy=p.y-(o.y-20),d=Math.hypot(dx,dy);if(d>T.r)continue;
+    let dx=p.x-o.x,dy=p.y-(o.y-20),d=Math.hypot(dx,dy);if(o.cl)for(const c of o.cl){const d2=Math.hypot(p.x-c.x,p.y-(c.y-20));if(d2<d){d=d2;dx=p.x-c.x;dy=p.y-(c.y-20)}}if(d>T.r)continue;
     if(T.door&&dy<-10)continue; // 오두막은 문(앞) 쪽에서만
     if(o.cd===undefined&&G.t<20){o.cd=G.t+5;continue} // 시작하자마자 터지지 않게
     o.tel=tel;o.shk=tel;if(!G.bot&&lv>0)SND.p(T.door?'radio':'paper')}}
@@ -850,6 +851,7 @@ function fmOff(){const lv=fmLv(),m=em();if(lv&&Math.random()<(lv===2?.14:.07)&&m
 // 구조물에서 튀어나오는 종류(③의 fmMob 교체)
 function fmMob(kind){const m=em(),r=Math.random();
   if(kind==='sprout')return'fm_sprout';
+  if(kind==='mu'){if(r<.82){const t=fmOff();return t==='fm_mu_cannon'||t==='fm_mu_jet'?(Math.random()<.5?t:'fm_mu_spider'):t}return r<.9?'fm_ant':'fm_beetle'}
   if(kind==='tomato')return r<.6?'fm_angry':r<.85?'fm_sprout':(m>=4?'fm_egg':'fm_angry');
   if(kind==='swarm'){if(m>=8&&r<.12)return'fm_rhino';if(m>=4&&r<.3)return'fm_egg';return r<.55?'fm_angry':r<.8?'fm_beetle':'fm_ant'}
   if(m>=6&&r<.12)return'fm_rhino';return r<.35?'fm_sprout':r<.55?'fm_cater':r<.75?'fm_ant':r<.9?'fm_beetle':'fm_angry'}

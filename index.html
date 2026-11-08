@@ -1050,7 +1050,14 @@ function fmSupTick(dt){const p=G.p,S=G.fmSp;
     if(s.k==='field'){s.tk-=dt;if(s.tk<=0){s.tk=.25;fmSupHit(s.x,s.y,s.R,s.col,{m:.3,pull:s.t>2?120:30,q:1})}if(s.t>=s.T){S.splice(i,1);fmSupHit(s.x,s.y,s.R*1.2,s.col,{m:1.5,ring:1});fmSpr('warp',s.x,s.y+30,1)}continue}
     if(s.k==='tornado'){const r=40+s.t*110,a=s.a+s.t*2.4;s.x=p.x+Math.cos(a)*r;s.y=p.y+Math.sin(a)*r*.75;s.tk-=dt;if(s.tk<=0){s.tk=.2;fmSupHit(s.x,s.y,70,s.col,{m:.45,pull:60,q:1})}if(s.t>=s.T)S.splice(i,1);continue}
     if(s.k==='drones'){s.tk-=dt;if(s.tk<=0){s.tk=.3;for(let j=0;j<6;j++){const a=G.t*2+j*1.047,dx=p.x+Math.cos(a)*90,dy=p.y+Math.sin(a)*60;let b=null,bd=320;for(const e of G.enemies){if(e.dead)continue;const d=Math.hypot(e.x-dx,e.y-dy);if(d<bd){bd=d;b=e}}if(b){hurt(b,b.boss?Math.min(G.fmSpD*.5,b.max*.004):G.fmSpD*.5,'fmsup');(G.fmCh||(G.fmCh=[])).push({pts:[[dx,dy],[b.x,b.y]],t:.12,col:s.col})}}}if(s.t>=s.T)S.splice(i,1);continue}}}
-function fmSupDraw(){const p=G.p;
+// 통신기 위에 떠 있는 실체화 아리아드네(선명한 그림, 어둠 위에 그림)
+function fmRadioAriDraw(){let im=FM.ari;if(!im){im=FM.ari=new Image();im.src='td/ari/full.png'}if(!im.width)return;
+  for(const k of G.pickups){if(k.k!=='fmradio'||k.got)continue;const bob=Math.sin(G.t*2.2)*4,w=66,h=w*im.height/im.width,x=k.x,y=k.y-28+bob;
+    ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=.22+.08*Math.sin(G.t*3);const gr=ctx.createRadialGradient(x,y-h*.5,4,x,y-h*.5,h*.75);gr.addColorStop(0,'#cfe8ff');gr.addColorStop(1,'rgba(160,200,255,0)');ctx.fillStyle=gr;ctx.beginPath();ctx.arc(x,y-h*.5,h*.75,0,7);ctx.fill();
+    ctx.globalAlpha=.35;ctx.fillStyle='#bfe0ff';ctx.fillRect(x-1,y,2,28-bob);ctx.restore();
+    const sm=ctx.imageSmoothingEnabled;ctx.imageSmoothingEnabled=false;ctx.drawImage(im,Math.round(x-w/2),Math.round(y-h),w,h);ctx.imageSmoothingEnabled=sm;
+    if(!G.bot&&Math.random()<.15)px(x+rnd(-24,24),y-rnd(10,h),rnd(-6,6),-rnd(10,30),.8,pick(['#bfe0ff','#ffffff','#e0c8ff']),2,1,1)}}
+function fmSupDraw(){const p=G.p;fmRadioAriDraw();
   for(const f of G.fmFx||[]){const M=FM_FXM[f.k],im=FM.fxi&&FM.fxi[f.k];if(!M||!im||!im.width)continue;const [fw,fh,n,c,fps,px,py]=M,i=Math.min(n-1,Math.floor(f.t*fps)),s=f.s;ctx.save();ctx.globalCompositeOperation='lighter';ctx.drawImage(im,(i%c)*fw,Math.floor(i/c)*fh,fw,fh,f.x-px*s,f.y-py*s,fw*s,fh*s);ctx.restore()}
   const C=G.fmCh;if(C)for(let i=C.length-1;i>=0;i--){const c=C[i];c.t-=1/60;if(c.t<=0){C.splice(i,1);continue}ctx.save();ctx.globalCompositeOperation='lighter';ctx.strokeStyle=c.col;ctx.lineWidth=3;ctx.globalAlpha=Math.min(1,c.t*5);ctx.beginPath();ctx.moveTo(c.pts[0][0],c.pts[0][1]);for(const q of c.pts.slice(1))ctx.lineTo(q[0]+rnd(-4,4),q[1]+rnd(-4,4));ctx.stroke();ctx.restore()}
   for(const s of G.fmSp||[]){if(s.t<0)continue;ctx.save();ctx.globalCompositeOperation='lighter';

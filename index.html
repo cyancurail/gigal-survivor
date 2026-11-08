@@ -7225,7 +7225,7 @@ function firstPick(){const box=ov.querySelector('.tdMenu'),sel=[];const ids=CHAR
     <div class="tdGrid">${grid(ids,sel)}</div><p>${sel.length}/5</p><div class="tdBtns"><button type="button" class="go" data-ok ${sel.length<5?'disabled':''}>이 5명으로 시작</button><button type="button" data-a="exit">로비로</button></div>`;fillFaces(box)};
   render();box.hidden=false;box.onclick=e=>{const b=e.target.closest('[data-id]');if(b){const id=b.dataset.id,i=sel.indexOf(id);if(i>=0)sel.splice(i,1);else if(sel.length<5)sel.push(id);snd('click');render();return}
     if(e.target.closest('[data-ok]')&&sel.length===5){TDS().un=sel.slice();sv();menu()}}}
-const stOpen=s=>{const i=STAGES.indexOf(s);if(i<=0||tdDev())return true;return(TDS().best[STAGES[i-1].id]||0)>WAVES};
+const stOpen=s=>{const i=STAGES.indexOf(s);if(i<=0)return true;/* 11-08 사용자: 개발자 계정도 보통 1부터 차례로 해금 */return(TDS().best[STAGES[i-1].id]||0)>WAVES};
 const tdDev=()=>{let d=!!window.__devAll;try{d=d||localStorage.getItem('gs_tddev')==='1'}catch(e){}return d};
 let LOB=null;/* 디펜스 로비: 로딩 그림이 위아래로 천천히 움직이고, 아래 탭 5개 */
 const TABS=V2?[['shop','🛒','상점'],['line','🌙','마음의 선'],['go','⚔️','출격'],['sq','👥','대원 관리'],['cm','🎖️','사령관 관리']]:[['go','⚔️','출격'],['up','🃏','무기 강화'],['st','📈','스탯 강화'],['sq','👥','대원'],['cl','👗','옷장']];

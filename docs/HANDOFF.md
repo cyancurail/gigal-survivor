@@ -269,3 +269,7 @@
 - 공지 NOTICE_VER 7(Act.2 세로 배너 `img/s3a2_banner.jpg`), 시작 화면 배너 = `img/s3_banner.jpg`.
 - 로비 배경 light·faith(패스 프리미엄 31·32, grave 34·beauty 35), farm(업적 `jangsu10`, ACH 맨 끝).
 - 기획 문서: 프로젝트 `claude/기갈서바이버_시즌3_농장_기획.md`, 대본 `claude/기갈서바이버_농장_스토리_대본.md`. 테스트 패널 `farm/_tools/test_panel.html`.
+
+## V167 (11-09) — 상봉 헬 전원 해금 · (히든) 프리즘 게이지
+- `sbAllHell()`: 상봉 헬 15분(=장수 해금) 때 모든 캐릭터 `SAVE.sbU=2`, `SAVE.fmU` 있는 계정은 로드 때 소급.
+- 그레이스 프리즘(히든, 패치내역 X): 2분 자동 → 「프리즘 게이지」 `st.gg`(1초 1%, 보스 등장 +50%), 왼쪽 아래 `#prG`(솜사탕 원반 아이콘) 터치·Ctrl → `prFire()`(15·20분 보스가 보이면 특별판). 봇은 100%면 자동.

@@ -3382,10 +3382,10 @@ const ATT_G=5,CHEST_G=20;function hardBonus(){if(!G.hard||G.hell||G.t<600)return
 function goldMul(){return G.tw?2:G.hell?4:G.hard?2:1}
 function runGold(){return(Math.floor(G.t/20)+5*(G.bossKills||0))*goldMul()*3+(G.bonusGold||0)+hardBonus()}
 // ---- gacha ----
-/* D5-c (아스가르드 디펜스와 함께 배포): 색·수영복·한복 스킨은 뽑기에서 빠짐(nog, POOL 칸은 그대로). 일반 = 강화카드 3~8, 희귀 = 안 가진 무기 스킨 50% 또는 강화카드 10~20, 희귀 확정권 = 강화카드 10~20 */
+/* D5-c (아스가르드 디펜스와 함께 배포): 색·수영복·한복 스킨은 뽑기에서 빠짐(nog, POOL 칸은 그대로). 일반 = 경험치 3~8, 희귀 = 안 가진 무기 스킨 50% 또는 경험치 10~20, 희귀 확정권 = 경험치 10~20 */
 POOL.forEach(p=>{if(p.kind==='color'||p.kind==='swim'||p.kind==='hanbok')p.disc=p.nog=1});
 function gachaCards(tier){const c=pick(CHAR),n=tier==='C'?3+Math.floor(Math.random()*6):10+Math.floor(Math.random()*11);SAVE.td=SAVE.td||{};SAVE.td.cd=SAVE.td.cd||{};SAVE.td.cd[c.id]=(SAVE.td.cd[c.id]||0)+n;
-  return{id:'cd:'+c.id,kind:'cards',tier,owner:c.id,cnt:n,n:`💠 ${c.nick} 강화카드 ×${n}`}}
+  return{id:'cd:'+c.id,kind:'cards',tier,owner:c.id,cnt:n,n:`💠 ${c.nick} 경험치 ×${n}`}}
 function rollGacha(force){
   let tier;const r=Math.random();if(force)tier=force;else if(SAVE.pityM>=PITYM-1||r<RATE.M)tier='M';else if(SAVE.pity>=PITY-1)tier='L';else{const q=r-RATE.M;tier=q<RATE.L?'L':q<RATE.L+RATE.R?'R':'C'}
   if(tier==='C'||tier==='R'&&(force==='R'||!POOL.some(p=>p.tier==='R'&&!p.nog&&!SAVE.inv[p.id])||Math.random()<.5)){if(!force){SAVE.pity=SAVE.pity+1;SAVE.pityM=SAVE.pityM+1;SAVE.pulls=(SAVE.pulls||0)+1}const it=gachaCards(tier);persist();achCheck();return{it,tier,dupe:false,refund:0,cards:it.cnt}}
@@ -3466,7 +3466,7 @@ function doGacha10(){
 function showGacha10(res,best){
   const ov=$('#gres');ov.hidden=false;SND.p('t'+best.tier);const ref=res.reduce((n,r)=>n+r.refund,0),nw=res.filter(r=>!r.dupe&&r.it.kind!=='cards').length,ncd=res.reduce((n,r)=>n+(r.cards||0),0);
   ov.innerHTML=`<div class="gcard g10c t${best.tier}"><div class="gtier">10연속 결과 · 최고 ${TIERN[best.tier]}</div><div class="g10">${res.map((r,i)=>`<div class="gm t${r.tier}" style="animation-delay:${i*.06}s"><div class="gmp"></div><b>${esc(r.it.kind==='cards'?CHAR.find(c=>c.id===r.it.owner).nick+' 카드':r.it.n.split(' · ').pop())}</b><small>${esc(TIERN[r.tier])} · ${r.it.kind==='cards'?`<span class="gnew">💠 +${r.it.cnt}</span>`:r.dupe?`중복 +${r.refund}G`:'<span class="gnew">NEW!</span>'}</small></div>`).join('')}</div>
-  <p>새 보상 <b>${nw}개</b>${ncd?` · 💠 강화카드 <b>${ncd}장</b>`:''}${ref?` · 중복 환급 💰 +${ref}G`:''}</p>
+  <p>새 보상 <b>${nw}개</b>${ncd?` · 💠 경험치 <b>${ncd}</b>`:''}${ref?` · 중복 환급 💰 +${ref}G`:''}</p>
   <div class="btns"><button class="big" type="button" id="g10Again" ${SAVE.gold<GACHA_COST*10?'disabled':''}>10연속 한 번 더 · ${GACHA_COST*10}G</button><button class="ghost" type="button" id="gOk">확인</button></div><small>보유 💰 ${SAVE.gold}G</small></div>`;
   ov.querySelectorAll('.gmp').forEach((d,i)=>d.appendChild(previewCv(res[i].it,64)));
   $('#gOk').onclick=()=>{ov.hidden=true;openShop()};$('#g10Again').onclick=()=>{ov.hidden=true;doGacha10()};
@@ -3495,13 +3495,13 @@ function openShop(){
   const wl=Object.keys(WFX).filter(k=>SAVE.inv['w:'+k]||SAVE.inv['wh:'+k]);const il=CHAR.filter(c=>introItems(c.id).length);
   $('#shop').innerHTML=`<div class="shead"><button class="ghost" type="button" id="shBack">← 뒤로</button><h2>🎰 소매치기 뽑기</h2><div class="gold">💰 ${SAVE.gold}G</div></div>
   ${open?`<div class="spull"><div class="pullrow"><button class="big" type="button" id="shPull" ${SAVE.gold<GACHA_COST?'disabled':''}>뽑기 1회 · ${GACHA_COST}G</button><button class="big pull10" type="button" id="shPull10" ${SAVE.gold<GACHA_COST*10?'disabled':''}>10연속 · ${GACHA_COST*10}G</button></div>
-    <p class="c">일반 ${Math.round((1-RATE.M-RATE.L-RATE.R)*100)}% · 희귀 ${Math.round(RATE.R*100)}% · 전설 ${Math.round(RATE.L*100)}% · <b style="color:#fff3b0">신화 ${Math.round(RATE.M*100)}%</b><br>전설 확정까지 최대 <b>${PITY-SAVE.pity}회</b> · 신화 확정까지 최대 <b>${PITYM-SAVE.pityM}회</b><br>💠 일반 = 무작위 대원의 아스가르드 강화카드 3~8장 · 희귀 = 안 가진 무기 스킨(50%) 또는 강화카드 10~20장 · 희귀 확정권 = 강화카드 10~20장<br>중복이면 골드 환급 (희귀 ${REFUND.R} · 전설 ${REFUND.L} · 신화 ${REFUND.M}G)<br>💰 보통 모드 30분 ≈ 6회 · 어려움 ≈ 12회</p></div>`
+    <p class="c">일반 ${Math.round((1-RATE.M-RATE.L-RATE.R)*100)}% · 희귀 ${Math.round(RATE.R*100)}% · 전설 ${Math.round(RATE.L*100)}% · <b style="color:#fff3b0">신화 ${Math.round(RATE.M*100)}%</b><br>전설 확정까지 최대 <b>${PITY-SAVE.pity}회</b> · 신화 확정까지 최대 <b>${PITYM-SAVE.pityM}회</b><br>💠 일반 = 무작위 대원의 아스가르드 경험치 3~8 · 희귀 = 안 가진 무기 스킨(50%) 또는 경험치 10~20 · 희귀 확정권 = 경험치 10~20<br>중복이면 골드 환급 (희귀 ${REFUND.R} · 전설 ${REFUND.L} · 신화 ${REFUND.M}G)<br>💰 보통 모드 30분 ≈ 6회 · 어려움 ≈ 12회</p></div>`
    :`<div class="spull locked"><p>🔒 화려한 모습을 <b>${GACHA_NEED}명</b> 해금하면 뽑기가 열려요 (${n}/${GACHA_NEED})</p><p class="c">골드는 지금부터 모여요. 판마다 버틴 시간과 보스 처치로 받아요.</p></div>`}
   ${(SAVE.tix.S||0)>0?`<h4>👑 신화 선택권 ${SAVE.tix.S}장 · 갖고 싶은 신화를 골라요</h4><div class="wfxl">${POOL.filter(q=>q.tier==='M'&&!q.nog&&!SAVE.inv[q.id]).map(q=>`<button type="button" class="wfxb msel" data-id="${q.id}">👑 ${esc(q.n)}</button>`).join('')||'<span class="c">이미 모든 신화를 가지고 있어요</span>'}</div>`:''}
   ${(SAVE.tix.R||0)+(SAVE.tix.L||0)+(SAVE.tix.M||0)>0?`<div class="wfxl">${SAVE.tix.M>0?`<button type="button" class="big tixb" data-t="M">👑 신화 확정 뽑기권 사용 (${SAVE.tix.M}장)</button>`:''}${SAVE.tix.L>0?`<button type="button" class="big tixb" data-t="L">🎟️ 전설 확정 뽑기권 사용 (${SAVE.tix.L}장)</button>`:''}${SAVE.tix.R>0?`<button type="button" class="big tixb" data-t="R">🎟️ 희귀 확정 뽑기권 사용 (${SAVE.tix.R}장)</button>`:''}</div>`:''}
   <div class="wfxl"><button type="button" class="big" id="shCloset">👗 옷장에서 스킨 · 무기 스킨 고르기</button></div>
   <h4>📖 도감 ${own}/${POOL.length}</h4>
-  <div class="gsec"><b class="tM">신화</b>${tierList('M')}</div><div class="gsec"><b class="tL">전설</b>${tierList('L')}</div><div class="gsec"><b class="tR">희귀</b>${tierList('R')}</div><div class="gsec"><b class="tC">일반</b><span class="gi own">💠 아스가르드 강화카드</span></div>
+  <div class="gsec"><b class="tM">신화</b>${tierList('M')}</div><div class="gsec"><b class="tL">전설</b>${tierList('L')}</div><div class="gsec"><b class="tR">희귀</b>${tierList('R')}</div><div class="gsec"><b class="tC">일반</b><span class="gi own">💠 아스가르드 경험치</span></div>
   <p class="c">스킨과 무기 스킨은 👗 옷장에서 고를 수 있어요.</p>`;
   $('#shBack').onclick=()=>{$('#shop').hidden=true;titleScreen()};
   $('#shCloset').onclick=()=>{window.CLO_FROM='lobby';openCloset(CHAR[selI].ju?0:selI)};$('#shop').querySelectorAll('.msel').forEach(b=>b.onclick=()=>{if((SAVE.tix.S||0)<=0)return;const it=PBY[b.dataset.id];SAVE.tix.S--;SAVE.inv[it.id]=true;persist();achCheck();SND.p('ach');toast('👑 신화 획득!',it.n,true);openShop()});if($('#shPull'))$('#shPull').onclick=doGacha;if($('#shPull10'))$('#shPull10').onclick=doGacha10;$('#shop').querySelectorAll('.tixb').forEach(b=>b.onclick=()=>useTicket(b.dataset.t));
@@ -5419,7 +5419,7 @@ setTimeout(()=>{const W0=WPN['박준형'],J0=WPN['쥬은'];
   WPN['쥬은']=function(m,dt,x,Y){if(!GLOW.on)return J0.apply(this,arguments);T.pearl=ev(m,3,'A');gKnightTick(m,dt,x,Y)}},0);
 /* 성장 곡선 (사용자 승인): 0 초반형 / 1 중반형 / 2 대기만성형 */
 const GROW={'박준형':0,'영규형':0,'박준영':0,'하도':0,'재건':0,'승태민':1,'김세진':1,'박민규':1,'임재영':1,'쥬은':1,'진형우':2,'조혁래':2,'박계원':2,'창환이형':2,'송기호':2};
-/* ---- 무기 강화 (판 밖, 강화카드만 사용) ---- */
+/* ---- 무기 강화 (판 밖, 경험치만 사용) ---- */
 const UPN=[10,20,30,70,180,300],UPD=['공격력 +20%','공속 +12%','✨ 속성 카드 등장(속성 없는 대원은 피해 +15%)','공격력 +30%','🔒 숨은 갈래 C: 3진화에 세 번째 선택지','💗 마음의 각성: 3진화에 오르면 자동'];
 const upOf=id=>((TDS().up||{})[id])||0;
 /* 3강 속성 (사용자 결정 2026-11-05). 마녀도 폭발 */
@@ -5812,10 +5812,10 @@ function finish(win){if(T.tut&&!T.bot)return simEnd(win);T.over=true;const td=TD
   const rest=CHAR.map(c=>c.id).filter(id=>!td.un.includes(id));let joined=null;if(!V2&&rest.length&&!T.bot){joined=pick(rest);td.un.push(joined)}
   td.rw=td.rw||{};td.cd=td.cd||{};const got=[];const dI=SOF(sid).d,RWC=[7,10,10],RWG=[1000,2000,5000],RWC3=[21,30,30];/* 11-07 4단계: 60스테이지라 처음 달성 카드 줄임(예전 10·20·40 / 30·60·120) */
   const giveCards=n=>{const ids=T.sq.map(q=>q.id);const per={};for(let i=0;i<n;i++){const id=pick(ids);per[id]=(per[id]||0)+1}for(const id in per)td.cd[id]=(td.cd[id]||0)+per[id];return Object.entries(per).map(([id,c])=>`${nick(id)} ${c}`).join(', ')};
-  for(let st=(td.rw[sid]||0)+1;st<=stars;st++){if(st===1)got.push(`★ 강화카드 ${RWC[dI]}장 (${giveCards(RWC[dI])})`);if(st===2){SAVE.gold=(SAVE.gold||0)+RWG[dI];got.push(`★★ 골드 ${RWG[dI].toLocaleString()}G`)}
-    if(st===3){SAVE.tix=SAVE.tix||{};SAVE.tix.R=(SAVE.tix.R||0)+1;got.push(`★★★ 강화카드 ${RWC3[dI]}장 (${giveCards(RWC3[dI])}) + 희귀 확정권 1장`)}}
+  for(let st=(td.rw[sid]||0)+1;st<=stars;st++){if(st===1)got.push(`★ 경험치 ${RWC[dI]} (${giveCards(RWC[dI])})`);if(st===2){SAVE.gold=(SAVE.gold||0)+RWG[dI];got.push(`★★ 골드 ${RWG[dI].toLocaleString()}G`)}
+    if(st===3){SAVE.tix=SAVE.tix||{};SAVE.tix.R=(SAVE.tix.R||0)+1;got.push(`★★★ 경험치 ${RWC3[dI]} (${giveCards(RWC3[dI])}) + 희귀 확정권 1장`)}}
   td.rw[sid]=Math.max(td.rw[sid]||0,stars);
-  /* 11-07 4단계: 판마다 보상 — 그 판에 쓴 무기마다 강화카드, 골드. 지면 도달 웨이브 비율의 절반 */
+  /* 11-07 4단계: 판마다 보상 — 그 판에 쓴 무기마다 경험치, 골드. 지면 도달 웨이브 비율의 절반 */
   let rpc='',rpg=0;if(V2&&!T.bot&&!T.lab){const PI=Math.max(0,STAGES.indexOf(SOF(sid))),si=PI%20+1,prog=win?1:.5*T.wave/WAVES,base=RPB[dI]+.1*si;
     const pc=T.sq.map(q=>[q.id,Math.max(win?1:0,Math.round(base*prog))]).filter(x=>x[1]>0);for(const [id,n] of pc)td.cd[id]=(td.cd[id]||0)+n;
     rpc=pc.map(([id,n])=>`${wic(id)}${W2N[id][0]} ${n}`).join(' · ');rpg=Math.round(RPG*(PI+1)*prog*(win?1.2:1));SAVE.gold=(SAVE.gold||0)+rpg}
@@ -5824,7 +5824,7 @@ function finish(win){if(T.tut&&!T.bot)return simEnd(win);T.over=true;const td=TD
   const r=ov.querySelector('.tdRes');r.innerHTML=`<h2>${win?'🌙 마음의 선을 지켰어요':'💔 마음의 선이 무너졌어요'}</h2>
    <p>${SOF(sid).n} · 웨이브 ${T.wave}/${WAVES} · 처치 ${T.kills} · 남은 체력 ${hpP}%</p>
    ${win?`<p class="tdStar">${'★'.repeat(stars)}${'☆'.repeat(3-stars)}</p><small>★ 클리어 · ★★ 선 50% 이상 · ★★★ 선 100%</small>`:''}
-   ${got.length?`<div class="tdJoin">🎁 처음 달성 보상<br>${got.join('<br>')}</div>`:''}${rpc||rpg?`<div class="tdJoin">🎁 이번 판 보상<br>${rpc?`💠 강화카드 ${rpc}<br>`:''}🪙 골드 +${rpg.toLocaleString()}G</div>`:''}
+   ${got.length?`<div class="tdJoin">🎁 처음 달성 보상<br>${got.join('<br>')}</div>`:''}${rpc||rpg?`<div class="tdJoin">🎁 이번 판 보상<br>${rpc?`💠 경험치 ${rpc}<br>`:''}🪙 골드 +${rpg.toLocaleString()}G</div>`:''}
    ${cmR?`<p class="tdJoin">🎖️ 사령관 Lv${cmLv()}${cmR.up?` <b>(레벨 업 +${cmR.up})</b>`:''}${cmR.nw.map(id=>`<br>🔓 새 무기: ${wic(id)} <b>${W2N[id][0]}</b> · ${nick(id)}`).join('')}</p>`:''}<p class="tdJoin">🔮 오드 +${odG} <small>(웨이브 ${T.wave}${win?' + 클리어 10':''}${stars?' + ★ '+stars*5:''})</small></p>
    ${joined?`<p class="tdJoin">✨ 새 대원 합류: <b>${CICON[joined]} ${nick(joined)}</b></p>`:''}
    <div class="tdBtns">${V2?'<button type="button" data-a="menu">디펜스 로비로</button>':'<button type="button" data-a="retry">다시 도전</button><button type="button" data-a="menu">디펜스 로비로</button><button type="button" data-a="exit">🌙 트와일라잇으로</button>'}</div>`;r.hidden=false;bgm(null);snd(win?'ach':'hurt');T.retry=[T.stg,T.sq[0].id];if(V2)tutFinish(win,sid,cmR&&cmR.nw)}
@@ -6826,7 +6826,7 @@ const ARI={
  t_st:[['n','몬스터가 파래지면 얼었고, 초록이면 중독이에요. 머리 위 그림도 잘 봐 두세요.']],
  t_boss:[['c','거대한 게 와요.'],['p','언니, 화장 고치고 집중해요.']],
  t_clear:[['w','시뮬레이션 끝! 역시 제가 사람 보는 눈은 있다니까요.'],['c','이제 진짜 무수리들이 기다려요. 홀로그램이랑은 달라요, 독해요.']],
- t_res:[['n','💠 강화카드는 그 판에 쓴 대원을 키우고, 🪙 골드는 강화 비용, 🔮 오드는 스탯에 써요.']],
+ t_res:[['n','💠 경험치는 그 판에 쓴 대원을 키우고, 🪙 골드는 강화 비용, 🔮 오드는 스탯에 써요.']],
  t_lb:[['n','👥 대원 관리에서는 경험치로 대원을 키워요.','[data-tab="sq"]'],['s','🎖️ 사령관 레벨이 오르면 새 대원이 와요.','[data-cmb]'],['w','🌙 마음의 선은 언니 자신을 가꾸는 곳이에요. 단단할수록 아름다워요.','[data-tab="line"]'],['n','🛒 상점은 트와일라잇 상점이랑 이어져 있어요. 골드도 같이 써요.','[data-tab="shop"]'],['s','준비되면 ⚔️ 출격! 1-1부터는 진짜예요.','[data-go]']],
  s_loss:[['d','어머....언니....제가 수준을 잘못 생각했나봐요.'],['w','…농담이에요. 강화하고 다시 와요. 선은 제가 다시 엮어 둘게요.']],
  s_c10:[['s','무수리들이 언니 이름을 수군거리기 시작했어요. 유명해지는 건 피곤한 일이죠.']],
@@ -7002,11 +7002,11 @@ function lbTab(k){const td=TDS(),L=LOB;
   if(V2&&k==='go')return stgCard();
   if(V2&&k==='line')return lineTab();
   if(V2&&k==='sq')return sqTab();
-  if(V2&&k==='wu'){td.cd=td.cd||{};td.wl=td.wl||{};const un=w2Un();return`<p style="font-size:12px;color:#ffd6ea">무기마다 따로 강화해요. 레벨당 피해 +10% · 💠 강화카드는 그 무기를 쓴 판에서 모여요. 🪙 ${(SAVE.gold||0).toLocaleString()}G</p>
+  if(V2&&k==='wu'){td.cd=td.cd||{};td.wl=td.wl||{};const un=w2Un();return`<p style="font-size:12px;color:#ffd6ea">무기마다 따로 강화해요. 레벨당 피해 +10% · 💠 경험치는 그 무기를 쓴 판에서 모여요. 🪙 ${(SAVE.gold||0).toLocaleString()}G</p>
     <div class="tdUp">${W2U.map(([id,ul])=>{const o=un.includes(id),l=wlOf(id),h=td.cd[id]||0,c=wlCost(l),can=o&&l<WLMAX&&h>=c.c&&(SAVE.gold||0)>=c.g,nt=WLT.find(t=>t[0]>l);
       return`<div class="tdUpR" style="${o?'':'opacity:.4'}" data-q="${id}"><span data-face="${id}"></span><div><b>${wic(id)} ${W2N[id][0]} <em>Lv${l}</em></b><small>${nick(id)} · 피해 ×${wlMul(id).toFixed(2)}${nt?` · Lv${nt[0]} ${nt[1]}`:' · 특성 모두 열림'}${o?'':` · 🔒 사령관 Lv${ul}`}</small><i>💠 ${h}${l<WLMAX?' / '+c.c+' · 🪙 '+c.g:''}</i></div><button type="button" data-wu="${id}" ${can?'':'disabled'}>${l<WLMAX?'강화':'최대'}</button></div>`}).join('')}</div>
     ${L.sq&&W2N[L.sq]?sqInfo(L.sq):''}
-    ${tdDev()?'<div class="tdBtns"><button type="button" data-dev>🧪 강화카드 모두 +100장</button><button type="button" data-devg>🧪 골드 +10만</button></div>':''}`}
+    ${tdDev()?'<div class="tdBtns"><button type="button" data-dev>🧪 경험치 모두 +100</button><button type="button" data-devg>🧪 골드 +10만</button></div>':''}`}
   if(V2&&k==='cm'){const c=td.cl||{lv:1,xp:0},lv=c.lv||1,need=cmNeed(lv);return`<h3>🎖️ 사령관 Lv${lv} <small style="color:#cbb">/ 50</small></h3><div class="stBar"><i style="width:${Math.min(100,(c.xp||0)/need*100)}%"></i></div><p style="font-size:12px">경험치 ${c.xp||0} / ${need} · 판이 끝나면 웨이브 ×10 + 클리어 50 + ★당 20</p>
     <div class="stNext">${W2U.map(([id,l])=>`<div class="${l<=lv?'on':''}"><em>Lv${l}</em>${l<=lv?'🔓':'🔒'} ${wic(id)} ${W2N[id][0]} · ${nick(id)}${W2I.has(id)?'':' <small>(제작 중)</small>'}<small>${W2N[id][1]}</small></div>`).join('')}</div>
     ${tdDev()?'<div class="tdBtns"><button type="button" data-devcm>🧪 사령관 +5레벨</button></div>':''}`}
@@ -7014,7 +7014,7 @@ function lbTab(k){const td=TDS(),L=LOB;
     <div class="tdStg">${ss.map(s=>{const o=stOpen(s);return`<button type="button" data-s="${s.id}" class="${s.id===L.stg?'on':''}" ${o?'':'disabled'}>${s.n.replace(/\D+/,'')}<small>${td.best[s.id]>WAVES?'★'.repeat(td.st[s.id]||0)||'클리어':o?(td.best[s.id]||0)+'웨이브':'🔒'}</small></button>`}).join('')}</div>
     <p style="font-size:12px">고른 스테이지: <b>${SOF(L.stg).n}</b> · 리더</p><div class="tdGrid">${grid(V2?td.un.filter(id=>W2I.has(id)):td.un,[td.lead])}</div>
     <button type="button" class="go lbGo" data-go>▶ 출격</button>`}
-  if(k==='up'){td.up=td.up||{};td.cd=td.cd||{};return`<p style="font-size:12px;color:#ffd6ea">강화카드는 뽑기와 스테이지 ★ 보상으로 모아요. 디펜스에서만 적용돼요.</p>
+  if(k==='up'){td.up=td.up||{};td.cd=td.cd||{};return`<p style="font-size:12px;color:#ffd6ea">경험치는 뽑기와 스테이지 ★ 보상으로 모아요. 디펜스에서만 적용돼요.</p>
     <div class="tdUp">${CHAR.map(c=>{const id=c.id,u=td.up[id]||0,h=td.cd[id]||0,need=UPN[u],can=u<6&&h>=need;return`<div class="tdUpR"><span data-face="${id}"></span><div><b>${CICON[id]} ${nick(id)} <em>+${u}강</em></b><small>${u<6?`다음: ${UPD[u]}`:'최대 강화'}${u>=3?` · ${ELM[id][0]} ${ELM[id][1]}`:''}${u>=5?` · C ${EVC[id][0]}`:''}${u>=6?` · 💗 ${EVW[id]}`:''}</small><i>💠 ${h}${u<6?' / '+need:''}</i></div><button type="button" data-u="${id}" ${can?'':'disabled'}>강화</button></div>`}).join('')}</div>
     ${tdDev()?'<div class="tdBtns"><button type="button" data-dev>🧪 모두 +100장</button></div>':''}`}
   if(k==='st'){const lv=td.sl||0,s=stSum(lv),c=lv<STN?stCost(lv):0,can=lv<STN&&(td.od||0)>=c;
@@ -7076,7 +7076,7 @@ function logoDraw(g,dt){const im=IMG['logo.png'],mm=IMG['logo_m.png'];if(!ok(im)
   g.save();g.globalCompositeOperation='lighter';for(let i=LGS.length-1;i>=0;i--){const q=LGS[i];q.t+=dt;if(q.t>q.T){LGS.splice(i,1);continue}const u=Math.sin(Math.PI*q.t/q.T),r=Math.max(1,Math.round(5*u*q.s)),x=Math.round(lx+q.x*k),y=Math.round(ly+q.y*k);
     g.fillStyle=`rgba(255,250,210,${.9*u})`;g.fillRect(x-r,y,r*2+1,1);g.fillRect(x,y-r,1,r*2+1);g.fillStyle=`rgba(255,255,255,${u})`;g.fillRect(x-1,y-1,3,3)}g.restore()}
 function upPanel(back){const box=ov.querySelector('.tdMenu'),td=TDS();td.up=td.up||{};td.cd=td.cd||{};
-  const render=()=>{box.innerHTML=`<h2>💠 무기 강화</h2><p style="font-size:12px;color:#ffd6ea">강화카드는 뽑기와 스테이지 ★ 보상으로 모아요. 디펜스에서만 적용돼요.</p>
+  const render=()=>{box.innerHTML=`<h2>💠 무기 강화</h2><p style="font-size:12px;color:#ffd6ea">경험치는 뽑기와 스테이지 ★ 보상으로 모아요. 디펜스에서만 적용돼요.</p>
     <div class="tdUp">${CHAR.map(c=>{const id=c.id,u=td.up[id]||0,h=td.cd[id]||0,need=UPN[u],can=u<6&&h>=need;return`<div class="tdUpR"><span data-face="${id}"></span><div><b>${CICON[id]} ${nick(id)} <em>+${u}강</em></b><small>${u<6?`다음: ${UPD[u]}`:'최대 강화'}${u>=3?` · ${ELM[id][0]} ${ELM[id][1]}`:''}${u>=5?` · C ${EVC[id][0]}`:''}${u>=6?` · 💗 ${EVW[id]}`:''}</small><i>💠 ${h}${u<6?' / '+need:''}</i></div><button type="button" data-u="${id}" ${can?'':'disabled'}>강화</button></div>`}).join('')}</div>
     <div class="tdBtns">${tdDev()?'<button type="button" data-dev>🧪 모두 +100장</button>':''}<button type="button" data-back>← 돌아가기</button></div>`;fillFaces(box)};
   render();box.onclick=e=>{const b=e.target.closest('[data-u]');if(b&&!b.disabled){const id=b.dataset.u,u=td.up[id]||0;if(u<6&&(td.cd[id]||0)>=UPN[u]){td.cd[id]-=UPN[u];td.up[id]=u+1;sv();snd('evo');render()}return}

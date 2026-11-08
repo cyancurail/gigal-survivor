@@ -937,13 +937,24 @@ function fmBossTick(dt){const p=G.p,lv=fmLv();
       e.mk=e.mk||0;const TH=[.8,.55,.3];if(e.mk<3&&e.hp<e.max*TH[e.mk]&&!e.fmInv){const B=FM_BOSSES[e.mk],A=G.arena,a=rnd(0,6.283),x=A?A.x+Math.cos(a)*A.hw*.6:e.x+Math.cos(a)*200,y=A?A.y+Math.sin(a)*A.hh*.6:e.y+Math.sin(a)*160;
         const m=mkEnemy(B.type,x,y,{elite:1,fmMini:1,r:B.r,hp:B.hp*.3,max:B.hp*.3,spd:B.spd,dmg:B.dmg*.8,xp:B.xp*.5,name:B.name});e.mk++;if(!G.bot){toast(`👑 「${B.name}, 나와라!」`,'토마토 여왕이 부하를 불렀어요',true);sparks(x,y-40,40,['#ffd34d','#ff4a5a','#ffffff'],240,.6,3);pring(x,y,70,'#ffd34d',22,.5);SND.p('boss')}}
       e.su=(e.su===undefined?4:e.su)-dt;if(e.su<=0&&!e.fmInv){e.su=rg?7:10;const n=(lv===2?8:lv?6:4)+(rg?2:0);for(let i=0;i<n;i++){const a=i/n*6.283;const q=fmPop(mkEnemy('fm_angry',e.x+Math.cos(a)*50,e.y+Math.sin(a)*40));q.fmT=1}if(!G.bot)G.texts.push({x:e.x,y:e.y-90,v:pick(['나의 토마토들아!','여왕님을 지켜라~','호호, 귀엽지?']),life:1.2,col:'#ffd0e4'})}
-      if(lv){e.fa2=(e.fa2===undefined?3:e.fa2)-dt;if(e.fa2<=0&&!e.fmInv){e.fa2=rg?2.2:3.2;for(let i=0;i<5;i++)ebShot(e,aim+(i-2)*.22,150,5,.45,'#ff3a5a')}}
+      if(lv)fmQueenShots(e,dt,aim,rg,lv);
       // 숨바꼭질: 풀숲 3~4개를 만들고 숨었다가 하나에서 튀어나옴
       e.hd=(e.hd===undefined?9:e.hd)-dt;if(e.hd<=0&&!e.fmInv&&G.arena){e.hd=rg?10:14;const A=G.arena,n=lv===2?4:3;e.qp=[];for(let i=0;i<n;i++)e.qp.push({x:A.x+rnd(-A.hw*.7,A.hw*.7),y:A.y+rnd(-A.hh*.6,A.hh*.7)});e.fmInv=lv===2?2.6:3.2;e.qk=Math.floor(Math.random()*n);if(!G.bot){sparks(e.x,e.y-30,26,['#9be15d','#ff4a5a','#ffd34d'],180,.5,3);G.texts.push({x:e.x,y:e.y-90,v:'어디 있게~?',life:1.2,col:'#ffd0e4'});SND.p('paper')}}
       if(e.fmInv>0){e.fmInv-=dt;e.spd=0;if(e.fmInv<=0){e.fmInv=0;e.spd=ENT.fm_b_queen.spd*(G.hard?1.08:1);const P=e.qp[e.qk];e.x=P.x;e.y=P.y;if(Math.hypot(p.x-e.x,p.y-e.y)<110)hitP(e.dmg*.7);if(!G.bot){sparks(e.x,e.y-30,40,['#9be15d','#ff4a5a','#ffffff'],260,.6,3);pring(e.x,e.y,90,'#ff4a5a',22,.5);G.shk=Math.max(G.shk||0,.25);SND.p('boom')}
-        e.qp.forEach((P2,i)=>{if(i===e.qk)return;const n=lv===2?3:2;for(let k=0;k<n;k++){const q=fmPop(mkEnemy('fm_angry',P2.x+rnd(-14,14),P2.y));q.fmT=1}});if(lv)for(let i=0;i<16;i++)ebShot(e,i/16*6.283,120,5,.45,'#ff7ad9');e.qp=null}}}}
+        e.qp.forEach((P2,i)=>{if(i===e.qk)return;const n=lv===2?3:2;for(let k=0;k<n;k++){const q=fmPop(mkEnemy('fm_angry',P2.x+rnd(-14,14),P2.y));q.fmT=1}});if(lv)for(let i=0;i<16;i++)ebShot(e,i/16*6.283,120,5,.45,'#ff7ad9');e.qp=null;e.qs={k:-1,t:lv===2?1.6:2.2,i:e.qs?e.qs.i:undefined}}}}}
   // 포물선 독가스 덩어리
   const Lb=G.fmLob;if(Lb)for(let i=Lb.length-1;i>=0;i--){const b=Lb[i];b.t+=dt;if(b.t>=b.T){Lb.splice(i,1);fmGas(b.tx,b.ty,58,4,b.dmg);if(!G.bot)sparks(b.tx,b.ty,12,['#9a4dff','#c9a0ff'],120,.4,2)}}}
+// 여왕 탄막: 한 번에 하나씩 차례로(겹치지 않게) — 고리 → 부채꼴 연사 → 나선 → 네온 레이저 → 장미 부채
+const FM_QP=['ring','fan','spiral','laser','rose'];
+function fmQueenShots(e,dt,aim,rg,lv){if(e.fmInv>0)return;const H=lv===2,Q=e.qs||(e.qs={k:-1,t:2.5});const mini=G.enemies.some(m=>m.fmMini&&!m.dead);
+  if(Q.k<0){Q.t-=dt*(mini?.6:1);if(Q.t<=0){Q.i=((Q.i===undefined?-1:Q.i)+1)%FM_QP.length;if(FM_QP[Q.i]==='laser'&&(!H&&!rg))Q.i=(Q.i+1)%FM_QP.length;Q.k=Q.i;Q.e=0;Q.n=0}return}
+  const k=FM_QP[Q.k];Q.e+=dt;let done=false;
+  if(k==='ring'){const n=H?(rg?22:18):(rg?15:12),o=rnd(0,6.283);for(let i=0;i<n;i++)ebShot(e,o+i*6.283/n,H?125:105,6,H?.55:.45,'#ff4a6a');done=true}
+  else if(k==='fan'){if(Q.e>=Q.n*.22){const m=H?5:3;for(let i=0;i<m;i++)ebShot(e,aim+(i-(m-1)/2)*.2,H?180:150,5,H?.5:.4,'#ffb020');Q.n++}done=Q.n>=(H?3:2)}
+  else if(k==='spiral'){Q.a=(Q.a||0)+dt*1.6;Q.s=(Q.s||0)-dt;if(Q.s<=0){Q.s=H?.16:.22;for(const o of [0,Math.PI])ebShot(e,Q.a+o,110,5,.45,'#c07bff',7)}done=Q.e>=(H?2.6:2)}
+  else if(k==='laser'){if(!G.blz){G.blz={x:e.x,y:e.y,a:aim,t:0,hit:0,dmg:e.dmg*(H?1.4:1.1)};if(!G.bot&&G.texts.length<70)G.texts.push({x:e.x,y:e.y-e.r-30,v:'너만 쓸 줄 알았니?',life:1.6,big:1,col:'#ff3fd2'})}done=Q.e>=1.8}
+  else if(k==='rose'){if(Q.e>=Q.n*.3){const o=aim+(Q.n%2?.11:-.11);for(let i=0;i<5;i++)ebShot(e,o+(i-2)*.24,145,5,.45,'#ff3a5a');Q.n++}done=Q.n>=3}
+  if(done){Q.k=-1;Q.t=(H?1.3:1.9)*(rg?.8:1)}}
 function fmBossDraw(e){const [k,w0]=FM_BIMG[e.type];const im=FM.img[k];
   if(e.type==='fm_b_queen'&&e.qp){for(const P of e.qp){const g=FM.img.tallgrass;if(g&&g.width){const w=g.width/2*1.1,h=g.height/2*1.1,sx=Math.sin(G.t*40+P.x)*(e.fmInv<1?2.5:1);ctx.drawImage(g,P.x-w/2+sx,P.y-h+6,w,h)}}}
   if(e.fmInv>0||!im||!im.width)return;
@@ -1764,7 +1775,7 @@ function nammiWave(tg){const p=tg||G.p,side=Math.random()*4|0,hw=VW/2+40,hh=VH/2
 function hellEvent(k){G.hev={k,t:k==='nammi'?9:25,el:0,w:[{at:.8},{at:3.4},{at:6}],side:Math.random()<.5?-1:1};if(k==='kick'&&G.weapons.length)G.sealed=pick(G.weapons);G.hban={t:4.5,title:HEV[k][0],sub:HEV[k][1]+(k==='kick'&&G.sealed?' (🔒 '+WP[G.sealed.k].name+')':'')};if(!G.bot)SND.p('boss')}
 function ebShot(e,a,v,r,dm,c,life){G.eb.push({x:e.x,y:e.y,vx:Math.cos(a)*v,vy:Math.sin(a)*v,r,dmg:e.dmg*dm,life:life||6,c,src:e})}
 function bossTick(dt){const wN=!G.hard;if(wN&&!(G.witch&&!G.witch.dead))return;const p=G.p,H=G.hell,FIN=GB()[GB().length-1].name;
-  for(const e of G.enemies){if(!e.boss||e.dead||(wN&&e.tpl!=='witch')||e.plF>G.t||e.fmInv>0)continue;const fin=e.name===FIN,aim=Math.atan2(p.y-e.y,p.x-e.x),rg=e.rage2;
+  for(const e of G.enemies){if(!e.boss||e.dead||(wN&&e.tpl!=='witch')||e.plF>G.t||e.fmInv>0||e.type==='fm_b_queen')continue;const fin=e.name===FIN,aim=Math.atan2(p.y-e.y,p.x-e.x),rg=e.rage2;
     // ring
     e.rg=(e.rg===undefined?3:e.rg)-dt;if(e.rg<=0){e.rg=H?(rg?2.5:4):(rg?3.2:5);const n=H?(rg?22:16):(rg?15:11),o=rnd(0,6.28);for(let i=0;i<n;i++)ebShot(e,o+i*6.283/n,H?130:105,6,H?.6:.45,H?'#ff4a6a':'#ff9ad5')}
     // aimed fan

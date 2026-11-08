@@ -1991,6 +1991,7 @@ function bossTick(dt){const wN=!G.hard;if(wN&&!(G.witch&&!G.witch.dead))return;c
 function hellTick(dt){const p=G.p;
   if(G.eb.length){const pw=W('pet'),D=pw&&pw.st.dome;for(const b of G.eb){b.x+=b.vx*dt;b.y+=b.vy*dt;b.life-=dt;const d2=(b.x-p.x)**2+(b.y-p.y)**2;if(D&&d2<D.R*D.R){b.life=0;hpB('pet',b.dmg*edm());if(!G.bot&&Math.random()<.5)sparks(b.x,b.y,4,['#7dffb0','#ffffff'],120,.2);continue}if(d2<(b.r+9)**2){b.life=0;rangedHit(b.dmg,b)}}G.eb=G.eb.filter(b=>b.life>0);if(G.eb.length>400)G.eb.splice(0,G.eb.length-400)}
   if(G.map==='sangbong'&&!G.tw&&!G.bot&&G.t>=600&&!G.hell){const nv=G.hard?2:1;if(sbU(G.id)<nv){SAVE.sbU=SAVE.sbU||{};SAVE.sbU[G.id]=nv;persist();const t=nv===2?'💀 상봉 헬 모드 해금!':'🔥 상봉 어려움 모드 해금!';G.unlockedNow.push(`${t.slice(0,2)} ${esc(CHAR[G.ci].nick)}의 ${t.slice(3,-1)}`);toast(t,CHAR[G.ci].nick+' · 상봉에서 10분 생존',true)}}
+  if(G.map==='farm'&&!G.tw&&!G.bot&&G.t>=600&&!(SAVE.ach||{}).jangsu10)achGet('jangsu10');
   if(G.map==='sangbong'&&G.hell&&!G.tw&&!G.bot&&G.t>=900&&!SAVE.fmU){SAVE.fmU=1;persist();G.unlockedNow.push('🍅 새 맵 「장수」 해금!');toast('🍅 새 맵 장수 해금!','위기의 토마토 농장 · 맵 선택에서 고를 수 있어요',true)}
   if(G.map==='gigal'&&G.hard&&!G.hell&&!G.tw&&!G.bot&&G.t>=600&&!hellUnl(G.id)){SAVE.hellU=SAVE.hellU||{};SAVE.hellU[G.id]=1;persist();achCheck();G.unlockedNow.push(`💀 ${esc(CHAR[G.ci].nick)}의 헬모드 해금!`);toast('💀 헬모드 해금!',CHAR[G.ci].nick+'의 헬모드가 열렸어요',true)}
   if(!G.hell)return;
@@ -3559,6 +3560,8 @@ const ACH_HX=[
  {id:'hx_rave',hx:'risha',n:'리샤 발렌타인',c:'R.A.V.E. 제작',r:'👑 무룩 신화 스킨 「대천사」',inv:'mx:조혁래|6'},
 ];
 const ACH_HX_ON=true;if(ACH_HX_ON)ACH.push(...ACH_HX);
+/* 11-08 밤: 장수 업적 — 저장 코드 순서 때문에 반드시 맨 끝에 */
+ACH.push({id:'jangsu10',n:'토마토 농장 지킴이',c:'장수 맵에서 10분 버티기 (보통 이상 아무 모드)',r:'🖼️ 로비 배경 「🍅 토마토 농장」',lb:'farm',pub:1});
 function achHx(k){for(const a of ACH)if(a.hx&&(!k||a.hx===k)&&SAVE.hxMade&&SAVE.hxMade[a.hx])achGet(a.id);
   /* 나중에 보상(inv)이 붙은 업적: 이미 받은 사람에게 소급 지급 */let ch=0;for(const a of ACH)for(const iv of [a.inv,a.inv2])if(iv&&SAVE.achC&&SAVE.achC[a.id]&&!SAVE.inv[iv]){SAVE.inv[iv]=true;ch=1}if(ch)try{persist()}catch(e){}}
 const ACH_V6=16,ACH_V16=18;
@@ -5534,7 +5537,7 @@ let run=false,raf=0,last=0,W=0,H=0,DPR=1;
 try{const sid=localStorage.getItem('gs_sel');const i=CHAR.findIndex(c=>c.id===sid);if(i>=0&&(!CHAR[i].ju||juUnl('emerald')))selI=i}catch(e){}
 const remember=()=>{try{localStorage.setItem('gs_sel',CHAR[selI].id)}catch(e){}};
 // ---- 배경: 제미나이 그림이 오면 fx/lobby_*.png 로 교체 (없으면 코드로 그린 임시 배경) ----
-const LBM={base:{n:'🌙 기본 밤하늘'},festa:{n:'🏮 시즌2 축제의 밤거리',gy:.745},spirit:{n:'🍄 정령의 숲',gy:.745},jeonju:{n:'🌕 전주의 숲',gy:.74},princess:{n:'👑 공주님 꿈깨세요',gy:.8},aegis:{n:'🛰️ 아이기스 지휘본부',gy:.79},grave:{n:'🕯️ 영혼이 쉬는 곳',gy:.79},beauty:{n:'🪽 아름다움의 신전',gy:.8}};
+const LBM={base:{n:'🌙 기본 밤하늘'},festa:{n:'🏮 시즌2 축제의 밤거리',gy:.745},spirit:{n:'🍄 정령의 숲',gy:.745},jeonju:{n:'🌕 전주의 숲',gy:.74},princess:{n:'👑 공주님 꿈깨세요',gy:.8},aegis:{n:'🛰️ 아이기스 지휘본부',gy:.79},grave:{n:'🕯️ 영혼이 쉬는 곳',gy:.79},beauty:{n:'🪽 아름다움의 신전',gy:.8},light:{n:'🕊️ 빛의 길을 따라 저에게로',gy:.8},faith:{n:'🌈 믿음의 흔적',gy:.82},farm:{n:'🍅 토마토 농장',gy:.79}};
 window.LBM=LBM;const lbOwn=k=>k==='base'||!!window.__devAll||!!(SAVE.lbOwn||{})[k];window.lbOwn=lbOwn;
 const lbKey=()=>{const k=SAVE.lobbyMap;return LBM[k]&&lbOwn(k)?k:'base'};
 const BG={};function bgImg(){const k=lbKey();if(k==='base')return null;if(!BG[k]){const im=new Image();im.src='fx/lobby_'+k+'.jpg';BG[k]=im}const im=BG[k];return im.complete&&im.naturalWidth?im:null}
@@ -5716,7 +5719,7 @@ const SPF=[{g:300},{g:350},{g:400},{g:450},{g:500},{g:550},{g:600},{g:650},{g:70
 const SPP=[{title:'liar'},{g:1000},{g:1200},{g:1400},{pet:'butterfly'},{g:1600},{g:1800},{t:{L:1}},{g:2000},{bg:'spirit'},
  {g:2000},{g:2200},{t:{M:1}},{g:2400},{pet:'slime'},{g:2500},{g:2600},{t:{L:1}},{g:2800},{bg:'jeonju'},
  {g:2800},{g:3000},{t:{M:1}},{g:3000},{pet:'ghost'},{g:3000},{g:3000},{t:{L:1}},{g:3000},{bg:'princess',title:'hero',t:{M:1}},
- {g:3000},{bg:'grave'},{t:{L:1}},{g:3500},{bg:'beauty',t:{M:1}}];
+ {bg:'light'},{bg:'faith'},{t:{L:1}},{bg:'grave'},{bg:'beauty',t:{M:1}}];/* 11-08 밤: 새 배경 2장(빛의 길·믿음의 흔적)을 먼저, 영혼이 쉬는 곳·아름다움의 신전은 뒤로 */
 const spNow=()=>Date.now();const spLive=()=>spNow()>=SP.start&&spNow()<SP.end;
 function sp(){let S=SAVE.sp;if(!S||S.id!==SP.id)S=SAVE.sp={id:SP.id,xp:0,prem:0,f:{},p:{}};return S}
 const SPMAX=SPF.length;const spLv=()=>Math.min(SPMAX,1+Math.floor(sp().xp/SP.lvXp));

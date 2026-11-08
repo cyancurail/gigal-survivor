@@ -6266,7 +6266,7 @@ function finish(win){if(T.tut&&!T.bot)return simEnd(win);T.over=true;try{window.
     if(st===3){SAVE.tix=SAVE.tix||{};SAVE.tix.R=(SAVE.tix.R||0)+1;got.push(`★★★ 💠 강화 칩 ${RWC3[dI]} (${giveCards(RWC3[dI])}) + 희귀 확정권 1장`)}}
   td.rw[sid]=Math.max(td.rw[sid]||0,stars);
   /* 11-07 4단계: 판마다 보상 — 그 판에 쓴 무기마다 경험치, 골드. 지면 도달 웨이브 비율의 절반 */
-  let rpc='',rpg=0;if(V2&&!T.bot&&!T.lab){const PI=Math.max(0,STAGES.indexOf(SOF(sid))),si=PI%20+1,prog=win?1:.5*T.wave/WAVES,base=RPB[dI]+.1*si;
+  let rpc='',rpg=0;if(V2&&!T.bot&&!T.lab){const PI=Math.max(0,STAGES.indexOf(SOF(sid))),si=PI%20+1,prog=win?1:.5*T.wave/WAVES,base=(RPB[dI]+.1*si)*[1,2,3][dI];/* 11-08 사용자 B안: 강화 칩 어려움 ×2 · 헬 ×3 (5명을 고루 키우는 목표) */
     const pc=T.sq.map(q=>[q.id,Math.max(win?1:0,Math.round(base*prog))]).filter(x=>x[1]>0);for(const [id,n] of pc)td.cd[id]=(td.cd[id]||0)+n;
     rpc=pc.map(([id,n])=>`${wic(id)}${W2N[id][0]} ${n}`).join(' · ');rpg=Math.round(RPG*(PI+1)*prog*(win?1.2:1));SAVE.gold=(SAVE.gold||0)+rpg}
   const cmR=V2&&!T.bot?cmGain(Math.round((T.wave*10+(win?50:0)+stars*20)*Math.pow(1.03,Math.max(0,STAGES.indexOf(SOF(sid)))))):null;const odG=T.bot?0:Math.max(1,T.wave)+(win?10:0)+stars*5;td.od=(td.od||0)+odG;

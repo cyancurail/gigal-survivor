@@ -772,7 +772,7 @@ function fmEmerge(o,n,kind){const lv=fmLv(),p=G.p;let live=0;for(const e of G.en
   if(lv===0){G.texts.push({x:ox,y:oy-30,v:'뿅!',life:.7,col:'#ffd0e4'});for(const q of SR)sparks(q.x,q.y-24,8,['#ffd0e4','#ffffff','#9be15d'],110,.45,2);SND.p('pop')}
   else{for(const q of SR)sparks(q.x,q.y-24,10,['#5a3a1a','#9be15d','#2a1a0a'],150,.5,2);if(SR.length>3&&!G.bot)G.texts.push({x:ox,y:oy-44,v:'우르르…!',life:.8,col:'#ff8a8a'});SND.p(FM_TR[o.t]&&FM_TR[o.t].door?'boom':'whoosh');if(lv===2)G.shk=Math.max(G.shk||0,.18)}}
 const FM_NQ={barn:1,hut_thatch:1,house_full:1,mini_house:1};
-function fmTrig(dt){const p=G.p,lv=fmLv(),tel=[.75,.5,.32][lv];
+function fmTrig(dt){const p=G.p,lv=fmLv(),tel=[.75,.5,.32][lv];if(!lv){for(const o of G.fmL)if(o.t==='scary_hut')fmHut(o,dt);return} // 보통: 구조물·풀숲에서 안 튀어나옴
   for(const o of G.fmL){
     if(o.t==='scary_hut'){fmHut(o,dt);continue}
     const T=FM_TR[o.t];if(!T||o.dec)continue;if(T.mob==='mu'&&!(lv===2&&o.amb))continue;if(lv===0&&FM_NQ[o.t])continue; // 보통: 헛간·초가집·토마토 하우스는 조용
@@ -832,7 +832,7 @@ function fmAllyArrows(){const A=G.fmA;if(!A||!A.length||G.bot)return;const p=G.p
     const [sx,sy]=W2S(p.x+dx*k,p.y+dy*k);ctx.save();ctx.globalAlpha=.75+.25*Math.sin(G.t*6);ctx.font='18px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('🍅',sx,sy);
     const an=Math.atan2(dy,dx);ctx.translate(sx+Math.cos(an)*16,sy+Math.sin(an)*16);ctx.rotate(an);ctx.fillStyle='#ffd0e4';ctx.beginPath();ctx.moveTo(6,0);ctx.lineTo(-3,-5);ctx.lineTo(-3,5);ctx.fill();ctx.restore()}}
 // 제자리 버티기 방지: 오래 한곳에 있으면 흙에서 새싹 토마토
-function fmCamp(dt){const p=G.p,C=G.fmC||(G.fmC={x:p.x,y:p.y,t:0});if(G.fmH&&G.fmH.on){C.t=0;return}if(Math.hypot(p.x-C.x,p.y-C.y)>90){C.x=p.x;C.y=p.y;C.t=0;return}C.t+=dt;
+function fmCamp(dt){if(!fmLv())return;const p=G.p,C=G.fmC||(G.fmC={x:p.x,y:p.y,t:0});if(G.fmH&&G.fmH.on){C.t=0;return}if(Math.hypot(p.x-C.x,p.y-C.y)>90){C.x=p.x;C.y=p.y;C.t=0;return}C.t+=dt;
   const lim=[14,11,8][fmLv()];let live=0;for(const e of G.enemies)if(e.fmT)live++;if(C.t>lim&&!G.arena&&live<fmCap()){C.t=lim-5;const n=Math.min(fmCap()-live,3+fmLv()+Math.floor(em()/6));for(let i=0;i<n;i++){const a=rnd(0,6.283),r=rnd(110,170),x=p.x+Math.cos(a)*r,y=p.y+Math.sin(a)*r;const e=fmPop(mkEnemy('fm_sprout',x,y));if(!G.bot)sparks(x,y,8,['#5a3a1a','#9be15d'],90,.4,2)}if(!G.bot){G.texts.push({x:p.x,y:p.y-46,v:'흙이 들썩…',life:1,col:'#c8a070'})}}}
 function fmTick(dt){if(!G.fmL)return;fmTrig(dt);fmTick4(dt);fmHide(dt);fmDarkTick(dt);fmAllyTick(dt);fmCamp(dt);for(const o of G.fmL)if(o.shk>0)o.shk-=dt;for(const e of G.enemies)if(e.pop>0)e.pop-=dt}
 // 농장 몹 그리기(③: 화난 토마토·새싹 — ④에서 늘림)
@@ -2705,7 +2705,7 @@ function spawnPos(){const side=Math.random()*4|0,m=40;let x,y;const hw=VW/2+m,hh
 function mkEnemy(type,x,y,o={}){
   const b=ENT[type]||ENT.unread,m=em(),hs=(1+m*.3+Math.pow(m/6.3,2.65))*1.25;
   const e={type,x,y,r:b.r,hp:b.hp*hs,max:b.hp*hs,spd:b.spd*rnd(.9,1.1)*(1+m*.012),dmg:b.dmg*(1+m*.15+Math.pow(m/15,3)),xp:b.xp,h:{},kx:0,ky:0,slow:0,stun:0,frog:0,flash:0,name:b.name};
-  Object.assign(e,o);if(G.map==='farm')e.xp*=1.45;if(b.ranged&&(type.slice(0,3)==='sb_'||type.slice(0,3)==='fm_')&&!o.boss&&G.enemies.reduce((n,q)=>n+(q.ranged&&!q.boss?1:0),0)<(G.hell?10:G.hard?8:6)){e.ranged=1;e.shcd=G.hell?2.4:3.2;e.bdm=G.hell?.8:.6}if(o.hpMul){e.hp*=o.hpMul;e.max=e.hp}
+  Object.assign(e,o);if(G.map==='farm'&&G.hard)e.xp*=1.45;if(b.ranged&&(type.slice(0,3)==='sb_'||type.slice(0,3)==='fm_')&&!o.boss&&G.enemies.reduce((n,q)=>n+(q.ranged&&!q.boss?1:0),0)<(G.hell?10:G.hard?8:6)){e.ranged=1;e.shcd=G.hell?2.4:3.2;e.bdm=G.hell?.8:.6}if(o.hpMul){e.hp*=o.hpMul;e.max=e.hp}
   if(G.hell){const et=ET();e.hp*=(et<300?HARD.hp*1.3:HARD.hp*1.3+(5-HARD.hp*1.3)*Math.min(1,(et-300)/300))*(e.elite?3:1);e.max=e.hp;e.dmg*=2;e.spd*=HARD.spd}
   else if(G.hard){const hm=(e.boss?HARD.boss:HARD.hp)*(G.hph||1);e.hp*=hm;e.max=e.hp;e.dmg*=HARD.dmg;e.spd*=HARD.spd}
   G.enemies.push(e);return e;
@@ -2736,7 +2736,7 @@ function drawArena(){const A=G.arena;if(!A)return;const t=G.t,w=A.hw,h=A.hh,rr=2
   if(!G.bot&&Math.random()<.8){const q=arenaPt(A,Math.random()*4);px(q[0],q[1],0,-rnd(20,60),.7,pick([c1,c2,'#ffffff']),2,1,1)}}
 function spawnTick(dt){
   const m=em(),hs=G.hard?HARD.spawn:1,target=Math.min((15+m*11)*hs,340*hs);
-  G.spawnAcc+=dt*Math.min(52,2+m*2)*hs*(G.map==='farm'?.24:1);
+  G.spawnAcc+=dt*Math.min(52,2+m*2)*hs*(G.map==='farm'&&G.hard?.24:1);
   if(G.arena){G.spawnAcc=0;arenaTick(dt);return}
   while(G.spawnAcc>=1){G.spawnAcc--;if(G.enemies.length<target){const [x,y]=spawnPos();if(G.map==='farm'){if(!(G.fmSil>0))mkEnemy(fmOffAny(),x,y)}else mkEnemy(G.hell&&Math.random()<.15?pick(G.map==='sangbong'?['sb_lamp','sb_germ','sb_trash']:['queen','kisoo']):pick(phaseTypes()),x,y)}}
   if(G.map!=='farm'&&G.swarms.length&&G.t>=G.swarms[0]){G.swarms.shift();toast('알림 폭탄 러시!','📢 단톡방이 터진다');const n=Math.round(20+m*2.2),gap=rnd(0,Math.PI*2);for(let i=0;i<n;i++){const a=gap+.6+i/n*(Math.PI*2-1.2);mkEnemy(G.map==='sangbong'?'sb_soju':'bell',G.p.x+Math.cos(a)*(VW*.62),G.p.y+Math.sin(a)*(VH*.62),{spd:80,dmg:ENT.bell.dmg*(1+m*.08)})}}

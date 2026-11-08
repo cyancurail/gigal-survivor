@@ -5464,7 +5464,7 @@ const mkM=id=>({id,lv:[0,0,0,0,0],t:.5,f:[],up:upOf(id)});
 const newRun=(stg,leader)=>stApply({stg,t:0,wave:0,wt:0,spawnQ:[],en:[],pr:[],fx:[],zn:[],sq:[V2?mkW(leader):{...mkM(leader),t:0}],
   later:[],vfx:[],duo:[],bl:{},evoQ:[],sh:0,hp:100,hpMax:100,en_:0,need:8,picks:0,kills:0,paused:false,over:false,speed:1,bot:false,drag:null,heal:0,eid:1,cardsLeft:0});
 const hkRun=r=>{['fx','pr','vfx','zn'].forEach(k=>hk(r[k]));return r};
-function stApply(r){hkRun(r);const td=TDS(),s=stSum(td.sl||0);r.hp=r.hpMax=100+3*s.line;r.atkM=1+(V2?.01:.03)*s.atk;r.crit=s.crit*.001;
+function stApply(r){hkRun(r);const td=TDS(),s=stSum(td.sl||0);r.hp=r.hpMax=V2?lnHp(llOf()):100+3*s.line;if(V2)r.ll=llOf();r.atkM=1+(V2?.01:.03)*s.atk;r.crit=s.crit*.001;
   if(V2){r.cmb=1+.01*(((td.cl||{}).lv||1)-1);const m=r.sq&&r.sq[0];if(m&&m.c&&wlOf(m.id)>=20){const ks=w2Keys(m.id).filter(k=>!W2BASE.includes(k)&&k!=='fam'&&w2Rk(m.id,k)[0]===1&&!w2Trade(m.id,k)&&!w2Pre(m.id,k));if(ks.length){const k=pick(ks);m.c[k]=1;r.freeC=w2Nm(m.id,k)}}}return r}
 /* 무기 강화 Lv1~40 (11-07 3단계): 레벨당 피해 +25%, 특성 Lv10·30·40 피해 +25%, Lv20 시작 카드 1장, Lv40 희귀 확률 2배 */
 const WLMAX=40,wlOf=id=>Math.max(1,(TDS().wl||{})[id]||1);
@@ -5533,7 +5533,7 @@ function spawn(k,x0,y0,mu,gd){if(V2&&k==='sm'&&T.en.length>160)return;const w=T.
   if(mu||(k!=='b'&&k!=='sm'&&Math.random()<S.mut*Math.min(1,w/8))||(k==='b'&&S.d===2&&w===21)){e.mut=1;if(k!=='b'){e.hp*=2.5;e.max=e.hp;e.spd*=1.15;e.dmg*=1.5;e.xp*=3}T.fx.push({k:'txt',x:e.x,y:Math.max(60,e.y+30),v:'✨ 변이!',t:1,col:'#ff9ad5'})}
   T.en.push(e);
   if(k==='b'){px('bs_portal',e.x,Math.max(e.y+e.r,95),{sc:1.1,sp:1.2});snd('boss');banner(`${e.nm} 등장!`)}}
-function hurt(e,d,o){if(e.dead)return;o=o||{};if(V2&&CURM&&CURM.c&&W2N[CURM.id])d*=w2Mul(CURM,e);const crt=!!(T.crit&&Math.random()<T.crit)||!!o.crit;let dd=d*(T.dm||1)*(T.atkM||1)*(crt&&!o.crit?2:1)*(T.weak&&e.po>0?1.15:1)*(o.pierceArm?1-(1-e.arm)*(1-o.pierceArm):e.arm)*(1+(e.vuln||0));if((e.boss||e.elite)&&o.bossMul)dd*=o.bossMul;dnum(e,dd,crt);e.hp-=dd;T.dsum=(T.dsum||0)+Math.min(dd,e.hp+dd);if(e.dummy){T.labD=(T.labD||0)+dd;e.hp=e.max}e.fl=.08;if(CURM&&CURM.el)elemHit(e,dd);if(o.stun)e.stun=Math.max(e.stun,(e.boss?o.stun*.3:o.stun)*(T.sm||1));if(o.slow){e.slow=Math.max(e.slow,(o.slowT||.5)*(T.sm||1));e.slowF=Math.min(e.slowF,1-o.slow)}
+function hurt(e,d,o){if(e.dead)return;o=o||{};if(V2&&(T.ll||0)>=15&&T.hp<T.hpMax*.3)d*=1.2;if(V2&&CURM&&CURM.c&&W2N[CURM.id])d*=w2Mul(CURM,e);const crt=!!(T.crit&&Math.random()<T.crit)||!!o.crit;let dd=d*(T.dm||1)*(T.atkM||1)*(crt&&!o.crit?2:1)*(T.weak&&e.po>0?1.15:1)*(o.pierceArm?1-(1-e.arm)*(1-o.pierceArm):e.arm)*(1+(e.vuln||0));if((e.boss||e.elite)&&o.bossMul)dd*=o.bossMul;dnum(e,dd,crt);e.hp-=dd;T.dsum=(T.dsum||0)+Math.min(dd,e.hp+dd);if(e.dummy){T.labD=(T.labD||0)+dd;e.hp=e.max}e.fl=.08;if(CURM&&CURM.el)elemHit(e,dd);if(o.stun)e.stun=Math.max(e.stun,(e.boss?o.stun*.3:o.stun)*(T.sm||1));if(o.slow){e.slow=Math.max(e.slow,(o.slowT||.5)*(T.sm||1));e.slowF=Math.min(e.slowF,1-o.slow)}
   
   if(e.hp<=0){e.dead=true;T.kills++;if(T.mire&&e.po>0)T.zn.push({k:'puddle',x:e.x,y:e.y,R:30,t:0,T:3,pod:T.mire,mx:8,pk:0,sw:9});if(e.wedK){T.hp=Math.min(T.hpMax,T.hp+.3)}T.en_+=e.xp*(e.xk||1)/MCNT;T.fx.push({k:'pop',x:e.x,y:e.y,r:e.r,t:.25,col:e.col});if(e.gold)goldReward(e);if(e.boss){bossReward();px('bs_dark',e.x,e.y,{sc:.85,sp:1.5})}else if(e.frzT>T.t)px('ag_shat',e.x,e.y+e.r*.4,{sc:.4,sp:1.8});if(e.split)for(let i=0;i<(e.boss?12:e.mut?8:5);i++)spawn('sm',e.x,e.y)}}
 function beamHit(m,bx,by,a,w,d){const c=Math.cos(a),sn=Math.sin(a);for(const q of T.en){if(q.dead)continue;const dx=q.x-bx,dy=q.y-by,u=dx*c+dy*sn,ww=Math.abs(-dx*sn+dy*c);if(u>0&&ww<w+q.r){let dd=d;
@@ -5541,7 +5541,7 @@ function beamHit(m,bx,by,a,w,d){const c=Math.cos(a),sn=Math.sin(a);for(const q o
     if(ev(m,3,'B')){if(q.bxT===T.t&&T.t-(q.bxC||0)>.6){q.bxC=T.t;aoe(q.x,q.y,40,d*2);T.fx.push({k:'ring',x:q.x,y:q.y,r:40,t:.3,col:'#d8a464'})}q.bxT=T.t}
     hurt(q,dd);if(GLOW.on&&m.id==='창환이형'&&Math.random()<.25)gSpark(q.x,q.y,GCOL['창환이형'],2,110);if(m.lv[4])q.vuln=Math.max(q.vuln||0,.1*m.lv[4]);
     if(duo('pnrj')&&!q.dead&&T.t>(q.nc||0)){q.nc=T.t+.5;const nb=T.en.filter(o=>!o.dead&&o!==q&&Math.hypot(o.x-q.x,o.y-q.y)<100).slice(0,2);for(const o of nb){vfx('chain',q.x,q.y,{ang:Math.atan2(o.y-q.y,o.x-q.x),sc:Math.hypot(o.x-q.x,o.y-q.y)/FXM.chain.len,sy:.5});hurt(o,d*.8)}}}}}
-function lineHit(d){d*=(T.lm||1);if(d>0)T.hit1=1;if(T.sh>0){const a=Math.min(T.sh,d);T.sh-=a;d-=a}T.hp-=d}
+function lineHit(d){d*=(T.lm||1);if(V2&&(T.ll||0)>=5&&d>0)d=Math.max(d*.3,d-1);if(d>0)T.hit1=1;if(T.sh>0){const a=Math.min(T.sh,d);T.sh-=a;d-=a}T.hp-=d}
 function near(x,y,n){return T.en.filter(e=>!e.dead).sort((a,b)=>((a.x-x)**2+(a.y-y)**2)-((b.x-x)**2+(b.y-y)**2)).slice(0,n)}
 const front=n=>T.en.filter(e=>!e.dead&&e.y>-10).sort((a,b)=>b.y-a.y).slice(0,n);
 function aoe(x,y,r,d,o){r*=(T.am||1);for(const e of T.en)if(!e.dead&&(e.x-x)**2+(e.y-y)**2<=(r+e.r)**2)hurt(e,d,o)}
@@ -5790,7 +5790,7 @@ function update(dt){if(!T||T.paused||T.over)return;T.t+=dt;if(T.lab)labTick(dt);
     if(e.lay){e.cd-=dt;if(e.cd<=0){e.cd=e.boss?1.5:e.mut?2:3.2;for(let i=0;i<(e.boss?3:2);i++)spawn('sm',e.x,e.y+6)}}
     if(e.rng&&e.y>=e.stopY){v=0;e.cd-=dt;if(e.cd<=0){e.cd=e.boss?1.6:e.mut?1.8:3;for(const dx of e.boss?[-30,0,30]:[0])T.pr.push({k:'shell',x:e.x+dx,y:e.y+e.r,vy:150,dmg:e.boss?4:2,life:6})}}
     if(T.walls&&T.walls.some(w=>e.y+e.r>=w.y-4&&e.y<w.y+18)){v=0;e.wk=(e.wk||0)+dt;if(e.wk>=.5){e.wk=0;hurt(e,T.walls[0].dps*.5)}}
-    e.y+=v*dt*(e.dummy?T.labV:ESPD)*(V2&&e.y<(T.enty||ENTY)&&!e.dummy?5:1);/* 11-07: 사거리 닿기 전 입장 구간은 5배 빠르게 */if(e.y+e.r*.4>=arcY(e.x)){if(e.dummy){e.y=30;continue}e.dead=true;lineHit(e.dmg);T.fx.push({k:'hit',t:.3});snd('hurt')}}
+    e.y+=v*dt*(e.dummy?T.labV:ESPD)*(V2&&e.y<(T.enty||ENTY)&&!e.dummy?5:1);/* 11-07: 사거리 닿기 전 입장 구간은 5배 빠르게 */if(e.y+e.r*.4>=arcY(e.x)){if(e.dummy){e.y=30;continue}e.dead=true;lineHit(e.dmg);if(V2&&(T.ll||0)>=10&&!T.lab){const ex=e.x,ey=e.y,dd=e.max*.5;setTimeout0(0,()=>{aoe(ex,ey,60,dd);T.fx.push({k:'ring',x:ex,y:ey,r:60,t:.3,col:'#9fe8ff'})})}T.fx.push({k:'hit',t:.3});snd('hurt')}}
   T.haste=1+(T.zn.some(z=>z.k==='heaven')?.15:0)+(T.pearl?.15:0)+.1*bl('rd');T.dm=(1+.1*bl('pt'))*(T.hp<T.hpMax*.3?1+.4*bl('gb'):1);T.am=1+.1*bl('sd');T.es=1-.08*bl('wg');T.sm=1+.2*bl('fr');T.lm=1-.12*bl('lv');T.frogHop=T.sq.some(q=>q.id==='박준영'&&ev(q,3,'A'));T.walls=T.zn.filter(z=>z.k==='wall');if(V2){for(const m of T.sq)w2Tick(m,dt,mx(m),my(m));w2Step(dt);T.enty=Math.max(ENTY,Math.min(...T.sq.map(m=>(m.wy||700)-Math.min(2000,w2Rg(m))))-30)}else for(const m of T.sq){GM=gm(m);CURM=m;if(EXT[m.id]){const g0=GM;GM=g0*CDD(m.id);EXT[m.id](m,dt,mx(m),my(m));GM=g0}const n0=T.pr.length,v0=T.vfx.length,l0=T.later.length,z0=T.zn.length;WK=FIRE*CDK(m.id)*(T.haste||1)*(m.up>=2?1.12:1);(WPN[m.id]||WPN._gen)(m,dt*WK,mx(m),my(m));WK=1;for(let i=n0;i<T.pr.length;i++)if(!T.pr[i].src)T.pr[i].src=m;for(let i=v0;i<T.vfx.length;i++)if(!T.vfx[i].src)T.vfx[i].src=m;for(let i=l0;i<T.later.length;i++)if(!T.later[i].src)T.later[i].src=m;for(let i=z0;i<T.zn.length;i++)if(!T.zn[i].src)T.zn[i].src=m}CURM=null;
   if(!V2)duoTick(dt);stepPr(dt);stepZn(dt);stepVfx(dt);for(const q of T.later){q.t-=dt;if(q.t<=0){CURM=q.src||null;q.f();CURM=null;q.x=1}}T.later=T.later.filter(q=>!q.x);T.en=T.en.filter(e=>!e.dead);
   for(const f of T.fx)f.t-=dt;T.fx=hk(T.fx.filter(f=>f.t>0));if(T.fx.length>260)T.fx.splice(0,T.fx.length-260);
@@ -5800,13 +5800,14 @@ function update(dt){if(!T||T.paused||T.over)return;T.t+=dt;if(T.lab)labTick(dt);
   if(T.tut){T.hp=Math.max(T.hp,T.hpMax*.3);if(!T.spawnQ.length&&!T.en.some(e=>!e.dead)){if(T.wave>=4){finish(true);return}if(T.wave>=1&&T.wt>2&&T.wt<T.wdur-1.5)T.wt=T.wdur-1.5}}
   if(T.hp<=0){T.hp=0;finish(false);return}
   if(T.wave>=WAVES&&!T.spawnQ.length&&!T.en.length){finish(true);return}
+  if(V2&&!T.lab&&(T.ll||0)>=20){T.iwT=(T.iwT==null?0:T.iwT)-dt;if(T.iwT<=0&&T.en.some(e=>!e.dead&&e.y>440)){T.iwT=45;for(const e of T.en)if(!e.dead&&e.y>380)frz(e,2.5);T.fx.push({k:'flash',t:.35,col:'#bfefff'});banner('🧊 마음의 선 · 얼음 벽');snd('glass')}}
   if(V2&&!T.lab&&!T.bot)tutTick();
   if(V2&&!T.lab){if(T.picks>=PKMAX)T.en_=0;else{const xpOk=T.picks-(T.bpk||0)<T.wave;if(T.en_>=T.need&&xpOk){T.en_-=T.need;T.en_=Math.min(T.en_,T.need*.5);T.picks++;openCards()}else if(!xpOk)T.en_=Math.min(T.en_,T.need)}
     if(T.bossPick&&!T.paused&&!T.over){T.bossPick=0;if(T.picks<PKMAX){T.picks++;T.bpk=(T.bpk||0)+1;openCards('🎁 보스 보상 · 카드를 골라요')}}}
   else if(T.en_>=T.need){T.en_-=T.need;T.picks++;T.need=8+1.3*(T.picks+1);openCards()}}
 
 function finish(win){if(T.tut&&!T.bot)return simEnd(win);T.over=true;const td=TDS(),sid=T.stg,hpP=Math.round(T.hp/T.hpMax*100);
-  let stars=0;if(win)stars=hpP>=100?3:hpP>=70?2:hpP>=30?1:0;
+  let stars=0;if(win)stars=hpP>=100?3:hpP>=50?2:1;
   td.best[sid]=Math.max(td.best[sid]||0,win?WAVES+1:T.wave);td.st[sid]=Math.max(td.st[sid]||0,stars);
   const rest=CHAR.map(c=>c.id).filter(id=>!td.un.includes(id));let joined=null;if(!V2&&rest.length&&!T.bot){joined=pick(rest);td.un.push(joined)}
   td.rw=td.rw||{};td.cd=td.cd||{};const got=[];const dI=SOF(sid).d,RWC=[7,10,10],RWG=[1000,2000,5000],RWC3=[21,30,30];/* 11-07 4단계: 60스테이지라 처음 달성 카드 줄임(예전 10·20·40 / 30·60·120) */
@@ -5822,7 +5823,7 @@ function finish(win){if(T.tut&&!T.bot)return simEnd(win);T.over=true;const td=TD
   sv();if(T.bot){T.result={win,wave:T.wave,hpP,stars};return}
   const r=ov.querySelector('.tdRes');r.innerHTML=`<h2>${win?'🌙 마음의 선을 지켰어요':'💔 마음의 선이 무너졌어요'}</h2>
    <p>${SOF(sid).n} · 웨이브 ${T.wave}/${WAVES} · 처치 ${T.kills} · 남은 체력 ${hpP}%</p>
-   ${win?`<p class="tdStar">${'★'.repeat(stars)}${'☆'.repeat(3-stars)}</p><small>★ 30% 이상 · ★★ 70% 이상 · ★★★ 100%</small>`:''}
+   ${win?`<p class="tdStar">${'★'.repeat(stars)}${'☆'.repeat(3-stars)}</p><small>★ 클리어 · ★★ 선 50% 이상 · ★★★ 선 100%</small>`:''}
    ${got.length?`<div class="tdJoin">🎁 처음 달성 보상<br>${got.join('<br>')}</div>`:''}${rpc||rpg?`<div class="tdJoin">🎁 이번 판 보상<br>${rpc?`💠 강화카드 ${rpc}<br>`:''}🪙 골드 +${rpg.toLocaleString()}G</div>`:''}
    ${cmR?`<p class="tdJoin">🎖️ 사령관 Lv${cmLv()}${cmR.up?` <b>(레벨 업 +${cmR.up})</b>`:''}${cmR.nw.map(id=>`<br>🔓 새 무기: ${wic(id)} <b>${W2N[id][0]}</b> · ${nick(id)}`).join('')}</p>`:''}<p class="tdJoin">🔮 오드 +${odG} <small>(웨이브 ${T.wave}${win?' + 클리어 10':''}${stars?' + ★ '+stars*5:''})</small></p>
    ${joined?`<p class="tdJoin">✨ 새 대원 합류: <b>${CICON[joined]} ${nick(joined)}</b></p>`:''}
@@ -6729,7 +6730,20 @@ body.tdOn .ov{z-index:9700!important}body.tdOn #ach{position:fixed;inset:0;z-ind
 .tdElvT{position:absolute;left:0;right:0;top:34%;text-align:center;font-family:'Courier New',monospace;letter-spacing:1px}.tdElvT p{margin:6px 0;font-size:15px;font-weight:700;min-height:20px;text-shadow:0 0 8px rgba(120,230,255,.8)}.tdElvT b{display:block;margin-top:10px;font-size:12px;color:#ff9ae0;font-weight:700;font-variant-numeric:tabular-nums}
 .tdElv:not(.long) .tdElvT{top:42%}.tdElvH{position:absolute;left:0;right:0;top:50%;display:flex;flex-direction:column;align-items:center;gap:8px;opacity:0;transition:opacity .4s}.tdElvH canvas{width:120px;height:120px;image-rendering:pixelated;filter:drop-shadow(0 0 8px rgba(120,230,255,.8))}.tdElvH p{margin:0;max-width:300px;text-align:center;font-size:13.5px;min-height:40px;word-break:keep-all}
 .tdElvU{position:absolute;left:0;right:0;top:44%;text-align:center;font:900 15px 'Courier New',monospace;color:#fff;letter-spacing:2px;text-shadow:0 0 14px #8ff0ff,0 0 26px #ff9ae0;opacity:0}.tdElvU small{font:700 12px 'Noto Sans KR',sans-serif;letter-spacing:0;color:#ffd6f4}.tdElvF{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none}.tdElv .tdAriS{top:auto;bottom:calc(20px + env(safe-area-inset-bottom,0px));right:14px}
-.tdAri{position:absolute;inset:0;z-index:40;display:flex;align-items:flex-end;justify-content:center;padding:0 0 calc(18px + env(safe-area-inset-bottom,0px));pointer-events:auto}.tdAri[hidden]{display:none}#tdOv img.wic{background:none!important;padding:0!important;border:0!important;border-radius:0!important;box-shadow:none!important;animation:none!important;width:1.6em!important;height:1.6em!important;min-width:0!important;object-fit:contain;vertical-align:middle;image-rendering:pixelated;margin:-.25em .1em -.2em 0;filter:drop-shadow(0 1px 2px #0009)}#tdOv img.wic.big{width:2.4em!important;height:2.4em!important}.tdAri.top{align-items:flex-start;padding:calc(12px + env(safe-area-inset-top,0px)) 0 0}
+.tdAri{position:absolute;inset:0;z-index:40;display:flex;align-items:flex-end;justify-content:center;padding:0 0 calc(18px + env(safe-area-inset-bottom,0px));pointer-events:auto}.tdAri[hidden]{display:none}
+#tdOv .lbSheet{max-height:74%}#tdOv .tdSB h2{font-size:22px}#tdOv .lbCm{display:flex;flex-direction:column;align-items:stretch;gap:2px;border:1.5px solid #ffd34d;background:rgba(20,10,26,.85);color:#ffd34d;border-radius:12px;padding:3px 8px;font:800 13px inherit;font-family:inherit;min-width:62px}#tdOv .lbCm i{display:block;height:4px;background:#3a2050;border-radius:3px;overflow:hidden}#tdOv .lbCm s{display:block;height:100%;background:#ffd34d;text-decoration:none}
+#tdOv .lbHead{gap:6px}#tdOv .lbHead .lbX{padding:6px 10px}
+#tdOv .tdSC{display:flex;align-items:center;gap:6px}#tdOv .tdSA{border:1.5px solid #ffd6ea;background:#2a1240;color:#ffd6ea;border-radius:10px;font:800 18px inherit;width:34px;height:64px;flex:none}#tdOv .tdSA[disabled]{opacity:.25}
+#tdOv .tdSB{flex:1;position:relative;background:linear-gradient(180deg,#2a1240,#140820);border:2px solid #ffd6ea;border-radius:14px;padding:12px 8px 10px;overflow:hidden}#tdOv .tdSB.lk{filter:grayscale(.8);opacity:.75}#tdOv .tdSB h2{margin:2px 0;font-size:24px;color:#fff;text-shadow:0 2px 0 #000}#tdOv .tdSB p{font-size:11.5px;color:#cbb;margin:4px 0 8px}#tdOv .tdSB>small{color:#9fe8ff;font-size:12px}
+#tdOv .tdStamp{position:absolute;left:6px;top:8px;transform:rotate(-18deg);border:2px solid #ff5a7a;color:#ff5a7a;border-radius:8px;padding:1px 6px;font:900 12px inherit;font-style:normal}
+#tdOv .tdChs{display:flex;justify-content:space-around;gap:4px;position:relative}#tdOv .tdChs:before{content:'';position:absolute;left:16%;right:16%;top:16px;height:2px;background:#4a2a5a}
+#tdOv .tdCh{position:relative;display:flex;flex-direction:column;align-items:center;gap:1px;flex:1}#tdOv .tdCh b{width:32px;height:32px;border-radius:50%;background:#1b0d29;border:2px solid #555;display:flex;align-items:center;justify-content:center;font-size:15px}#tdOv .tdCh.got b{border-color:#7dffb0;color:#7dffb0}#tdOv .tdCh small{font-size:11px;color:#fff}#tdOv .tdCh i{font-style:normal;font-size:10.5px;color:#ffd34d}
+#tdOv .tdLL{display:flex;justify-content:center;gap:10px;align-items:center;background:#fff7e8;color:#2a1030;border-radius:12px;padding:8px;font-weight:800}#tdOv .tdLL b{font-size:18px}#tdOv .tdLL .up{color:#1aa04a}
+#tdOv .tdWG{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}#tdOv .tdWG button{position:relative;display:flex;flex-direction:column;align-items:center;gap:2px;background:linear-gradient(180deg,#3a1d2a,#24101c);border:2px solid #6a4030;border-radius:10px;padding:8px 2px 6px;color:#fff;font:700 11px inherit;font-family:inherit}#tdOv .tdWG button.lk{filter:grayscale(1);opacity:.5}#tdOv .tdWG button.on{border-color:#ffd34d}#tdOv .tdWG em{font-style:normal;color:#ffd34d;font-size:11px}#tdOv .tdWG .dot{position:absolute;right:6px;top:6px;width:9px;height:9px;border-radius:50%;background:#3dff7a;box-shadow:0 0 6px #3dff7a}#tdOv .tdWG img.wic.big{width:3.4em!important;height:3.4em!important}
+#tdOv .tdPop{position:fixed;inset:0;z-index:30;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;padding:14px}#tdOv .tdWD{width:min(420px,100%);max-height:86%;display:flex;flex-direction:column;background:#140820;border:2px solid #ffd6ea;border-radius:16px;padding:12px;text-align:left}
+#tdOv .tdWDh{display:flex;gap:10px;align-items:center}#tdOv .tdWDh>div{flex:1;display:flex;flex-direction:column}#tdOv .tdWDh small{color:#cbb;font-size:11.5px}#tdOv .tdWDh b{font-size:17px}#tdOv .tdX{border:1.5px solid #ffd6ea;background:#2a1240;color:#fff;border-radius:50%;width:30px;height:30px;font:800 14px inherit}
+#tdOv .tdWDc{display:flex;gap:8px;justify-content:center;margin:8px 0 0;font-size:13px}#tdOv .tdWD h4{margin:8px 0 4px;font-size:13px;color:#ffd6ea}
+#tdOv .tdWL{overflow:auto;display:flex;flex-direction:column;gap:3px;min-height:120px}#tdOv .tdWL div{display:flex;gap:8px;align-items:center;background:#1b0d29;border:1px solid #3a2050;border-radius:8px;padding:4px 8px;font-size:12px;opacity:.55}#tdOv .tdWL div.done{opacity:.85;border-color:#2a6a40}#tdOv .tdWL div.nx{opacity:1;border-color:#ffd34d}#tdOv .tdWL em{font-style:normal;color:#ffd34d;width:36px}#tdOv .tdWL span{flex:1}#tdOv .tdWL small{color:#9fe8ff;margin-left:4px}#tdOv .tdWL i{font-style:normal;font-size:11px;color:#cbb}#tdOv .tdWL div.done i{color:#7dffb0}#tdOv img.wic{background:none!important;padding:0!important;border:0!important;border-radius:0!important;box-shadow:none!important;animation:none!important;width:1.6em!important;height:1.6em!important;min-width:0!important;object-fit:contain;vertical-align:middle;image-rendering:pixelated;margin:-.25em .1em -.2em 0;filter:drop-shadow(0 1px 2px #0009)}#tdOv img.wic.big{width:2.4em!important;height:2.4em!important}.tdAri.top{align-items:flex-start;padding:calc(12px + env(safe-area-inset-top,0px)) 0 0}
 .tdPt{position:fixed;inset:0;pointer-events:none;z-index:60}.tdPt[hidden]{display:none}.tdPt i{position:fixed;border:3px solid #ffd54a;box-shadow:0 0 0 4px rgba(255,213,74,.25),0 0 18px #ffd54a;animation:tdPtR 1s ease-in-out infinite;box-sizing:border-box}.tdPt b{position:fixed;font-size:38px;line-height:1;filter:drop-shadow(0 2px 4px #000)}.tdPt span{position:fixed;transform:translateX(-50%);background:#ffd54a;color:#2a1030;font:700 13px/1.2 sans-serif;padding:5px 10px;border-radius:10px;white-space:nowrap;box-shadow:0 2px 8px #0008}.tdPt span[hidden]{display:none}@keyframes tdPtR{50%{transform:scale(1.07);opacity:.55}}
 .tdAriBg{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 40%,rgba(10,20,40,.55),rgba(2,2,8,.96))}.tdAriBg i{position:absolute;left:50%;top:0;width:2px;height:62%;margin-left:-1px;background:linear-gradient(#fff0,#ffe9ff 40%,#8ff0ff);box-shadow:0 0 12px #8ff0ff,0 0 26px #ff9ae0;animation:ariT 1.6s ease-out both}@keyframes ariT{from{transform:scaleY(0);transform-origin:top}to{transform:scaleY(1);transform-origin:top}}
 .tdAriW{position:relative;display:flex;align-items:flex-end;gap:8px;width:min(94vw,430px);background:linear-gradient(180deg,rgba(10,30,48,.9),rgba(14,8,26,.94));border:1.5px solid rgba(140,235,255,.7);border-radius:16px;box-shadow:0 0 18px rgba(120,230,255,.35),inset 0 0 22px rgba(120,230,255,.12);padding:8px 10px 10px 4px;color:#eafcff;font-family:'Noto Sans KR',sans-serif}
@@ -6794,7 +6808,7 @@ function firstPick(){const box=ov.querySelector('.tdMenu'),sel=[];const ids=CHAR
 const stOpen=s=>{const i=STAGES.indexOf(s);if(i<=0||tdDev())return true;return(TDS().best[STAGES[i-1].id]||0)>WAVES};
 const tdDev=()=>{let d=!!window.__devAll;try{d=d||localStorage.getItem('gs_tddev')==='1'}catch(e){}return d};
 let LOB=null;/* 디펜스 로비: 로딩 그림이 위아래로 천천히 움직이고, 아래 탭 5개 */
-const TABS=V2?[['go','⚔️','출격'],['wu','🔧','무기 강화'],['cm','🎖️','사령관'],['st','📈','스탯'],['cl','👗','옷장']]:[['go','⚔️','출격'],['up','🃏','무기 강화'],['st','📈','스탯 강화'],['sq','👥','대원'],['cl','👗','옷장']];
+const TABS=V2?[['shop','🛒','상점'],['line','🌙','마음의 선'],['go','⚔️','출격'],['sq','👥','대원 관리'],['cl','👗','옷장']]:[['go','⚔️','출격'],['up','🃏','무기 강화'],['st','📈','스탯 강화'],['sq','👥','대원'],['cl','👗','옷장']];
 /* ===== 🧵 아리아드네 — 프롤로그·튜토리얼·스토리 (11-07 사용자 승인). 적 = 무수리(다 암컷인 종족). 사령관을 가끔 「언니」라고 부름 =====
    얼굴: n 기본 · s 웃음 · w 윙크 · o 놀람 · c 진지. 그림은 td/ari/<얼굴>.png(투명 PNG)가 있으면 쓰고, 없으면 임시 실루엣. 홀로그램 효과는 코드로. */
 const ARI={
@@ -6813,7 +6827,7 @@ const ARI={
  t_boss:[['c','거대한 게 와요.'],['p','언니, 화장 고치고 집중해요.']],
  t_clear:[['w','시뮬레이션 끝! 역시 제가 사람 보는 눈은 있다니까요.'],['c','이제 진짜 무수리들이 기다려요. 홀로그램이랑은 달라요, 독해요.']],
  t_res:[['n','💠 강화카드는 그 판에 쓴 대원을 키우고, 🪙 골드는 강화 비용, 🔮 오드는 스탯에 써요.']],
- t_lb:[['n','🔧 무기 강화에서는 강화카드로 대원을 키워요.','[data-tab="wu"]'],['s','🎖️ 사령관 레벨이 오르면 새 대원이 와요.','[data-tab="cm"]'],['w','📈 스탯은 언니 자신을 가꾸는 곳이에요.','[data-tab="st"]'],['s','준비되면 ⚔️ 출격! 1-1부터는 진짜예요.','[data-tab="go"]']],
+ t_lb:[['n','👥 대원 관리에서는 경험치로 대원을 키워요.','[data-tab="sq"]'],['s','🎖️ 사령관 레벨이 오르면 새 대원이 와요.','[data-cmb]'],['w','🌙 마음의 선은 언니 자신을 가꾸는 곳이에요. 단단할수록 아름다워요.','[data-tab="line"]'],['n','🛒 상점은 트와일라잇 상점이랑 이어져 있어요. 골드도 같이 써요.','[data-tab="shop"]'],['s','준비되면 ⚔️ 출격! 1-1부터는 진짜예요.','[data-go]']],
  s_loss:[['d','어머....언니....제가 수준을 잘못 생각했나봐요.'],['w','…농담이에요. 강화하고 다시 와요. 선은 제가 다시 엮어 둘게요.']],
  s_c10:[['s','무수리들이 언니 이름을 수군거리기 시작했어요. 유명해지는 건 피곤한 일이죠.']],
  s_c20:[['s','폴라리스 사람들이 언니를 북극성처럼 바라보고 있어요.'],['w','부담 갖지 마요, 원래 빛나는 사람은 그래요.']],
@@ -6937,17 +6951,57 @@ function elvAnim(now){if(!EV)return;const b=ov.querySelector('.tdElv'),t=(now-EV
 /* 기록이 하나도 없는 첫 입장: 로비를 거치지 않고 프롤로그 → 1-1 튜토리얼 전투 */
 function proFlow(){T=null;LOB=null;ov.querySelector('.tdLobby').hidden=true;bgm(null);const td=TDS();if(V2)td.un=w2Un();ari('pro',{done:()=>start('1-1','재건')})}
 function menu(){T=null;const td=TDS();if(V2)td.un=w2Un();ov.querySelectorAll('.tdPanel').forEach(p=>p.hidden=true);if(!V2&&td.un.length<5){LOB={t:LOB?LOB.t:0,tab:'go'};return firstPick()}
-  LOB=LOB||{t:0};LOB.stg=LOB.stg||'1-1';LOB.d=LOB.d==null?0:LOB.d;bgm('lobby');lbRender();
+  if(!LOB&&V2){const op=STAGES.filter(s=>s.d===0&&stOpen(s));LOB={t:0,stg:(op[op.length-1]||STAGES[0]).id}}LOB=LOB||{t:0};LOB.stg=LOB.stg||'1-1';if(V2&&!LOB.tab)LOB.tab='go';LOB.d=LOB.d==null?0:LOB.d;bgm('lobby');lbRender();
   if(V2){if(!ariSeen('pro'))ari('pro');else if(tutS().lbp)ari('t_lb')}}
 const cardSum=()=>Object.values(TDS().cd||{}).reduce((a,b)=>a+b,0);
 function lbRender(){const box=ov.querySelector('.tdLobby'),td=TDS(),L=LOB;if(V2)td.un=w2Un();if(!td.lead||!td.un.includes(td.lead)||(V2&&!W2I.has(td.lead)))td.lead=td.un[0];
-  box.innerHTML=`<div class="lbHead"><button type="button" data-a="exit" class="lbX">🌙 트와일라잇으로 돌아가기</button>${tdDev()?'<button type="button" class="lbIcB" data-lab>🎬</button>':''}<div class="lbRes"><button type="button" class="lbIcB" data-icb>☰<i class="lbIcD" hidden></i></button><span>🔮 ${(td.od||0).toLocaleString()}</span><span>💠 ${cardSum().toLocaleString()}</span></div></div>
+  const cl0=td.cl||{lv:1,xp:0},cmP=Math.min(100,(cl0.xp||0)/cmNeed(cl0.lv||1)*100);
+  box.innerHTML=`<div class="lbHead">${V2?`<button type="button" class="lbCm" data-cmb><b>🎖️ ${cl0.lv||1}</b><i><s style="width:${cmP}%"></s></i></button>`:''}<button type="button" data-a="exit" class="lbX">${V2?'🌙 돌아가기':'🌙 트와일라잇으로 돌아가기'}</button>${tdDev()?'<button type="button" class="lbIcB" data-lab>🎬</button>':''}<div class="lbRes"><button type="button" class="lbIcB" data-icb>☰<i class="lbIcD" hidden></i></button><span>🔮 ${(td.od||0).toLocaleString()}</span>${V2?`<span>🪙 ${(SAVE.gold||0).toLocaleString()}</span>`:`<span>💠 ${cardSum().toLocaleString()}</span>`}</div></div>
    <div class="lbIc" ${LOB.ic?'':'hidden'}>${icHTML()}</div>
    <div class="lbTitle"></div>
-   ${L.tab?`<div class="lbSheet">${lbTab(L.tab)}</div>`:''}
+   ${L.tab?`<div class="lbSheet">${L.tab==='cm'?'<button type="button" class="tdX" data-cmx style="float:right">✕</button>':''}${lbTab(L.tab)}</div>`:''}${V2&&L.sq&&L.tab==='sq'?`<div class="tdPop">${wqPop(L.sq)}</div>`:''}
    <div class="lbTabs">${TABS.map(([k,ic,n])=>`<button type="button" data-tab="${k}" class="${L.tab===k?'on':''}"><i>${ic}</i>${n}</button>`).join('')}</div>`;
   box.hidden=false;ov.querySelector('.tdTop').style.visibility='hidden';fillFaces(box);icDot()}
+/* ===== 11-08 사용자: 디펜스 로비 개편 — 🛒 상점(서바이버 상점) · 🌙 마음의 선 · ⚔️ 출격(스테이지 카드) · 👥 대원 관리 · 👗 옷장, 🎖️ 사령관은 왼쪽 위 배지 ===== */
+const LLMAX=30,lnHp=l=>100+8*(l-1),llCost=l=>30+15*l,llOf=()=>{const td=TDS();if(td.ll==null){td.ll=1+Math.floor(stSum(td.sl||0).line/2)}return td.ll};
+const LLS=[[5,'🛡️','마음의 선이 받는 피해가 1 줄어요'],[10,'💥','무수리가 선에 닿으면 그 자리에서 터져 주변 적에게 피해'],[15,'🔥','선이 30% 아래면 모든 피해 +20%'],[20,'🧊','45초마다 선 가까이 온 적을 얼리는 얼음 벽']];
+const RWD=d=>[[7,1000,21],[10,2000,30],[10,5000,30]][d]||[7,1000,21];
+function stgCard(){const td=TDS(),L=LOB,ss=STAGES.filter(s=>s.d===L.d),S=SOF(L.stg),i=ss.indexOf(S),o=stOpen(S),st=td.st[S.id]||0,cl=(td.best[S.id]||0)>WAVES,rw=RWD(S.d);
+  const mob=[...new Set(S.mix)].slice(0,4).map(k=>ETY[k]?ETY[k].nm:'').filter(Boolean).join(' · ');
+  const ch=(n,lb,r)=>`<div class="tdCh ${st>=n?'got':''}"><b>${st>=n?'✔':'🎁'}</b><small>${lb}</small><i>${r}</i></div>`;
+  return`<div class="lbSeg">${['🙂 보통','🔥 어려움','💀 헬'].map((n,d)=>`<button type="button" data-d="${d}" class="${L.d===d?'on':''}">${n}</button>`).join('')}</div>
+   <div class="tdSC"><button type="button" class="tdSA" data-sv="-1" ${i>0?'':'disabled'}>◀</button><div class="tdSB ${o?'':'lk'}">${st>=3?'<em class="tdStamp">완벽 통과</em>':''}<h2>${S.n}</h2><small>${o?(cl?'클리어 ✔':(td.best[S.id]?'최고 웨이브 '+td.best[S.id]+'/21':'처음 도전')):'🔒 앞 스테이지를 깨면 열려요'}</small><p>무수리: ${mob}${S.nw&&ETY[S.nw]?` · <b>NEW ${ETY[S.nw].nm}</b>`:''}</p>
+     <div class="tdChs">${ch(1,'클리어','💠 '+rw[0])}${ch(2,'선 50% 이상','🪙 '+rw[1].toLocaleString())}${ch(3,'선 100%','💠 '+rw[2]+' + 💜')}</div></div><button type="button" class="tdSA" data-sv="1" ${i<ss.length-1?'':'disabled'}>▶</button></div>
+   <p style="font-size:12px;margin:6px 0 2px">시작 무기</p><div class="tdGrid">${grid(td.un.filter(id=>W2I.has(id)),[td.lead])}</div>
+   <button type="button" class="go lbGo" data-go ${o?'':'disabled'}>⚔️ 출격</button>`}
+function lineTab(){const td=TDS(),l=llOf(),c=llCost(l),can=l<LLMAX&&(td.od||0)>=c,lv=td.sl||0,s=stSum(lv),sc=lv<STN?stCost(lv):0;
+  return`<h3>🌙 마음의 선 <em style="font-style:normal;color:#ffd34d">Lv${l}</em> <small style="color:#cbb">/ ${LLMAX}</small></h3>
+   <div class="tdLL"><span>내구력 <b>${lnHp(l)}</b></span>${l<LLMAX?`<span class="up">다음 +8</span>`:''}</div>
+   ${l<LLMAX?`<button type="button" class="go lbGo" data-llu ${can?'':'disabled'}>레벨업 (🔮 ${c})</button>`:'<p>✨ 최대 레벨</p>'}
+   <div class="stNext">${LLS.map(([n,ic,t])=>`<div class="${l>=n?'on':''}"><em>Lv${n}</em>${l>=n?ic:'🔒'} ${t}</div>`).join('')}</div>
+   <h3 style="margin-top:12px">✨ 공통 강화 <em style="font-style:normal;color:#ffd34d">${lv}</em></h3>
+   <div class="stNow"><span>⚔️ 공격력 <b>+${s.atk}%</b></span><span>🎯 크리티컬 <b>+${(s.crit/10).toFixed(1)}%</b></span></div>
+   ${lv<STN?`<button type="button" class="go lbGo" data-stu ${(td.od||0)>=sc?'':'disabled'}>${STL[stOf(lv)][0]} ${STL[stOf(lv)][1]} (🔮 ${sc})</button>`:''}
+   <p style="font-size:11.5px;color:#cbb">🔮 오드는 판이 끝날 때마다 받아요: 도달 웨이브 + 클리어 10 + ★당 5.</p>
+   ${tdDev()?'<div class="tdBtns"><button type="button" data-devo>🧪 오드 +1000</button></div>':''}`}
+function sqTab(){const td=TDS(),L=LOB,un=w2Un();td.cd=td.cd||{};
+  const can=id=>{const l=wlOf(id),c=wlCost(l);return un.includes(id)&&l<WLMAX&&(td.cd[id]||0)>=c.c&&(SAVE.gold||0)>=c.g};
+  return`<p style="font-size:12px;color:#ffd6ea">무기를 누르면 강화 목록이 보여요 · 🪙 ${(SAVE.gold||0).toLocaleString()}G</p>
+   <div class="tdWG">${W2U.map(([id,ul])=>{const o=un.includes(id);return`<button type="button" data-wq="${id}" class="${L.sq===id?'on':''} ${o?'':'lk'}">${can(id)?'<i class="dot"></i>':''}${wic(id,'big')}<span>${W2N[id][0]}</span><em>${o?'Lv'+wlOf(id):'🔒 사령관 Lv'+ul}</em></button>`}).join('')}</div>
+   ${tdDev()?'<div class="tdBtns"><button type="button" data-dev>🧪 경험치 모두 +100</button><button type="button" data-devg>🧪 골드 +10만</button></div>':''}`}
+function wqPop(id){const td=TDS(),un=w2Un(),o=un.includes(id),l=wlOf(id),h=(td.cd||{})[id]||0,c=wlCost(l),ok2=o&&l<WLMAX&&h>=c.c&&(SAVE.gold||0)>=c.g,ul=(W2U.find(q=>q[0]===id)||[])[1];
+  const rows=[];for(let n=2;n<=WLMAX;n++){const t=WLT.find(q=>q[0]===n),k=wlCost(n-1),m=(1+.1*(n-1))*(n>=10?1.1:1)*(n>=30?1.1:1)*(n>=40?1.1:1);rows.push(`<div class="${n<=l?'done':n===l+1?'nx':''}"><em>Lv${n}</em><span>피해 +10%${t?` · <b>${t[1]}</b>`:''}<small>×${m.toFixed(2)}</small></span>${n<=l?'<i>✔</i>':`<i>💠${k.c} · 🪙${k.g}</i>`}</div>`)}
+  return`<div class="tdWD"><div class="tdWDh">${wic(id,'big')}<div><b>${W2N[id][0]}</b><small>${nick(id)} · ${W2N[id][1]} · ${W2D[id]||''}</small><small>Lv${l} · 피해 ×${wlMul(id).toFixed(2)}</small></div><button type="button" class="tdX" data-wqx>✕</button></div>
+   <div class="tdWDc"><span>💠 경험치 <b>${h}</b>${l<WLMAX?' / '+c.c:''}</span><span>🪙 <b>${(SAVE.gold||0).toLocaleString()}</b>${l<WLMAX?' / '+c.g:''}</span></div>
+   ${o?(l<WLMAX?`<button type="button" class="go lbGo" data-wu="${id}" ${ok2?'':'disabled'}>강화 → Lv${l+1}</button>`:'<p>✨ 최대 강화</p>'):`<p>🔒 사령관 Lv${ul}에 합류해요</p>`}
+   <h4>강화 목록</h4><div class="tdWL">${rows.join('')}</div></div>`}
+function toShop(){if(typeof openShop!=='function')return;
+  if(!window.__tdSH){window.__tdSH=1;const _o=openShop;openShop=function(){const r=_o.apply(this,arguments);if(window.SHOP_FROM==='td'){const b=document.getElementById('shBack');if(b)b.onclick=()=>{window.SHOP_FROM=null;document.getElementById('shop').hidden=true;ov.hidden=false;menu()}}return r};try{window.openShop=openShop}catch(e){}}
+  window.SHOP_FROM='td';ov.hidden=true;try{openShop()}catch(e){console.warn(e);ov.hidden=false}}
 function lbTab(k){const td=TDS(),L=LOB;
+  if(V2&&k==='go')return stgCard();
+  if(V2&&k==='line')return lineTab();
+  if(V2&&k==='sq')return sqTab();
   if(V2&&k==='wu'){td.cd=td.cd||{};td.wl=td.wl||{};const un=w2Un();return`<p style="font-size:12px;color:#ffd6ea">무기마다 따로 강화해요. 레벨당 피해 +10% · 💠 강화카드는 그 무기를 쓴 판에서 모여요. 🪙 ${(SAVE.gold||0).toLocaleString()}G</p>
     <div class="tdUp">${W2U.map(([id,ul])=>{const o=un.includes(id),l=wlOf(id),h=td.cd[id]||0,c=wlCost(l),can=o&&l<WLMAX&&h>=c.c&&(SAVE.gold||0)>=c.g,nt=WLT.find(t=>t[0]>l);
       return`<div class="tdUpR" style="${o?'':'opacity:.4'}" data-q="${id}"><span data-face="${id}"></span><div><b>${wic(id)} ${W2N[id][0]} <em>Lv${l}</em></b><small>${nick(id)} · 피해 ×${wlMul(id).toFixed(2)}${nt?` · Lv${nt[0]} ${nt[1]}`:' · 특성 모두 열림'}${o?'':` · 🔒 사령관 Lv${ul}`}</small><i>💠 ${h}${l<WLMAX?' / '+c.c+' · 🪙 '+c.g:''}</i></div><button type="button" data-wu="${id}" ${can?'':'disabled'}>${l<WLMAX?'강화':'최대'}</button></div>`}).join('')}</div>
@@ -6985,8 +7039,14 @@ function lbClick(e){const td=TDS(),L=LOB;if(!L)return;let b;if(e.target.closest(
   if(e.target.closest('[data-lab]')){snd('click');labApply();return}
   if(e.target.closest('[data-icb]')){L.ic=!L.ic;snd('click');lbRender();return}
   if(b=e.target.closest('[data-lbf]')){const o=document.querySelector(`#lbIcons [data-lb="${b.dataset.lbf}"]`);L.ic=false;lbRender();if(o)o.click();return}
-  if(b=e.target.closest('[data-tab]')){const t=b.dataset.tab;snd('click');if(t==='cl'){toCloset();return}L.tab=L.tab===t?null:t;lbRender();return}
-  if(b=e.target.closest('[data-d]')){L.d=+b.dataset.d;const f=STAGES.filter(s=>s.d===L.d);const op=f.filter(stOpen);if(op.length)L.stg=op[op.length-1].id;snd('click');lbRender();return}
+  if(b=e.target.closest('[data-tab]')){const t=b.dataset.tab;snd('click');if(t==='cl'){toCloset();return}if(t==='shop'){toShop();return}L.tab=V2?t:(L.tab===t?null:t);if(V2)L.sq=null;lbRender();return}
+  if(e.target.closest('[data-cmb]')){snd('click');L.tab=L.tab==='cm'?'go':'cm';lbRender();return}
+  if(e.target.closest('[data-cmx]')){snd('click');L.tab='go';lbRender();return}
+  if(b=e.target.closest('[data-sv]')){const ss=STAGES.filter(s=>s.d===L.d),i=ss.indexOf(SOF(L.stg))+(+b.dataset.sv);if(ss[i]){L.stg=ss[i].id;snd('click');lbRender()}return}
+  if(b=e.target.closest('[data-wq]')){L.sq=b.dataset.wq;snd('click');lbRender();return}
+  if(e.target.closest('[data-wqx]')||(V2&&e.target.classList&&e.target.classList.contains('tdPop'))){L.sq=null;snd('click');lbRender();return}
+  if((b=e.target.closest('[data-llu]'))&&!b.disabled){const l=llOf();if(l<LLMAX&&(td.od||0)>=llCost(l)){td.od-=llCost(l);td.ll=l+1;sv();const k=LLS.find(q=>q[0]===l+1);snd(k?'evo':'pop');if(k&&typeof toast==='function')toast('🌙 마음의 선 스킬',k[2]);lbRender()}return}
+  if(b=e.target.closest('[data-d]')){L.d=+b.dataset.d;const f=STAGES.filter(s=>s.d===L.d);const op=f.filter(stOpen);L.stg=(op.length?op[op.length-1]:f[0]).id;snd('click');lbRender();return}
   if((b=e.target.closest('[data-s]'))&&!b.disabled){L.stg=b.dataset.s;snd('click');lbRender();return}
   if(b=e.target.closest('[data-id]')){td.lead=b.dataset.id;sv();snd('click');lbRender();return}
   if((b=e.target.closest('[data-wu]'))&&!b.disabled){const id=b.dataset.wu,l=wlOf(id),c=wlCost(l);td.wl=td.wl||{};if(l<WLMAX&&(td.cd[id]||0)>=c.c&&(SAVE.gold||0)>=c.g){td.cd[id]-=c.c;SAVE.gold-=c.g;td.wl[id]=l+1;sv();snd(WLT.some(t=>t[0]===l+1)?'evo':'pop');if(WLT.some(t=>t[0]===l+1))toast&&toast('🔧 특성 열림',`${W2N[id][0]} Lv${l+1}: ${WLT.find(t=>t[0]===l+1)[1]}`);lbRender()}return}

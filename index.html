@@ -5812,8 +5812,8 @@ function finish(win){if(T.tut&&!T.bot)return simEnd(win);T.over=true;const td=TD
   const rest=CHAR.map(c=>c.id).filter(id=>!td.un.includes(id));let joined=null;if(!V2&&rest.length&&!T.bot){joined=pick(rest);td.un.push(joined)}
   td.rw=td.rw||{};td.cd=td.cd||{};const got=[];const dI=SOF(sid).d,RWC=[7,10,10],RWG=[1000,2000,5000],RWC3=[21,30,30];/* 11-07 4단계: 60스테이지라 처음 달성 카드 줄임(예전 10·20·40 / 30·60·120) */
   const giveCards=n=>{const ids=T.sq.map(q=>q.id);const per={};for(let i=0;i<n;i++){const id=pick(ids);per[id]=(per[id]||0)+1}for(const id in per)td.cd[id]=(td.cd[id]||0)+per[id];return Object.entries(per).map(([id,c])=>`${nick(id)} ${c}`).join(', ')};
-  for(let st=(td.rw[sid]||0)+1;st<=stars;st++){if(st===1)got.push(`★ 경험치 ${RWC[dI]} (${giveCards(RWC[dI])})`);if(st===2){SAVE.gold=(SAVE.gold||0)+RWG[dI];got.push(`★★ 골드 ${RWG[dI].toLocaleString()}G`)}
-    if(st===3){SAVE.tix=SAVE.tix||{};SAVE.tix.R=(SAVE.tix.R||0)+1;got.push(`★★★ 경험치 ${RWC3[dI]} (${giveCards(RWC3[dI])}) + 희귀 확정권 1장`)}}
+  for(let st=(td.rw[sid]||0)+1;st<=stars;st++){if(st===1)got.push(`★ 💠 경험치 ${RWC[dI]} (${giveCards(RWC[dI])})`);if(st===2){SAVE.gold=(SAVE.gold||0)+RWG[dI];got.push(`★★ 골드 ${RWG[dI].toLocaleString()}G`)}
+    if(st===3){SAVE.tix=SAVE.tix||{};SAVE.tix.R=(SAVE.tix.R||0)+1;got.push(`★★★ 💠 경험치 ${RWC3[dI]} (${giveCards(RWC3[dI])}) + 희귀 확정권 1장`)}}
   td.rw[sid]=Math.max(td.rw[sid]||0,stars);
   /* 11-07 4단계: 판마다 보상 — 그 판에 쓴 무기마다 경험치, 골드. 지면 도달 웨이브 비율의 절반 */
   let rpc='',rpg=0;if(V2&&!T.bot&&!T.lab){const PI=Math.max(0,STAGES.indexOf(SOF(sid))),si=PI%20+1,prog=win?1:.5*T.wave/WAVES,base=RPB[dI]+.1*si;
@@ -5825,7 +5825,7 @@ function finish(win){if(T.tut&&!T.bot)return simEnd(win);T.over=true;const td=TD
    <p>${SOF(sid).n} · 웨이브 ${T.wave}/${WAVES} · 처치 ${T.kills} · 남은 체력 ${hpP}%</p>
    ${win?`<p class="tdStar">${'★'.repeat(stars)}${'☆'.repeat(3-stars)}</p><small>★ 클리어 · ★★ 선 50% 이상 · ★★★ 선 100%</small>`:''}
    ${got.length?`<div class="tdJoin">🎁 처음 달성 보상<br>${got.join('<br>')}</div>`:''}${rpc||rpg?`<div class="tdJoin">🎁 이번 판 보상<br>${rpc?`💠 경험치 ${rpc}<br>`:''}🪙 골드 +${rpg.toLocaleString()}G</div>`:''}
-   ${cmR?`<p class="tdJoin">🎖️ 사령관 Lv${cmLv()}${cmR.up?` <b>(레벨 업 +${cmR.up})</b>`:''}${cmR.nw.map(id=>`<br>🔓 새 무기: ${wic(id)} <b>${W2N[id][0]}</b> · ${nick(id)}`).join('')}</p>`:''}<p class="tdJoin">🔮 오드 +${odG} <small>(웨이브 ${T.wave}${win?' + 클리어 10':''}${stars?' + ★ '+stars*5:''})</small></p>
+   ${cmR?`<p class="tdJoin">🎖️ 사령관 Lv${cmLv()} · 🏅 명성 +${cmR.g}${cmR.up?` <b>(레벨 업 +${cmR.up})</b>`:''}${cmR.nw.map(id=>`<br>🔓 새 무기: ${wic(id)} <b>${W2N[id][0]}</b> · ${nick(id)}`).join('')}</p>`:''}<p class="tdJoin">🔮 오드 +${odG} <small>(웨이브 ${T.wave}${win?' + 클리어 10':''}${stars?' + ★ '+stars*5:''})</small></p>
    ${joined?`<p class="tdJoin">✨ 새 대원 합류: <b>${CICON[joined]} ${nick(joined)}</b></p>`:''}
    <div class="tdBtns">${V2?'<button type="button" data-a="menu">디펜스 로비로</button>':'<button type="button" data-a="retry">다시 도전</button><button type="button" data-a="menu">디펜스 로비로</button><button type="button" data-a="exit">🌙 트와일라잇으로</button>'}</div>`;r.hidden=false;bgm(null);snd(win?'ach':'hurt');T.retry=[T.stg,T.sq[0].id];if(V2)tutFinish(win,sid,cmR&&cmR.nw)}
 
@@ -6513,7 +6513,7 @@ function w2Card(c){const dots=(m)=>`<i>Lv${w2Lv(m)} ${'◆'.repeat(Math.min(5,w2
   if(c.k==='wc'){const m=T.sq.find(q=>q.id===c.id),C=W2C[c.id];const t=w2Txt(c.id,c.c),rk=c.rk||w2Rk(c.id,c.c)[0],tr=w2Trade(c.id,c.c);return`<b>${wic(c.id)} ${w2Nm(c.id,c.c)}${c.rare?' <em class="w2Rk">💜</em>':''}</b><small>${W2N[c.id][0]} · ${t}</small>${dots(m)}`}
   if(c.k==='combo'){const C=W2COMBO.find(q=>q.k===c.d);return`<b>✨ ${C.n}</b><small>${W2N[C.a][0]} + ${W2N[C.b][0]} · ${C.d}</small>`}return null}
 /* ---- 사령관 경험치 ---- */
-function cmGain(xp){const td=TDS();td.cl=td.cl||{lv:1,xp:0};const c=td.cl;const before=w2Un();c.xp+=xp;let up=0;while(c.lv<50&&c.xp>=cmNeed(c.lv)){c.xp-=cmNeed(c.lv);c.lv++;up++}const nw=w2Un().filter(id=>!before.includes(id));td.un=w2Un();return{up,nw}}
+function cmGain(xp){const td=TDS();td.cl=td.cl||{lv:1,xp:0};const c=td.cl;const before=w2Un();c.xp+=xp;let up=0;while(c.lv<50&&c.xp>=cmNeed(c.lv)){c.xp-=cmNeed(c.lv);c.lv++;up++}const nw=w2Un().filter(id=>!before.includes(id));td.un=w2Un();return{up,nw,g:xp}}
 
 /* ===== ✨ 빛 이펙트 시제품 (갤럭시 디펜스 느낌: 하얀 심 + 번지는 빛, 겹치면 밝아짐) — 쁘니 레이저 · 마녀 유도 미사일 · 쥬은 에메랄드 기사 ===== */
 const GLOW={on:1};const gStage=m=>Math.min(4,(m.ev||[]).filter(Boolean).length+(aw(m)?1:0));
@@ -7007,7 +7007,7 @@ function lbTab(k){const td=TDS(),L=LOB;
       return`<div class="tdUpR" style="${o?'':'opacity:.4'}" data-q="${id}"><span data-face="${id}"></span><div><b>${wic(id)} ${W2N[id][0]} <em>Lv${l}</em></b><small>${nick(id)} · 피해 ×${wlMul(id).toFixed(2)}${nt?` · Lv${nt[0]} ${nt[1]}`:' · 특성 모두 열림'}${o?'':` · 🔒 사령관 Lv${ul}`}</small><i>💠 ${h}${l<WLMAX?' / '+c.c+' · 🪙 '+c.g:''}</i></div><button type="button" data-wu="${id}" ${can?'':'disabled'}>${l<WLMAX?'강화':'최대'}</button></div>`}).join('')}</div>
     ${L.sq&&W2N[L.sq]?sqInfo(L.sq):''}
     ${tdDev()?'<div class="tdBtns"><button type="button" data-dev>🧪 경험치 모두 +100</button><button type="button" data-devg>🧪 골드 +10만</button></div>':''}`}
-  if(V2&&k==='cm'){const c=td.cl||{lv:1,xp:0},lv=c.lv||1,need=cmNeed(lv);return`<h3>🎖️ 사령관 Lv${lv} <small style="color:#cbb">/ 50</small></h3><div class="stBar"><i style="width:${Math.min(100,(c.xp||0)/need*100)}%"></i></div><p style="font-size:12px">경험치 ${c.xp||0} / ${need} · 판이 끝나면 웨이브 ×10 + 클리어 50 + ★당 20</p>
+  if(V2&&k==='cm'){const c=td.cl||{lv:1,xp:0},lv=c.lv||1,need=cmNeed(lv);return`<h3>🎖️ 사령관 Lv${lv} <small style="color:#cbb">/ 50</small></h3><div class="stBar"><i style="width:${Math.min(100,(c.xp||0)/need*100)}%"></i></div><p style="font-size:12px">🏅 명성 ${c.xp||0} / ${need} · 판이 끝나면 웨이브 ×10 + 클리어 50 + ★당 20</p>
     <div class="stNext">${W2U.map(([id,l])=>`<div class="${l<=lv?'on':''}"><em>Lv${l}</em>${l<=lv?'🔓':'🔒'} ${wic(id)} ${W2N[id][0]} · ${nick(id)}${W2I.has(id)?'':' <small>(제작 중)</small>'}<small>${W2N[id][1]}</small></div>`).join('')}</div>
     ${tdDev()?'<div class="tdBtns"><button type="button" data-devcm>🧪 사령관 +5레벨</button></div>':''}`}
   if(k==='go'){const ss=STAGES.filter(s=>s.d===L.d);return`<div class="lbSeg">${['🙂 보통','🔥 어려움','💀 헬'].map((n,d)=>`<button type="button" data-d="${d}" class="${L.d===d?'on':''}">${n}</button>`).join('')}</div>

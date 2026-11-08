@@ -746,9 +746,10 @@ function fmDraw(front){if(!G.fmL)return;const p=G.p,fy=p.y+18;const sm=ctx.image
 
 /* ---- 농장 ③: 튀어나옴 · 숨기 · 시야 · 착한 토마토 ---- */
 const FM_TR={ // 튀어나오는 구조물: r 반경, n 기본 마릿수, cd 쿨(초), mob 종류
- tallgrass:{r:95,n:3,cd:30,mob:'mu'},bush:{r:90,n:2,cd:30,mob:'mu'},corn:{r:100,n:4,cd:32,mob:'mu'},trellis:{r:120,n:3,cd:30,mob:'tomato'},
- tomato_bush:{r:80,n:1,cd:35,mob:'sprout'},house_full:{r:200,n:4,cd:40,mob:'tomato'},crate_pile:{r:90,n:2,cd:35,mob:'grass'},hay:{r:90,n:2,cd:35,mob:'grass'},
- barn:{r:180,n:8,cd:45,mob:'swarm',door:1},hut_thatch:{r:170,n:6,cd:45,mob:'swarm',door:1}};
+ tallgrass:{r:95,n:3,cd:30,mob:'mu'},bush:{r:90,n:2,cd:30,mob:'mu'},corn:{r:100,n:4,cd:32,mob:'mu'},trellis:{r:140,n:5,cd:18,mob:'tomato'},
+ tomato_bush:{r:110,n:3,cd:18,mob:'sprout'},house_full:{r:230,n:6,cd:24,mob:'tomato'},crate_pile:{r:110,n:4,cd:20,mob:'grass'},hay:{r:110,n:3,cd:20,mob:'grass'},
+ crates:{r:110,n:3,cd:20,mob:'grass'},barrel:{r:100,n:2,cd:20,mob:'grass'},crate_tomato:{r:100,n:3,cd:20,mob:'tomato'},mini_house:{r:130,n:4,cd:22,mob:'tomato'},vine_fence:{r:100,n:2,cd:22,mob:'grass'},
+ barn:{r:200,n:11,cd:28,mob:'swarm',door:1},hut_thatch:{r:190,n:9,cd:28,mob:'swarm',door:1}};
 const FM_HOME={barn:1,hut_thatch:1,house_full:1,house_empty:1,mini_house:1,scary_hut:1}; // 착한 토마토가 들어가는 곳
 // ④에서 농장 몹이 늘어나면 여기만 바꿈
 function fmMob(kind){const m=em();if(kind==='sprout')return'fm_sprout';if(kind==='tomato')return Math.random()<.75?'fm_angry':'fm_sprout';if(kind==='swarm')return Math.random()<.5?'fm_sprout':'fm_angry';return Math.random()<.6?'fm_sprout':'fm_angry'}
@@ -761,13 +762,13 @@ function fmEmerge(o,n,kind){const lv=fmLv(),p=G.p;let live=0;for(const e of G.en
   if(G.bot)return;
   if(lv===0){G.texts.push({x:ox,y:oy-30,v:'뿅!',life:.7,col:'#ffd0e4'});for(const q of SR)sparks(q.x,q.y-24,8,['#ffd0e4','#ffffff','#9be15d'],110,.45,2);SND.p('pop')}
   else{for(const q of SR)sparks(q.x,q.y-24,10,['#5a3a1a','#9be15d','#2a1a0a'],150,.5,2);if(SR.length>3&&!G.bot)G.texts.push({x:ox,y:oy-44,v:'우르르…!',life:.8,col:'#ff8a8a'});SND.p(FM_TR[o.t]&&FM_TR[o.t].door?'boom':'whoosh');if(lv===2)G.shk=Math.max(G.shk||0,.18)}}
-const FM_NQ={barn:1,hut_thatch:1,house_full:1};
+const FM_NQ={barn:1,hut_thatch:1,house_full:1,mini_house:1};
 function fmTrig(dt){const p=G.p,lv=fmLv(),tel=[.75,.5,.32][lv];
   for(const o of G.fmL){
     if(o.t==='scary_hut'){fmHut(o,dt);continue}
     const T=FM_TR[o.t];if(!T||o.dec)continue;if(T.mob==='mu'&&!(lv===2&&o.amb))continue;if(lv===0&&FM_NQ[o.t])continue; // 보통: 헛간·초가집·토마토 하우스는 조용
  // 풀숲: 보통·어려움은 숨는 곳, 헬은 매복 덩어리만
-    if(o.tel>0){o.tel-=dt;if(o.tel<=0&&(o.t==='house_full'||o.t==='trellis')&&em()>=6&&Math.random()<.45){fmMelon(o.x,o.y+20);if(!G.bot)SND.p('boom');o.cd=G.t+T.cd;continue}if(o.tel<=0){const n=T.n+Math.round((o.cl?o.cl.length:0)*1.6)+Math.floor(em()/5)*(T.door?2:1)+(lv===2?1:0);fmEmerge(o,n,T.mob);o.cd=G.t+T.cd*(lv===2?.75:1)}continue}
+    if(o.tel>0){o.tel-=dt;if(o.tel<=0&&(o.t==='house_full'||o.t==='trellis')&&em()>=6&&Math.random()<.45){fmMelon(o.x,o.y+20);if(!G.bot)SND.p('boom');o.cd=G.t+T.cd;continue}if(o.tel<=0){const n=Math.round(T.n*[1,1.5,1.3][lv])+Math.round((o.cl?o.cl.length:0)*1.6)+Math.floor(em()/2.5)*(T.door?2:1)+(lv===2?1:0);fmEmerge(o,n,T.mob);o.cd=G.t+T.cd*(lv?.75:1)}continue}
     if((o.cd||0)>G.t)continue;
     let dx=p.x-o.x,dy=p.y-(o.y-20),d=Math.hypot(dx,dy);if(o.cl)for(const c of o.cl){const d2=Math.hypot(p.x-c.x,p.y-(c.y-20));if(d2<d){d=d2;dx=p.x-c.x;dy=p.y-(c.y-20)}}if(d>T.r)continue;
     if(T.door&&dy<-10)continue; // 오두막은 문(앞) 쪽에서만
@@ -850,6 +851,8 @@ function fmReg(){Object.assign(ENT,FM_ENT);fmBossReg();const D={fm_hut:e=>{}};fo
   for(let i=1;i<=10;i++)for(const s of [1,2]){const k='mu'+s+'_'+i,im=new Image();im.src=`td/m${s}_${String(i).padStart(2,'0')}.png`;FM.img[k]=im}
   for(const k of ['m_caterpillar','m_beetle_red','m_ant','m_beetle_black','m_eggplant','m_melon','burst_tomato','burst_eggplant','burst_melon']){const im=new Image();im.src='farm/'+k+'.png';FM.img[k]=im}}
 // 화면 밖 등장 종류: 어려움부터 가끔 탄막 무수리
+const FM_FARM_MIX=[[0,.75,['fm_sprout','fm_angry','fm_ant']],[4,.45,['fm_sprout','fm_angry','fm_ant','fm_beetle','fm_cater']],[10,.25,['fm_angry','fm_beetle','fm_ant','fm_cater','fm_egg']],[16,.15,['fm_angry','fm_beetle','fm_egg','fm_rhino']]];
+function fmOffAny(){const m=em();let M=FM_FARM_MIX[0];for(const x of FM_FARM_MIX)if(m>=x[0])M=x;return Math.random()<M[1]?pick(M[2]):fmOff()}
 function fmOff(){const lv=fmLv(),m=em();if(lv&&Math.random()<(lv===2?.14:.07)&&m>=3)return Math.random()<.5?'fm_mu_cannon':'fm_mu_jet';let t=FM_PH[0][1];for(const [at,ts] of FM_PH)if(m>=at)t=ts;return pick(t)}
 // 구조물에서 튀어나오는 종류(③의 fmMob 교체)
 function fmMob(kind){const m=em(),r=Math.random();
@@ -888,7 +891,7 @@ function fmDie(e){const lv=fmLv(),t=e.type;let k=null,s=1;
   if(t==='fm_angry'||t==='fm_sprout'){k='burst_tomato';s=t==='fm_sprout'?.75:1;if(lv&&Math.random()<.35)(G.fmZ||(G.fmZ=[])).push({k:'juice',x:e.x,y:e.y+6,r:26,t:2.5})}
   else if(t==='fm_egg'){k='burst_eggplant';if(lv)(G.fmZ||(G.fmZ=[])).push({k:'gas',x:e.x,y:e.y,r:50,t:2.2,dmg:e.dmg*.6})}
   else if(t==='fm_melon'||t==='fm_melon_s'){k='burst_melon';s=t==='fm_melon'?1.2:.65;if(t==='fm_melon'&&lv){const n=lv===2?14:10,v=150;for(let i=0;i<n;i++){const a=i/n*6.283;G.eb.push({x:e.x,y:e.y,vx:Math.cos(a)*v,vy:Math.sin(a)*v,r:4,dmg:e.dmg*.45,life:2.6,src:e,c:'#2a1a1a'})}}}
-  else if(t==='fm_mu_blob'&&lv){for(let i=0;i<2;i++){const c=fmPop(mkEnemy('fm_mu_spider',e.x+rnd(-12,12),e.y+rnd(-12,12)));c.sk=e.sk}}
+  else if(t==='fm_mu_blob'&&lv){let sp=0;for(const q of G.enemies)if(q.fmSp)sp++;for(let i=0;i<2&&sp<(lv===2?30:20);i++,sp++){const c=fmPop(mkEnemy('fm_mu_spider',e.x+rnd(-12,12),e.y+rnd(-12,12)));c.sk=e.sk;c.fmSp=1}}
   else if(t==='fm_b_egg'){k='burst_eggplant';s=3.2}else if(t==='fm_b_melon'){k='burst_melon';s=2.4}else if(t==='fm_b_bug'||t==='fm_b_queen'){k='burst_tomato';s=3.4}
   if(k&&!G.bot){const B=G.fmB||(G.fmB=[]);if(B.length<60)B.push({k,x:e.x,y:e.y-(e.boss?40:0),t:0,s})}}
 function fmBurstDraw(dt){const B=G.fmB;if(!B||!B.length)return;const sm=ctx.imageSmoothingEnabled;ctx.imageSmoothingEnabled=true;
@@ -2674,7 +2677,7 @@ function spawnPos(){const side=Math.random()*4|0,m=40;let x,y;const hw=VW/2+m,hh
 function mkEnemy(type,x,y,o={}){
   const b=ENT[type]||ENT.unread,m=em(),hs=(1+m*.3+Math.pow(m/6.3,2.65))*1.25;
   const e={type,x,y,r:b.r,hp:b.hp*hs,max:b.hp*hs,spd:b.spd*rnd(.9,1.1)*(1+m*.012),dmg:b.dmg*(1+m*.15+Math.pow(m/15,3)),xp:b.xp,h:{},kx:0,ky:0,slow:0,stun:0,frog:0,flash:0,name:b.name};
-  Object.assign(e,o);if(b.ranged&&(type.slice(0,3)==='sb_'||type.slice(0,3)==='fm_')&&!o.boss&&G.enemies.reduce((n,q)=>n+(q.ranged&&!q.boss?1:0),0)<(G.hell?10:G.hard?8:6)){e.ranged=1;e.shcd=G.hell?2.4:3.2;e.bdm=G.hell?.8:.6}if(o.hpMul){e.hp*=o.hpMul;e.max=e.hp}
+  Object.assign(e,o);if(G.map==='farm')e.xp*=1.45;if(b.ranged&&(type.slice(0,3)==='sb_'||type.slice(0,3)==='fm_')&&!o.boss&&G.enemies.reduce((n,q)=>n+(q.ranged&&!q.boss?1:0),0)<(G.hell?10:G.hard?8:6)){e.ranged=1;e.shcd=G.hell?2.4:3.2;e.bdm=G.hell?.8:.6}if(o.hpMul){e.hp*=o.hpMul;e.max=e.hp}
   if(G.hell){const et=ET();e.hp*=(et<300?HARD.hp*1.3:HARD.hp*1.3+(5-HARD.hp*1.3)*Math.min(1,(et-300)/300))*(e.elite?3:1);e.max=e.hp;e.dmg*=2;e.spd*=HARD.spd}
   else if(G.hard){const hm=(e.boss?HARD.boss:HARD.hp)*(G.hph||1);e.hp*=hm;e.max=e.hp;e.dmg*=HARD.dmg;e.spd*=HARD.spd}
   G.enemies.push(e);return e;
@@ -2705,9 +2708,9 @@ function drawArena(){const A=G.arena;if(!A)return;const t=G.t,w=A.hw,h=A.hh,rr=2
   if(!G.bot&&Math.random()<.8){const q=arenaPt(A,Math.random()*4);px(q[0],q[1],0,-rnd(20,60),.7,pick([c1,c2,'#ffffff']),2,1,1)}}
 function spawnTick(dt){
   const m=em(),hs=G.hard?HARD.spawn:1,target=Math.min((15+m*11)*hs,340*hs);
-  G.spawnAcc+=dt*Math.min(52,2+m*2)*hs*(G.map==='farm'?.45:1);
+  G.spawnAcc+=dt*Math.min(52,2+m*2)*hs*(G.map==='farm'?.24:1);
   if(G.arena){G.spawnAcc=0;arenaTick(dt);return}
-  while(G.spawnAcc>=1){G.spawnAcc--;if(G.enemies.length<target){const [x,y]=spawnPos();if(G.map==='farm'){if(!(G.fmSil>0))mkEnemy(fmOff(),x,y)}else mkEnemy(G.hell&&Math.random()<.15?pick(G.map==='sangbong'?['sb_lamp','sb_germ','sb_trash']:['queen','kisoo']):pick(phaseTypes()),x,y)}}
+  while(G.spawnAcc>=1){G.spawnAcc--;if(G.enemies.length<target){const [x,y]=spawnPos();if(G.map==='farm'){if(!(G.fmSil>0))mkEnemy(fmOffAny(),x,y)}else mkEnemy(G.hell&&Math.random()<.15?pick(G.map==='sangbong'?['sb_lamp','sb_germ','sb_trash']:['queen','kisoo']):pick(phaseTypes()),x,y)}}
   if(G.map!=='farm'&&G.swarms.length&&G.t>=G.swarms[0]){G.swarms.shift();toast('알림 폭탄 러시!','📢 단톡방이 터진다');const n=Math.round(20+m*2.2),gap=rnd(0,Math.PI*2);for(let i=0;i<n;i++){const a=gap+.6+i/n*(Math.PI*2-1.2);mkEnemy(G.map==='sangbong'?'sb_soju':'bell',G.p.x+Math.cos(a)*(VW*.62),G.p.y+Math.sin(a)*(VH*.62),{spd:80,dmg:ENT.bell.dmg*(1+m*.08)})}}
   G.eliteT-=dt;if(G.eliteT<=0){G.eliteT=G.hard?HARD.elite:45;const [x,y]=spawnPos();const tp=pick(phaseTypes());mkEnemy(tp,x,y,{elite:1,r:ENT[tp].r*1.7,hpMul:7,xp:12,spd:ENT[tp].spd*.75,dmg:ENT[tp].dmg*1.1*(1+m*.1),name:'엘리트 '+ENT[tp].name})}
   if(G.tw){if(!G.arena&&G.t>=G.twNext){const k=G.twK++,b0=GB()[k%4],mul=Math.pow(1.5,Math.floor(k/4));G.twNext+=180;arenaStart(Object.assign({},b0,{hp:b0.hp*mul,dmg:b0.dmg*(1+.25*Math.floor(k/4))}))}return}

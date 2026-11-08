@@ -6180,15 +6180,15 @@ function evoNext(){if(!T||!T.evoQ.length)return;const q=T.evoQ.shift(),D=(EVD[q.
   box.onclick=e=>{const b=e.target.closest('button[data-v]');if(!b)return;snd('evo');q.m.ev[q.st-1]=b.dataset.v;T.fx.push({k:'txt',x:mx(q.m),y:my(q.m)-60,v:`${q.st}진화 · ${DD['ABC'.indexOf(b.dataset.v)][0]}${q.st===3&&aw(q.m)?' · 💗 각성':''}`,t:1.6,col:'#ffd34d'});box.hidden=true;T.paused=false;evoNext()}}
 /* 11-08: 황금 무수리(엘리트) — 3·5·9·11·16·18웨이브 중간에 1마리, 잡으면 무기 카드 1~3장 자동 적용(레벨업 20회와 별개) */
 const ELW=[3,5,9,11,16,18],ELH=12;
-/* 11-08 사용자: 사람은 엎어진 카드 5장 중 3장을 뒤집어 그 카드를 받아요(뒤집을 때 정해짐). 봇은 3장 자동 */
-const RRMAX=5,FLIPN=5,FLIPK=3;
+/* 11-08 사용자: 엎어진 카드 5장 중 1~3장을 뒤집어요(몇 장인지는 비밀 — 뒤집을 때마다 「한 번 더!」). 카드는 뒤집을 때 정해짐. 봇은 같은 확률로 자동 */
+const RRMAX=5,FLIPN=5,flipK=()=>1+(Math.random()<.5?1:0)+(Math.random()<.2?1:0);
 function goldReward(e){if(T.lab)return;if(!T.tut&&!T.bot){T.goldPick=(T.goldPick||0)+1;snd('evo');banner('🎁 황금 무수리 보상 · 카드 뒤집기!');return}
-  const n=T.tut?(T.tutGold||2):FLIPK,got=[];
+  const n=T.tut?(T.tutGold||2):flipK(),got=[];
   for(let i=0;i<n;i++){const L=w2Offers(8).filter(o=>o.k==='wc');if(!L.length)break;const c=L[Math.floor(Math.random()*L.length)];w2Apply(c);got.push(c)}
   if(!got.length)return;snd('evo');banner(`🎁 황금 무수리 보상 · 카드 ${got.length}장!`);got.forEach((c,i)=>T.fx.push({k:'txt',x:cl(e.x,70,W-70),y:Math.max(80,e.y-10-i*20),v:`+ ${nick(c.id)} · ${w2Nm(c.id,c.c)}`,t:1.8,col:'#ffd54a'}));T.goldN=(T.goldN||0)+got.length}
 function flipCard(){const L=w2Offers(8).filter(o=>o.k==='wc');return L.length?L[Math.floor(Math.random()*L.length)]:null}
-function openFlip(){T.paused=true;const box=ov.querySelector('.tdCards'),st={n:0,c:Array(FLIPN).fill(null),miss:Array(FLIPN).fill(null)};
-  const fh=c=>c.k==='none'?'<b>✨ 꽉 찼어요</b><small>더 올릴 카드가 없어요</small>':cardHTML(c);const show=()=>{const done=st.n>=FLIPK;box.innerHTML=`<h3>🎁 황금 무수리 보상</h3><p class="tdFlT">${done?'✨ 뒤집은 카드 3장이 적용됐어요':`카드를 뒤집어요 · 남은 기회 <b>${FLIPK-st.n}</b>`}</p><div class="tdFL">${st.c.map((c,i)=>c?`<div class="tdFC up${c.rare?' w2R':''}">${fh(c)}</div>`:st.miss[i]?`<div class="tdFC up miss">${fh(st.miss[i])}</div>`:`<button type="button" class="tdFC dn" data-f="${i}"${done?' disabled':''}><span>✦</span></button>`).join('')}</div>${done?'<button type="button" class="tdFOk">확인</button>':''}`};
+function openFlip(){T.paused=true;const FLIPK=flipK(),box=ov.querySelector('.tdCards'),st={n:0,c:Array(FLIPN).fill(null),miss:Array(FLIPN).fill(null)};
+  const fh=c=>c.k==='none'?'<b>✨ 꽉 찼어요</b><small>더 올릴 카드가 없어요</small>':cardHTML(c);const show=()=>{const done=st.n>=FLIPK;box.innerHTML=`<h3>🎁 황금 무수리 보상</h3><p class="tdFlT">${done?`✨ 카드 ${FLIPK}장이 적용됐어요`:st.n?'<b class="tdOM">한 번 더!</b>':'카드 1장을 뒤집어요'}</p><div class="tdFL">${st.c.map((c,i)=>c?`<div class="tdFC up${c.rare?' w2R':''}">${fh(c)}</div>`:st.miss[i]?`<div class="tdFC up miss">${fh(st.miss[i])}</div>`:`<button type="button" class="tdFC dn" data-f="${i}"${done?' disabled':''}><span>✦</span></button>`).join('')}</div>${done?'<button type="button" class="tdFOk">확인</button>':''}`};
   show();box.hidden=false;
   box.onclick=e=>{if(e.target.closest('.tdFOk')){box.hidden=true;T.paused=false;evoNext();return}const b=e.target.closest('button[data-f]');if(!b||st.n>=FLIPK)return;const i=+b.dataset.f,c=flipCard();
     st.n++;if(c){w2Apply(c);st.c[i]=c;T.goldN=(T.goldN||0)+1}else st.c[i]={k:'none'};snd(st.n>=FLIPK?'ach':'click');
@@ -6386,7 +6386,7 @@ const w2Orb=()=>T&&T.sq&&T.sq.some(q=>q.id==='승태민'&&cc(q,'u5'));
 /* ---- 투사체 ---- */
 function w2Shoot(o){T.w2=T.w2||[];T.w2.push(o)}
 /* 무기별 감지 범위 (11-07 사용자): 0 = 화면 전체 */
-const W2RG={'재건':600,'박준형':450,'송기호':600,'박계원':400,'김세진':0,'승태민':380,'창환이형':320,'박민규':360,'진형우':300,'박준영':420,'하도':550,'영규형':400,'조혁래':0,'임재영':0,'쥬은':450};
+/* 11-08 사용자: 마녀 사거리 절반, 디올 레이저 상향 */const W2RG={'재건':600,'박준형':225,'송기호':800,'박계원':400,'김세진':0,'승태민':380,'창환이형':320,'박민규':360,'진형우':300,'박준영':420,'하도':550,'영규형':400,'조혁래':0,'임재영':0,'쥬은':450};
 const w2Rg=m=>{const b=W2RG[m.id];return b?b*(1+w2BV(m.id).r*.5*cc(m,'r'))*(m.id==='창환이형'&&wt(m,5)?1.1:1):1e9};
 const inRg=(m,e)=>!e.dead&&e.y>-10&&Math.hypot(e.x-(m.wx===undefined?W/2:m.wx),e.y-(m.wy===undefined?LINE:m.wy))<=w2Rg(m)+e.r;
 const enR=m=>T.en.filter(e=>inRg(m,e));
@@ -7184,7 +7184,7 @@ function css(){if(document.getElementById('tdCss'))return;const st=document.crea
 #tdOv .tdCL button{display:flex;flex-direction:column;gap:4px;text-align:left;padding:12px 14px;border-radius:14px;border:1.5px solid #ff9ad5;background:#2a1240;color:#fff;font-family:inherit}
 #tdOv .tdCL button.w2R{border-color:#c49bff;background:linear-gradient(160deg,#4a1d80,#241048);box-shadow:0 0 16px #a46bff99,inset 0 0 12px #c49bff44}#tdOv .tdCL .w2Rk{font-style:normal;font-size:11px;color:#9fe8ff;margin-left:4px}#tdOv .tdCL button.w2R .w2Rk{color:#e2c8ff}#tdOv .tdCL b{font-size:16px}#tdOv .tdCL small{font-size:13px;color:#ffd6ea}#tdOv .tdCL i{font-style:normal;color:#ffd34d;font-size:12px;letter-spacing:2px}
 #tdOv .tdRR{margin-top:10px;width:100%;padding:10px;border-radius:12px;border:1.5px dashed #ffd34d;background:rgba(255,211,77,.1);color:#ffe7a8;font:800 14px 'Noto Sans KR',sans-serif}#tdOv .tdRR:disabled{opacity:.4}
-#tdOv .tdFlT{margin:0 0 10px;font-size:13px;color:#ffd6ea}#tdOv .tdFlT b{color:#ffd34d;font-size:16px}
+#tdOv .tdFlT{margin:0 0 10px;font-size:13px;color:#ffd6ea;min-height:22px}#tdOv .tdOM{display:inline-block;animation:tdOM .45s ease-out}@keyframes tdOM{0%{transform:scale(2.2);opacity:0}60%{transform:scale(.9);opacity:1}100%{transform:none}}#tdOv .tdFlT b{color:#ffd34d;font-size:16px}
 #tdOv .tdFL{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}#tdOv .tdFC{grid-column:span 2;min-height:118px;border-radius:12px;box-sizing:border-box;font-family:inherit;color:#fff}#tdOv .tdFC:nth-child(4){grid-column:2/span 2}
 #tdOv .tdFC.dn{border:2px solid #ffd34d;background:radial-gradient(circle at 50% 40%,#5a3a10,#1e1030 70%);box-shadow:0 0 14px #ffd34d66;display:grid;place-items:center;animation:tdFlB 1.6s ease-in-out infinite}#tdOv .tdFC.dn span{font-size:34px;color:#ffd34d;text-shadow:0 0 12px #ffb300}#tdOv .tdFC.dn:disabled{animation:none;opacity:.5}
 #tdOv .tdFC.up{display:flex;flex-direction:column;gap:3px;text-align:left;padding:8px;border:1.5px solid #ffd34d;background:#3a2410;animation:tdFlU .35s ease-out}#tdOv .tdFC.up b{font-size:12.5px}#tdOv .tdFC.up small{font-size:11px;color:#ffd6ea}#tdOv .tdFC.up i{font-style:normal;color:#ffd34d;font-size:10px}#tdOv .tdFC.w2R{border-color:#c49bff;background:linear-gradient(160deg,#4a1d80,#241048)}#tdOv .tdFC.miss{opacity:.4;filter:grayscale(.7);border-style:dashed}

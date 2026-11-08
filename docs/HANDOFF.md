@@ -1,4 +1,4 @@
-# 기갈 서바이버 인수인계 문서 (2026-11-07 기준, 사이트 V158 / claude.ai V87)
+# 기갈 서바이버 인수인계 문서 (2026-11-07 기준, 사이트 V159 / claude.ai V87)
 
 새 대화(또는 프로젝트)에서 이 문서를 먼저 읽고 작업을 이어간다.
 
@@ -31,6 +31,7 @@
 | 홍보 이미지 캔버스 | https://claude.ai/artifact/CMEttteZbaj4VHwD5iTHst | 도트 키 비주얼 (참고용) |
 
 - 게임은 **HTML 한 파일**(V81 이후 약 2.4MB 이상). 소스는 claude-artifacts `read_file`에 slug(UUID)와 `paths:["index.html"]`을 주면 파일로 저장된다(대화에 통째로 붙이지 말 것). 수정 후 같은 slug로 publish.
+- **V159 배포 (2026-11-08 19:25, 사이트) — 히든 3건 (패치내역 미기재, 사용자 결정)**: ① 그레이스 프리즘 보스 특별판 친구·맘터/쁘니 그림: `prForm(id)` = SAVE.fancy[id] 또는 mskCur(id) 또는 curSkin(id)이면 'fancy'(끼운 신화·일반 스킨으로 등장, 화려한 모습 꺼져 있어도). ② 그레이스 프리즘 아이콘 = 솜사탕 원반 `fx/hx_prism.png`(pdisc 첫 칸 64px): `WICO`/`wIco(k)`로 HUD 무기 칸·일시정지 목록·결과창 무기별 딜(dpsn)에 img, 랭킹 HXICO.prism. ③ 스텔라 피날레 문구 `SZ_TX` 6→16개(사용자 승인 새 문구 10개) + 화면 폭 90%보다 긴 문구는 쉼표·마침표 우선으로 두 줄 나눔. sw ASSETS fx/hx_prism.png, VERSION 'v159'.
 - **V158 배포 (2026-11-08 16:55, 사이트) — 🖼️ 로비 아트 추가**: `LBM`에 aegis 🛰️ 아이기스 지휘본부(gy .79)·grave 🕯️ 영혼이 쉬는 곳(.79)·beauty 🪽 아름다움의 신전(.8), `fx/lobby_*.jpg`(제미나이 ✦ 제거). 업적 `aegis` 「아이기스 우주사령부」(디펜스 입장, td.js `enter()`에서 `achGet('aegis')`, 기존 디펜스 경험자는 achCheck에서 소급) — 업적 보상 `lb` 필드(achClaim → `SAVE.lbOwn`). 시즌 패스 `SP.days` 21(11/25 18시까지), 35단계(`SPMAX=SPF.length`): 무료 31~35 골드, 프리미엄 32 grave · 33 전설1 · 35 beauty+신화1. 🆕 새 획득 알림: `SAVE.seen` vs `ownKeys()`(inv·lbOwn·petOwn·titles), 처음엔 전부 본 것으로 초기화, 로비 👗 옷장 탭 `dot('closet')`, 옷장 탭별 숫자·카드 NEW(`.nwb`), `openCloset`이 새것 있는 탭으로. 로비 꾸미기 탭 맨 위 👀 미리보기(`lbPreview`). sw VERSION 'v158'.
 - **V157 배포 (2026-11-08, 사이트) — 👑 신화 선택권 미리보기 (사용자 결정)**: 상점 선택권 목록 `.msel`을 누르면 바로 받지 않고 `mselPreview(pid)` 창 → 그 신화의 스킨(`mselSkin`: m:=Ⅰ, m3:=Ⅱ, ms:/m2:=Ⅲ, mx:id|s)을 걷기 프레임 4~7로 **까만 실루엣 + 금빛 그림자**만 보여 줌, 입장 연출이면 「🎬 입장 연출 포함」. [👑 이걸로 할래요]에서 선택권 차감·획득, [다시 고를래요]/바깥 탭은 닫기. 패치내역 「👑 신화 선택권 미리보기(실루엣)」. sw VERSION 'v157'.
 - **V156 배포 (2026-11-08 15:30, 사이트) — 자잘한 수정 (패치내역 새 줄 없음)**: 로딩 화면 `.st`·시작 화면 `.s2tag` 문구 「시즌3 · 새로운 세상」(키 비주얼 그림은 시즌2 그대로). 📡 통신기 「💬 오늘의 한마디」 숨김(`DAYOFF=true`: 로비·디펜스 로비 알약 제거, 통신기 탭 숨김, 기본 탭 log — 사용자 제보 「터치하면 계속 넘어감」, 고친 뒤 다시 켜기). 디펜스 중 서바이버 로비 mp3가 겹치던 문제: `SND.tick`의 `__tdOn` 분기에서 `lbStop()`. sw VERSION 'v156'.

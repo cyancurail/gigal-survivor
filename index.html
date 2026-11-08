@@ -116,7 +116,7 @@ button:focus-visible{outline:3px solid var(--cyan);outline-offset:2px}
 .clochars button{border:1px solid var(--line);background:var(--panel2,#1a1426);border-radius:10px;padding:4px 2px;font-size:11px;font-weight:700;color:var(--ink);display:flex;flex-direction:column;align-items:center;gap:2px}
 .clochars button[aria-pressed="true"]{border-color:var(--gold);box-shadow:0 0 0 2px rgba(255,211,77,.35)}
 .clochars canvas{width:36px;height:36px;image-rendering:pixelated}
-.clotabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.clotabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px} .clocard,.wfxb{position:relative} .nwb{position:absolute;top:-6px;right:-4px;background:#ff3b5c;color:#fff;font:900 9.5px/1 system-ui,sans-serif;font-style:normal;border-radius:7px;padding:3px 5px;box-shadow:0 0 0 2px #1a1020;pointer-events:none;animation:nwP 1.4s ease-in-out infinite} @keyframes nwP{50%{transform:scale(1.12)}} .lbPv{position:relative;border-radius:12px;overflow:hidden;border:1px solid var(--line);margin-bottom:8px;background:#0b0820;line-height:0} .lbPv canvas{display:block;width:100%} .lbPvN{position:absolute;left:8px;bottom:8px;line-height:1.2;background:rgba(10,6,24,.72);color:#fff;font-size:12px;font-weight:800;padding:4px 9px;border-radius:999px}
 .clotabs button{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:999px;padding:8px 14px;font-weight:800;font-size:14px}
 .clotabs button[aria-pressed="true"]{background:var(--gold);color:#2a1a00;border-color:var(--gold)}
 .clogrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px}
@@ -3039,6 +3039,7 @@ const ACH=[
  {id:'hell12',n:'지옥 단톡방 전원 입장',c:'12명 모두 헬모드 해금',r:'👑 신화 선택권 1장 (원하는 신화를 직접 골라요)',tix:{S:1},pub:1},
  {id:'hellev',n:'헬 모드 추가 이벤트!',c:'헬 모드 추가 기념 접속 선물',r:'💰 2000G',gold:2000},
  {id:'s2ev',n:'시즌2 업데이트 기념 접속 이벤트 달성!',c:'시즌2 업데이트 기념 접속 선물',r:'💰 5000G',gold:5000},
+ {id:'aegis',n:'아이기스 우주사령부',c:'아스가르드 디펜스 모드 입장',r:'🖼️ 로비 배경 「🛰️ 아이기스 지휘본부」',lb:'aegis'},
 ];
 /* 히든 무기 제작 업적 (V133 준비, 사용자 결정 B안): 보상 신화 스킨이 준비되면 ACH_HX_ON=true + 각 항목에 inv(스킨 POOL id)·r 채우기.
    켜면 ACH 맨 끝에 붙음(18→24개, 저장 코드 3바이트 그대로). 숨김 업적(pub 없음). 패치내역엔 안 씀(히든). 달성 = SAVE.hxMade[hx](직접 합체, 트와일라잇 제외, 예전 기록 소급) */
@@ -3060,12 +3061,12 @@ if(SAVE.ach&&!SAVE.achC){SAVE.achC={};Object.keys(SAVE.ach).forEach(k=>SAVE.achC
 ['ach','ax','xevo','achC'].forEach(k=>{if(!SAVE[k])SAVE[k]={}});if(!SAVE.tix)SAVE.tix={R:0,L:0};
 function achOn(k){const a=ACH.find(q=>q.fx&&q.fx.includes(k));return !!(a&&SAVE.achC[a.id]&&SAVE.ax[k]!==false)}
 const achUnclaimed=()=>ACH.filter(a=>SAVE.ach[a.id]&&!SAVE.achC[a.id]).length;
-function achClaim(id){if(!SAVE.ach[id]||SAVE.achC[id])return;const a=ACH.find(q=>q.id===id);SAVE.achC[id]=Date.now();if(a.gold)SAVE.gold+=a.gold;if(a.tix)for(const t in a.tix)SAVE.tix[t]=(SAVE.tix[t]||0)+a.tix[t];if(a.inv)SAVE.inv[a.inv]=true;if(a.inv2)SAVE.inv[a.inv2]=true;persist();SKC_ACH();SND.p('coin');achBadge()}
+function achClaim(id){if(!SAVE.ach[id]||SAVE.achC[id])return;const a=ACH.find(q=>q.id===id);SAVE.achC[id]=Date.now();if(a.gold)SAVE.gold+=a.gold;if(a.tix)for(const t in a.tix)SAVE.tix[t]=(SAVE.tix[t]||0)+a.tix[t];if(a.inv)SAVE.inv[a.inv]=true;if(a.inv2)SAVE.inv[a.inv2]=true;if(a.lb){SAVE.lbOwn=SAVE.lbOwn||{};SAVE.lbOwn[a.lb]=1}persist();SKC_ACH();try{window.lbBadges&&lbBadges()}catch(e){}SND.p('coin');achBadge()}
 function achBadge(){const n=achUnclaimed();document.querySelectorAll('#achBtn,#selAch').forEach(b=>{b.innerHTML='🏆 업적'+(n?` <span class="achdot">${n}</span>`:'')})}
 function achGet(id){if(SAVE.ach[id])return;if(G&&G.tw&&G.running)return;const a=ACH.find(q=>q.id===id);if(!a)return;SAVE.ach[id]=Date.now();persist();achBadge();
   SND.p('ach');if(!(G&&G.bot))toast('🏆 업적 달성!','업적 창에서 보상을 받으세요',true)}
 function achCheck(){
-  achGet('enter');achGet('hellev');achGet('s2ev');try{achHx()}catch(e){}
+  achGet('enter');achGet('hellev');achGet('s2ev');try{const T=SAVE.td;if(T&&((T.tut&&T.tut.done)||Object.keys(T.best||{}).length))achGet('aegis')}catch(e){}try{achHx()}catch(e){}
   if(fancyCount()>=CH12().length)achGet('fancy12');
   if(CH12().every(c=>SAVE.cine[c.id]))achGet('cine12');
   if(anyMyth())achGet('myth');if((SAVE.mdup||0)>=1)achGet('mdup1');if((SAVE.mdup||0)>=2)achGet('mdup2');
@@ -5018,7 +5019,7 @@ let run=false,raf=0,last=0,W=0,H=0,DPR=1;
 try{const sid=localStorage.getItem('gs_sel');const i=CHAR.findIndex(c=>c.id===sid);if(i>=0&&(!CHAR[i].ju||juUnl('emerald')))selI=i}catch(e){}
 const remember=()=>{try{localStorage.setItem('gs_sel',CHAR[selI].id)}catch(e){}};
 // ---- 배경: 제미나이 그림이 오면 fx/lobby_*.png 로 교체 (없으면 코드로 그린 임시 배경) ----
-const LBM={base:{n:'🌙 기본 밤하늘'},festa:{n:'🏮 시즌2 축제의 밤거리',gy:.745},spirit:{n:'🍄 정령의 숲',gy:.745},jeonju:{n:'🌕 전주의 숲',gy:.74},princess:{n:'👑 공주님 꿈깨세요',gy:.8}};
+const LBM={base:{n:'🌙 기본 밤하늘'},festa:{n:'🏮 시즌2 축제의 밤거리',gy:.745},spirit:{n:'🍄 정령의 숲',gy:.745},jeonju:{n:'🌕 전주의 숲',gy:.74},princess:{n:'👑 공주님 꿈깨세요',gy:.8},aegis:{n:'🛰️ 아이기스 지휘본부',gy:.79},grave:{n:'🕯️ 영혼이 쉬는 곳',gy:.79},beauty:{n:'🪽 아름다움의 신전',gy:.8}};
 window.LBM=LBM;const lbOwn=k=>k==='base'||!!window.__devAll||!!(SAVE.lbOwn||{})[k];window.lbOwn=lbOwn;
 const lbKey=()=>{const k=SAVE.lobbyMap;return LBM[k]&&lbOwn(k)?k:'base'};
 const BG={};function bgImg(){const k=lbKey();if(k==='base')return null;if(!BG[k]){const im=new Image();im.src='fx/lobby_'+k+'.jpg';BG[k]=im}const im=BG[k];return im.complete&&im.naturalWidth?im:null}
@@ -5078,7 +5079,7 @@ cv.addEventListener('pointerdown',e=>{if(window.__ariLbHit&&__ariLbHit(e.clientX
 function res(){const T=SAVE.tix||{};$$('#lbRes').innerHTML=`<span>💰 ${(SAVE.gold||0).toLocaleString()}G</span>${T.R?`<span>🎟️ 희귀 ${T.R}</span>`:''}${T.L?`<span>🎟️ 전설 ${T.L}</span>`:''}${T.M?`<span>👑 신화 ${T.M}</span>`:''}`;
   const c=CHAR[selI],tt=SAVE.title&&(SAVE.titles||{})[SAVE.title]&&window.TITLES?TITLES[SAVE.title]:'';$$('#lbName').innerHTML=esc(c.nick)+(SAVE.fancy[c.id]&&!c.ju?' · 👗':'')+(tt?`<small class="lbTt">${esc(tt)}</small>`:'')}
 const dot=(k,n)=>{const b=$$(`[data-lb="${k}"]`);if(!b)return;let d=b.querySelector('.dot');if(!n){if(d)d.remove();return}if(!d){d=document.createElement('span');d.className='dot';b.appendChild(d)}d.textContent=n===true?'!':(n>99?'99+':n)};
-function badges(){try{dot('mail',window.GMAIL?GMAIL.n():0)}catch(e){}dot('att',attCan()?true:0);try{const n=msCanN();dot('day',n);dot('pass',spCanN())}catch(e){}try{dot('ach',achUnclaimed())}catch(e){}try{dot('patch',localStorage.getItem('gs_patch')===PATCH[0][0]?0:'N')}catch(e){}try{dot('board',window.__boardN||0)}catch(e){}try{const cb=$$('[data-lb="comm"]');if(cb)cb.hidden=!(window.ARICOM&&ARICOM.on());dot('comm',window.ARICOM?ARICOM.n():0)}catch(e){}}
+function badges(){try{dot('mail',window.GMAIL?GMAIL.n():0)}catch(e){}dot('att',attCan()?true:0);try{const n=msCanN();dot('day',n);dot('pass',spCanN())}catch(e){}try{dot('ach',achUnclaimed())}catch(e){}try{dot('closet',window.cloNewN?cloNewN():0)}catch(e){}try{dot('patch',localStorage.getItem('gs_patch')===PATCH[0][0]?0:'N')}catch(e){}try{dot('board',window.__boardN||0)}catch(e){}try{const cb=$$('[data-lb="comm"]');if(cb)cb.hidden=!(window.ARICOM&&ARICOM.on());dot('comm',window.ARICOM?ARICOM.n():0)}catch(e){}}
 window.lbBadges=()=>{if(run)badges()};
 // ---- 🎉 7일 출석 체크 ----
 const ATT7=[{g:300},{t:{R:1}},{g:500},{t:{R:2}},{g:800},{t:{L:1}},{g:1500,t:{L:1}}];
@@ -5138,29 +5139,72 @@ const _rc=renderCloset;renderCloset=function(){const lob=CLO.tab==='lobby';if(lo
   if(!lob)return;tabs.querySelectorAll('button').forEach(b=>{if(b!==tb)b.setAttribute('aria-pressed','false')});
   const host=tabs.parentElement;while(tabs.nextSibling)host.removeChild(tabs.nextSibling);
   const bg=SAVE.lobbyMap&&lbOwn(SAVE.lobbyMap)?SAVE.lobbyMap:'base',pc=petCur();
-  const d=document.createElement('div');d.innerHTML=`<p class="clonote">로비 배경과 펫은 어떤 캐릭터로 놀든 함께해요. 시즌 패스에서 얻을 수 있어요.</p>
+  const d=document.createElement('div');d.innerHTML=`<div class="lbPv"><canvas id="lbPvC"></canvas><span class="lbPvN">👀 미리보기 · ${esc(LBM[bg].n)}</span></div><p class="clonote">로비 배경과 펫은 어떤 캐릭터로 놀든 함께해요. 시즌 패스·업적에서 얻을 수 있어요.</p>
    <div class="clowrow"><span class="wn">🖼️ 로비 배경</span><span class="wb">${Object.keys(LBM).map(k=>lbOwn(k)?`<button type="button" class="wfxb clb" data-lbm="${k}" aria-pressed="${bg===k}">${esc(LBM[k].n)}</button>`:`<button type="button" class="wfxb" disabled>🔒 ???</button>`).join('')}</span></div>
    <div class="clowrow"><span class="wn">🐾 펫</span><span class="wb"><button type="button" class="wfxb clp" data-pet="" aria-pressed="${!pc}">없음</button>${Object.keys(PETS).map(k=>petOwn(k)?`<button type="button" class="wfxb clp" data-pet="${k}" aria-pressed="${pc===k}"><canvas width="40" height="34" data-pp="${k}" style="vertical-align:middle;margin-right:4px"></canvas>${esc(PETS[k].n)}</button>`:`<button type="button" class="wfxb" disabled>🔒 ???</button>`).join('')}</span><span class="c">로비에서는 따라다니고, 게임에서는 경험치 보석을 주워 와요</span></div>
    <div class="clowrow"><span class="wn">🏷️ 칭호</span><span class="wb"><button type="button" class="wfxb clt" data-tt="" aria-pressed="${!SAVE.title}">없음</button>${Object.keys(window.TITLES||{}).map(k=>(SAVE.titles||{})[k]?`<button type="button" class="wfxb clt" data-tt="${k}" aria-pressed="${SAVE.title===k}">${esc(TITLES[k])}</button>`:`<button type="button" class="wfxb" disabled>🔒 ???</button>`).join('')}</span><span class="c">로비에서 이름 밑에 보여요</span></div>`;
   host.appendChild(d);
   d.querySelectorAll('canvas[data-pp]').forEach(cv=>{const k=cv.dataset.pp,draw=()=>{const g=cv.getContext('2d');g.clearRect(0,0,40,34);petBlit(g,k,0,20,17,.45)};const im=petIm(k);if(im)draw();else PIM[k].onload=draw});
+  try{lbPreview(d.querySelector('#lbPvC'),bg)}catch(e){console.warn(e)}
   d.querySelectorAll('.clb').forEach(b=>b.onclick=()=>{SAVE.lobbyMap=b.dataset.lbm;persist();renderCloset()});
   d.querySelectorAll('.clp').forEach(b=>b.onclick=()=>{SAVE.pet=b.dataset.pet||null;persist();renderCloset()});
   d.querySelectorAll('.clt').forEach(b=>b.onclick=()=>{SAVE.title=b.dataset.tt||null;persist();renderCloset()})};
 try{window.renderCloset=renderCloset}catch(e){}
+// ---- 👀 로비 미리보기 (11-08): 고른 배경 전체 + 옷장 캐릭터가 걷는 선 위를 산책 + 펫 ----
+let PVT=null;
+function lbPreview(cv,k){if(!cv)return;clearInterval(PVT);const W0=cv.parentElement.clientWidth||320,H0=Math.round(W0*572/1024),DP=Math.min(2,devicePixelRatio||1);
+  cv.width=Math.round(W0*DP);cv.height=Math.round(H0*DP);cv.style.width=W0+'px';cv.style.height=H0+'px';const g=cv.getContext('2d');
+  let im=null;if(k!=='base'){im=new Image();im.src='fx/lobby_'+k+'.jpg'}
+  const id=CHAR[CLO.ci].id,form=SAVE.fancy[id]?'fancy':'plain',st={x:.3,dir:1,f:0,t0:performance.now()};
+  const stars=[...Array(60)].map((_,i)=>[hash(i*7+1),hash(i*13+5)*.7,hash(i*3+9)]);
+  const tick=()=>{if(!cv.isConnected||$('#closet').hidden){clearInterval(PVT);PVT=null;return}const t=(performance.now()-st.t0)/1000;
+    g.setTransform(DP,0,0,DP,0,0);g.imageSmoothingEnabled=true;
+    const gyF=k==='base'?.82:(LBM[k].gy||.78),gy=H0*gyF,sz=H0*.24;
+    if(im&&im.complete&&im.naturalWidth)g.drawImage(im,0,0,W0,H0);else{const gr=g.createLinearGradient(0,0,0,H0);gr.addColorStop(0,'#0b0820');gr.addColorStop(1,'#2a1a4a');g.fillStyle=gr;g.fillRect(0,0,W0,H0);
+      for(const [a,b,c] of stars){g.globalAlpha=.4+.6*Math.abs(Math.sin(t*1.5+c*9));g.fillStyle='#fff';g.fillRect(a*W0,b*H0,1.5,1.5)}g.globalAlpha=1;g.fillStyle='#1a1230';g.fillRect(0,gy,W0,H0-gy)}
+    st.x+=st.dir*.0045;st.f+=.45;if(st.x>.85){st.x=.85;st.dir=-1}if(st.x<.15){st.x=.15;st.dir=1}
+    const x=st.x*W0,bob=Math.abs(Math.sin(st.f*Math.PI/2))*-2;
+    const pk=petCur();if(pk){const PP=PETS[pk],psc=sz/48*PP.sc,px0=x-st.dir*(sz*.3+PP.w*psc*.28),py=PP.fly?gy-sz*.78+Math.sin(t*2.2)*4:gy-PP.h*psc*.42;g.fillStyle='rgba(0,0,0,.22)';g.beginPath();g.ellipse(px0,gy,PP.w*psc*.18,sz*.04,0,0,7);g.fill();petBlit(g,pk,t,px0,py,psc,st.dir<0)}
+    g.fillStyle='rgba(0,0,0,.28)';g.beginPath();g.ellipse(x,gy,sz*.28,sz*.07,0,0,7);g.fill();
+    let sp=null;try{sp=SPRF(id,form,(st.f|0)%4)}catch(e){}if(sp){g.save();g.imageSmoothingEnabled=false;g.translate(x,gy-sz*.5+bob+sz*.06);if(st.dir<0)g.scale(-1,1);g.drawImage(sp,-sz/2,-sz/2,sz,sz);g.restore()}};
+  tick();PVT=setInterval(tick,1000/24)}
+// ---- 🆕 새로 얻은 스킨·펫·로비·칭호 알림 (11-08) ----
+// 가진 것 목록과 SAVE.seen(본 것)을 비교. 처음엔 지금 가진 걸 모두 '본 것'으로 해서 알림이 쏟아지지 않게.
+function ownKeys(){const a=[];for(const k in (SAVE.inv||{}))if(SAVE.inv[k])a.push('inv:'+k);for(const k in (SAVE.lbOwn||{}))if(SAVE.lbOwn[k])a.push('bg:'+k);for(const k in (SAVE.petOwn||{}))if(SAVE.petOwn[k])a.push('pet:'+k);for(const k in (SAVE.titles||{}))if(SAVE.titles[k])a.push('tt:'+k);return a}
+function nwCat(k){if(/^(bg|pet|tt):/.test(k))return'lobby';const id=k.slice(4);if(id==='hell:aura')return'skin';if(id==='hell:wfx'||/^wh?:/.test(id))return'weapon';const q=POOL.find(o=>o.id===id);if(!q)return null;if(SKINK.includes(q.kind)||q.kind==='mskin')return'skin';if(q.kind==='tall'||q.vid)return'video';return null}
+function nwSeen(){if(!SAVE.seen){SAVE.seen={};for(const k of ownKeys())SAVE.seen[k]=1;try{persist()}catch(e){}}return SAVE.seen}
+function nwList(cat){const S=nwSeen();return ownKeys().filter(k=>!S[k]&&nwCat(k)&&(!cat||nwCat(k)===cat))}
+window.cloNewN=()=>{try{return nwList().length}catch(e){return 0}};
+const NWS=new Set();/* 이번 접속에서 보여 준 NEW 표시(한 번 본 뒤에도 창을 닫기 전까지 유지) */
+const _rc2=renderCloset;renderCloset=function(){_rc2.apply(this,arguments);try{
+  const root=$('#closet'),tab=CLO.tab;const tabs=root.querySelector('.clotabs');
+  const mine=nwList(tab);if(mine.length){const S=nwSeen();for(const k of mine){S[k]=1;NWS.add(k)}persist()}
+  if(tabs)tabs.querySelectorAll('button[data-tab]').forEach(b=>{const n=nwList(b.dataset.tab).length;b.querySelector('.achdot')?.remove();if(n)b.insertAdjacentHTML('beforeend',` <span class="achdot">${n}</span>`)});
+  const tag=el=>{if(el&&!el.querySelector('.nwb'))el.insertAdjacentHTML('beforeend','<em class="nwb">NEW</em>')};
+  for(const k of NWS){const [c,...r]=k.split(':'),v=r.join(':');let el=null;
+    if(c==='bg')el=root.querySelector(`[data-lbm="${v}"]`);else if(c==='pet')el=root.querySelector(`[data-pet="${v}"]`);else if(c==='tt')el=root.querySelector(`[data-tt="${v}"]`);
+    else if(c==='inv'){if(v==='hell:aura')el=root.querySelector('.cau');else if(v==='hell:wfx')el=root.querySelector('.chf');else if(/^wh?:/.test(v)){const [h,w]=v.split(':');el=root.querySelector(`.cws[data-k="${w}"][data-v="${h==='wh'?'h':'r'}"]`)}
+      else{el=root.querySelector(`[data-sk="${CSS.escape(v)}"]`);if(!el){const cid=CHAR[CLO.ci].id;root.querySelectorAll('.cmsk[data-s]').forEach(b=>{try{if(mskSrc(cid,+b.dataset.s)===v)el=b}catch(e){}})}}}
+    tag(el)}
+  try{window.lbBadges&&lbBadges()}catch(e){}}catch(e){console.warn('nw',e)}};
+try{window.renderCloset=renderCloset}catch(e){}
+const _oc=openCloset;openCloset=function(ci){try{if(!nwList(CLO.tab).length){const t=['lobby','skin','weapon','video'].find(q=>(q!=='video'||anyMyth())&&nwList(q).length);if(t)CLO.tab=t}}catch(e){}return _oc.apply(this,arguments)};
+try{window.openCloset=openCloset}catch(e){}
 // ===== 🎫 시즌 패스 + 📅 미션 (V106) =====
-const SP={id:'s2a',name:'시즌2 패스 · 아름다운 거짓',start:new Date('2026-11-04T18:00:00+09:00').getTime(),days:14,lvXp:200,premG:5000};
+const SP={id:'s2a',name:'시즌2 패스 · 아름다운 거짓',start:new Date('2026-11-04T18:00:00+09:00').getTime(),days:21,/* 11-08: 11/25 18시까지 연장 */lvXp:200,premG:5000};
 SP.end=SP.start+SP.days*864e5;window.SP=SP;
 const TITLES={fin:'🏁 시즌2 완주자',liar:'💋 아름다운 거짓말쟁이',hero:'👑 시즌2의 주인공'};window.TITLES=TITLES;
 const SPF=[{g:300},{g:350},{g:400},{g:450},{g:500},{g:550},{g:600},{g:650},{g:700},{bg:'festa'},
  {g:800},{g:850},{g:900},{g:950},{t:{L:1}},{g:1000},{g:1050},{g:1100},{g:1200},{pet:'wisp'},
- {g:1300},{g:1400},{g:1500},{g:1600},{t:{L:1}},{g:1700},{g:1800},{g:1900},{g:2000},{g:3000,title:'fin'}];
+ {g:1300},{g:1400},{g:1500},{g:1600},{t:{L:1}},{g:1700},{g:1800},{g:1900},{g:2000},{g:3000,title:'fin'},
+ {g:2000},{g:2000},{g:2000},{g:2000},{g:3000}];
 const SPP=[{title:'liar'},{g:1000},{g:1200},{g:1400},{pet:'butterfly'},{g:1600},{g:1800},{t:{L:1}},{g:2000},{bg:'spirit'},
  {g:2000},{g:2200},{t:{M:1}},{g:2400},{pet:'slime'},{g:2500},{g:2600},{t:{L:1}},{g:2800},{bg:'jeonju'},
- {g:2800},{g:3000},{t:{M:1}},{g:3000},{pet:'ghost'},{g:3000},{g:3000},{t:{L:1}},{g:3000},{bg:'princess',title:'hero',t:{M:1}}];
+ {g:2800},{g:3000},{t:{M:1}},{g:3000},{pet:'ghost'},{g:3000},{g:3000},{t:{L:1}},{g:3000},{bg:'princess',title:'hero',t:{M:1}},
+ {g:3000},{bg:'grave'},{t:{L:1}},{g:3500},{bg:'beauty',t:{M:1}}];
 const spNow=()=>Date.now();const spLive=()=>spNow()>=SP.start&&spNow()<SP.end;
 function sp(){let S=SAVE.sp;if(!S||S.id!==SP.id)S=SAVE.sp={id:SP.id,xp:0,prem:0,f:{},p:{}};return S}
-const spLv=()=>Math.min(30,1+Math.floor(sp().xp/SP.lvXp));
+const SPMAX=SPF.length;const spLv=()=>Math.min(SPMAX,1+Math.floor(sp().xp/SP.lvXp));
 function spAdd(x,why){if(!spLive()||!(x>0))return 0;const S=sp(),b=spLv();S.xp+=Math.round(x);const a=spLv();if(a>b)setTimeout(()=>toast('🎫 패스 '+a+'단계!','받을 보상이 생겼어요'),400);return Math.round(x)}
 window.spAdd=spAdd;
 function rwIcon(r){if(r.bg)return'🖼️';if(r.pet)return'🐾';if(r.title&&!r.g&&!r.t)return'🏷️';if(r.t&&r.t.M)return'👑';if(r.t&&r.t.L)return'🎟️';return'💰'}
@@ -5202,8 +5246,8 @@ for(const fn of ['hxMerge','rdMerge']){const o=window[fn];if(typeof o!=='functio
 const dLeft=()=>{const ms0=SP.end-spNow();if(ms0<=0)return'시즌 종료';const d=Math.floor(ms0/864e5),h=Math.floor(ms0%864e5/36e5);return d?`${d}일 ${h}시간 남음`:`${h}시간 남음`};
 function passM(){const S=sp(),L=spLv(),xin=S.xp%SP.lvXp,pre=spNow()<SP.start;
   const cell=(tr,i)=>{const lv=i+1,r=(tr==='p'?SPP:SPF)[i],got=(tr==='p'?S.p:S.f)[lv],ok=lv<=L&&(tr==='f'||S.prem);return `<button type="button" class="spC${got?' got':ok?' ok':''}${r.bg||r.pet||r.title?' sp':''}" data-tr="${tr}" data-lv="${lv}" ${!ok||got?'disabled':''} title="${esc(rwName(r))}"><i>${rwIcon(r)}</i><small>${esc(rwName(r))}</small>${got?'<em>✔</em>':!ok&&tr==='p'&&!S.prem?'<em>🔒</em>':''}</button>`};
-  const o=ovM(`<div class="lbM spM"><h3>🎫 ${esc(SP.name)}</h3><p class="c" style="margin:0">${pre?'곧 시작해요!':dLeft()} · <b>${L}단계</b>${L<30?` · 다음 단계까지 ${SP.lvXp-xin} XP`:' · 🎉 만렙!'}</p>
-   <div class="spBar"><span style="width:${L>=30?100:xin/SP.lvXp*100}%"></span></div>
+  const o=ovM(`<div class="lbM spM"><h3>🎫 ${esc(SP.name)}</h3><p class="c" style="margin:0">${pre?'곧 시작해요!':dLeft()} · <b>${L}단계</b>${L<SPMAX?` · 다음 단계까지 ${SP.lvXp-xin} XP`:' · 🎉 만렙!'}</p>
+   <div class="spBar"><span style="width:${L>=SPMAX?100:xin/SP.lvXp*100}%"></span></div>
    <div class="spRows"><div class="spHd"><b>무료</b><b>${S.prem?'👑 프리미엄':'🔒 프리미엄'}</b></div><div class="spScroll">${SPF.map((_,i)=>`<div class="spCol${i+1===L?' cur':''}"><span class="spN">${i+1}</span>${cell('f',i)}${cell('p',i)}</div>`).join('')}</div></div>
    <div class="btns">${spCanN()?`<button type="button" class="big" id="spAll">🎁 모두 받기 (${spCanN()})</button>`:''}${S.prem?'':`<button type="button" class="ghost" id="spPrem">👑 프리미엄 열기 · ${SP.premG.toLocaleString()}G</button>`}<button type="button" class="ghost" id="lbX">닫기</button></div>
    <p class="c" style="font-size:11.5px;opacity:.75;margin:4px 0 0">판마다 버틴 시간·보스 처치로, 그리고 📅 미션으로 XP가 쌓여요. 받은 보상은 시즌이 끝나도 남아요.</p></div>`);
@@ -7527,7 +7571,7 @@ function irisC(mid){const im=IMG['fx/iris_c.png'];if(!ok(im)||window.__irisBusy)
   const step=ts=>{if(!t0)t0=ts;const t=(ts-t0)/1000,f=Math.min(44,Math.floor(t*20));if(!done&&t>=1.06){done=true;try{mid()}catch(e){console.warn(e)}}
     g.setTransform(dr,0,0,dr,0,0);g.clearRect(0,0,Wv,Hv);g.imageSmoothingEnabled=false;const k=Math.max(Wv/320,Hv/180),w=320*k,h=180*k;g.drawImage(im,(f%8)*320,((f/8)|0)*180,320,180,(Wv-w)/2,(Hv-h)/2,w,h);
     if(t<2.2)requestAnimationFrame(step);else{c.remove();window.__irisBusy=0;if(!done)mid()}};requestAnimationFrame(step)}
-function enter(){/* 11-08 사용자: 궤도 엘리베이터는 처음(튜토리얼)만, 그 뒤로는 iris → 위에서 아래로 훑는 카메라 → 로비 */irisC(open)}
+function enter(){/* 11-08 사용자: 궤도 엘리베이터는 처음(튜토리얼)만, 그 뒤로는 iris → 위에서 아래로 훑는 카메라 → 로비 */try{window.achGet&&achGet('aegis')}catch(e){}irisC(open)}
 function leave(){bgm(null);const ig=window.irisGo;if(typeof ig==='function')ig(close);else close()}
 function close(){cancelAnimationFrame(raf);raf=0;T=null;LD=null;LOB=null;bgm(null);window.__tdOn=0;document.body.classList.remove('tdOn');if(ov){ov.hidden=true;ov.querySelectorAll('.tdPanel').forEach(p=>p.hidden=true)}}
 /* 로비 버튼 (조무룩 계정 또는 localStorage gs_tddev=1 에서만) */

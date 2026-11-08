@@ -5198,7 +5198,7 @@ function msM(){if(!spLive()){ovM(`<div class="lbM"><h3>📅 미션</h3><p class=
   o.querySelector('#msP').onclick=passM}
 
 // ---- ✨ 게임 진입: pixelfx star iris (V106) ----
-const IRIS=new Image();IRIS.src='fx/iris.png';
+const IRIS=new Image();IRIS.src='fx/iris.png';window.irisGo=(m)=>irisGo(m);/* 디펜스에서 트와일라잇으로 돌아갈 때 star iris */
 function irisGo(mid){if(!(IRIS.complete&&IRIS.naturalWidth)||window.__irisBusy){mid();return}window.__irisBusy=1;
   const c=document.createElement('canvas');c.id='irisCv';c.style.cssText='position:fixed;inset:0;width:100%;height:100%;z-index:100000;pointer-events:auto;image-rendering:pixelated';document.body.appendChild(c);
   const g=c.getContext('2d'),dpr=Math.min(2,devicePixelRatio||1),Wv=innerWidth,Hv=innerHeight;c.width=Wv*dpr;c.height=Hv*dpr;let t0=0,done=false;try{SND.p('evo')}catch(e){}
@@ -7471,7 +7471,7 @@ function upPanel(back){const box=ov.querySelector('.tdMenu'),td=TDS();td.up=td.u
 function start(stg,ld){const S=SOF(stg);T=null;ov.querySelector('.tdLobby').hidden=true;LOB&&(LOB.off=1);bgm(null);loading([],2.4,()=>{T=newRun(stg,ld);if(V2&&!tutS().done&&!Object.keys(TDS().best||{}).length)T.tut=1;ov.querySelector('.tdTop [data-a=spd]').textContent='⏩ 2배';snd('ult');T.ph='battle';bgm(T.tut?null:'battle')})}
 function loop(ts){raf=requestAnimationFrame(loop);const dt=Math.min(.05,(ts-(last||ts))/1000);last=ts;if(LD){ldStep(dt);if(LD){ldDraw();return}}if(T&&!T.paused&&!T.over){const n=T.speed;for(let i=0;i<n;i++)update(dt*(T.ts||1));if(!T.bossM&&T.wave>=WAVES&&T.en.some(e=>e.boss&&!e.dead))T.bossM=1;
     if(!T.over&&T.ph){const low=T.hp/T.hpMax<(T.lowM?.25:.2);T.lowM=low;if(low&&T.ph==='battle')T.ph='fight';bgm(T.tut?null:low?'low':T.bossM?'boss':T.ph)}}bgVol();if(!T&&LOB&&!ov.querySelector('.tdLobby').hidden){lbDraw(dt);return}draw();if(T&&T.lab)labDraw(ctx);dragDraw()}
-function open(fast){build();ov.hidden=false;window.__tdOn=1;document.body.classList.add('tdOn');resize();last=0;cancelAnimationFrame(raf);raf=requestAnimationFrame(loop);T=null;LOB=null;ov.querySelector('.tdLobby').hidden=true;const nw0=V2&&!ariSeen('pro'),rec0=Object.keys(TDS().best||{}).length>0;if(!(nw0&&!rec0))bgm('lobby');if(V2){elv(nw0,nw0&&!rec0?proFlow:menu);if(fast&&EV)EV.iris=1}else loading([],2.6,menu,1)}
+function open(fast){build();ov.hidden=false;window.__tdOn=1;document.body.classList.add('tdOn');resize();last=0;cancelAnimationFrame(raf);raf=requestAnimationFrame(loop);T=null;LOB=null;ov.querySelector('.tdLobby').hidden=true;const nw0=V2&&!ariSeen('pro'),rec0=Object.keys(TDS().best||{}).length>0;if(!(nw0&&!rec0))bgm('lobby');if(V2&&(nw0||!tutS().done)){elv(nw0,nw0&&!rec0?proFlow:menu);if(fast&&EV)EV.iris=1}else loading([],2.6,menu,1)}
 /* 화면 전환: 서바이버 → 디펜스 = iris, 디펜스 → 서바이버 = star iris */
 function irisC(mid){const im=IMG['fx/iris_c.png'];if(!ok(im)||window.__irisBusy){mid();return}window.__irisBusy=1;
   const c=document.createElement('canvas');c.style.cssText='position:fixed;inset:0;width:100%;height:100%;z-index:100000;pointer-events:auto;image-rendering:pixelated';document.body.appendChild(c);
@@ -7479,8 +7479,8 @@ function irisC(mid){const im=IMG['fx/iris_c.png'];if(!ok(im)||window.__irisBusy)
   const step=ts=>{if(!t0)t0=ts;const t=(ts-t0)/1000,f=Math.min(44,Math.floor(t*20));if(!done&&t>=1.06){done=true;try{mid()}catch(e){console.warn(e)}}
     g.setTransform(dr,0,0,dr,0,0);g.clearRect(0,0,Wv,Hv);g.imageSmoothingEnabled=false;const k=Math.max(Wv/320,Hv/180),w=320*k,h=180*k;g.drawImage(im,(f%8)*320,((f/8)|0)*180,320,180,(Wv-w)/2,(Hv-h)/2,w,h);
     if(t<2.2)requestAnimationFrame(step);else{c.remove();window.__irisBusy=0;if(!done)mid()}};requestAnimationFrame(step)}
-function enter(){/* 11-08 사용자: 튜토리얼(프롤로그) 뒤로는 궤도 엘리베이터 → iris → 디펜스 로비 순서 */if(V2&&tutS().done&&ariSeen('pro'))open(1);else irisC(open)}
-function leave(){bgm(null);if(typeof irisGo==='function')irisGo(close);else close()}
+function enter(){/* 11-08 사용자: 궤도 엘리베이터는 처음(튜토리얼)만, 그 뒤로는 iris → 위에서 아래로 훑는 카메라 → 로비 */irisC(open)}
+function leave(){bgm(null);const ig=window.irisGo;if(typeof ig==='function')ig(close);else close()}
 function close(){cancelAnimationFrame(raf);raf=0;T=null;LD=null;LOB=null;bgm(null);window.__tdOn=0;document.body.classList.remove('tdOn');if(ov){ov.hidden=true;ov.querySelectorAll('.tdPanel').forEach(p=>p.hidden=true)}}
 /* 로비 버튼 (조무룩 계정 또는 localStorage gs_tddev=1 에서만) */
 function lobbyBtn(){const row=document.getElementById('lbGoRow');const mp=document.getElementById('lbMp');if(mp&&!mp.dataset.tdl){mp.dataset.tdl=1;mp.innerHTML='👥<span>친구와 함께하기</span>'}

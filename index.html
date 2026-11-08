@@ -5827,7 +5827,7 @@ function finish(win){if(T.tut&&!T.bot)return simEnd(win);T.over=true;const td=TD
    ${got.length?`<div class="tdJoin">🎁 처음 달성 보상<br>${got.join('<br>')}</div>`:''}${rpc||rpg?`<div class="tdJoin">🎁 이번 판 보상<br>${rpc?`💠 강화카드 ${rpc}<br>`:''}🪙 골드 +${rpg.toLocaleString()}G</div>`:''}
    ${cmR?`<p class="tdJoin">🎖️ 사령관 Lv${cmLv()}${cmR.up?` <b>(레벨 업 +${cmR.up})</b>`:''}${cmR.nw.map(id=>`<br>🔓 새 무기: ${wic(id)} <b>${W2N[id][0]}</b> · ${nick(id)}`).join('')}</p>`:''}<p class="tdJoin">🔮 오드 +${odG} <small>(웨이브 ${T.wave}${win?' + 클리어 10':''}${stars?' + ★ '+stars*5:''})</small></p>
    ${joined?`<p class="tdJoin">✨ 새 대원 합류: <b>${CICON[joined]} ${nick(joined)}</b></p>`:''}
-   <div class="tdBtns"><button type="button" data-a="retry">다시 도전</button><button type="button" data-a="menu">디펜스 로비로</button><button type="button" data-a="exit">🌙 트와일라잇으로</button></div>`;r.hidden=false;bgm(null);snd(win?'ach':'hurt');T.retry=[T.stg,T.sq[0].id];if(V2)tutFinish(win,sid,cmR&&cmR.nw)}
+   <div class="tdBtns">${V2?'<button type="button" data-a="menu">디펜스 로비로</button>':'<button type="button" data-a="retry">다시 도전</button><button type="button" data-a="menu">디펜스 로비로</button><button type="button" data-a="exit">🌙 트와일라잇으로</button>'}</div>`;r.hidden=false;bgm(null);snd(win?'ach':'hurt');T.retry=[T.stg,T.sq[0].id];if(V2)tutFinish(win,sid,cmR&&cmR.nw)}
 
 /* ---- 그리기 ---- */
 /* ===== 🚀 무기 v2 (2026-11-06 사용자 결정: 갤럭시 디펜스식 · 사령관 레벨 해금 · 판 안 무기 건설) ===== */

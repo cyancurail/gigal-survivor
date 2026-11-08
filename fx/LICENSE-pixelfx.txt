@@ -1,4 +1,5 @@
 fx/pstar.png, fx/pimp.png, fx/rune.png: rendered from pixelfx (https://github.com/patch-gg/pixelfx)
+farm/torch.png: rendered from pixelfx fire/torch (every 2nd frame, 30 frames, 72x120, pivot 36,94).
 (projectiles/flare star part, explosions/implosion, arcane/rune-circle flattened; ice/arcane palettes).
 
 MIT License

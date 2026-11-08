@@ -671,6 +671,8 @@ const FMC=560;
 // 해금(⑥에서 상봉 헬 15분으로) — 지금은 개발자·테스트만
 /* 🔒 농장 헬·트와일라잇 임시 잠금 (11-08): 0으로 바꾸면 그대로 다시 열림 · 테스트 페이지(__devAll)는 열림 */
 const FM_HELL_LOCK=1;function fmHellOff(){return FM_HELL_LOCK&&!window.__devAll}
+/* 11-09 사용자: 상봉 헬 15분(=장수 해금)을 한 번 하면 모든 캐릭터의 상봉 어려움·헬 해금 (예전에 장수를 연 사람은 접속 때 소급) */
+function sbAllHell(say){let n=0;SAVE.sbU=SAVE.sbU||{};for(const c of CHAR){if((SAVE.sbU[c.id]||0)<2){SAVE.sbU[c.id]=2;n++}}if(n&&say){try{G.unlockedNow.push('💀 모든 캐릭터의 상봉 헬모드 해금!');toast('💀 상봉 헬모드 전원 해금!','이제 모든 캐릭터로 상봉 헬에 갈 수 있어요',true)}catch(e){}}return n}
 function fmU(){let d=!!window.__devAll||!!SAVE.fmU;try{d=d||localStorage.getItem('gs_tddev')==='1'||localStorage.getItem('gs_fm')==='1'}catch(e){}return d}
 // 그림: farm/*.png 는 월드 크기의 2배로 저장 → ½로 그림
 const FM_K=['floor','tomato_bush','shovel','watering_can','mini_house','crate_tomato','scarecrow','house_full','house_empty','tallgrass','hay','crates','vine_fence','bush','barrel','barn','trellis','corn','crate_pile','hut_thatch','hide_grass','scary_hut','fence_long','fence_short','fence_corner','fence_t','maze_0','maze_1','maze_2','maze_3','maze_4','maze_5','maze_6','maze_7','maze_8','m_ally','m_angry','m_sprout'];
@@ -1992,7 +1994,7 @@ function hellTick(dt){const p=G.p;
   if(G.eb.length){const pw=W('pet'),D=pw&&pw.st.dome;for(const b of G.eb){b.x+=b.vx*dt;b.y+=b.vy*dt;b.life-=dt;const d2=(b.x-p.x)**2+(b.y-p.y)**2;if(D&&d2<D.R*D.R){b.life=0;hpB('pet',b.dmg*edm());if(!G.bot&&Math.random()<.5)sparks(b.x,b.y,4,['#7dffb0','#ffffff'],120,.2);continue}if(d2<(b.r+9)**2){b.life=0;rangedHit(b.dmg,b)}}G.eb=G.eb.filter(b=>b.life>0);if(G.eb.length>400)G.eb.splice(0,G.eb.length-400)}
   if(G.map==='sangbong'&&!G.tw&&!G.bot&&G.t>=600&&!G.hell){const nv=G.hard?2:1;if(sbU(G.id)<nv){SAVE.sbU=SAVE.sbU||{};SAVE.sbU[G.id]=nv;persist();const t=nv===2?'💀 상봉 헬 모드 해금!':'🔥 상봉 어려움 모드 해금!';G.unlockedNow.push(`${t.slice(0,2)} ${esc(CHAR[G.ci].nick)}의 ${t.slice(3,-1)}`);toast(t,CHAR[G.ci].nick+' · 상봉에서 10분 생존',true)}}
   if(G.map==='farm'&&!G.tw&&!G.bot&&G.t>=600&&!(SAVE.ach||{}).jangsu10)achGet('jangsu10');
-  if(G.map==='sangbong'&&G.hell&&!G.tw&&!G.bot&&G.t>=900&&!SAVE.fmU){SAVE.fmU=1;persist();G.unlockedNow.push('🍅 새 맵 「장수」 해금!');toast('🍅 새 맵 장수 해금!','위기의 토마토 농장 · 맵 선택에서 고를 수 있어요',true)}
+  if(G.map==='sangbong'&&G.hell&&!G.tw&&!G.bot&&G.t>=900&&!SAVE.fmU){SAVE.fmU=1;sbAllHell(1);persist();G.unlockedNow.push('🍅 새 맵 「장수」 해금!');toast('🍅 새 맵 장수 해금!','위기의 토마토 농장 · 맵 선택에서 고를 수 있어요',true)}
   if(G.map==='gigal'&&G.hard&&!G.hell&&!G.tw&&!G.bot&&G.t>=600&&!hellUnl(G.id)){SAVE.hellU=SAVE.hellU||{};SAVE.hellU[G.id]=1;persist();achCheck();G.unlockedNow.push(`💀 ${esc(CHAR[G.ci].nick)}의 헬모드 해금!`);toast('💀 헬모드 해금!',CHAR[G.ci].nick+'의 헬모드가 열렸어요',true)}
   if(!G.hell)return;
   if(G.t>=600&&!G.h10){G.h10=1;if(!G.bot)achGet('hell10')}
@@ -4963,6 +4965,7 @@ function loop(now){
   if(G){draw();hudT+=dt;if(hudT>.1&&G.running){hudT=0;hudTick()}}
 }
 requestAnimationFrame(t=>{last=t;loop(t)});
+try{if(SAVE.fmU&&sbAllHell(0))persist()}catch(e){}
 titleScreen();
 
 /* ================= test hooks ================= */

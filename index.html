@@ -6914,7 +6914,7 @@ let EV=null;
 function elv(long,then){const b=ov.querySelector('.tdElv')||(()=>{const d=document.createElement('div');d.className='tdElv';d.innerHTML='<canvas class="tdElvC"></canvas><div class="tdElvT"><p></p><p></p><b></b></div><div class="tdElvH"><canvas width="224" height="224"></canvas><p></p></div><div class="tdElvU">ARIADNE ENGINE UPDATE COMPLETE<br><small>아리아드네 엔진 업데이트 완료</small></div><div class="tdElvF"></div><button type="button" class="tdAriS">건너뛰기</button>';ov.appendChild(d);
     d.querySelector('.tdAriS').addEventListener('click',e=>{e.stopPropagation();elvEnd()});return d})();
   b.hidden=false;b.classList.toggle('long',!!long);b.querySelectorAll('.tdElvT p,.tdElvH p').forEach(p=>p.textContent='');b.querySelector('.tdElvH').style.opacity=0;b.querySelector('.tdElvU').style.opacity=0;b.querySelector('.tdElvF').style.opacity=0;b.querySelector('.tdElvT').style.opacity=1;ov.querySelector('.tdLobby').hidden=true;EV={t0:performance.now(),long:!!long,then,dur:long?11.6:1.7,st:{}};snd('whoosh');requestAnimationFrame(elvAnim)}
-function elvEnd(){if(!EV)return;const f=EV.then;EV=null;const b=ov.querySelector('.tdElv');if(b)b.hidden=true;if(f)f()}
+function elvEnd(){if(!EV||EV.ending)return;if(EV.iris){EV.ending=1;const e=EV;irisC(()=>{if(EV===e)EV=null;const b=ov.querySelector('.tdElv');if(b)b.hidden=true;if(e.then)e.then()});return}const f=EV.then;EV=null;const b=ov.querySelector('.tdElv');if(b)b.hidden=true;if(f)f()}
 function elvType(el,s,t0,t,sp){const n=Math.max(0,Math.min(s.length,Math.floor((t-t0)/(sp||.035))));const v=s.slice(0,n);if(el.textContent!==v)el.textContent=v}
 function elvAnim(now){if(!EV)return;const b=ov.querySelector('.tdElv'),t=(now-EV.t0)/1000,L=EV.long,cv=b.querySelector('.tdElvC');requestAnimationFrame(elvAnim);
   const W0=cv.clientWidth,H0=cv.clientHeight;if(cv.width!==W0)cv.width=W0;if(cv.height!==H0)cv.height=H0;const g=cv.getContext('2d');g.fillStyle='#020308';g.fillRect(0,0,W0,H0);
@@ -7025,7 +7025,7 @@ function upPanel(back){const box=ov.querySelector('.tdMenu'),td=TDS();td.up=td.u
 function start(stg,ld){const S=SOF(stg);T=null;ov.querySelector('.tdLobby').hidden=true;LOB&&(LOB.off=1);bgm(null);loading([],2.4,()=>{T=newRun(stg,ld);if(V2&&!tutS().done&&!Object.keys(TDS().best||{}).length)T.tut=1;ov.querySelector('.tdTop [data-a=spd]').textContent='⏩ 2배';snd('ult');T.ph='battle';bgm(T.tut?null:'battle')})}
 function loop(ts){raf=requestAnimationFrame(loop);const dt=Math.min(.05,(ts-(last||ts))/1000);last=ts;if(LD){ldStep(dt);if(LD){ldDraw();return}}if(T&&!T.paused&&!T.over){const n=T.speed;for(let i=0;i<n;i++)update(dt*(T.ts||1));if(!T.bossM&&T.wave>=WAVES&&T.en.some(e=>e.boss&&!e.dead))T.bossM=1;
     if(!T.over&&T.ph){const low=T.hp/T.hpMax<(T.lowM?.25:.2);T.lowM=low;if(low&&T.ph==='battle')T.ph='fight';bgm(T.tut?null:low?'low':T.bossM?'boss':T.ph)}}bgVol();if(!T&&LOB&&!ov.querySelector('.tdLobby').hidden){lbDraw(dt);return}draw();if(T&&T.lab)labDraw(ctx);dragDraw()}
-function open(){build();ov.hidden=false;window.__tdOn=1;document.body.classList.add('tdOn');resize();last=0;cancelAnimationFrame(raf);raf=requestAnimationFrame(loop);T=null;LOB=null;ov.querySelector('.tdLobby').hidden=true;const nw0=V2&&!ariSeen('pro'),rec0=Object.keys(TDS().best||{}).length>0;if(!(nw0&&!rec0))bgm('lobby');if(V2)elv(nw0,nw0&&!rec0?proFlow:menu);else loading([],2.6,menu,1)}
+function open(fast){build();ov.hidden=false;window.__tdOn=1;document.body.classList.add('tdOn');resize();last=0;cancelAnimationFrame(raf);raf=requestAnimationFrame(loop);T=null;LOB=null;ov.querySelector('.tdLobby').hidden=true;const nw0=V2&&!ariSeen('pro'),rec0=Object.keys(TDS().best||{}).length>0;if(!(nw0&&!rec0))bgm('lobby');if(V2){elv(nw0,nw0&&!rec0?proFlow:menu);if(fast&&EV)EV.iris=1}else loading([],2.6,menu,1)}
 /* 화면 전환: 서바이버 → 디펜스 = iris, 디펜스 → 서바이버 = star iris */
 function irisC(mid){const im=IMG['fx/iris_c.png'];if(!ok(im)||window.__irisBusy){mid();return}window.__irisBusy=1;
   const c=document.createElement('canvas');c.style.cssText='position:fixed;inset:0;width:100%;height:100%;z-index:100000;pointer-events:auto;image-rendering:pixelated';document.body.appendChild(c);
@@ -7033,7 +7033,7 @@ function irisC(mid){const im=IMG['fx/iris_c.png'];if(!ok(im)||window.__irisBusy)
   const step=ts=>{if(!t0)t0=ts;const t=(ts-t0)/1000,f=Math.min(44,Math.floor(t*20));if(!done&&t>=1.06){done=true;try{mid()}catch(e){console.warn(e)}}
     g.setTransform(dr,0,0,dr,0,0);g.clearRect(0,0,Wv,Hv);g.imageSmoothingEnabled=false;const k=Math.max(Wv/320,Hv/180),w=320*k,h=180*k;g.drawImage(im,(f%8)*320,((f/8)|0)*180,320,180,(Wv-w)/2,(Hv-h)/2,w,h);
     if(t<2.2)requestAnimationFrame(step);else{c.remove();window.__irisBusy=0;if(!done)mid()}};requestAnimationFrame(step)}
-function enter(){irisC(open)}
+function enter(){/* 11-08 사용자: 튜토리얼(프롤로그) 뒤로는 궤도 엘리베이터 → iris → 디펜스 로비 순서 */if(V2&&tutS().done&&ariSeen('pro'))open(1);else irisC(open)}
 function leave(){bgm(null);if(typeof irisGo==='function')irisGo(close);else close()}
 function close(){cancelAnimationFrame(raf);raf=0;T=null;LD=null;LOB=null;bgm(null);window.__tdOn=0;document.body.classList.remove('tdOn');if(ov){ov.hidden=true;ov.querySelectorAll('.tdPanel').forEach(p=>p.hidden=true)}}
 /* 로비 버튼 (조무룩 계정 또는 localStorage gs_tddev=1 에서만) */

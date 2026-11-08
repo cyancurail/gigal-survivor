@@ -5883,7 +5883,7 @@ KC.prism='#ffb3f0';
 HX.push({k:'prism',a:'laser',b:'cotton',it:'sunglass',q:'지금 당신은 가장 강하고 아름다워요. 준비됐어요?',lore:'가장 눈부신 순간엔, 언제나 우린 함께였어요.',col:'#ffb3f0',sub:'💗 QUEEN 레이저쇼 + 🍭 솜사탕 랜드 + 🕶️ 선글라스'});
 [['pcore',120,86,24,15],['pmana',208,150,28,15],['pplasma',224,200,27,15],['pimpact',320,180,10,30],['pwarpb',100,104,42,30],['pdebris',232,96,64,20],['pdisc',64,64,6,20],['pquake',288,104,48,15]].forEach(([k,w,h,n,fps])=>{const im=new Image();im.src='fx/'+k+'.png';HXI[k]={im,w,h,n,fps}});
 function hxDrawList(){const L=G.weapons;const p=L.find(w=>w.k==='prism');return p&&p.st.sub?L.concat([p.st.sub.laser,p.st.sub.cotton].filter(Boolean)):L}
-const PR={CD:120,/* CD는 11-09부터 안 씀(프리즘 게이지) */BW:10,AP:2.0,CH:3.0,FIRE:3.5,K:1440,KB:600,LM:.8,DM:.6};// 2분마다(첫 발동도 2분 뒤) · 15·20분 보스 등장 10초 뒤 특별판// 맘터 등장 → 충전(정전) → 발사
+const PR={TURN:.18,CD:120,/* CD는 11-09부터 안 씀(프리즘 게이지) */BW:10,AP:2.0,CH:3.0,FIRE:3.5,K:1440,KB:600,LM:.8,DM:.6};// 2분마다(첫 발동도 2분 뒤) · 15·20분 보스 등장 10초 뒤 특별판// 맘터 등장 → 충전(정전) → 발사
 function prDir(){const p=G.p,R=Math.max(VW,VH)*.75;let best=0,bn=-1;for(let i=0;i<16;i++){const a=i*Math.PI/8,ca=Math.cos(a),sa=Math.sin(a);let n=0;for(const e of G.enemies){if(e.dead)continue;const dx=e.x-p.x,dy=e.y-p.y,pr=dx*ca+dy*sa;if(pr<20||pr>R)continue;if(Math.abs(dx*sa-dy*ca)<pr*.5)n+=e.boss?6:e.elite?3:1}if(n>bn){bn=n;best=a}}return best}
 function prTick(w,dt){const S=G.S,st=w.st,p=G.p;
   if(!st.sub||!st.sub.cotton)st.sub={laser:{k:'laser',lvl:8,evo:true,t:0,st:{}},cotton:{k:'cotton',lvl:8,evo:true,t:0,st:{}}};
@@ -5904,13 +5904,15 @@ function prTick(w,dt){const S=G.S,st=w.st,p=G.p;
   if(!c.s2&&c.t>PR.AP){c.s2=1;if(!G.bot)SND.p('ult')}
   const T=c.t-PR.AP-PR.CH;
   // 발동 중 제자리: 빔 앞쪽이 아닌 적은 가까이 오면 밀려나요(무적은 아님)
-  {const BR=150*S.area,a=c.shot?c.a0:c.a,ca=Math.cos(a),sa=Math.sin(a),hw=Math.min(VW,VH)/6*S.area;
+  {const BR=150*S.area,a=c.shot?c.a0:c.a,ca=Math.cos(a),sa=Math.sin(a),hw=Math.min(VW,VH)/6*S.area*prBW(c,T);
    for(const e of G.enemies){if(e.dead)continue;const dx=e.x-p.x,dy=e.y-p.y,d=Math.hypot(dx,dy)||1,lim=BR+e.r;if(d>=lim)continue;
      if(c.shot&&T>=0&&T<(c.F||PR.FIRE)){const pr=dx*ca+dy*sa;if(pr>0&&Math.abs(dx*sa-dy*ca)<hw+e.r)continue}
      const k=e.boss?.35:1;e.x=p.x+dx/d*(d+(lim-d)*k);e.y=p.y+dy/d*(d+(lim-d)*k);if(!G.bot&&Math.random()<.08)px(e.x,e.y,dx/d*120,dy/d*120,.3,pick(['#ffb3f0','#ffffff','#bff4ff']),2,1,2)}}
   if(T>=0&&T<CF){
     if(c.bm&&!c.fl&&T>=6.4){c.fl=1;if(!G.bot){SND.p('ult');SND.p('boom');G.wflash=Math.max(G.wflash||0,.5)}}
     if(!c.shot){c.shot=1;c.a0=c.a;{const bs=c.fb&&!c.fb.dead?c.fb:null;if(bs){c.bm=1;c.F=11.4;c.a0=Math.atan2(bs.y-p.y,bs.x-p.x);c.fr=prFriends(c.hp&&c.hp.st)}}if(!G.bot){SND.p('boom');G.fx.push({ring:1,x:p.x,y:p.y,r:0,R:120,life:.4,L:.4,c:'#ffb3f0'})}}
+    // V169: 빔은 아주 천천히 방향을 틀어요(초당 약 10°) — 보스판은 보스, 기본판은 적이 많은 쪽
+    {c.rt=(c.rt||0)-dt;if(c.rt<=0){c.rt=.25;c.tg=c.bm&&c.fb&&!c.fb.dead?Math.atan2(c.fb.y-p.y,c.fb.x-p.x):prDir()}if(c.tg!==undefined){const d=((c.tg-c.a0+Math.PI*3)%(Math.PI*2))-Math.PI,mx=PR.TURN*dt;c.a0+=Math.max(-mx,Math.min(mx,d))}}
     c.cur=c.a0;{const v=c.bm?(T<3.2?60:T<5.4?60*(1-(T-3.2)/2.2):0):30+50*(T/CF);p.x-=Math.cos(c.a0)*v*dt;p.y-=Math.sin(c.a0)*v*dt;if(!G.bot&&v>20&&Math.random()<.7)px(p.x+rnd(-8,8),p.y+16,-Math.cos(c.a0)*rnd(20,60),-rnd(10,30),.5,pick(['#d8c8c0','#a89890','#ffffff']),2,1,1)}
     const len=Math.max(VW,VH)*1.25,hw=Math.min(VW,VH)/6*S.area*prBW(c,T),ca=Math.cos(c.cur),sa=Math.sin(c.cur);
     c.bt-=dt;if(c.bt<=0){c.bt=.1;const dmg=PR.K*S.might;
@@ -5925,7 +5927,7 @@ function prTick(w,dt){const S=G.S,st=w.st,p=G.p;
   }
   if(c.ex)c.ex=c.ex.filter(q=>(q.t+=dt)<1.8);
   if(T>=CF&&!c.qk){c.qk=1;st.qk=st.qk||[];const len=Math.max(VW,VH)*1.1;for(const da of [-.25,0,.25])for(const f of [.28,.6,.92]){const a=c.a0+da;st.qk.push({q:1,x:p.x+Math.cos(a)*len*f,y:p.y+Math.sin(a)*len*f,a:a+rnd(-.15,.15),t:-Math.random()*.3})}
-    const hw=Math.min(VW,VH)/6*G.S.area*(c.bm?1.8:1),ca=Math.cos(c.a0),sa=Math.sin(c.a0);for(const f of [.12,.3,.48,.66,.84])for(const o of [-.6,0,.6]){const d=len*(f+rnd(-.05,.05)),oo=hw*(o+rnd(-.2,.2));st.qk.push({x:p.x+ca*d-sa*oo,y:p.y+sa*d+ca*oo,t:-Math.random()*.5,fl:Math.random()<.5})}if(!G.bot)SND.p('boom')}
+    const hw=Math.min(VW,VH)/6*G.S.area*(c.bm?1.8:1)*1.2,ca=Math.cos(c.a0),sa=Math.sin(c.a0);for(const f of [.12,.3,.48,.66,.84])for(const o of [-.6,0,.6]){const d=len*(f+rnd(-.05,.05)),oo=hw*(o+rnd(-.2,.2));st.qk.push({x:p.x+ca*d-sa*oo,y:p.y+sa*d+ca*oo,t:-Math.random()*.5,fl:Math.random()<.5})}if(!G.bot)SND.p('boom')}
   if(T>=CF+.8){if(c.bm)st.u=PR.CD*G.S.cd;st.c=null;st.mt=0;st.gEnd=G.t}
 }
 WU.prism=prTick;
@@ -5948,7 +5950,7 @@ function prDraw(w){const st=w.st,c=st.c,p=G.p;if(!c)return;const gh=!!G.__gh,T=c
   if(!gh)prHelpDraw(c,T,CF);
   if(c.ex)for(const q of c.ex)hxFrame('pplasma',q.t*15,q.x,q.y,1.1,1)}
 
-function prBW(c,T){return c.bm&&T>=6.4?1.8:1}
+function prBW(c,T){return (c.bm&&T>=6.4?1.8:1)*1.2}// V169 굵기 +20%
 function prFan(c,T){return 0}// 부채꼴 반각(라디안)
 function prBeam(c,T,CF,gh){const p=G.p;
   if(T>=0&&T<CF+.6){const len=Math.max(VW,VH)*1.25,hw=Math.min(VW,VH)/6*G.S.area*prBW(c,T),a=c.cur===undefined?c.a:c.cur,fade=T>CF?1-(T-CF)/.6:Math.min(1,T/.12);

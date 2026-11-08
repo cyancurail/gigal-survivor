@@ -665,16 +665,87 @@ function sbDraw(front){const p=G.p,fy=p.y+18;
     if(o.fl){ctx.save();ctx.translate(snapPx(o.x),0);ctx.scale(-1,1);ctx.drawImage(im,-Math.round(w/2),y);ctx.restore()}else ctx.drawImage(im,snapPx(o.x)-Math.round(w/2),y);
     ctx.globalAlpha=1}}
 
-function newGame(ci,fancy,hard,hell,tw){s2Desc();
+/* ================= 시즌3 Act.2 맵: 위기의 토마토 농장 ================= */
+const FM={img:{},pat:null,cache:new Map(),ld:0};
+const FMC=560;
+// 해금(⑥에서 상봉 헬 15분으로) — 지금은 개발자·테스트만
+function fmU(){let d=!!window.__devAll||!!SAVE.fmU;try{d=d||localStorage.getItem('gs_tddev')==='1'||localStorage.getItem('gs_fm')==='1'}catch(e){}return d}
+// 그림: farm/*.png 는 월드 크기의 2배로 저장 → ½로 그림
+const FM_K=['floor','tomato_bush','shovel','watering_can','mini_house','crate_tomato','scarecrow','house_full','house_empty','tallgrass','hay','crates','vine_fence','bush','barrel','barn','trellis','corn','crate_pile','hut_thatch','hide_grass','scary_hut','fence_long','fence_short','fence_corner','fence_t','maze_0','maze_1','maze_2','maze_3','maze_4','maze_5','maze_6','maze_7','maze_8'];
+function fmLoad(){if(FM.ld)return;FM.ld=1;for(const k of FM_K){const im=new Image();im.src='farm/'+k+(k==='floor'?'.jpg':'.png');FM.img[k]=im}}
+// 충돌 상자(월드 px, 아래 가운데 기준 [x0,x1,y0,y1]) — 풀숲·옥수수·빈 비닐하우스는 통과
+const FM_BOX={
+ tomato_bush:[[-24,24,-12,0]],mini_house:[[-50,50,-34,0]],crate_tomato:[[-28,28,-20,0]],scarecrow:[[-6,6,-6,0]],
+ house_full:[[-150,150,-118,-4]],hay:[[-36,36,-30,0]],crates:[[-38,38,-32,0]],bush:[[-36,36,-20,0]],barrel:[[-30,30,-18,0]],
+ barn:[[-66,66,-50,0]],trellis:[[-76,76,-14,0]],crate_pile:[[-44,44,-26,0]],hut_thatch:[[-66,66,-44,0]],scary_hut:[[-88,88,-74,-6]],
+ fence_long:[[-57,57,-12,0]],fence_short:[[-30,30,-12,0]],fence_corner:[[-14,36,-12,0],[-36,-28,-50,-38],[-30,-22,-40,-26],[-24,-16,-28,-12]],
+ fence_t:[[-37,37,-52,-40],[-6,6,-40,0]],vine_fence:[[-48,0,-30,-16],[0,48,-16,0]],
+ maze_0:[[-33,33,-10,0]],maze_1:[[-54,54,-10,0]],maze_2:[[-84,84,-10,0]],maze_3:[[-58,-2,-40,-30],[-8,2,-36,0],[-4,58,-10,0]],
+ maze_4:[[-45,-30,-46,-34],[-32,-16,-34,-20],[-18,18,-20,0],[16,32,-34,-20],[30,45,-46,-34]],
+ maze_5:[[-29,-12,-46,-30],[-14,4,-30,-14],[2,29,-14,0]],maze_6:[[-31,31,-10,0]],maze_7:[[-33,33,-34,-24],[-6,6,-24,0]],maze_8:[[-18,18,-10,0]]};
+for(const k in FM_BOX)if(/^(fence_|maze_)/.test(k))FM_BOX[k]=FM_BOX[k].map(b=>b.map(v=>Math.round(v*1.35)));
+// 통과하지만 캐릭터를 덮는 것(숨는 느낌) / 들어갈 수 있는 것
+const FM_SOFT={tallgrass:1,hide_grass:1,corn:1,house_empty:1};
+// 배치 조각(640×640 청크, [이름,x,y] = 아래 가운데)
+const FM_PF={ // 560×560 청크, [이름,x,y] = 아래 가운데. 울타리 월드 폭: long 155·short 80·maze_2 226·maze_1 145
+ open:[['tomato_bush',150,260],['watering_can',380,380],['shovel',420,392],['tallgrass',470,150],['tomato_bush',300,470]],
+ grass:[['tallgrass',120,170],['bush',270,230],['tallgrass',410,300],['hide_grass',260,440],['tomato_bush',470,480],['tallgrass',110,400]],
+ corn:[['corn',170,270],['corn',330,280],['trellis',260,450],['tallgrass',470,190],['hide_grass',90,470]],
+ scarecrow:[['scarecrow',280,270],['hay',430,320],['tomato_bush',150,330],['tallgrass',380,460],['shovel',220,300],['bush',110,150]],
+ crates:[['crates',170,220],['hay',340,200],['crate_pile',270,380],['barrel',430,360],['mini_house',150,480],['tallgrass',450,500]],
+ house:[['house_empty',280,300],['tomato_bush',90,380],['crate_tomato',480,360],['watering_can',220,390],['tallgrass',420,500]],
+ barn:[['barn',280,220],['fence_long',110,340],['fence_long',450,340],['crate_pile',460,180],['tallgrass',100,200],['hide_grass',280,480]],
+ maze:[['maze_2',150,140],['maze_2',420,140],['maze_3',280,300],['maze_2',130,450],['maze_1',410,450],['tallgrass',440,300],['bush',110,300]],
+ maze2:[['fence_long',80,170],['fence_long',235,170],['fence_corner',370,175],['maze_4',430,330],['fence_t',150,370],['fence_long',330,500],['fence_long',485,500],['tallgrass',280,320]],
+ green:[['house_full',280,280],['trellis',260,470],['hide_grass',490,420],['crate_tomato',70,400]],
+ thatch:[['hut_thatch',280,230],['fence_long',100,300],['fence_long',460,300],['barrel',200,400],['vine_fence',410,440],['tallgrass',120,480]],
+ scary:[['scary_hut',280,270],['fence_long',90,320],['vine_fence',470,310],['fence_short',150,430],['tallgrass',180,500],['hide_grass',420,490]]};
+const FM_W=[ // [최소 초, 조각 가중치]
+ [0,{open:3,grass:4,corn:2,scarecrow:2,crates:2,house:1}],
+ [300,{open:1,grass:3,corn:2,scarecrow:1,crates:1,house:2,barn:3,maze:3,maze2:2,thatch:2,green:2}],
+ [900,{grass:3,corn:2,house:1,barn:3,maze:3,maze2:3,thatch:2,green:2,scary:3}]];
+function fmPick(cx,cy){let w=FM_W[0][1];for(const [t,ww] of FM_W)if(G.t>=t)w=ww;const ks=Object.keys(w).filter(k=>k!=='scary'||G.hard);let tot=0;for(const k of ks)tot+=w[k];let r=sbH(cx,cy,7)*tot;for(const k of ks){r-=w[k];if(r<0)return k}return ks[0]}
+function fmChunk(cx,cy){const key=cx+','+cy;let L=FM.cache.get(key);if(L)return L;L=[];
+  const pf=fmPick(cx,cy),fl=sbH(cx,cy,8)<.5,jx=(sbH(cx,cy,9)-.5)*50,jy=(sbH(cx,cy,11)-.5)*50;
+  for(let i=0;i<FM_PF[pf].length;i++){const [t,px0,py0]=FM_PF[pf][i];const x=Math.round(cx*FMC+(fl?FMC-px0:px0)+jx),y=Math.round(cy*FMC+py0+jy);
+    if(x*x+y*y<260*260)continue;
+    const bx=(FM_BOX[t]||[]).map(([a,b,c,d])=>fl?{L:x-b,R:x-a,T:y+c,B:y+d}:{L:x+a,R:x+b,T:y+c,B:y+d});
+    L.push({t,x,y,fl,bx,soft:!!FM_SOFT[t],pf,id:key+':'+i,gone:-1})}
+  FM.cache.set(key,L);return L}
+function fmFrame(){fmLoad();const p=G.p,A=G.arena,mx=VW*.62+200,my=VH*.62+260,L=[],B=[];
+  const c0=Math.floor((p.x-mx)/FMC),c1=Math.floor((p.x+mx)/FMC),r0=Math.floor((p.y-my)/FMC),r1=Math.floor((p.y+my)/FMC);
+  for(let cy=r0;cy<=r1;cy++)for(let cx=c0;cx<=c1;cx++)for(const o of fmChunk(cx,cy)){
+    if(A&&Math.abs(o.x-A.x)<A.hw+80&&Math.abs(o.y-A.y)<A.hh+120){if(o.gone===0&&!G.bot){sparks(o.x,o.y-18,14,['#ff5a3a','#9be15d','#ffffff'],120,.5,2);pring(o.x,o.y-12,22,'#ff5a3a',12,.3)}o.gone=1;continue}
+    o.gone=0;L.push(o);for(const b of o.bx)B.push(b)}
+  L.sort((a,b)=>a.y-b.y);G.fmL=L;G.sbL=B;
+  sbPush(p,0,12,9);for(const k of G.pickups)sbPush(k,0,0,12);
+  // 지금 캐릭터가 들어가 있는 통과 구조물(풀숲·하우스) — ③에서 숨기·시야에 씀
+  let inS=null;for(const o of L){if(!o.soft)continue;const im=FM.img[o.t];if(!im||!im.width)continue;const hw=im.width/4,hh=im.height/2;if(Math.abs(p.x-o.x)<hw*.8&&p.y>o.y-hh*.75&&p.y<o.y+4){inS=o;break}}G.fmIn=inS}
+function fmPat(){if(FM.pat)return FM.pat;const im=FM.img.floor;if(!im||!im.complete||!im.width)return null;FM.pat=ctx.createPattern(im,'repeat');return FM.pat}
+function fmFloor(fi){fmLoad();const P=fmPat();if(!P)return false;
+  ctx.save();ctx.translate(innerWidth/2,innerHeight/2);ctx.scale(Z,Z);ctx.translate(-G.p.x,-G.p.y);ctx.scale(.5,.5);ctx.imageSmoothingEnabled=true;ctx.fillStyle=P;ctx.fillRect((G.p.x-VW/2)*2-8,(G.p.y-VH/2)*2-8,VW*2+16,VH*2+16);ctx.restore();
+  ctx.fillStyle=`rgba(10,6,20,${G.hell?.26:G.hard?.14:.04})`;ctx.fillRect(0,0,innerWidth,innerHeight);
+  if(fi>0){ctx.fillStyle=`rgba(6,0,18,${Math.min(.3,fi*.05)})`;ctx.fillRect(0,0,innerWidth,innerHeight)}return true}
+function fmDraw(front){if(!G.fmL)return;const p=G.p,fy=p.y+18;const sm=ctx.imageSmoothingEnabled;ctx.imageSmoothingEnabled=true;
+  for(const o of G.fmL){if((o.y>fy)!==!!front)continue;const im=FM.img[o.t];if(!im||!im.complete||!im.width)continue;const w=im.width/2,h=im.height/2,y=o.y-h+3;
+    let a=1;if(front&&Math.abs(p.x-o.x)<w/2+10&&p.y>o.y-h-14)a=o.soft?(G.fmIn===o?.62:.75):.5;
+    if(!o.soft&&o.t.indexOf('fence')<0&&o.t.indexOf('maze')<0){ctx.globalAlpha=.32*a;ctx.fillStyle='#120a04';ctx.beginPath();ctx.ellipse(o.x,o.y-2,w*.44,Math.max(5,h*.06),0,0,7);ctx.fill()}
+    ctx.globalAlpha=a;
+    if(o.fl){ctx.save();ctx.translate(o.x,0);ctx.scale(-1,1);ctx.drawImage(im,-w/2,y,w,h);ctx.restore()}else ctx.drawImage(im,o.x-w/2,y,w,h);
+    ctx.globalAlpha=1}
+  ctx.imageSmoothingEnabled=sm;
+  if(window.__fmBox&&front){ctx.strokeStyle='#ff2a2a';ctx.lineWidth=1;for(const b of G.sbL)ctx.strokeRect(b.L,b.T,b.R-b.L,b.B-b.T)}}
+
+function newGame(ci,fancy,hard,hell,tw){s2Desc();FM.cache.clear();
   HELLFX=hellFxOn();
-  G={map:SAVE.map==='sangbong'?'sangbong':'gigal',sbL:null,wb:[],witch:null,knN:0,ci,fancy,tw:!!tw,twNext:180,twK:0,hard:!!hard||!!hell||!!tw,hell:!!hell||!!tw,hevT:120,eb:[],id:CHAR[ci].id,t:0,running:true,paused:false,freeze:0,kills:0,lvl:1,xp:0,next:5,items:{},weapons:[],enemies:[],projs:[],gems:[],fx:[],texts:[],pickups:[],zones:[],chests:0,
+  G={map:SAVE.map==='sangbong'?'sangbong':(SAVE.map==='farm'&&fmU())?'farm':'gigal',sbL:null,wb:[],witch:null,knN:0,ci,fancy,tw:!!tw,twNext:180,twK:0,hard:!!hard||!!hell||!!tw,hell:!!hell||!!tw,hevT:120,eb:[],id:CHAR[ci].id,t:0,running:true,paused:false,freeze:0,kills:0,lvl:1,xp:0,next:5,items:{},weapons:[],enemies:[],projs:[],gems:[],fx:[],texts:[],pickups:[],zones:[],chests:0,
      p:{x:0,y:0,hp:100,fx:1,fy:0,inv:0,walk:0,frame:0},spawnAcc:0,eliteT:45,bossIdx:0,swarms:[260,560,820,1040,1320,1560,1760],ult:null,ultReady:false,ultCd:0,energy:30,xpMul:1,xpMulT:0,
      stats:{dmg:0},unlockedNow:[]};
   recalc();G.p.hp=G.S.maxHp;pxClear();G.pcol=(CHAR[ci].bg.match(/#[0-9a-f]{6}/i)||['#ffffff'])[0];
   addWeapon(CHAR[ci].w);
   G.ultReady=!!(fancy&&SAVE.ult[G.id])||G.id==='쥬은';
   if(G.tw)twSetup();
-  {const mt=$('#modeTag'),k=G.tw?3:G.hell?2:G.hard?1:0;mt.className='modetag m'+k;mt.textContent=['보통 모드','🔥 어려움 모드','💀 헬 모드','🌙 트와일라잇'][k]+(fancy?' · 👗':'')+(G.map==='sangbong'?' · 🎡 상봉':'')}
+  {const mt=$('#modeTag'),k=G.tw?3:G.hell?2:G.hard?1:0;mt.className='modetag m'+k;mt.textContent=['보통 모드','🔥 어려움 모드','💀 헬 모드','🌙 트와일라잇'][k]+(fancy?' · 👗':'')+(G.map==='sangbong'?' · 🎡 상봉':G.map==='farm'?' · 🍅 농장':'')}
   hideAll();$('#hud').hidden=false;renderHud();setupUltBtn();
   last=performance.now();
 }
@@ -778,7 +849,7 @@ function juCardFix(){const b=$('#selgrid').querySelector(`.pc[data-i="${CHAR.ind
 function juDetail(c){const J=juJ();if(!SAVE.twU)selTw=false;if(selTw){selHard=false;selHell=false}selFancy=false;
   const gem=(e,n,ok,how)=>`<div style="display:flex;gap:8px;align-items:center;opacity:${ok?1:.55}"><span style="font-size:20px">${ok?e:'🔒'}</span><span><b>${ok?esc(n):'???'}</b><br><small>${ok?'해금':esc(how)}</small></span></div>`;
   $('#detail').innerHTML=`<div class="dscroll"><div class="row"><canvas width="64" height="64"></canvas><div><h3>쥬은 <small style="font-size:12px;opacity:.8">보석의 마녀</small></h3><p>${WP.emerald.icon} ${esc(WP.emerald.name)}: ${esc(WP.emerald.d)}<br>특성: ${esc(c.perk)} · 화려한 모습 없음</p></div></div>
-  <div class="forms"><button type="button" data-m="gigal" aria-pressed="${SAVE.map!=='sangbong'}">🌃 기본 맵</button><button type="button" data-m="sangbong" aria-pressed="${SAVE.map==='sangbong'}">🎡 상봉 · Act.2</button></div>
+  <div class="forms"><button type="button" data-m="gigal" aria-pressed="${SAVE.map!=='sangbong'&&!(SAVE.map==='farm'&&fmU())}">🌃 기본 맵</button><button type="button" data-m="sangbong" aria-pressed="${SAVE.map==='sangbong'}">🎡 상봉 · Act.2</button>${fmU()?`<button type="button" data-m="farm" aria-pressed="${SAVE.map==='farm'}">🍅 농장 · S3</button>`:''}</div>
   <div class="forms"><button type="button" data-h="0" aria-pressed="${!selHard&&!selTw}">보통</button><button type="button" data-h="1" class="hardb" aria-pressed="${selHard&&!selHell}" ${SAVE.map==='sangbong'&&sbU('쥬은')<1?'disabled':''}>${SAVE.map==='sangbong'&&sbU('쥬은')<1?'🔒 어려움 (상봉 보통 10분)':'🔥 어려움'}</button><button type="button" data-h="2" class="hellb" aria-pressed="${selHell}" ${SAVE.map==='sangbong'&&sbU('쥬은')<2?'disabled':''}>${SAVE.map==='sangbong'&&sbU('쥬은')<2?'🔒 헬 (상봉 어려움 10분)':'💀 헬'}</button><button type="button" data-h="3" class="twb" aria-pressed="${selTw}" ${SAVE.twU?'':'disabled'}>${SAVE.twU?'🌙 트와일라잇':'🔒 트와일라잇'}</button></div>${selTw?twPicker(c):''}
   ${stuRow(c)}${jmsRow()}<div class="wardrobe" style="display:grid;grid-template-columns:1fr 1fr;gap:8px">${gem('💚','해방하는 5월',J.n,'')}${gem('💙','추억하는 9월',J.h,'어려움 보석의 마녀 처치')}${gem('🤍','공명하는 4월',J.x,'헬 보석의 마녀 처치')}${gem('🩷','사랑하는 자들의 6월',J.x,'헬 보석의 마녀 처치')}</div>
   <p style="font-size:12px;opacity:.85">🌙 트와일라잇에서는 일반 모드에서 한 번 진화시킨 보석만 쓸 수 있어요 · 진화 기록: ${['emerald','sapphire','diamond','pearl'].map(k=>(SAVE.juEvo||{})[k]?WP[k].icon:'·').join(' ')}</p>
@@ -1489,7 +1560,7 @@ function bossTick(dt){const wN=!G.hard;if(wN&&!(G.witch&&!G.witch.dead))return;c
 function hellTick(dt){const p=G.p;
   if(G.eb.length){const pw=W('pet'),D=pw&&pw.st.dome;for(const b of G.eb){b.x+=b.vx*dt;b.y+=b.vy*dt;b.life-=dt;const d2=(b.x-p.x)**2+(b.y-p.y)**2;if(D&&d2<D.R*D.R){b.life=0;hpB('pet',b.dmg*edm());if(!G.bot&&Math.random()<.5)sparks(b.x,b.y,4,['#7dffb0','#ffffff'],120,.2);continue}if(d2<(b.r+9)**2){b.life=0;rangedHit(b.dmg,b)}}G.eb=G.eb.filter(b=>b.life>0);if(G.eb.length>400)G.eb.splice(0,G.eb.length-400)}
   if(G.map==='sangbong'&&!G.tw&&!G.bot&&G.t>=600&&!G.hell){const nv=G.hard?2:1;if(sbU(G.id)<nv){SAVE.sbU=SAVE.sbU||{};SAVE.sbU[G.id]=nv;persist();const t=nv===2?'💀 상봉 헬 모드 해금!':'🔥 상봉 어려움 모드 해금!';G.unlockedNow.push(`${t.slice(0,2)} ${esc(CHAR[G.ci].nick)}의 ${t.slice(3,-1)}`);toast(t,CHAR[G.ci].nick+' · 상봉에서 10분 생존',true)}}
-  if(G.map!=='sangbong'&&G.hard&&!G.hell&&!G.tw&&!G.bot&&G.t>=600&&!hellUnl(G.id)){SAVE.hellU=SAVE.hellU||{};SAVE.hellU[G.id]=1;persist();achCheck();G.unlockedNow.push(`💀 ${esc(CHAR[G.ci].nick)}의 헬모드 해금!`);toast('💀 헬모드 해금!',CHAR[G.ci].nick+'의 헬모드가 열렸어요',true)}
+  if(G.map==='gigal'&&G.hard&&!G.hell&&!G.tw&&!G.bot&&G.t>=600&&!hellUnl(G.id)){SAVE.hellU=SAVE.hellU||{};SAVE.hellU[G.id]=1;persist();achCheck();G.unlockedNow.push(`💀 ${esc(CHAR[G.ci].nick)}의 헬모드 해금!`);toast('💀 헬모드 해금!',CHAR[G.ci].nick+'의 헬모드가 열렸어요',true)}
   if(!G.hell)return;
   if(G.t>=600&&!G.h10){G.h10=1;if(!G.bot)achGet('hell10')}
   if(G.hban&&G.hban.t>0)G.hban.t-=dt;
@@ -2467,7 +2538,7 @@ function update(dt){
   const ml=Math.hypot(mx,my);
   if(ml>.05){const k=Math.min(1,ml)/ml;mx*=k;my*=k;const sb=G.spdB>0?1.3:1;p.x+=mx*S.speed*um.speed*sb*dt;p.y+=my*S.speed*um.speed*sb*dt;p.fx=mx;p.fy=my;p.walk+=dt;p.frame=Math.floor(p.walk*8)%4;if(!G.bot&&Math.random()<.5)px(p.x+rnd(-6,6),p.y+16,rnd(-15,15),rnd(-25,-5),.5,G.pcol,2,G.fancy?3:1,2)}else p.frame=0;p.mv=ml>.05;if(G.juCast>0)G.juCast-=dt;if(G.mAtk>0)G.mAtk-=dt;
   if(G.arena){const A=G.arena;p.x=clamp(p.x,A.x-A.hw+12,A.x+A.hw-12);p.y=clamp(p.y,A.y-A.hh+16,A.y+A.hh-12)}
-  if(G.map==='sangbong')sbFrame();
+  if(G.map==='sangbong')sbFrame();else if(G.map==='farm')fmFrame();
   if(!G.bot&&G.fancy&&Math.random()<.35)px(p.x+rnd(-14,14),p.y+rnd(-26,6),0,-20,.6,pick(['#ffffff','#ffd6f5',G.pcol]),2,3,1);
   // temporarily apply toggle mods to stats
   const S0={cd:S.cd,might:S.might,area:S.area};S.cd*=um.cd;S.might*=um.might;S.area*=um.area;
@@ -2552,7 +2623,7 @@ function draw(){
   const m=em(),fi=Math.min(FLOORS.length-1,Math.floor(m/5));const [c1,c2]=FLOORS[fi];
   ctx.fillStyle=c1;ctx.fillRect(0,0,innerWidth,innerHeight);
   // tiles
-  if(!(G.map==='sangbong'&&sbFloor(fi))){const T=48,ox=G.p.x-VW/2,oy=G.p.y-VH/2;ctx.fillStyle=c2;
+  if(!((G.map==='sangbong'&&sbFloor(fi))||(G.map==='farm'&&fmFloor(fi)))){const T=48,ox=G.p.x-VW/2,oy=G.p.y-VH/2;ctx.fillStyle=c2;
   for(let ty=Math.floor(oy/T);ty<=Math.floor((oy+VH)/T);ty++)for(let tx=Math.floor(ox/T);tx<=Math.floor((ox+VW)/T);tx++){
     if((tx+ty)&1){const [sx,sy]=W2S(tx*T,ty*T);ctx.fillRect(sx,sy,T*Z+1,T*Z+1)}
     const h=((tx*73856093)^(ty*19349663))>>>0;if(h%17===0){const [sx,sy]=W2S(tx*T+18,ty*T+18);ctx.globalAlpha=.1;ctx.fillStyle='#9fb4ff';ctx.fillRect(sx,sy,10*Z,7*Z);ctx.fillRect(sx+2*Z,sy+7*Z,2*Z,2*Z);ctx.globalAlpha=1;ctx.fillStyle=c2}
@@ -2604,7 +2675,7 @@ function draw(){
   }
   gf(false);
   };dW();
-  if(G.sbL&&G.map==='sangbong')sbDraw(0);
+  if(G.sbL&&G.map==='sangbong')sbDraw(0);else if(G.map==='farm')fmDraw(0);
   // enemies
   for(const e of G.enemies){
     if(S2D[e.type]&&!(e.frog>0))S2D[e.type](e);else{const tpl=e.frog>0?(HW('fairy')?'mummy':'frog'):(e.tpl||e.type);const img=ecanvas(tpl,e.flash>0?'rgba(255,255,255,.8)':null);
@@ -2685,7 +2756,7 @@ function draw(){
     ctx.globalAlpha=Math.min(1,sy.life*4);ctx.fillStyle=lv===3?'#ff2a4a':lv===2?'#ffe14d':'#fff';ctx.strokeStyle='#1a1020';ctx.lineWidth=2;ctx.beginPath();ctx.roundRect(bx,by,bw,bh,9);ctx.moveTo(p.x-5,by+bh);ctx.lineTo(p.x,by+bh+6);ctx.lineTo(p.x+5,by+bh);ctx.fill();ctx.stroke();
     ctx.fillStyle=lv===3?'#fff':'#1a1020';const tb=ctx.textBaseline;ctx.textBaseline='middle';ctx.fillText(sy.v,p.x,by+bh/2+1);ctx.textBaseline=tb;ctx.globalAlpha=1}
   if(mpDraw)mpDraw();
-  if(G.sbL&&G.map==='sangbong')sbDraw(1);
+  if(G.sbL&&G.map==='sangbong')sbDraw(1);else if(G.map==='farm')fmDraw(1);
   // texts
   for(const t of G.texts){ctx.globalAlpha=Math.min(1,t.life*3);ctx.font=t.big?'900 22px "Black Han Sans",sans-serif':(t.crit?'900 14px':'700 11px')+' sans-serif';ctx.lineWidth=3;ctx.strokeStyle='#000';ctx.strokeText(t.v,t.x,t.y);ctx.fillStyle=t.col||(t.crit?'#ffd34d':'#fff');ctx.fillText(t.v,t.x,t.y);ctx.globalAlpha=1}
   try{prPost()}catch(_){}
@@ -2993,7 +3064,7 @@ function introFixed(id){const it=introItems(id),pk=(SAVE.mpick||{})[id];return i
 function introVid(id){const it=introItems(id);if(!it.length)return null;const f=introFixed(id);return (f||pick(it)).vid}
 let PRELV=null;function preloadVid(src){try{if(!src)return;if(!PRELV){PRELV=document.createElement('video');PRELV.muted=true;PRELV.preload='auto';PRELV.playsInline=true}if(PRELV.dataset.s===src)return;PRELV.dataset.s=src;PRELV.src=src;PRELV.load()}catch(e){}}
 function playIntro(){if(G.bot)return;const v=introVid(G.id);if(!v||(SAVE.introOff||{})[G.id])return;G.freeze=1e6;cutinCb=null;playVid(v,()=>{G.freeze=.01},()=>{G.freeze=.01})}
-function startRun(ci,f,h,hl,tw){const nu=hl&&!tw&&!SAVE.twU;if(nu){SAVE.twU=1;persist()}newGame(ci,f,h,hl,tw);if(G.map==='sangbong')setTimeoutG(()=>toast('🎡 외로운 축제의 도시, 상봉','Gigal Survival Act.2 「아름다운 거짓」'),1.2);if(nu)setTimeoutG(()=>toast('🌙 트와일라잇 해금!','캐릭터 선택에서 빌드 테스트 모드를 쓸 수 있어요',true),2);if(hl&&!tw)hellIntro(playIntro);else playIntro()}
+function startRun(ci,f,h,hl,tw){const nu=hl&&!tw&&!SAVE.twU;if(nu){SAVE.twU=1;persist()}newGame(ci,f,h,hl,tw);if(G.map==='sangbong')setTimeoutG(()=>toast('🎡 외로운 축제의 도시, 상봉','Gigal Survival Act.2 「아름다운 거짓」'),1.2);else if(G.map==='farm')setTimeoutG(()=>toast('🍅 위기의 토마토 농장','시즌3 Act.2'),1.2);if(nu)setTimeoutG(()=>toast('🌙 트와일라잇 해금!','캐릭터 선택에서 빌드 테스트 모드를 쓸 수 있어요',true),2);if(hl&&!tw)hellIntro(playIntro);else playIntro()}
 const POOL_V7=POOL.length;POOL.push({id:'wl:diamond',tier:'L',kind:'wfx',lg:1,owner:'쥬은',wk:'diamond',n:'💎 다이아 기갈타워'});
 const POOL_V8=POOL.length;CHAR.filter(c=>!c.ju&&c.id!=='박계원').forEach(c=>POOL.push({id:'ms:'+c.id,tier:'M',kind:'mskin',owner:c.id,n:`${c.nick} · 신화 스킨 Ⅲ`}));
 const POOL_V9=POOL.length;POOL.push({id:'wl:unnie',tier:'L',kind:'wfx',lg:1,owner:'영규형',wk:'unnie',n:'👊 왕언니 레전드 세트'},{id:'wl:bride',tier:'L',kind:'wfx',lg:1,owner:'박준형',wk:'bride',n:'💔 비련의 신부 레전드 세트'});
@@ -3668,7 +3739,7 @@ function renderDetail(){
   if(CHAR[selI].ju){if(SAVE.map==='sangbong'){if(sbU('쥬은')<2)selHell=false;if(sbU('쥬은')<1)selHard=false;if(selHell)selHard=true}juDetail(CHAR[selI]);return}
   const c=CHAR[selI],f=SAVE.fancy[c.id],u=SAVE.ult[c.id],cn=SAVE.cine[c.id],SBM=SAVE.map==='sangbong',hdU=SBM?sbU(c.id)>=1:(u||anyHell());if(!f)selFancy=false;if(!hdU)selHard=false;const hu=SBM?sbU(c.id)>=2:hellUnl(c.id);if(!hu)selHell=false;if(selHell)selHard=true;if(!SAVE.twU)selTw=false;if(selTw){selHard=false;selHell=false}
   $('#detail').innerHTML=`<div class="dscroll"><div class="row"><canvas width="64" height="64"></canvas><div><h3>${esc(c.nick)}</h3><p>${WP[c.w].icon} ${esc(WP[c.w].name)}: ${esc(WP[c.w].d)}<br>특성: ${esc(c.perk)}</p></div></div>
-  <div class="forms"><button type="button" data-m="gigal" aria-pressed="${SAVE.map!=='sangbong'}">🌃 기본 맵</button><button type="button" data-m="sangbong" aria-pressed="${SAVE.map==='sangbong'}">🎡 상봉 · Act.2</button></div>
+  <div class="forms"><button type="button" data-m="gigal" aria-pressed="${SAVE.map!=='sangbong'&&!(SAVE.map==='farm'&&fmU())}">🌃 기본 맵</button><button type="button" data-m="sangbong" aria-pressed="${SAVE.map==='sangbong'}">🎡 상봉 · Act.2</button>${fmU()?`<button type="button" data-m="farm" aria-pressed="${SAVE.map==='farm'}">🍅 농장 · S3</button>`:''}</div>
   <div class="forms"><button type="button" data-f="0" aria-pressed="${!selFancy}">기본 모습</button><button type="button" data-f="1" aria-pressed="${selFancy}" ${f?'':'disabled'}>${f?'👗 화려한 모습':'🔒 10분 이상 버티면 해금'}</button></div>
   <div class="forms"><button type="button" data-h="0" aria-pressed="${!selHard&&!selTw}">보통</button><button type="button" data-h="1" class="hardb" aria-pressed="${selHard&&!selHell}" ${hdU?'':'disabled'}>${hdU?'🔥 어려움':SBM?'🔒 어려움 (상봉 보통 10분)':'🔒 어려움 (필살기 해금 후)'}</button><button type="button" data-h="2" class="hellb" aria-pressed="${selHell}" ${hu?'':'disabled'}>${hu?'💀 헬':SBM?'🔒 헬 (상봉 어려움 10분)':'🔒 헬'}</button><button type="button" data-h="3" class="twb" aria-pressed="${selTw}" ${SAVE.twU?'':'disabled'}>${SAVE.twU?'🌙 트와일라잇':'🔒 트와일라잇'}</button></div>${SAVE.twU?'':'<p class="c" style="margin:0;font-size:12px">🌙 트와일라잇: 헬 모드에 한 번 입장하면 열려요</p>'}${selTw?twPicker(c):''}${selHell?`<p class="hardnote">💀 헬모드 · 적 체력 어려움의 1.3배 → 5~10분에 걸쳐 ×5 · 경험치 ×1.3 · 공격력 ×2 · 엘리트 체력 +200% · 원거리 몬스터 · 단톡방 이벤트 · 순대국 회복 10 · 골드 4배</p>`:!hu&&u?`<p class="c" style="margin:0">💀 헬모드: 어려움 모드 10분을 버티면 열려요</p>`:''}
   ${stuRow(c)}<div class="wardrobe"><b>👗 스킨: ${curSkin(c.id)?esc(PBY[curSkin(c.id)].kind==='color'?PBY[curSkin(c.id)].n:PBY[curSkin(c.id)].n.split(' · ')[1]):'기본'}${selFancy?'':' (화려한 모습에서 적용)'}</b><button type="button" id="detCloset">👗 옷장 열기</button></div>
@@ -5730,7 +5801,7 @@ window.resTab=function(btn,i){try{SND.p('click')}catch(e){}const box=btn.closest
 const eg=window.endGame;window.endGame=function(win){const g=G;const r=eg.apply(this,arguments);try{if(!g||g.bot||g.tw)return r;
   try{if(window.msBump&&g.t>=60){msBump('bpsD',Math.round(bpsNow(g)),1);persist()}}catch(e){}
   if(!g.hard||!g.bpS)return r;
-  if(!window.GRANK||!GRANK.on())return r;const c=CHAR[g.ci],S=g.bpS,dk=g.hell?'h':'d',map=g.map==='sangbong'?'sangbong':'gigal';
+  if(!window.GRANK||!GRANK.on()||g.map==='farm')return r;const c=CHAR[g.ci],S=g.bpS,dk=g.hell?'h':'d',map=g.map==='sangbong'?'sangbong':'gigal';
   const rec={kind:'bps',map:'bps'+dk+'_'+map,rm:map,dk,ch:c.id,tf:S.tf,bps:S.v,t:S.t,raw:S.t,dmg:S.dmg,ws:S.ws,it:Object.keys(S.il),il:S.il,wb:S.wb,mul:bpMul(g),
    sk:(window.rkSkin?window.rkSkin(c.id):null),mp:window.MP&&MP.g?1:0,title:SAVE.title&&(SAVE.titles||{})[SAVE.title]&&window.TITLES?TITLES[SAVE.title]:''};
   GRANK.submit(rec,(a,b)=>a.tf>b.tf||(a.tf===b.tf&&a.bps>b.bps)).then(x=>{if(x&&x.best)toast('💄 BPS 랭킹 기록 갱신!',`${c.nick} · ⏱ ${S.tf}분 · BPS ${S.v.toLocaleString()}`,true)}).catch(e=>console.warn('bps rank',e))}catch(e){console.warn(e)}return r};

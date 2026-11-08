@@ -880,10 +880,12 @@ function fmReg(){Object.assign(ENT,FM_ENT);fmBossReg();const D={fm_hut:e=>{},fm_
   for(const k of ['m_caterpillar','m_beetle_red','m_ant','m_beetle_black','m_eggplant','m_melon','burst_tomato','burst_eggplant','burst_melon']){const im=new Image();im.src='farm/'+k+'.png';FM.img[k]=im}}
 // 화면 밖 등장 종류: 어려움부터 가끔 탄막 무수리
 const FM_FARM_MIX=[[0,.75,['fm_sprout','fm_angry','fm_ant']],[4,.45,['fm_sprout','fm_angry','fm_ant','fm_beetle','fm_cater']],[10,.25,['fm_angry','fm_beetle','fm_ant','fm_cater','fm_egg']],[16,.15,['fm_angry','fm_beetle','fm_egg','fm_rhino']]];
-function fmOffAny(){const m=em();let M=FM_FARM_MIX[0];for(const x of FM_FARM_MIX)if(m>=x[0])M=x;return Math.random()<M[1]?pick(M[2]):fmOff()}
+function fmNoCat(t){return G.hell&&t==='fm_cater'?'fm_beetle':t} /* 11-09: 장수 헬엔 애벌레 없음 */
+function fmOffAny(){const m=em();let M=FM_FARM_MIX[0];for(const x of FM_FARM_MIX)if(m>=x[0])M=x;return Math.random()<M[1]*(G.hell&&m>=8?.5:1)/* 11-09: 헬 10분부터 농장 몹 절반 → 무수리 ↑ */?fmNoCat(pick(M[2])):fmOff()}
 function fmOff(){const lv=fmLv(),m=em();if(lv&&Math.random()<(lv===2?.14:.07)&&m>=3)return Math.random()<.5?'fm_mu_cannon':'fm_mu_jet';let t=FM_PH[0][1];for(const [at,ts] of FM_PH)if(m>=at)t=ts;return pick(t)}
 // 구조물에서 튀어나오는 종류(③의 fmMob 교체)
-function fmMob(kind){const m=em(),r=Math.random();
+function fmMob(kind){return fmNoCat(fmMob0(kind))}
+function fmMob0(kind){const m=em(),r=Math.random();
   if(kind==='sprout')return'fm_sprout';
   if(kind==='mu'){if(r<.82){const t=fmOff();return t==='fm_mu_cannon'||t==='fm_mu_jet'?(Math.random()<.5?t:'fm_mu_spider'):t}return r<.9?'fm_ant':'fm_beetle'}
   if(kind==='tomato')return r<.6?'fm_angry':r<.85?'fm_sprout':(m>=4?'fm_egg':'fm_angry');
@@ -948,7 +950,7 @@ function fmSilTick(dt){if(!G.hell||G.arena)return;if(G.fmSil>0){G.fmSil-=dt;if(G
 function fmTick4(dt){fmPenTick(dt);fmFenceTick(dt);fmMobTick(dt);fmBossTick(dt);fmSwarmTick(dt);fmCrowTick(dt);fmSilTick(dt);fmTick7(dt)}
 /* ---- 장수 ⑦ (11-08 밤, 사용자 승인): 장수 엘리트 · 감시 드론(4번) · 헬 보스 호위대(10번) · 무수리 떼 출현 · 무수리 8마리 떼 · 횃불 · 하늘의 감시함(9번) ---- */
 for(const k in FM_MU)FM_ENT[k].spd=Math.round(FM_ENT[k].spd*1.2); // 무수리 이동속도 +20%
-FM_MU.fm_drone=4;FM_ENT.fm_drone={hp:60,spd:26,dmg:6,xp:6,r:15,name:'감시 무수리'};
+FM_MU.fm_drone=4;FM_ENT.fm_drone={hp:22,spd:26,dmg:6,xp:6,r:15,name:'감시 무수리'};
 {const _fr=fmReg;fmReg=function(){_fr();S2D.fm_drone=fmDroneDraw;const im=new Image();im.src='farm/torch.png';FM.img.torch=im}}
 // ① 엘리트: 기본 맵과 같은 간격·배율, 종류만 장수 몹
 function fmEliteT(){return fmOff()} /* 11-08 밤 사용자: 장수 엘리트는 전부 무수리 */
@@ -958,7 +960,7 @@ function fmSpawnOne(x,y){const t=fmOffAny();if(t.slice(0,6)==='fm_mu_'&&t!=='fm_
 // ② 감시 드론
 function fmDroneTick(dt){const lv=fmLv(),p=G.p;if(!lv||G.arena||em()<1.5)return;let n=0;
   G.fmDrT=(G.fmDrT===undefined?20:G.fmDrT)-dt;for(const e of G.enemies)if(e.type==='fm_drone'&&!e.dead)n++;
-  if(G.fmDrT<=0){G.fmDrT=(lv===2?28:40)*rnd(.85,1.15);if(n<(lv===2?3:2)){const a=rnd(0,6.283),r=Math.max(VW,VH)*.5;const e=mkEnemy('fm_drone',p.x+Math.cos(a)*r,p.y+Math.sin(a)*r);e.cd=3;e.ph=rnd(0,6)}}
+  if(G.fmDrT<=0){G.fmDrT=(lv===2?28:40)*rnd(.85,1.15);if(n<(lv===2?3:2)){const a=rnd(0,6.283),r=Math.max(VW,VH)*.5;const e=mkEnemy('fm_drone',p.x+Math.cos(a)*r,p.y+Math.sin(a)*r);{/* 11-09: 체력 = 그 모드 엘리트(같은 체력 22짜리 갑옷 무수리 엘리트로 계산) */const q=mkEnemy('fm_mu_beetle',e.x,e.y,{elite:1,hpMul:7});const qi=G.enemies.indexOf(q);if(qi>=0)G.enemies.splice(qi,1);e.max=e.hp=q.max}e.cd=3;e.ph=rnd(0,6)}}
   const SR=lv===2?175:150;
   for(const e of G.enemies){if(e.type!=='fm_drone'||e.dead)continue;e.cd=(e.cd||0)-dt;e.ph=(e.ph||0)+dt;
     if(!e.wp||Math.hypot(e.wp.x-e.x,e.wp.y-e.y)<20||(e.wpT||0)<G.t){e.wp={x:p.x+rnd(-320,320),y:p.y+rnd(-240,240),on:true};e.wpT=G.t+rnd(5,8)}
@@ -997,15 +999,19 @@ function fmShipTick(dt){const lv=fmLv(),p=G.p;
     if(s.hit){s.bt-=dt;if(s.bt<=0)B.splice(i,1)}}
   let S=G.fmShip;
   if(!S){if(!lv||G.arena||em()<2.5)return;G.fmShT=(G.fmShT===undefined?(lv===2?50:80):G.fmShT)-dt;if(G.fmShT>0)return;G.fmShT=(lv===2?55:85)*rnd(.85,1.2);
-    const dir=Math.random()<.5?1:-1;S=G.fmShip={dir,x:p.x-dir*(VW/2+300),y:p.y+rnd(-140,140),sx:0,sy:0,tg:null,lg:0,lk:0,sc:new Set(),life:60};S.sx=S.x;S.sy=S.y;
+    const dir=Math.random()<.5?1:-1;S=G.fmShip={dir,x:p.x-dir*(VW/2+300),y:p.y+rnd(-140,140),sx:0,sy:0,tg:null,lg:0,lk:0,sc:new Set(),life:G.hell?75:60};S.sx=S.x;S.sy=S.y;
     if(!G.bot){if(!G.fmShTip){G.fmShTip=1;toast('👁️ 하늘의 감시함','붉은 빛에 들키면 1.5초 뒤 그 자리에 광선이 내리꽂혀요',true)}SND.p('whoosh')}return}
-  S.life-=dt;S.x+=S.dir*70*dt;S.lk-=dt;
+  S.life-=dt;S.lk-=dt;if(S.life<=0)S.lv=1;
+  if(G.hell&&!S.lv){S.x+=S.dir*23*dt+(p.x-S.x)*dt*.06;S.y+=(p.y-S.y)*dt*.12; // 11-09: 헬은 오래 머물며 슬금슬금 따라옴
+    const hid=!!(G.fmIn&&G.fmIn.soft);S.jt=(S.jt===undefined?1.5:S.jt)-dt;if(!hid&&S.jt<=0&&(S.jn||0)<20){S.jt=1;S.jn=(S.jn||0)+1;const e=fmPop(mkEnemy('fm_mu_jet',S.x+rnd(-30,30),S.y+rnd(-20,20)));e.sk=1;if(!G.bot)sparks(e.x,e.y-20,8,['#b06bff','#ff3a3a','#ffffff'],120,.3,2)}else if(hid)S.jt=Math.max(S.jt,.5)}
+  else S.x+=S.dir*(S.lv?180:70)*dt;
   if(!S.tg||(S.lg>0&&(S.lg-=dt)<=0&&S.arr)){S.tg=null;S.arr=0;S.lg=0;let bd=380;for(const o of G.fmL||[]){if(!FM_HIDE[o.t]||S.sc.has(o.id))continue;const d=Math.hypot(o.x-S.x,o.y-S.y);if(d<bd){bd=d;S.tg=o}}
     if(S.tg)S.sc.add(S.tg.id);else S.tg={x:S.x+S.dir*160,y:S.y+rnd(-120,120),fake:1}}
   const tx=S.tg.x,ty=S.tg.y-(S.tg.fake?0:20),dx=tx-S.sx,dy=ty-S.sy,d=Math.hypot(dx,dy);if(d>6){const v=Math.min(d,170*dt);S.sx+=dx/d*v;S.sy+=dy/d*v}else if(!S.arr){S.arr=1;S.lg=S.tg.fake?.1:1.2}
-  if(S.lk<=0&&!G.arena&&Math.hypot(p.x-S.sx,p.y-S.sy)<72){S.lk=2.2;B.push({x:p.x,y:p.y,t:1.5,T:1.5,sx:S.x,sy:S.y-150});if(!G.bot){G.texts.push({x:p.x,y:p.y-46,v:'⚠️ 발각!',life:1,col:'#ff3a3a'});SND.p('surprise')}}
-  if(S.life<=0||(S.x-p.x)*S.dir>VW/2+340)G.fmShip=null}
-function fmTick7(dt){if(G.bot&&!G.fmL)return;fmDroneTick(dt);fmEscortTick(dt);fmRaidTick(dt);fmTorchTick(dt);fmShipTick(dt);fmTick8(dt)}
+  if(S.lk<=0&&!G.arena&&Math.hypot(p.x-S.sx,p.y-S.sy)<72){S.lk=2.2;{const D=G.hell?.4:1.5;B.push({x:p.x,y:p.y,t:D,T:D,sx:S.x,sy:S.y-150})}if(!G.bot){G.texts.push({x:p.x,y:p.y-46,v:'⚠️ 발각!',life:1,col:'#ff3a3a'});SND.p('surprise')}}
+  if((S.x-p.x)*S.dir>VW/2+340||S.life<-20)G.fmShip=null}
+function fmCannonTick(dt){const lv=fmLv(),p=G.p;if(!lv)return;for(const e of G.enemies){if(e.type!=='fm_mu_cannon'||e.dead||e.dash)continue;e.cs=(e.cs===undefined?rnd(.5,1.8):e.cs)-dt;if(e.cs>0)continue;e.cs=1.8;if(Math.abs(e.x-p.x)>VW/2+60||Math.abs(e.y-p.y)>VH/2+60)continue;const a=Math.atan2(p.y-e.y,p.x-e.x),n=lv===2?3:1;for(let i=0;i<n;i++)ebShot(e,a+(i-(n-1)/2)*.25,150,5,.6,'#ff5a7a')}} /* 11-09: 대포 무수리 상시 탄막 */
+function fmTick7(dt){if(G.bot&&!G.fmL)return;fmCannonTick(dt);fmDroneTick(dt);fmEscortTick(dt);fmRaidTick(dt);fmTorchTick(dt);fmShipTick(dt);fmTick8(dt)}
 /* ---- 장수 ⑧ (11-08 밤, 사용자 승인): 허수아비 지푸라기 탄 · 쫓아오는 착한 토마토 · 헬 통신기(아이기스 지원 사격) ---- */
 function fmStraw(x,y,n,ring){const p=G.p,lv=fmLv(),src={x,y,dmg:(9+em()*.8)*(lv===2?1.4:1)},a0=Math.atan2(p.y-y,p.x-x);for(let i=0;i<n;i++){const a=ring?a0+i*6.283/n:a0+(i-(n-1)/2)*.22;ebShot(src,a,ring?130:160,5,1,'#f0c860')}if(!G.bot){sparks(x,y,10,['#f0c860','#8a5a2a'],120,.35,2);SND.p('paper')}}
 // 쫓아오는 착한 토마토: 플레이어에게 달려와 닿으면 체력 8% 회복(+ 원래 구조 보상)

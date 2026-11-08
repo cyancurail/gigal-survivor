@@ -5917,8 +5917,8 @@ function densestR(m){const L=enR(m);let best=null,bs=-1;for(const a of L){let k=
 function w2Tick(m,dt,x,Y){const F=W2T[m.id];m.wx=x;m.wy=Y-22;if(F)F(m,dt*(1+w2BV(m.id).f*cc(m,'f')),x,Y-22)}
 const W2T={
  '재건'(m,dt,x,Y){m.t-=dt;if(m.t>0)return;const e=nearR(m,x,Y);if(!e){m.t=.2;return}m.t=cc(m,'c2')?.75:1.5;const z7=cc(m,'u7'),n=z7?1:1+cc(m,'n'),d=18*w2Dm(m)*(z7?2.2:Math.pow(.85,cc(m,'n')))*(cc(m,'c2')?.6:1),aw=cc(m,'u4');
-   m.chg=(m.chg||0);if(FXV===2&&!T.bot)f2({k:'arc',x,y:Y-6,R:16,a:Math.atan2(e.y-Y,e.x-x),col:w2Col(m),T:.14});for(let i=0;i<3;i++)setTimeout0(i*.12,()=>{for(let k=0;k<n;k++){const a=Math.atan2(e.y-Y,e.x-x)+(k-(n-1)/2)*.12;const dbl=m.chg>=10;if(dbl)m.chg=0;else if(cc(m,'u3'))m.chg++;
-     w2Shoot({k:'bul',m,x:x+(k-(n-1)/2)*6,y:Y,vx:Math.cos(a)*620,vy:Math.sin(a)*620,d,pc:cc(m,'u1')+(aw?2:0),sp:((cc(m,'v1')?2+cc(m,'r'):0)||(aw?2:0))*(dbl?2:1)*(aw?2:1),hit:new Set(),life:1.4,w:2.2});
+   m.chg=(m.chg||0);if(FXV===2&&!T.bot)f2({k:'arc',x,y:Y-6,R:16,a:Math.atan2(e.y-Y,e.x-x),col:w2Col(m),T:.14});for(let i=0;i<3;i++)setTimeout0(i*.12,()=>{for(let k=0;k<n;k++){const a=Math.atan2(e.y-Y,e.x-x),bk=k*16;/* 11-08 사용자: 탄 추가는 부채꼴 말고 일렬로(같은 방향, 앞뒤로 줄지어) */const dbl=m.chg>=10;if(dbl)m.chg=0;else if(cc(m,'u3'))m.chg++;
+     w2Shoot({k:'bul',m,x:x-Math.cos(a)*bk,y:Y-Math.sin(a)*bk,vx:Math.cos(a)*620,vy:Math.sin(a)*620,d,pc:cc(m,'u1')+(aw?2:0),sp:((cc(m,'v1')?2+cc(m,'r'):0)||(aw?2:0))*(dbl?2:1)*(aw?2:1),hit:new Set(),life:1.4,w:2.2});
        m.ec2=(m.ec2||0)+1;if(cc(m,'b2')&&m.ec2>=10){m.ec2=0;w2Shoot({k:'bul',m,x,y:Y,vx:Math.cos(a)*380,vy:Math.sin(a)*380,d:d*3,pc:99,sp:0,hit:new Set(),life:2.2,w:6,big:1})}}
      if(cc(m,'u2'))for(const s of [-1,1])w2Shoot({k:'bul',m,x,y:Y,vx:s*160,vy:-600,d:d*.4,pc:0,sp:0,boom:.1,hit:new Set(),life:1.4,w:1.4,small:1});snd('pop')})},
  '박준형'(m,dt,x,Y){m.t-=dt;if(m.t>0)return;if(!enR(m).length){m.t=.2;return}m.t=3;const z7=cc(m,'u7'),n=Math.max(1,2+cc(m,'n')-z7),d=46*w2Dm(m)*Math.pow(.85,cc(m,'n'))*(cc(m,'u4')?3:1)*(z7?1.8:1);

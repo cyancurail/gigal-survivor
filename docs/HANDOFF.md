@@ -351,3 +351,12 @@
 - 저장: `SAVE.saint={키:[1~5단계 개수]}`, `SAVE.saintEq=[키|null×3]`. **SC_VER 23**: 맨 끝 [n(var) + 종류마다 5개(var) + 장착 3바이트(SNK 인덱스+1)]. **SNK 순서는 끝에만 추가.**
 - 래핑: newGame·recalc/stuApply·hitP·healP('_food')·mkEnemy·kill(월급날 시작)·endGame(정산)·update(tick). 직접 수정: hurt(손톱·결계·헬 넉백 예외), 사망 줄(리버스, MPDIE보다 먼저), 필살기 쿨/에너지(언니빨), levelUp `G.rr`(리롤), openChest(상자), rollGacha·뽑기 결과·상점 문구, `lbVis`에 saint.
 - 월급날(희귀): 보스 처치 후 5분 동안 얻은 골드(runGold 차이, 상자 골드 포함) +10·20·30·40·50%, 끝날 때 정산. 창 안에서 보스를 또 잡으면 정산 후 새 5분.
+
+## V189 (11-09) — 🛡️ 폴라리스 패스 (아스가르드 디펜스 패스) · 디펜스 미션 · 로비 배경음 · 강화 골드 ×5 · 탭 나누기
+- `window.TPASS`(td.js): `TP={id:'tn1',name:'폴라리스 패스',end:2026-11-25 18:00,lvXp:200,max:30}`, `SAVE.tp={xp,got}`. 홀수 단계 = 합류 대원 랜덤, 짝수 = 골라 받기, 칩 `round(12+3.3×lv)`(합 ≈1,870 = 무기 하나 Lv30). 10·20·30단계 `TPX` = 로비 배경음 inc·cos·ari + 칭호 pl1(아스가르드 대원)·pl2(폴라리스 사령관)·pl3(폴라리스 수호자).
+- XP: 디펜스 판 끝(`finish`)에 웨이브×5 + 클리어 30 + ★×10. 디펜스 미션 `SAVE.tpm`(오늘 2: 3판·클리어·정예/보스 10·조합 카드 / 이번 주 2: 어려움+ 클리어 3·5명 클리어), 일 150·주 400 XP. 정예·보스 처치 수 `T.ek`.
+- 서바이버 쪽: 🎫 패스 창 탭 [시즌2 패스][폴라리스 패스] `tpM()`, 📅 미션 창 맨 아래 「🛡️ 디펜스 미션」, 배지 `dot('pass')`·`msCanN`에 TPASS 합산.
+- 로비 배경음: `LBGM`(base lobby · inc lb_incheon · cos lb_cosmos · ari lb_ariadne, 사용자 곡 −16 LUFS 128k), `SAVE.bgmOwn`·`SAVE.lbBgm`, `LBF()`·`__lbBgmReset`, 옷장 로비 꾸미기 「🎵 로비 배경음」 줄.
+- 무기 강화 골드 `wlCost` g: 30×Lv → 150×Lv (Lv30까지 약 6.5만, 사용자 「×5」). 환급 `tdRefund`는 예전 30×Lv 기준 그대로.
+- 아래 메뉴 [대원 관리] → [👥 대원 강화](강화 단계만), [🧬 대원 조합](카드 나무만) — `wqPop(id,mode)`.
+- 패치내역(사용자 문구) 「🛡️ 아스가르드 디펜스 패스 출시」. sw v189.

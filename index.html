@@ -9249,7 +9249,7 @@ const css=`
 #saint{background:#140a1e;color:#fff;font-family:'Noto Sans KR',sans-serif;padding:0;overflow-y:auto;display:block}#saint>*{flex-shrink:0}
 #saint .snHead{position:sticky;top:0;z-index:4;display:flex;align-items:center;gap:8px;padding:calc(8px + env(safe-area-inset-top,0px)) 12px 8px;background:linear-gradient(#140a1ef2,#140a1ecc);border-bottom:1px solid rgba(255,214,234,.2)}
 #saint .snHead h2{margin:0;font-size:17px;flex:1}#saint .snHead .ghost{color:#fff;border-color:rgba(255,214,234,.5)}
-#saint .snStage{position:relative;width:100%;overflow:hidden;background:#2a1a24;touch-action:pan-y}
+#saint .snStage{position:relative;width:100%;overflow:hidden;background:#2a1a24;touch-action:pan-y}#saint .snStage::before{content:'';position:absolute;inset:-20px;background:url(saint/bg.webp) center/cover;filter:blur(14px) brightness(.55)}
 #saint .snIn{position:absolute;left:0;top:0;width:${BGW}px;height:${BGH}px;transform-origin:0 0;background:url(saint/bg.webp) 0 0/100% 100% no-repeat}
 #saint .snGlow{position:absolute;border-radius:50%;border:3px solid rgba(170,232,255,.95);box-shadow:0 0 10px 3px rgba(120,210,255,.75),inset 0 0 6px rgba(200,245,255,.8);animation:snPulse 1.8s ease-in-out infinite;pointer-events:none}
 @keyframes snPulse{0%,100%{opacity:.55}50%{opacity:1}}
@@ -9286,9 +9286,9 @@ let built=false,SEL=null;
 function build(){if(built)return;built=true;const s=document.createElement('style');s.textContent=css;document.head.appendChild(s);
   const sec=document.createElement('section');sec.className='scr';sec.id='saint';sec.hidden=true;document.body.appendChild(sec);
   addEventListener('resize',()=>{if(!sec.hidden)layout()})}
-function stageBox(){const sec=document.getElementById('saint'),W=sec.clientWidth||innerWidth,maxH=Math.max(220,Math.min(innerHeight*.52,560));
-  const crop=W<700?{w:820,h:640}:{w:1150,h:820},cx=800,cy=560;let s=W/crop.w;if(crop.h*s>maxH)s=maxH/crop.h;s=Math.max(s,W/BGW);const H=Math.min(crop.h*s,maxH);
-  const vw=W/s,vh=H/s,left=Math.max(0,Math.min(BGW-vw,cx-vw/2)),top=Math.max(0,Math.min(BGH-vh,cy-vh/2));return{W,H,s,left,top}}
+function stageBox(){const sec=document.getElementById('saint'),W=sec.clientWidth||innerWidth,narrow=W<700,Ht=Math.max(220,innerHeight*(narrow?.5:.62)),Hf=W*BGH/BGW;
+  /* 그림 위아래는 자르지 않음(사용자 11-09). 좁은 화면은 양옆을 손 중심으로 자르고, 넓은 화면은 양옆을 흐린 그림으로 채움 */
+  const H=Hf>=Ht?Math.min(Hf,innerHeight*.75):Ht,s=H/BGH,vw=W/s,cx=800,left=vw<BGW?Math.max(0,Math.min(BGW-vw,cx-vw/2)):-(vw-BGW)/2;return{W,H,s,left,top:0}}
 function layout(){const st=document.querySelector('#saint .snStage'),inn=document.querySelector('#saint .snIn');if(!st||!inn)return;const b=stageBox();st.style.height=b.H+'px';inn.style.transform=`scale(${b.s}) translate(${-b.left}px,${-b.top}px)`}
 function say(kind,txt){const el=document.querySelector('#saint .snSay span');if(!el)return;el.textContent=txt||pk(LINES[kind]||LINES.hi)}
 function slotsHTML(){const E=eqKeys();return SLOT.map((o,i)=>{const k=E[i];if(!k)return `<div class="snGlow" style="left:${o.x-o.w/2-8}px;top:${o.y-10}px;width:${o.w+16}px;height:20px;transform:rotate(${o.r}deg)"></div><button type="button" class="snHit" data-slot="${i}" aria-label="${i+1}번 반지 칸 (비어 있음)" style="left:${o.x-o.w/2-12}px;top:${o.y-34}px;width:${o.w+24}px;height:62px"></button>`;

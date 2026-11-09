@@ -6197,7 +6197,7 @@ function szDraw(w){const st=w.st,p=G.p;ctx.save();ctx.globalCompositeOperation='
 Object.assign(WP,{rouge:{name:'에클라땅뜨 아르떼',icon:'💋',evo:'wegovy',evoName:'에클라땅뜨 아르떼',hid:1,d:'더 화려하게, 더 아름답게, 더 눈부시게!',ed:'더 화려하게, 더 아름답게, 더 눈부시게!',extra:1}});
 KC.rouge='#ff4f9a';
 HX.push({k:'rouge',a:'lipstick',b:'nail',it:'wegovy',q:'네 안에 화려함을 터트려볼까?',lore:'더 화려하게, 더 아름답게, 더 눈부시게!',col:'#ff4f9a',sub:'💄 립스틱 난도 + 💅 하트 네일 + 💉 위고비'});
-const RA={CD:1.8,M:3.3,VUL:.15,VD:4,VCD:20,STOP:5,SCD:22,FHOLD:5,MCD:15,MD:5,FIN:100,HOLD:.9,FADE:.55,
+const RA={CD:1.8,HCD:6,M:2.95,VUL:.15,VD:4,VCD:20,STOP:5,SCD:22,FHOLD:5,MCD:15,MD:5,FIN:100,HOLD:.9,FADE:.55,
   N:{pink:{line:'#ff2a6d',glow:'#ff6fae',core:'#ffe3f0',pt:['#ff2a6d','#ff7ab8','#ffd0e4','#ffffff']},cyan:{line:'#1ec8ff',glow:'#7fe9ff',core:'#e8fbff',pt:['#1ec8ff','#7fe9ff','#d8f8ff','#ffffff']},yellow:{line:'#ffc61a',glow:'#ffe48a',core:'#fff8dc',pt:['#ffc61a','#ffe48a','#fff3c0','#ffffff']},purple:{line:'#a64dff',glow:'#d39bff',core:'#f3e6ff',pt:['#a64dff','#d39bff','#efdcff','#ffffff']},green:{line:'#22e07a',glow:'#8dffc0',core:'#e6fff1',pt:['#22e07a','#8dffc0','#dcffe9','#ffffff']},orange:{line:'#ff7a1a',glow:'#ffb070',core:'#fff0e0',pt:['#ff7a1a','#ffb070','#ffe0c4','#ffffff']},magenta:{line:'#ff2bd6',glow:'#ff86ec',core:'#ffe6fa',pt:['#ff2bd6','#ff86ec','#ffd6f6','#ffffff']},red:{line:'#ff1e3c',glow:'#ff6a7a',core:'#ffe0e4',pt:['#ff1e3c','#ff6a7a','#ffd0d6','#ffffff']},sig:{line:'#9a0016',glow:'#c8001f',core:'#d81a33',pt:['#9a0016','#c8001f','#e0203a','#ffffff']}},
   C:{line:'#ff2a6d',glow:'#ff6fae',core:'#ffe3f0',pt:['#ff2a6d','#ff7ab8','#ffd0e4','#ffffff','#ffb3d9']}};
 // ---- 모양 (단위 좌표 −1~1) ----
@@ -6236,6 +6236,8 @@ function raTick(w,dt){const S=G.S,st=w.st,p=G.p,m=S.might*RA.M;
   const vis=G.enemies.filter(e=>!e.dead&&Math.abs(e.x-p.x)<VW/2+20&&Math.abs(e.y-p.y)<VH/2+20);
   if(st.fn<=0&&!st.F&&vis.length){st.fn=RA.FIN*S.cd;raFinale(st)}
   if(st.u<=0&&!st.F){st.u=RA.CD*S.cd;raPick(st,vis,m)}
+  // 손 기술은 따로 6초마다
+  st.hu=(st.hu===undefined?2:st.hu)-dt;if(st.hu<=0&&!st.F&&vis.length){st.hu=RA.HCD*S.cd;raHand(st,vis)}
   // 진행 중인 기술
   st.sk=st.sk.filter(k=>raSkill(st,k,dt,m,vis));
   if(st.F)raFinTick(st,dt,m);
@@ -6265,16 +6267,20 @@ function raDust(st,dt){const P=RA.C.pt;
       px(x+rnd(-2,2),y+rnd(-2,2),dx/d*v+rnd(-25,25),dy/d*v-rnd(20,60),rnd(.5,1.1),pick(Math.random()<.25?['#ffffff','#fff4fa']:(s.col||RA.C).pt),pick([2,2,3]),1,1.2)}}}
 // ---- 상황 보고 기술 고르기 ----
 function raCluster(vis,R){let best=null,bn=0;for(let i=0;i<vis.length;i+=Math.max(1,vis.length/30|0)){const c=vis[i];let n=0,sx=0,sy=0;for(const e of vis){if((e.x-c.x)**2+(e.y-c.y)**2<R*R){n++;sx+=e.x;sy+=e.y}}if(n>bn){bn=n;best={x:sx/n,y:sy/n,n}}}return best}
-function raPick(st,vis,m,force){const S=G.S,p=G.p;if(!vis.length)return;
+// 손: 보스·엘리트 → 내려치기, 몰려 있으면 → 움켜쥐기, 아니면 → 밀기
+function raHand(st,vis,force){const p=G.p,near=vis.filter(e=>(e.x-p.x)**2+(e.y-p.y)**2<260*260),big=vis.filter(e=>(e.boss||e.elite)&&(e.x-p.x)**2+(e.y-p.y)**2<380*380);
+  const k=force||(big.length?'palm':near.length>=10?'grab':'sweep');
+  if(k==='palm'){const b=big.find(e=>e.boss)||big[0]||vis[0];st.sk.push({k,t:0,e:b,x:b.x,y:b.y});return}
+  if(k==='grab'){const c=raCluster(near.length?near:vis,170)||{x:p.x,y:p.y};st.sk.push({k,t:0,x:c.x,y:c.y});return}
+  const L=vis.filter(e=>e.x<p.x).length,dir=L>vis.length-L?-1:1;st.sk.push({k:'sweep',t:0,dir,hit:new Set()})}
+function raPick(st,vis,m,force){if(force==='grab'||force==='palm'||force==='sweep'){raHand(st,vis,force);return}const S=G.S,p=G.p;if(!vis.length)return;
   const hpLow=p.hp<S.maxHp*.45,bul=(G.eb||[]).filter(b=>b.life>0&&(b.x-p.x)**2+(b.y-p.y)**2<320*320).length,bigV=vis.filter(e=>e.boss||e.elite),near=vis.filter(e=>(e.x-p.x)**2+(e.y-p.y)**2<260*260),big=vis.filter(e=>(e.boss||e.elite)&&(e.x-p.x)**2+(e.y-p.y)**2<380*380),cl=raCluster(vis,140);
   let k;
   if(force)k=force;else if(hpLow&&!st.bar&&st.bc<=0)k='circle';
   else if(st.vc<=0&&vis.length>=6)k='weak';
   else if(st.mc<=0&&!st.mir&&(bul>=3||(bigV.some(e=>e.boss)&&Math.random()<.35)))k='mirror';
   else if(st.sc<=0&&bigV.length)k='stop';
-  else if(near.length>=10&&Math.random()<.45)k='grab';
-  else if(big.length&&Math.random()<.5)k='palm';
-  else{const L=vis.filter(e=>e.x<p.x).length,Rr=vis.length-L;k=pick(Math.abs(L-Rr)>vis.length*.4?['sweep','heart','lips','flower','rocket','ufo']:['heart','lips','flower','rocket','planet','ufo','bfly','sweep'])}
+  else{const L=vis.filter(e=>e.x<p.x).length,Rr=vis.length-L;k=pick(Math.abs(L-Rr)>vis.length*.4?['heart','lips','flower','rocket','ufo']:['heart','lips','flower','rocket','planet','ufo','bfly'])}
   const sc=Math.min(VW,VH);
   if(k==='circle'){st.bc=12*S.cd;const R=95*S.area;st.bar={t:0,R};st.dr.push(Object.assign(raStroke(RAS.circle(48),0,0,R,.45,{keep:1,w:6,noTail:1,slant:.08,jit:.02}),{fol:[0,0],ox:p.x,oy:p.y,bar:1}));return}
   if(k==='weak'){st.vc=RA.VCD*S.cd;const x=p.x,y=p.y-sc*.22,sz=Math.max(34,Math.round(sc*.085));raWrite(st,'약하구나?',x,y,sz*1.6,1,{hold:1.1});st.sk.push({k,t:0,x,y});return}

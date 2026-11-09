@@ -3846,7 +3846,8 @@ const SND=(()=>{
   function music(name){want=name;if(!ok())return;if(name===cur)return;cur=name;step=0;nextT=AC.currentTime+.08;if(!timer)timer=setInterval(()=>{try{sched()}catch(e){}},25)}
   // ---- 🎵 로비 배경음 (V131, 사용자 곡 bgm/lobby.mp3 · 로비와 로비에서 여는 화면에서만, 시작 화면은 칩튠 그대로) ----
   const LB={buf:null,ld:0,src:null,g:null,t0:0,off:0};
-  function lbLoad(){if(LB.ld)return;LB.ld=1;fetch('bgm/lobby.mp3').then(r=>{if(!r.ok)throw 0;return r.arrayBuffer()}).then(a=>new Promise((res,rej)=>AC.decodeAudioData(a,res,rej))).then(b=>{LB.buf=b}).catch(()=>{setTimeout(()=>{LB.ld=0},15000)})}
+  /* 11-09: 로비 배경음 고르기 (옷장 → 로비 꾸미기, 폴라리스 패스 보상곡) */const LBF=()=>{const k=SAVE.lbBgm,L=window.LBGM;return L&&L[k]&&(k==='base'||(SAVE.bgmOwn||{})[k]||window.__devAll)?L[k].f:'lobby'};window.__lbBgmReset=()=>{lbStop();LB.buf=null;LB.ld=0;LB.off=0};
+  function lbLoad(){if(LB.ld)return;LB.ld=1;fetch('bgm/'+LBF()+'.mp3').then(r=>{if(!r.ok)throw 0;return r.arrayBuffer()}).then(a=>new Promise((res,rej)=>AC.decodeAudioData(a,res,rej))).then(b=>{LB.buf=b}).catch(()=>{setTimeout(()=>{LB.ld=0},15000)})}
   function lbVis(){if(G&&G.running)return false;if(window.__tdOn){const o=document.getElementById('tdOv');if(o&&!o.hidden)return false}/* 디펜스 화면 위에서는 서바이버 로비 음악 끔 */const rv=$('#resov');if(rv&&!rv.hidden)return false;const t=$('#title');if(t&&!t.hidden&&t.classList.contains('tonly'))return false;return ['lobby','select','shop','closet','ach','savescr','saint'].some(id=>{const e=document.getElementById(id);return e&&!e.hidden})}
   function lbVol(){return SAVE.snd.m?.55*duck*VOL('m'):0}
   function lbStart(){if(LB.src)return;if(!LB.g){LB.g=AC.createGain();LB.g.connect(M)}const now=AC.currentTime;LB.g.gain.cancelScheduledValues(now);LB.g.gain.setValueAtTime(0,now);LB.g.gain.linearRampToValueAtTime(lbVol(),now+.6);
@@ -5753,12 +5754,14 @@ const _rc=renderCloset;renderCloset=function(){const lob=CLO.tab==='lobby';if(lo
   const bg=SAVE.lobbyMap&&lbOwn(SAVE.lobbyMap)?SAVE.lobbyMap:'base',pc=petCur();
   const d=document.createElement('div');d.innerHTML=`<div class="lbPv"><canvas id="lbPvC"></canvas><span class="lbPvN">👀 미리보기 · ${esc(LBM[bg].n)}</span></div><p class="clonote">로비 배경과 펫은 어떤 캐릭터로 놀든 함께해요. 시즌 패스·업적에서 얻을 수 있어요.</p>
    <div class="clowrow"><span class="wn">🖼️ 로비 배경</span><span class="wb">${Object.keys(LBM).map(k=>lbOwn(k)?`<button type="button" class="wfxb clb" data-lbm="${k}" aria-pressed="${bg===k}">${esc(LBM[k].n)}</button>`:`<button type="button" class="wfxb" disabled>🔒 ???</button>`).join('')}</span></div>
+   <div class="clowrow"><span class="wn">🎵 로비 배경음</span><span class="wb">${Object.keys(LBGM).map(k=>k==='base'||(SAVE.bgmOwn||{})[k]||window.__devAll?`<button type="button" class="wfxb clm" data-lbg="${k}" aria-pressed="${(SAVE.lbBgm||'base')===k}">${esc(LBGM[k].n)}</button>`:`<button type="button" class="wfxb" disabled>🔒 ???</button>`).join('')}</span><span class="c">로비에서 흘러나와요 · 🛡️ 폴라리스 패스 보상</span></div>
    <div class="clowrow"><span class="wn">🐾 펫</span><span class="wb"><button type="button" class="wfxb clp" data-pet="" aria-pressed="${!pc}">없음</button>${Object.keys(PETS).map(k=>petOwn(k)?`<button type="button" class="wfxb clp" data-pet="${k}" aria-pressed="${pc===k}"><canvas width="40" height="34" data-pp="${k}" style="vertical-align:middle;margin-right:4px"></canvas>${esc(PETS[k].n)}</button>`:`<button type="button" class="wfxb" disabled>🔒 ???</button>`).join('')}</span><span class="c">로비에서는 따라다니고, 게임에서는 경험치 보석을 주워 와요</span></div>
    <div class="clowrow"><span class="wn">🏷️ 칭호</span><span class="wb"><button type="button" class="wfxb clt" data-tt="" aria-pressed="${!SAVE.title}">없음</button>${Object.keys(window.TITLES||{}).map(k=>(SAVE.titles||{})[k]?`<button type="button" class="wfxb clt" data-tt="${k}" aria-pressed="${SAVE.title===k}">${esc(TITLES[k])}</button>`:`<button type="button" class="wfxb" disabled>🔒 ???</button>`).join('')}</span><span class="c">로비에서 이름 밑에 보여요</span></div>`;
   host.appendChild(d);
   d.querySelectorAll('canvas[data-pp]').forEach(cv=>{const k=cv.dataset.pp,draw=()=>{const g=cv.getContext('2d');g.clearRect(0,0,40,34);petBlit(g,k,0,20,17,.45)};const im=petIm(k);if(im)draw();else PIM[k].onload=draw});
   try{lbPreview(d.querySelector('#lbPvC'),bg)}catch(e){console.warn(e)}
   d.querySelectorAll('.clb').forEach(b=>b.onclick=()=>{SAVE.lobbyMap=b.dataset.lbm;persist();renderCloset()});
+  d.querySelectorAll('.clm').forEach(b=>b.onclick=()=>{SAVE.lbBgm=b.dataset.lbg;persist();try{window.__lbBgmReset&&__lbBgmReset()}catch(e){}renderCloset()});
   d.querySelectorAll('.clp').forEach(b=>b.onclick=()=>{SAVE.pet=b.dataset.pet||null;persist();renderCloset()});
   d.querySelectorAll('.clt').forEach(b=>b.onclick=()=>{SAVE.title=b.dataset.tt||null;persist();renderCloset()})};
 try{window.renderCloset=renderCloset}catch(e){}
@@ -5805,7 +5808,8 @@ try{window.openCloset=openCloset}catch(e){}
 // ===== 🎫 시즌 패스 + 📅 미션 (V106) =====
 const SP={id:'s2a',name:'시즌2 패스 · 아름다운 거짓',start:new Date('2026-11-04T18:00:00+09:00').getTime(),days:21,/* 11-08: 11/25 18시까지 연장 */lvXp:200,premG:5000};
 SP.end=SP.start+SP.days*864e5;window.SP=SP;
-const TITLES={fin:'🏁 시즌2 완주자',liar:'💋 아름다운 거짓말쟁이',hero:'👑 시즌2의 주인공'};window.TITLES=TITLES;
+const TITLES={fin:'🏁 시즌2 완주자',liar:'💋 아름다운 거짓말쟁이',hero:'👑 시즌2의 주인공',pl1:'🛡️ 아스가르드 대원',pl2:'⭐ 폴라리스 사령관',pl3:'🌌 폴라리스 수호자'};
+const LBGM={base:{n:'기본',f:'lobby'},inc:{n:'인천의 밤',f:'lb_incheon'},cos:{n:'우주의 시간',f:'lb_cosmos'},ari:{n:'아리아드네',f:'lb_ariadne'}};window.LBGM=LBGM;window.TITLES=TITLES;
 const SPF=[{g:300},{g:350},{g:400},{g:450},{g:500},{g:550},{g:600},{g:650},{g:700},{bg:'festa'},
  {g:800},{g:850},{g:900},{g:950},{t:{L:1}},{g:1000},{g:1050},{g:1100},{g:1200},{pet:'wisp'},
  {g:1300},{g:1400},{g:1500},{g:1600},{t:{L:1}},{g:1700},{g:1800},{g:1900},{g:2000},{g:3000,title:'fin'},
@@ -5858,7 +5862,7 @@ for(const fn of ['hxMerge','rdMerge']){const o=window[fn];if(typeof o!=='functio
 const dLeft=()=>{const ms0=SP.end-spNow();if(ms0<=0)return'시즌 종료';const d=Math.floor(ms0/864e5),h=Math.floor(ms0%864e5/36e5);return d?`${d}일 ${h}시간 남음`:`${h}시간 남음`};
 function passM(){const S=sp(),L=spLv(),xin=S.xp%SP.lvXp,pre=spNow()<SP.start;
   const cell=(tr,i)=>{const lv=i+1,r=(tr==='p'?SPP:SPF)[i],got=(tr==='p'?S.p:S.f)[lv],ok=lv<=L&&(tr==='f'||S.prem);return `<button type="button" class="spC${got?' got':ok?' ok':''}${r.bg||r.pet||r.title?' sp':''}" data-tr="${tr}" data-lv="${lv}" ${!ok||got?'disabled':''} title="${esc(rwName(r))}"><i>${rwIcon(r)}</i><small>${esc(rwName(r))}</small>${got?'<em>✔</em>':!ok&&tr==='p'&&!S.prem?'<em>🔒</em>':''}</button>`};
-  const __T='s';const o=ovM(`<div class="lbM spM">${window.TPASS?`<div class="spTabs"><button type="button" data-spt="s" class="${__T==='s'?'on':''}">🎫 시즌2 패스</button><button type="button" data-spt="t" class="${__T==='t'?'on':''}">🛡️ 토나르 패스</button></div>`:''}<h3>🎫 ${esc(SP.name)}</h3><p class="c" style="margin:0">${pre?'곧 시작해요!':dLeft()} · <b>${L}단계</b>${L<SPMAX?` · 다음 단계까지 ${SP.lvXp-xin} XP`:' · 🎉 만렙!'}</p>
+  const __T='s';const o=ovM(`<div class="lbM spM">${window.TPASS?`<div class="spTabs"><button type="button" data-spt="s" class="${__T==='s'?'on':''}">🎫 시즌2 패스</button><button type="button" data-spt="t" class="${__T==='t'?'on':''}">🛡️ 폴라리스 패스</button></div>`:''}<h3>🎫 ${esc(SP.name)}</h3><p class="c" style="margin:0">${pre?'곧 시작해요!':dLeft()} · <b>${L}단계</b>${L<SPMAX?` · 다음 단계까지 ${SP.lvXp-xin} XP`:' · 🎉 만렙!'}</p>
    <div class="spBar"><span style="width:${L>=SPMAX?100:xin/SP.lvXp*100}%"></span></div>
    <div class="spRows"><div class="spHd"><b>무료</b><b>${S.prem?'👑 프리미엄':'🔒 프리미엄'}</b></div><div class="spScroll">${SPF.map((_,i)=>`<div class="spCol${i+1===L?' cur':''}"><span class="spN">${i+1}</span>${cell('f',i)}${cell('p',i)}</div>`).join('')}</div></div>
    <div class="btns">${spCanN()?`<button type="button" class="big" id="spAll">🎁 모두 받기 (${spCanN()})</button>`:''}${S.prem?'':`<button type="button" class="ghost" id="spPrem">👑 프리미엄 열기 · ${SP.premG.toLocaleString()}G</button>`}<button type="button" class="ghost" id="lbX">닫기</button></div>
@@ -5871,26 +5875,26 @@ function passM(){const S=sp(),L=spLv(),xin=S.xp%SP.lvXp,pre=spNow()<SP.start;
 /* 11-09: 🛡️ 토나르 패스 (아스가르드 디펜스 전용, 로직은 디펜스 코드 window.TPASS) */
 function tpM(pk){const P=window.TPASS;if(!P)return;const S=P.s(),L=P.lv(),TP=P.TP,xin=S.xp%TP.lvXp,un=P.un();const __T='t';
   const left=()=>{const m=TP.end-Date.now();if(m<=0)return'시즌 종료';const d=Math.floor(m/864e5),h=Math.floor(m%864e5/36e5);return d?`${d}일 ${h}시간 남음`:`${h}시간 남음`};
-  const cell=l=>{const g=S.got[l],ok=l<=L,pk2=P.pick(l);return `<div class="spCol${l===L?' cur':''}"><span class="spN">${l}</span><button type="button" class="spC${g?' got':ok?' ok':''}${pk2?' sp':''}" data-tl="${l}" ${!ok||g?'disabled':''}><i>${g?P.ic(g.id):pk2?'🎁':'🎲'}</i><small>${g?`${esc(P.nick(g.id))} 💠${g.n}`:`💠 ${P.amt(l)}<br>${pk2?'대원 골라 받기':'랜덤 대원'}`}</small>${g?'<em>✔</em>':''}</button></div>`};
+  const cell=l=>{const g=S.got[l],ok=l<=L,pk2=P.pick(l);return `<div class="spCol${l===L?' cur':''}"><span class="spN">${l}</span><button type="button" class="spC${g?' got':ok?' ok':''}${pk2?' sp':''}" data-tl="${l}" ${!ok||g?'disabled':''}><i>${g?P.ic(g.id):pk2?'🎁':'🎲'}</i><small>${g?`${esc(P.nick(g.id))} 💠${g.n}`:`💠 ${P.amt(l)}<br>${pk2?'대원 골라 받기':'랜덤 대원'}`}${P.ex(l)?`<br><b style="color:#ffd34d">${esc(P.exN(l))}</b>`:''}</small>${g?'<em>✔</em>':''}</button></div>`};
   const pick=pk?`<div class="tpPk"><p class="c" style="margin:4px 0">🎁 ${pk}단계 · 💠 ${P.amt(pk)}개를 받을 대원을 골라요</p><div class="tpPkG">${un.map(id=>`<button type="button" data-tp="${id}">${P.ic(id)}<b>${esc(P.nm(id))}</b><small>${esc(P.nick(id))}</small></button>`).join('')}</div></div>`:'';
   const rn=()=>{let n=0;for(let l=1;l<=L;l++)if(!S.got[l]&&!P.pick(l))n++;return n};
-  const o=ovM(`<div class="lbM spM"><div class="spTabs"><button type="button" data-spt="s" class="${__T==='s'?'on':''}">🎫 시즌2 패스</button><button type="button" data-spt="t" class="${__T==='t'?'on':''}">🛡️ 토나르 패스</button></div><h3>🛡️ ${esc(TP.name)}</h3><p class="c" style="margin:0">${left()} · <b>${L}단계</b>${L<TP.max?` · 다음 단계까지 ${TP.lvXp-xin} XP`:' · 🎉 만렙!'}</p>
+  const o=ovM(`<div class="lbM spM"><div class="spTabs"><button type="button" data-spt="s" class="${__T==='s'?'on':''}">🎫 시즌2 패스</button><button type="button" data-spt="t" class="${__T==='t'?'on':''}">🛡️ 폴라리스 패스</button></div><h3>🛡️ ${esc(TP.name)}</h3><p class="c" style="margin:0">${left()} · <b>${L}단계</b>${L<TP.max?` · 다음 단계까지 ${TP.lvXp-xin} XP`:' · 🎉 만렙!'}</p>
    <div class="spBar"><span style="width:${L>=TP.max?100:xin/TP.lvXp*100}%"></span></div>
    <div class="spScroll">${Array.from({length:TP.max},(_,i)=>cell(i+1)).join('')}</div>${pick}
    <div class="btns">${rn()?`<button type="button" class="big" id="tpAll">🎲 랜덤 칩 모두 받기 (${rn()})</button>`:''}<button type="button" class="ghost" id="lbX">닫기</button></div>
-   <p class="c" style="font-size:11.5px;opacity:.75;margin:4px 0 0">아스가르드 디펜스 판과 📅 디펜스 미션으로만 XP가 쌓여요. 🎲 홀수 단계는 합류한 대원 중 랜덤, 🎁 짝수 단계는 대원을 골라 받아요.</p></div>`);
+   <p class="c" style="font-size:11.5px;opacity:.75;margin:4px 0 0">아스가르드 디펜스 판과 📅 디펜스 미션으로만 XP가 쌓여요. 🎲 홀수 단계는 합류한 대원 중 랜덤, 🎁 짝수 단계는 대원을 골라 받아요. 10·20·30단계엔 🎵 로비 배경음과 🏷️ 칭호도 있어요.</p></div>`);
   {const md=o.querySelector('.modal');md.style.maxWidth='760px';md.style.width='calc(100vw - 20px)';md.style.boxSizing='border-box'}const sc=o.querySelector('.spScroll');requestAnimationFrame(()=>{const c=sc.querySelector('.spCol.cur');if(c)sc.scrollLeft=c.offsetLeft-sc.clientWidth/2+c.clientWidth/2});
   o.querySelectorAll('[data-spt]').forEach(b=>b.onclick=()=>{if(b.dataset.spt==='s')passM()});
-  const done=r=>{try{SND.p('ach')}catch(e){}toast('🛡️ 토나르 패스',`${P.nm(r.id)} · ${P.nick(r.id)} 강화 칩 +${r.n}`);badges()};
+  const done=r=>{try{SND.p('ach')}catch(e){}toast('🛡️ 폴라리스 패스',`${P.nm(r.id)} · ${P.nick(r.id)} 강화 칩 +${r.n}${r.ex?' · '+r.ex:''}`);badges()};
   o.querySelectorAll('[data-tl]').forEach(b=>b.onclick=()=>{const l=+b.dataset.tl;if(P.pick(l)){const k=sc.scrollLeft;tpM(l);const n=document.querySelector('#lbOv .spScroll');if(n)n.scrollLeft=k;return}const r=P.claim(l);if(r){done(r);const k=sc.scrollLeft;tpM();const n=document.querySelector('#lbOv .spScroll');if(n)n.scrollLeft=k}});
   o.querySelectorAll('[data-tp]').forEach(b=>b.onclick=()=>{const r=P.claim(pk,b.dataset.tp);if(r){done(r);tpM()}});
-  const al=o.querySelector('#tpAll');if(al)al.onclick=()=>{let n=0,c=0;for(let l=1;l<=L;l++)if(!P.pick(l)){const r=P.claim(l);if(r){n++;c+=r.n}}try{SND.p('ach')}catch(e){}toast('🛡️ 토나르 패스',`랜덤 강화 칩 ${n}단계 · 💠 ${c}개`);badges();tpM()}}
+  const al=o.querySelector('#tpAll');if(al)al.onclick=()=>{let n=0,c=0;for(let l=1;l<=L;l++)if(!P.pick(l)){const r=P.claim(l);if(r){n++;c+=r.n}}try{SND.p('ach')}catch(e){}toast('🛡️ 폴라리스 패스',`랜덤 강화 칩 ${n}단계 · 💠 ${c}개`);badges();tpM()}}
 window.tpM=tpM;
 function msM(){if(!spLive()){ovM(`<div class="lbM"><h3>📅 미션</h3><p class="c">${spNow()<SP.start?'시즌 패스와 함께 곧 열려요!':'이번 시즌이 끝났어요. 다음 시즌을 기다려 주세요!'}</p><div class="btns"><button type="button" class="ghost" id="lbX">닫기</button></div></div>`);return}
   const M=ms(),row=(q,wk)=>{const D=(wk?MSW:MSD)[q.k],done=q.v>=D.g;return `<div class="msR${q.got?' got':''}"><div><b>${esc(msN(q,wk))}</b><div class="spBar sm"><span style="width:${Math.min(100,q.v/D.g*100)}%"></span></div><small>${Math.min(q.v,D.g).toLocaleString()} / ${D.g.toLocaleString()} · 🎫 +${wk?MXW:MXD} XP</small></div><button type="button" class="msG" data-k="${q.k}" data-w="${wk?1:0}" ${done&&!q.got?'':'disabled'}>${q.got?'✔':done?'받기':'진행 중'}</button></div>`};
-  const P=window.TPASS,TM=P&&P.live()?P.ms():null,trow=(q,wk)=>{const done=q.v>=q.g;return `<div class="msR${q.got?' got':''}"><div><b>${esc(q.n)}</b><div class="spBar sm"><span style="width:${Math.min(100,q.v/q.g*100)}%"></span></div><small>${Math.min(q.v,q.g).toLocaleString()} / ${q.g.toLocaleString()} · 🛡️ 토나르 +${q.x} XP</small></div><button type="button" class="msG tpG" data-k="${q.k}" data-w="${wk?1:0}" ${done&&!q.got?'':'disabled'}>${q.got?'✔':done?'받기':'진행 중'}</button></div>`};
+  const P=window.TPASS,TM=P&&P.live()?P.ms():null,trow=(q,wk)=>{const done=q.v>=q.g;return `<div class="msR${q.got?' got':''}"><div><b>${esc(q.n)}</b><div class="spBar sm"><span style="width:${Math.min(100,q.v/q.g*100)}%"></span></div><small>${Math.min(q.v,q.g).toLocaleString()} / ${q.g.toLocaleString()} · 🛡️ 폴라리스 +${q.x} XP</small></div><button type="button" class="msG tpG" data-k="${q.k}" data-w="${wk?1:0}" ${done&&!q.got?'':'disabled'}>${q.got?'✔':done?'받기':'진행 중'}</button></div>`};
   const o=ovM(`<div class="lbM msM"><h3>📅 미션</h3><h4>오늘의 미션 <small>(매일 오전 4시에 바뀌어요)</small></h4>${M.dl.map(q=>row(q,0)).join('')}<h4>이번 주 미션 <small>(월요일에 바뀌어요)</small></h4>${M.wl.map(q=>row(q,1)).join('')}${TM?`<h4>🛡️ 디펜스 미션 <small>(오늘 2 · 이번 주 2)</small></h4>${TM.dl.map(q=>trow(q,0)).join('')}${TM.wl.map(q=>trow(q,1)).join('')}`:''}<div class="btns"><button type="button" class="ghost" id="msP">🎫 패스 보기</button><button type="button" class="ghost" id="lbX">닫기</button></div></div>`);
-  o.querySelectorAll('.tpG').forEach(b=>b.onclick=e=>{e.stopImmediatePropagation();const x=P.msClaim(b.dataset.k,b.dataset.w==='1');if(x){try{SND.p('ach')}catch(e){}toast('📅 디펜스 미션 완료','🛡️ 토나르 패스 +'+x+' XP');badges();msM()}});
+  o.querySelectorAll('.tpG').forEach(b=>b.onclick=e=>{e.stopImmediatePropagation();const x=P.msClaim(b.dataset.k,b.dataset.w==='1');if(x){try{SND.p('ach')}catch(e){}toast('📅 디펜스 미션 완료','🛡️ 폴라리스 패스 +'+x+' XP');badges();msM()}});
   o.querySelectorAll('.msG:not(.tpG)').forEach(b=>b.onclick=()=>{const wk=b.dataset.w==='1',q=(wk?M.wl:M.dl).find(x=>x.k===b.dataset.k);const x=q&&msClaim(q,wk);if(x){persist();try{SND.p('ach')}catch(e){}toast('📅 미션 완료','🎫 패스 +'+x+' XP');badges();msM()}});
   o.querySelector('#msP').onclick=passM}
 
@@ -6873,7 +6877,7 @@ function stApply(r){hkRun(r);const td=TDS(),s=stSum(td.sl||0);r.hp=r.hpMax=V2?ln
 const WLMAX=40,wlOf=id=>Math.max(1,(TDS().wl||{})[id]||1);
 const wlMul=id=>{const l=wlOf(id);return(1+.03*(l-1))*(l>=10?1.1:1)*(l>=30?1.1:1)*(l>=40?1.1:1)}/* 11-08 사용자 A안: 레벨당 +10%, 특성 +10% */;
 /* 11-08 사용자: 강화 칩은 무기마다 따로, Lv6까지는 싸고(3~7) Lv7부터 15%씩 비싸짐 — 각성(Lv34)까지 가는 길을 어렵게 */
-/* 11-09 사용자: Lv30까지 골드 약 13만 (예전 1.3만) — 이미 올린 Lv는 그대로 */const wlCost=l=>({c:l<6?2+l:Math.round(10*Math.pow(1.15,l-6)),g:300*l});
+/* 11-09 사용자: Lv30까지 골드 약 6.5만 (예전 1.3만, ×5) — 이미 올린 Lv는 그대로 */const wlCost=l=>({c:l<6?2+l:Math.round(10*Math.pow(1.15,l-6)),g:150*l});
 const WLT=[[10,'피해 +10%'],[20,'시작 무기로 고르면 랭크1 카드 1장을 받고 시작'],[30,'피해 +10%'],[40,'💜 희귀 카드 확률 2배 + 피해 +10%']];
 const lvSum=m=>m.lv.reduce((a,b)=>a+b,0);
 const ORDER=[2,1,3,0,4];/* 리더는 가운데 칸 */
@@ -7247,7 +7251,7 @@ function finish(win){if(T.tut&&!T.bot)return simEnd(win);T.over=true;try{window.
    <p>${SOF(sid).n} · 웨이브 ${T.wave}/${WAVES} · 처치 ${T.kills} · 남은 체력 ${hpP}%</p>
    ${win?`<p class="tdStar">${'★'.repeat(stars)}${'☆'.repeat(3-stars)}</p><small>★ 클리어 · ★★ 선 50% 이상 · ★★★ 선 100%</small>`:''}
    ${got.length?`<div class="tdJoin">🎁 처음 달성 보상<br>${got.join('<br>')}</div>`:''}${rpc||rpg?`<div class="tdJoin">🎁 이번 판 보상<br>${rpc?`💠 강화 칩 ${rpc}<br>`:''}🪙 골드 +${rpg.toLocaleString()}G</div>`:''}
-   ${cmR?`<p class="tdJoin">🎖️ 사령관 Lv${cmLv()} · 🏅 명성 +${cmR.g}${cmR.up?` <b>(레벨 업 +${cmR.up})</b>`:''}${cmR.nw.map(id=>`<br>🔓 새 무기: ${wic(id)} <b>${W2N[id][0]}</b> · ${nick(id)}`).join('')}</p>`:''}${tpX?`<p class="tdJoin">🛡️ 토나르 패스 +${tpX} XP · ${tpLv()}단계${window.TPASS.canN()?' · 받을 보상이 있어요':''}</p>`:''}<p class="tdJoin">🔮 오드 +${odG} <small>(웨이브 ${T.wave}${win?' + 클리어 10':''}${stars?' + ★ '+stars*5:''})</small></p>
+   ${cmR?`<p class="tdJoin">🎖️ 사령관 Lv${cmLv()} · 🏅 명성 +${cmR.g}${cmR.up?` <b>(레벨 업 +${cmR.up})</b>`:''}${cmR.nw.map(id=>`<br>🔓 새 무기: ${wic(id)} <b>${W2N[id][0]}</b> · ${nick(id)}`).join('')}</p>`:''}${tpX?`<p class="tdJoin">🛡️ 폴라리스 패스 +${tpX} XP · ${tpLv()}단계${window.TPASS.canN()?' · 받을 보상이 있어요':''}</p>`:''}<p class="tdJoin">🔮 오드 +${odG} <small>(웨이브 ${T.wave}${win?' + 클리어 10':''}${stars?' + ★ '+stars*5:''})</small></p>
    ${joined?`<p class="tdJoin">✨ 새 대원 합류: <b>${CICON[joined]} ${nick(joined)}</b></p>`:''}
    <div class="tdBtns">${V2?'<button type="button" data-a="menu">디펜스 로비로</button>':'<button type="button" data-a="retry">다시 도전</button><button type="button" data-a="menu">디펜스 로비로</button><button type="button" data-a="exit">🌙 트와일라잇으로</button>'}</div>`;r.hidden=false;bgm(null);snd(win?'ach':'hurt');T.retry=[T.stg,T.sq[0].id];if(V2)tutFinish(win,sid,cmR&&cmR.nw)}
 
@@ -8811,11 +8815,13 @@ function tdRefund(){if(typeof SAVE==='undefined'||!SAVE||!SAVE.td)return null;co
   t.rf1={at:Date.now(),cd,g,rows};for(const id in wl)wl[id]=1;try{persist()}catch(e){}return t.rf1}
 setTimeout(()=>{try{if(typeof SAVE!=='undefined'&&SAVE.td){TDS();window.__ariMailSync&&__ariMailSync()}}catch(e){}},1200);
 /* 11-09 사용자 승인: 🛡️ 토나르 패스 — 디펜스 판으로만 XP, 30단계, 홀수 단계 = 합류 대원 중 랜덤 칩 · 짝수 단계 = 대원 골라 받는 칩, 합계 ≈ 무기 하나 Lv30. 디펜스 미션(오늘 2·이번 주 2) */
-const TP={id:'tn1',name:'토나르 패스',end:new Date('2026-11-25T18:00:00+09:00').getTime(),lvXp:200,max:30,MXD:150,MXW:400};
-const tpAmt=l=>Math.round(12+3.3*l),tpPick=l=>l%2===0;
+/* 11-09 사용자: 이름 「폴라리스 패스」, 10·20·30단계 = 로비 배경음 인천의 밤·우주의 시간·아리아드네 + 칭호 아스가르드 대원·폴라리스 사령관·폴라리스 수호자 */
+const TP={id:'tn1',name:'폴라리스 패스',end:new Date('2026-11-25T18:00:00+09:00').getTime(),lvXp:200,max:30,MXD:150,MXW:400};
+const tpAmt=l=>Math.round(12+3.3*l),tpPick=l=>l%2===0,TPX={10:{bgm:'inc',t:'pl1'},20:{bgm:'cos',t:'pl2'},30:{bgm:'ari',t:'pl3'}};
+const tpExN=l=>{const x=TPX[l];if(!x)return'';const B=window.LBGM||{},Tt=window.TITLES||{};return `🎵 ${(B[x.bgm]||{}).n||''} · 🏷️ ${Tt[x.t]||''}`};
 function tpS(){if(typeof SAVE==='undefined')return null;let S=SAVE.tp;if(!S||S.id!==TP.id)S=SAVE.tp={id:TP.id,xp:0,got:{}};return S}
 const tpLive=()=>Date.now()<TP.end,tpLv=()=>{const S=tpS();return S?Math.min(TP.max,1+Math.floor(S.xp/TP.lvXp)):1};
-function tpAdd(x){if(!tpLive()||!(x>0))return 0;const S=tpS();const b=tpLv();S.xp+=Math.round(x);const a=tpLv();if(a>b){try{toast&&toast('🛡️ 토나르 패스 '+a+'단계!','받을 강화 칩이 생겼어요')}catch(e){}}return Math.round(x)}
+function tpAdd(x){if(!tpLive()||!(x>0))return 0;const S=tpS();const b=tpLv();S.xp+=Math.round(x);const a=tpLv();if(a>b){try{toast&&toast('🛡️ 폴라리스 패스 '+a+'단계!','받을 강화 칩이 생겼어요')}catch(e){}}return Math.round(x)}
 const TPD={dPlay:{n:'🛡️ 디펜스 3판 하기',g:3},dClear:{n:'🛡️ 디펜스 스테이지 1번 클리어',g:1},dElite:{n:'🛡️ 정예·보스 무수리 10마리 처치',g:10},dCombo:{n:'🤝 디펜스에서 조합 카드 1장 받기',g:1}},
  TPW={wHard:{n:'🔥 어려움 이상 스테이지 3번 클리어',g:3},w5:{n:'🧬 대원 5명을 세워서 클리어',g:1}};
 const tpDK=()=>{const d=new Date(Date.now()-4*3600e3);return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()},tpWK=()=>{const d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()-((d.getDay()+6)%7));return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()};
@@ -8825,7 +8831,7 @@ function tpBump(k,v){if(!tpLive())return;const M=tpMs();for(const q of [...M.dl,
 function tpRun(win,dI){if(!tpLive()||T.bot||T.lab||T.tut)return 0;tpBump('dPlay',1);if(win)tpBump('dClear',1);tpBump('dElite',T.ek||0);if(T.duo2&&Object.keys(T.duo2).length)tpBump('dCombo',1);if(win&&dI>=1)tpBump('wHard',1);if(win&&T.sq.length>=5)tpBump('w5',1);return 0}
 window.TPASS={TP,live:tpLive,lv:tpLv,s:tpS,amt:tpAmt,pick:tpPick,un:()=>w2Un(),nm:id=>W2N[id][0],nick:id=>nick(id),ic:id=>wic(id),
   canN(){const S=tpS();if(!S)return 0;let n=0;for(let l=1;l<=tpLv();l++)if(!S.got[l])n++;return n},
-  claim(l,id){const S=tpS();if(!S||l>tpLv()||S.got[l])return null;const un=w2Un();if(tpPick(l)){if(!id||!un.includes(id))return null}else id=un[Math.floor(Math.random()*un.length)];const n=tpAmt(l);S.got[l]={id,n};SAVE.td=SAVE.td||{};SAVE.td.cd=SAVE.td.cd||{};SAVE.td.cd[id]=(SAVE.td.cd[id]||0)+n;try{persist()}catch(e){}return{id,n}},
+  claim(l,id){const S=tpS();if(!S||l>tpLv()||S.got[l])return null;const un=w2Un();if(tpPick(l)){if(!id||!un.includes(id))return null}else id=un[Math.floor(Math.random()*un.length)];const n=tpAmt(l);S.got[l]={id,n};const ex=TPX[l];if(ex){SAVE.bgmOwn=SAVE.bgmOwn||{};SAVE.bgmOwn[ex.bgm]=1;SAVE.titles=SAVE.titles||{};SAVE.titles[ex.t]=1;if(!SAVE.title)SAVE.title=ex.t}SAVE.td=SAVE.td||{};SAVE.td.cd=SAVE.td.cd||{};SAVE.td.cd[id]=(SAVE.td.cd[id]||0)+n;try{persist()}catch(e){}return{id,n,ex:ex?tpExN(l):''}},ex:l=>!!TPX[l],exN:tpExN,
   ms:()=>{const M=tpMs();return M?{dl:M.dl.map(q=>Object.assign({n:TPD[q.k].n,g:TPD[q.k].g,x:TP.MXD},q)),wl:M.wl.map(q=>Object.assign({n:TPW[q.k].n,g:TPW[q.k].g,x:TP.MXW},q))}:{dl:[],wl:[]}},
   msCanN(){if(!tpLive())return 0;const M=tpMs();if(!M)return 0;return [...M.dl,...M.wl].filter(q=>!q.got&&q.v>=(TPD[q.k]||TPW[q.k]).g).length},
   msClaim(k,wk){const M=tpMs(),q=(wk?M.wl:M.dl).find(x=>x.k===k),D=wk?TPW[k]:TPD[k];if(!q||q.got||q.v<D.g)return 0;q.got=1;const x=tpAdd(wk?TP.MXW:TP.MXD);try{persist()}catch(e){}return x}};

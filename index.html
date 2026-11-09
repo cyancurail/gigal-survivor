@@ -714,11 +714,12 @@ const FM_PF={ // 560×560 청크, [이름,x,y] = 아래 가운데. 울타리 월
 const FM_W=[ // [최소 초, 조각 가중치]
  [0,{open:3,grass:4,corn:2,scarecrow:2,crates:2,house:1}],
  [300,{open:1,grass:3,corn:2,scarecrow:1,crates:1,house:2,barn:3,maze:3,maze2:2,thatch:2,green:2}],
- [900,{grass:3,corn:2,house:1,barn:3,maze:3,maze2:3,thatch:2,green:2,scary:3}]];
+ [600,{open:1,grass:3,corn:2,scarecrow:1,crates:1,house:2,barn:3,maze:3,maze2:2,thatch:2,green:2,scary:3}],
+ [900,{grass:3,corn:2,house:1,barn:3,maze:3,maze2:3,thatch:2,green:2,scary:5}]];/* 11-09: 오두막 어려움 10분부터 */
 const FM_WH=[ // 헬: 울타리 조각 약 40%
  [0,{open:1,grass:3,corn:2,scarecrow:1,crates:1,house:1,maze:2,maze2:2,pen:2,corridor:2,deadend:1}],
- [300,{grass:2,corn:1,scarecrow:1,house:1,barn:2,maze:3,maze2:2,thatch:1,green:1,pen:3,corridor:3,deadend:2}],
- [900,{grass:2,corn:1,house:1,barn:2,maze:3,maze2:3,thatch:1,green:1,scary:3,pen:4,corridor:3,deadend:2}]];
+ [300,{grass:2,corn:1,scarecrow:1,house:1,barn:2,maze:3,maze2:2,thatch:1,green:1,pen:3,corridor:3,deadend:2,scary:3}],
+ [900,{grass:2,corn:1,house:1,barn:2,maze:3,maze2:3,thatch:1,green:1,scary:5,pen:4,corridor:3,deadend:2}]];/* 11-09: 오두막 헬 5분부터 */
 function fmPick(cx,cy){const T=G.hell?FM_WH:FM_W;let w=T[0][1];for(const [t,ww] of T)if(G.t>=t)w=ww;if(G.hard&&!G.hell&&G.t>=300)w=Object.assign({pen:1,corridor:1},w);const ks=Object.keys(w).filter(k=>k!=='scary'||G.hard);let tot=0;for(const k of ks)tot+=w[k];let r=sbH(cx,cy,7)*tot;for(const k of ks){r-=w[k];if(r<0)return k}return ks[0]}
 function fmChunk(cx,cy){const key=cx+','+cy;let L=FM.cache.get(key);if(L)return L;L=[];
   const pf=fmPick(cx,cy),fl=sbH(cx,cy,8)<.5,jx=(sbH(cx,cy,9)-.5)*50,jy=(sbH(cx,cy,11)-.5)*50;
@@ -808,7 +809,12 @@ function fmHide(dt){const p=G.p,lv=fmLv(),H=G.fmH||(G.fmH={t:0,cd:0,on:0,x:0,y:0
   else if(H.on){H.on=0;H.cd=Math.max(H.cd,3)}
   if(H.on){for(const e of G.enemies){if(e.boss||e.fixed||e.dash||e.type==='fm_drone')continue;/* 11-09: 보스·감시자 빼고 바로 옆 몬스터까지 전부 못 봄 */if(!e.tnt||!e.tnt.hid||e.tntT<G.t){const a=rnd(0,6.283),r=rnd(120,260);e.tnt={x:H.x+Math.cos(a)*r,y:H.y+Math.sin(a)*r,on:true,hid:1}}e.tntT=G.t+.4}}}
 // 시야(어둠): 어려움·헬, 시간이 갈수록 좁아짐, 착한 토마토를 구하면 넓어짐
-function fmDarkTick(dt){const lv=fmLv();if(!lv){G.fmD=0;return}G.fmD=Math.min(1,(G.fmD||0)+dt/(lv===2?480:900))}
+function fmDarkTick(dt){const lv=fmLv();if(!lv){G.fmD=0;return}
+  // 11-09: 어둠 = 바탕(천천히, 헬 8분에 60%·어려움 15분에 45%까지) + 밀려오는 어둠(헬 90초·어려움 150초마다 5초에 +45%, 그 뒤 약 40초에 걸쳐 걷힘)
+  const cap=lv===2?.6:.45;G.fmD0=Math.min(cap,(G.fmD0||0)+dt*cap/(lv===2?480:900));
+  if(!G.arena){G.fmSgT=(G.fmSgT===undefined?(lv===2?90:150):G.fmSgT)-dt;if(G.fmSgT<=0){G.fmSgT=lv===2?90:150;G.fmSg=5;if(!G.bot){toast('🌑 어둠이 밀려와요','숨은 착한 토마토를 구하면 다시 밝아져요');SND.p('whoosh');G.shk=Math.max(G.shk||0,.12)}}}
+  if(G.fmSg>0){G.fmSg-=dt;G.fmDs=Math.min(.45,(G.fmDs||0)+.09*dt)}else G.fmDs=Math.max(0,(G.fmDs||0)-.012*dt);
+  G.fmD=Math.min(1,G.fmD0+(G.fmDs||0))}
 function fmVis(){const lv=fmLv();if(!lv)return 0;const dk=G.fmD||0,mx=Math.hypot(VW,VH)*.62,mn=lv===2?175:260;let R=mx+(mn-mx)*dk;if(G.fmIn&&G.fmIn.t==='house_empty')R*=.62;return R}
 function fmDarkDraw(){const lv=fmLv();if(!lv)return;const p=G.p;let R=fmVis();G.fmVR=(G.fmVR||R)+(R-(G.fmVR||R))*.08;R=G.fmVR;
   // 11-08 밤: 어둠을 ¼ 크기 그림판에 그리고 구멍(캐릭터 시야 + 켜진 횃불)을 뚫은 뒤 한 번에 덮음
@@ -838,7 +844,7 @@ function fmAllyTick(dt){const p=G.p,lv=fmLv();const A=G.fmA||(G.fmA=[]);G.fmAT=(
     else{if(a.t>(lv?1.6:.5)){if(lv&&a.home){const o=a.home;const n=G.hell?3:2;for(let k=0;k<n;k++){const e=fmPop(mkEnemy('fm_angry',o.x+rnd(-20,20),o.y-6));e.kx=rnd(-20,20);e.ky=rnd(10,30);e.fmBad=1}if(!G.bot&&Math.hypot(p.x-o.x,p.y-o.y)<VW*.7){G.texts.push({x:o.x,y:o.y-50,v:'…화난 토마토가 됐어요',life:1.2,col:'#ff6a6a'});SND.p('whoosh')}}A.splice(i,1)}}}}
 function fmRescue(a){const p=G.p,lv=fmLv();healP(Math.round(G.S.maxHp*.03),'fm');
   const n=3+Math.floor(em()/4);for(let k=0;k<n;k++)G.gems.push({x:a.x+rnd(-14,14),y:a.y+rnd(-10,10),v:Math.max(2,Math.round(G.next*.035)),big:1});
-  if(lv)G.fmD=Math.max(0,(G.fmD||0)-.25);G.fmSaved=(G.fmSaved||0)+1;
+  if(lv&&!a.fol){G.fmD0=Math.max(0,(G.fmD0||0)-.15);G.fmDs=Math.max(0,(G.fmDs||0)-.15)}/* 11-09: 숨은 토마토만 시야 회복(-15%) */G.fmSaved=(G.fmSaved||0)+1;
   if(G.bot)return;G.texts.push({x:a.x,y:a.y-34,v:pick(['고마워요!','살았다!','언니 최고!']),life:1,col:'#ffd0e4'});sparks(a.x,a.y-10,18,['#ff4a5a','#ffd0e4','#9be15d','#ffffff'],140,.6,2);pring(a.x,a.y-8,30,'#ffd0e4',14,.4);SND.p('heal')}
 function fmAllyDraw(){const A=G.fmA;if(!A||!A.length)return;const im0=FM.img.m_ally;if(!im0||!im0.width)return;const w=44,im=fmSC('m_ally',w)||im0,h=w*im0.height/im0.width,p=G.p;
   for(const a of A){let al=1,s=1;if(a.st===1){const k=Math.min(1,a.t/(fmLv()?1.6:.5));al=1-k;s=1-k*.4}const by=Math.abs(Math.sin(a.t*7+a.ph))*3;
@@ -1018,7 +1024,7 @@ function fmStraw(x,y,n,ring){const p=G.p,lv=fmLv(),src={x,y,dmg:(9+em()*.8)*(lv=
 function fmFolTick(dt){if(G.arena)return;const p=G.p,F=G.fmF||(G.fmF=[]);G.fmFoT=(G.fmFoT===undefined?25:G.fmFoT)-dt;
   if(G.fmFoT<=0){G.fmFoT=fmLv()===2?30:fmLv()?35:40;if(F.length<2){const a=rnd(0,6.283),r=Math.max(VW,VH)*.5;F.push({x:p.x+Math.cos(a)*r,y:p.y+Math.sin(a)*r,life:30,ph:rnd(0,6)});if(!G.bot)toast('🍅 착한 토마토가 달려와요!','닿으면 체력이 회복돼요')}}
   for(let i=F.length-1;i>=0;i--){const a=F[i];a.life-=dt;const dx=p.x-a.x,dy=p.y-a.y,d=Math.hypot(dx,dy)||1;a.x+=dx/d*95*dt;a.y+=dy/d*95*dt;a.fl=dx<0;
-    if(d<28){F.splice(i,1);const hv=Math.round(G.S.maxHp*.08);healP(hv,'fm');fmRescue({x:a.x,y:a.y});if(!G.bot){G.texts.push({x:p.x,y:p.y-46,v:'언니! +'+hv,life:1,col:'#ff9ab8'});SND.p('heal')}continue}
+    if(d<28){F.splice(i,1);const hv=Math.round(G.S.maxHp*.08);healP(hv,'fm');fmRescue({x:a.x,y:a.y,fol:1});if(!G.bot){G.texts.push({x:p.x,y:p.y-46,v:'언니! +'+hv,life:1,col:'#ff9ab8'});SND.p('heal')}continue}
     if(a.life<=0)F.splice(i,1)}}
 function fmFolDraw(){const F=G.fmF;if(!F||!F.length)return;const im0=FM.img.m_ally;if(!im0||!im0.width)return;const w=44,im=fmSC('m_ally',w)||im0,h=w*im0.height/im0.width;
   for(const a of F){const by=Math.abs(Math.sin(G.t*14+a.ph))*5;ctx.save();ctx.translate(a.x,a.y-by);if(a.fl)ctx.scale(-1,1);ctx.drawImage(im,-w/2,-h,w,h);ctx.restore();ctx.fillStyle='#ff6a9a';ctx.font='14px serif';ctx.textAlign='center';ctx.fillText('💗',a.x,a.y-h-8-by)}}
@@ -1077,7 +1083,14 @@ function fmSupDraw(){const p=G.p;fmRadioAriDraw();
     else if(s.k==='tornado'&&s.x!==undefined){const a=Math.min(1,s.t*4,(s.T-s.t)*3);for(let j=0;j<5;j++){ctx.globalAlpha=.4*a;ctx.strokeStyle=s.col;ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(s.x,s.y-j*14,30-j*4+8*Math.sin(G.t*20+j),9-j,0,0,7);ctx.stroke()}}
     else if(s.k==='drones'){for(let j=0;j<6;j++){const b=G.t*2+j*1.047;ctx.globalAlpha=.9;ctx.fillStyle=s.col;ctx.beginPath();ctx.arc(p.x+Math.cos(b)*90,p.y+Math.sin(b)*60-20,7,0,7);ctx.fill();ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(p.x+Math.cos(b)*90,p.y+Math.sin(b)*60-20,3,0,7);ctx.fill()}}
     ctx.restore()}}
-function fmTick8(dt){fmFolTick(dt);fmRadioTick(dt);fmSupTick(dt)}
+function fmHutRise(dt){if(!G.hell||G.arena||G.t<300||!G.fmL)return;G.fmHuT=(G.fmHuT===undefined?20:G.fmHuT)-dt;if(G.fmHuT>0)return;G.fmHuT=5;const p=G.p;
+  if(G.fmL.some(o=>o.t==='scary_hut'&&!o.dead&&Math.hypot(o.x-p.x,o.y-p.y)<900))return;
+  for(let k=0;k<12;k++){const a=rnd(0,6.283),r=rnd(380,520),x=Math.round(p.x+Math.cos(a)*r),y=Math.round(p.y+Math.sin(a)*r*.75);if(x*x+y*y<300*300)continue;
+    if(G.fmL.some(o=>Math.abs(o.x-x)<170&&Math.abs(o.y-y)<150))continue;const cx=Math.floor(x/FMC),cy=Math.floor(y/FMC),L=fmChunk(cx,cy);
+    const bx=(FM_BOX.scary_hut||[]).map(([a1,b1,c1,d1])=>({L:x+a1,R:x+b1,T:y+c1,B:y+d1}));if(bx.some(b=>p.x>b.L-20&&p.x<b.R+20&&p.y>b.T-20&&p.y<b.B+20))continue;
+    L.push({t:'scary_hut',x,y,fl:false,bx,soft:false,pf:'rise',id:'rise'+Math.round(G.t)+':'+k,gone:-1,amb:false,shk:1.2});G.fmHuT=180;
+    if(!G.bot){toast('🏚️ 무서운 오두막이 솟아올랐어요!','보라색 빛… 부수면 보물상자가 나와요',true);sparks(x,y-40,40,['#b06bff','#2a0a3a','#ffffff'],220,.8,3);pring(x,y-30,90,'#b06bff',24,.6);G.shk=Math.max(G.shk||0,.35);SND.p('sboom')}return}}
+function fmTick8(dt){fmHutRise(dt);fmFolTick(dt);fmRadioTick(dt);fmSupTick(dt)}
 
 // 화면 위(어둠 위)에 그리는 것들: 드론 탐지 원 · 낙하 그림자 · 횃불 · 감시함 · 조준 원 · 광선
 function fmSkyDraw(){const lv=fmLv();if(!lv)return;const p=G.p,sm=ctx.imageSmoothingEnabled;

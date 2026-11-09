@@ -321,3 +321,4 @@
 - 디올 레이저: 발사 1번을 0.3초 간격 7번(`LP`)으로 나눠 2.1초 지속, 한 번 피해 = 원래/7(총 피해 그대로). `w2Laser` 9번째 인자 `qt`(조용한 틱). 빛 에너지 마비 조합 ic .7.
 - 로비 `.tdLobby` 높이 = 화면 전체(innerHeight), padding-top에 `env(safe-area-inset-top)`, 탭에 safe-area-bottom.
 - 봇 측정 주의: 환급 `tdRefund`가 가짜 저장의 wl을 Lv1로 리셋하므로 측정 스크립트는 `SAVE.td.rf1={rows:[]}`를 넣어야 함.
+- (V182) 사용자 결정: V181 패치내역 줄은 공개하지 않음 → PATCH에서 삭제, sw v182.

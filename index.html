@@ -3450,7 +3450,7 @@ function tallCv(id){if(TCV[id])return TCV[id];const o=TALL[id];if(!o){const c=do
 
 /* ================= skins · weapon fx · gold · gacha ================= */
 const GACHA_COST=100,GACHA_NEED=2,PITY=50,PITYM=100;
-const RATE={M:.015,L:.095,R:.21};/* V186 세인트썸띵: 신화 2→1.5%, 전설 9→9.5% */
+const RATE={M:.015,L:.095,R:.21};/* 💍 세인트썸띵: 신화 2→1.5%, 전설 9→9.5% */
 const REFUND={C:30,R:50,L:100,M:200};
 const SKIN_TONES=new Set(['#ffd9bf','#f2b999','#fff0f6','#f0ffe8','#ffffff','#1e1222','#2a1a2a','#ff9aa8']);
 const COLORS={
@@ -3889,7 +3889,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)r
 
 /* ================= 저장 코드 (기기 간 이동) =================
    ※ POOL/ACH/AXN/WFX 순서가 코드 해석 순서예요. 새 항목은 반드시 "끝에" 추가하세요. */
-const SC_VER=23;/* V186 v23: 맨 끝 세인트썸띵 블록 */
+const SC_VER=23;/* v23: 맨 끝 세인트썸띵 블록 */
 function scBits(list,has){const out=[];for(let i=0;i<list.length;i+=8){let b=0;for(let j=0;j<8&&i+j<list.length;j++)if(has(list[i+j],i+j))b|=1<<j;out.push(b)}return out}
 function scUnbits(bytes,pos,list,set){for(let i=0;i<list.length;i++){if(bytes[pos+(i>>3)]>>(i&7)&1)set(list[i],i)}return pos+Math.ceil(list.length/8)}
 function scVar(out,n){n=Math.max(0,Math.floor(n||0));do{let b=n&127;n=Math.floor(n/128);if(n)b|=128;out.push(b)}while(n)}
@@ -4057,7 +4057,7 @@ function gachaCards(tier){const c=pick(CHAR),n=tier==='C'?3+Math.floor(Math.rand
   return{id:'cd:'+c.id,kind:'cards',tier,owner:c.id,cnt:n,n:`💠 ${c.nick} 강화 칩 ×${n}`}}
 function rollGacha(force){
   let tier;const r=Math.random();if(force)tier=force;else if(SAVE.pityM>=PITYM-1||r<RATE.M)tier='M';else if(SAVE.pity>=PITY-1)tier='L';else{const q=r-RATE.M;tier=q<RATE.L?'L':q<RATE.L+RATE.R?'R':'C'}
-  /* V186 💍 세인트썸띵: 전설 = 전설 반지, 희귀 = 80% 희귀 반지 */
+  /* 💍 세인트썸띵: 전설 = 전설 반지, 희귀 = 80% 희귀 반지 */
   if(window.SN&&(tier==='L'||tier==='R'&&Math.random()<.8)){if(!force){SAVE.pity=tier==='L'?0:SAVE.pity+1;SAVE.pityM=SAVE.pityM+1;SAVE.pulls=(SAVE.pulls||0)+1}const it=SN.gacha(tier);persist();achCheck();return{it,tier,dupe:false,refund:0}}
   if(tier==='C'||tier==='R'&&(force==='R'||!POOL.some(p=>p.tier==='R'&&!p.nog&&!SAVE.inv[p.id])||Math.random()<.5)){if(!force){SAVE.pity=SAVE.pity+1;SAVE.pityM=SAVE.pityM+1;SAVE.pulls=(SAVE.pulls||0)+1}const it=gachaCards(tier);persist();achCheck();return{it,tier,dupe:false,refund:0,cards:it.cnt}}
   let cand=POOL.filter(p=>p.tier===tier&&!p.nog);if(tier==='M'||tier==='R'){const c2=cand.filter(p=>!SAVE.inv[p.id]);cand=c2.length?c2:cand}const fresh=cand.filter(p=>!SAVE.inv[p.id]),it=pick(force&&fresh.length?fresh:cand);

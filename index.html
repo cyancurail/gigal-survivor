@@ -1012,9 +1012,10 @@ function fmShipTick(dt){const lv=fmLv(),p=G.p;
     const dir=Math.random()<.5?1:-1;S=G.fmShip={dir,x:p.x-dir*(VW/2+300),y:p.y+rnd(-140,140),sx:0,sy:0,tg:null,lg:0,lk:0,sc:new Set(),life:G.hell?75:60};S.sx=S.x;S.sy=S.y;
     if(!G.bot){if(!G.fmShTip){G.fmShTip=1;toast('👁️ 하늘의 감시함','붉은 빛에 들키면 1.5초 뒤 그 자리에 광선이 내리꽂혀요',true)}SND.p('whoosh')}return}
   S.life-=dt;S.lk-=dt;if(S.life<=0)S.lv=1;
-  if(G.hell&&!S.lv){S.x+=S.dir*23*dt+(p.x-S.x)*dt*.06;S.y+=(p.y-S.y)*dt*.12; // 11-09: 헬은 오래 머물며 슬금슬금 따라옴
-    const hid=!!(G.fmIn&&G.fmIn.soft);S.jt=(S.jt===undefined?1.5:S.jt)-dt;if(!hid&&S.jt<=0&&(S.jn||0)<45){S.jt=1/3;S.jn=(S.jn||0)+1;const e=fmPop(mkEnemy('fm_mu_jet',S.x+rnd(-30,30),S.y+rnd(-20,20)));e.sk=1;e.max*=3;e.hp=e.max;/* 11-09: 초당 3마리·최대 45·체력 ×3 */if(!G.bot)sparks(e.x,e.y-20,8,['#b06bff','#ff3a3a','#ffffff'],120,.3,2)}else if(hid)S.jt=Math.max(S.jt,.5)}
+  if(G.hell&&!S.lv){S.x+=S.dir*23*dt+(p.x-S.x)*dt*.06;S.y+=(p.y-S.y)*dt*.12} // 11-09: 헬은 오래 머물며 슬금슬금 따라옴
   else S.x+=S.dir*(S.lv?180:70)*dt;
+  if(!S.lv){const hid=!!(G.fmIn&&G.fmIn.soft),H2=G.hell,cap=H2?45:30;S.jt=(S.jt===undefined?1.5:S.jt)-dt; // 숨지 않으면 비행 무수리 투하: 헬 초당 3·최대 45, 어려움 초당 2·최대 30 (체력 ×3)
+    if(!hid&&S.jt<=0&&(S.jn||0)<cap){S.jt=H2?1/3:1/2;S.jn=(S.jn||0)+1;const e=fmPop(mkEnemy('fm_mu_jet',S.x+rnd(-30,30),S.y+rnd(-20,20)));e.sk=1;e.max*=3;e.hp=e.max;if(!G.bot)sparks(e.x,e.y-20,8,['#b06bff','#ff3a3a','#ffffff'],120,.3,2)}else if(hid)S.jt=Math.max(S.jt,.5)}
   if(!S.tg||(S.lg>0&&(S.lg-=dt)<=0&&S.arr)){S.tg=null;S.arr=0;S.lg=0;let bd=380;for(const o of G.fmL||[]){if(!FM_HIDE[o.t]||S.sc.has(o.id))continue;const d=Math.hypot(o.x-S.x,o.y-S.y);if(d<bd){bd=d;S.tg=o}}
     if(S.tg)S.sc.add(S.tg.id);else S.tg={x:S.x+S.dir*160,y:S.y+rnd(-120,120),fake:1}}
   const tx=S.tg.x,ty=S.tg.y-(S.tg.fake?0:20),dx=tx-S.sx,dy=ty-S.sy,d=Math.hypot(dx,dy);if(d>6){const v=Math.min(d,170*dt);S.sx+=dx/d*v;S.sy+=dy/d*v}else if(!S.arr){S.arr=1;S.lg=S.tg.fake?.1:1.2}

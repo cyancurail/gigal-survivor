@@ -6277,6 +6277,19 @@ try{endGame=window.endGame}catch(e){}
 })();
 </script>
 <script>
+/* 11-09 사용자: 작업 동안 아스가르드 디펜스 잠금 — 입장하면 아리아드네가 막아요 (개발자 gs_tddev·__devAll은 통과). 풀 때 TDLOCK=false */
+(()=>{const TDLOCK=true;window.TDLOCK=TDLOCK;
+const dev=()=>{try{return !!window.__devAll||localStorage.getItem('gs_tddev')==='1'}catch(e){return false}};
+function msg(){if(document.getElementById('tdLockM'))return;const o=document.createElement('div');o.id='tdLockM';
+  o.style.cssText='position:fixed;inset:0;z-index:99990;background:rgba(6,4,14,.72);display:flex;align-items:flex-end;justify-content:center;padding:0 10px calc(18px + env(safe-area-inset-bottom,0px))';
+  o.innerHTML=`<div style="position:relative;width:min(560px,100%);display:flex;gap:10px;align-items:flex-end;background:linear-gradient(180deg,rgba(10,30,48,.95),rgba(14,8,26,.97));border:1.5px solid rgba(140,235,255,.75);border-radius:16px;box-shadow:0 0 18px rgba(120,230,255,.35);padding:12px 14px;color:#eafcff;font-family:'Noto Sans KR',sans-serif"><img src="td/ari/n.png" alt="" style="width:86px;height:86px;object-fit:contain;image-rendering:pixelated;flex:none;filter:drop-shadow(0 0 6px rgba(120,230,255,.8))"><div style="flex:1;min-width:0"><b style="display:inline-block;background:#085041;color:#e1f5ee;font-size:12px;padding:2px 10px;border-radius:8px;margin-bottom:6px">아리아드네 · AI ASGARD</b><p style="margin:0;font-size:15px;line-height:1.6">잠시 궤도 엘레베이터 수리 중이에요.<br>힐이 끼었다나 뭐라나...</p><small style="display:block;text-align:right;color:#9ab;font-size:11px;margin-top:4px">눌러서 닫기 ▸</small></div></div>`;
+  o.onclick=()=>o.remove();document.body.appendChild(o);try{SND.p('pop')}catch(e){}}
+window.tdLockMsg=msg;
+document.addEventListener('click',e=>{if(!TDLOCK||dev())return;const b=e.target.closest&&e.target.closest('#lbTd');if(!b)return;e.stopImmediatePropagation();e.preventDefault();msg()},true);
+const wrap=()=>{const T=window.TD;if(!T||T.__lk)return setTimeout(wrap,500);T.__lk=1;for(const k of ['open','enter']){const f=T[k];if(typeof f!=='function')continue;T[k]=function(){if(TDLOCK&&!dev()){msg();return}return f.apply(this,arguments)}}};setTimeout(wrap,0);
+})();
+</script>
+<script>
 /* ===== 🛡️ 기갈 디펜스 : 무너지지 않는 마음의 선 (D1-a, 개발자 전용) ===== */
 (()=>{'use strict';
 const W=450,H=800,SLOTX=[57,141,225,309,393];

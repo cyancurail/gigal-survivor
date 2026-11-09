@@ -3538,6 +3538,8 @@ const POOL_V17=POOL.length;[['조혁래',6,'대천사','msk2/hx_rave.png'],['김
 const POOL_V18=POOL.length;[['창환이형',6,'셀레스티얼 디바','msk2/hx_prism_pn.png'],['진형우',6,'셀레스티얼 스타','msk2/hx_prism_mt.png']].forEach(([id,sl,n,f])=>{const o={id,s:sl,n,pid:'mx:'+id+'|'+sl,f};MSK2L.push(o);MSK2B[id+'|'+sl]=o;const c=CHAR.find(q=>q.id===id);POOL.push({id:o.pid,tier:'M',kind:'mskin',owner:id,s:sl,nog:1,n:`${c?c.nick:id} · ${n}`})});
 /* 2026-11-08 신화 스킨 체리 시리즈 15종 (신화 뽑기·선택권 포함) — POOL 맨 끝 */
 const POOL_V19=POOL.length;[['임재영',7,'체리 원피스','msk2/cc01.png'],['영규형',6,'제진고 교복','msk2/cc02.png'],['박계원',8,'이소랑','msk2/cc03.png'],['창환이형',7,'하이틴 팝','msk2/cc04.png'],['진형우',7,'해바라기 피크닉','msk2/cc05.png'],['조혁래',7,'플라이 카드','msk2/cc06.png'],['김세진',8,'별자리 카드','msk2/cc07.png'],['승태민',6,'지수 커스텀복','msk2/cc08.png'],['박준형',7,'파이어리 카드','msk2/cc09.png'],['박민규',6,'체리 광팬 지수','msk2/cc10.png'],['송기호',7,'다크 카드','msk2/cc11.png'],['박준영',7,'타임 카드','msk2/cc12.png'],['쥬은',5,'지수','msk2/cc13.png'],['재건',3,'케로베로스','msk2/cc14.png'],['하도',3,'달의 심판자','msk2/cc15.png']].forEach(([id,sl,n,f])=>{const o={id,s:sl,n,pid:'mx:'+id+'|'+sl,f};MSK2L.push(o);MSK2B[id+'|'+sl]=o;const c=CHAR.find(q=>q.id===id);POOL.push({id:o.pid,tier:'M',kind:'mskin',owner:id,s:sl,n:`${c?c.nick:({'재건':'짱재'}[id]||id)} · ${n}`})});
+/* 11-09 하모닉스 「에클라땅뜨 아르떼」 업적 보상 신화 스킨 (뽑기 제외 nog) — POOL 맨 끝 */
+const POOL_V20=POOL.length;[['박준형',8,'라 플리 벨 뉘','msk2/hx_rouge.png']].forEach(([id,sl,n,f])=>{const o={id,s:sl,n,pid:'mx:'+id+'|'+sl,f};MSK2L.push(o);MSK2B[id+'|'+sl]=o;const c=CHAR.find(q=>q.id===id);POOL.push({id:o.pid,tier:'M',kind:'mskin',owner:id,s:sl,nog:1,n:`${c?c.nick:id} · ${n}`})});
 {const t=POOL.find(p=>p.id==='ms:임재영');if(t){t.vid='ult3/taetae.mp4';t.role='intro';t.vn='태태영 Ⅲ'}}
 const PBY={};POOL.forEach(p=>PBY[p.id]=p);
 const TIERN={C:'일반',R:'희귀',L:'전설',M:'신화'},TIERC={C:'#e8e8f0',R:'#ffd34d',L:'#ff7ac8',M:'#fff3b0'};
@@ -3581,6 +3583,7 @@ const ACH_HX=[
  {id:'hx_stellar',hx:'stellar',n:'별들의 후손',c:'스텔라 디센던트 제작',r:'👑 세나 신화 스킨 「세나 어센딩」',inv:'mx:김세진|7'},
  {id:'hx_prism',hx:'prism',n:'눈부신 우리의 순간',c:'그레이스 프리즘 제작',r:'👑 쁘니 신화 스킨 「셀레스티얼 디바」 + 맘터 신화 스킨 「셀레스티얼 스타」',inv:'mx:창환이형|6',inv2:'mx:진형우|6'},
  {id:'hx_rave',hx:'risha',n:'리샤 발렌타인',c:'R.A.V.E. 제작',r:'👑 무룩 신화 스킨 「대천사」',inv:'mx:조혁래|6'},
+ {id:'hx_rouge',hx:'rouge',n:'예술가는 가난하지 않아요.',c:'에클라땅뜨 아르떼 제작',r:'👑 마녀 신화 스킨 「라 플리 벨 뉘」',inv:'mx:박준형|8'},
 ];
 const ACH_HX_ON=true;if(ACH_HX_ON)ACH.push(...ACH_HX);
 /* 11-08 밤: 장수 업적 — 저장 코드 순서 때문에 반드시 맨 끝에 */
@@ -3825,7 +3828,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)r
 
 /* ================= 저장 코드 (기기 간 이동) =================
    ※ POOL/ACH/AXN/WFX 순서가 코드 해석 순서예요. 새 항목은 반드시 "끝에" 추가하세요. */
-const SC_VER=20;
+const SC_VER=21;
 function scBits(list,has){const out=[];for(let i=0;i<list.length;i+=8){let b=0;for(let j=0;j<8&&i+j<list.length;j++)if(has(list[i+j],i+j))b|=1<<j;out.push(b)}return out}
 function scUnbits(bytes,pos,list,set){for(let i=0;i<list.length;i++){if(bytes[pos+(i>>3)]>>(i&7)&1)set(list[i],i)}return pos+Math.ceil(list.length/8)}
 function scVar(out,n){n=Math.max(0,Math.floor(n||0));do{let b=n&127;n=Math.floor(n/128);if(n)b|=128;out.push(b)}while(n)}
@@ -3860,7 +3863,7 @@ function parseCode(code){
   try{const C=CH12().map(c=>c.id),S={fancy:{},ult:{},cine:{},tallOff:{},best:{},bestH:{},inv:{},skin:{},wfx:{},ach:{},ax:{},xevo:{},achC:{},tix:{R:0,L:0,M:0}};let p=1;
     for(const k of ['fancy','ult','cine','tallOff'])p=scUnbits(body,p,C,id=>S[k][id]=true);
     C.forEach(id=>{const v=body[p++];if(v)S.best[id]=v*10});C.forEach(id=>{const v=body[p++];if(v)S.bestH[id]=v*10});
-    p=scUnbits(body,p,ver>=20?POOL:ver>=19?POOL.slice(0,POOL_V19):ver>=18?POOL.slice(0,POOL_V18):ver>=17?POOL.slice(0,POOL_V17):ver>=16?POOL.slice(0,POOL_V16):ver>=15?POOL.slice(0,POOL_V15):ver>=14?POOL.slice(0,POOL_V14):ver>=13?POOL.slice(0,POOL_V13):ver>=11?POOL.slice(0,POOL_V11):ver>=9?POOL.slice(0,POOL_V9):ver>=8?POOL.slice(0,POOL_V8):ver>=6?POOL.slice(0,POOL_V7):ver>=5?POOL.slice(0,POOL_V5):POOL.slice(0,POOL_V4),it=>S.inv[it.id]=true);
+    p=scUnbits(body,p,ver>=21?POOL:ver>=20?POOL.slice(0,POOL_V20):ver>=19?POOL.slice(0,POOL_V19):ver>=18?POOL.slice(0,POOL_V18):ver>=17?POOL.slice(0,POOL_V17):ver>=16?POOL.slice(0,POOL_V16):ver>=15?POOL.slice(0,POOL_V15):ver>=14?POOL.slice(0,POOL_V14):ver>=13?POOL.slice(0,POOL_V13):ver>=11?POOL.slice(0,POOL_V11):ver>=9?POOL.slice(0,POOL_V9):ver>=8?POOL.slice(0,POOL_V8):ver>=6?POOL.slice(0,POOL_V7):ver>=5?POOL.slice(0,POOL_V5):POOL.slice(0,POOL_V4),it=>S.inv[it.id]=true);
     C.forEach(id=>{const v=body[p++];if(v&&POOL[v-1]&&['color','swim','hanbok','wed','god'].includes(POOL[v-1].kind))S.skin[id]=POOL[v-1].id});
     p=scUnbits(body,p,WK(),k=>S.wfx[k]=false);
     p=scUnbits(body,p,AL,a=>S.ach[a.id]=1);p=scUnbits(body,p,AXK(),k=>S.ax[k]=false);p=scUnbits(body,p,XW(),k=>S.xevo[k]=1);S.achC={};if(ver>=2)p=scUnbits(body,p,AL,a=>S.achC[a.id]=1);else Object.keys(S.ach).forEach(k=>S.achC[k]=1);if(ver>=4){S.cpn={};p=scUnbits(body,p,COUPONS,q=>S.cpn[q.c]=1)}
@@ -4646,7 +4649,7 @@ function hxFloor(){for(const w of G.weapons){if(w.k==='soulwed')swFloor(w);else 
 function plFzDraw(){if(G.bot)return;ctx.save();for(const e of G.enemies){if(!e.plF)continue;const on=e.plF>G.t&&!e.dead,R=e.r*(e.type&&e.type.slice(0,3)==='sb_'?1.7:1.25)+(e.boss?8:4);if(!on){e.plF=0;const m=pn(e.boss?40:14);for(let i=0;i<m;i++){const a=rnd(0,6.283),v=rnd(60,e.boss?260:170);px(e.x+Math.cos(a)*R*.5,e.y+Math.sin(a)*R*.5,Math.cos(a)*v,Math.sin(a)*v-50,rnd(.35,.8),pick(['#ffffff','#d8f4ff','#9fdcff','#5aa8ff']),pick([2,3,3]),2,1)}continue}const left=e.plF-G.t,cr=left<.6&&Math.floor(G.t*14)%2,hh=R*1.25,ww=R,x=e.x,y=e.y-R*.08;if(e.boss){ctx.globalAlpha=.55;ctx.strokeStyle='#bfefff';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(x,e.y+R*.7,R*1.25,R*.42,0,0,6.283);ctx.stroke();ctx.globalAlpha=.25;ctx.fillStyle='#9fdcff';ctx.fill()}const pts=[[0,-hh],[ww*.72,-hh*.45],[ww*.72,hh*.5],[0,hh*.8],[-ww*.72,hh*.5],[-ww*.72,-hh*.45]];const g=ctx.createLinearGradient(x-ww,y-hh,x+ww,y+hh);g.addColorStop(0,'rgba(240,252,255,.78)');g.addColorStop(.45,'rgba(150,215,255,.55)');g.addColorStop(1,'rgba(70,140,230,.6)');ctx.globalAlpha=cr?.55:1;ctx.fillStyle=g;ctx.beginPath();pts.forEach((q,i)=>i?ctx.lineTo(x+q[0],y+q[1]):ctx.moveTo(x+q[0],y+q[1]));ctx.closePath();ctx.fill();ctx.strokeStyle='#ffffff';ctx.lineWidth=1.6;ctx.stroke();ctx.globalAlpha=(cr?.4:.85);ctx.strokeStyle='rgba(255,255,255,.9)';ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(x,y-hh);ctx.lineTo(x,y+hh*.8);ctx.moveTo(x-ww*.72,y-hh*.45);ctx.lineTo(x,y-hh*.05);ctx.lineTo(x+ww*.72,y-hh*.45);ctx.stroke();ctx.globalAlpha=.9;ctx.fillStyle='#ffffff';ctx.fillRect(x-ww*.5,y-hh*.35,2,hh*.55);ctx.fillRect(x-ww*.36,y-hh*.4,1.5,hh*.3);for(let k=0;k<3;k++){const a=G.t*1.6+e.plS+k*2.09,sx=x+Math.cos(a)*ww*.95,sy=y+Math.sin(a)*hh*.7,tw=(Math.sin(G.t*7+k+e.plS)+1)/2,z=1.5+2.5*tw;ctx.globalAlpha=.5+.5*tw;ctx.fillRect(sx-z,sy-.6,z*2,1.2);ctx.fillRect(sx-.6,sy-z,1.2,z*2)}}ctx.restore()}
 // 🌈 프리즘 발사 중 흑백 (임팩트 프레임 뒤 ~ 레이저 끝, 0.5초 동안 색 복귀)
 let PRG=-1;function prGray(){if(G.__gh)return;let g=0;if(!G.bot){const w=G.weapons.find(w=>w.k==='prism');if(w){const c=w.st.c;if(c){const T=c.t-PR.AP-PR.CH;if(T>=0&&!c.bm)g=1}else if(w.st.gEnd&&!w.st.gBm)g=Math.max(0,1-(G.t-w.st.gEnd)/.5)}}g=Math.round(g*20)/20;if(g!==PRG){PRG=g;document.getElementById('game').style.filter=g>0?'grayscale('+g+')':''}}
-function hxDraw(){try{plFzDraw()}catch(_){}try{prGray()}catch(_){}for(const w of G.weapons){if(w.k==='polaris'){plDraw(w);plFlash(w)}else if(w.k==='soulwed')swDraw(w);else if(w.k==='glass')glDraw(w);else if(w.k==='prism'){prFdDraw(w);prDraw(w)}else if(w.k==='risha')rsDraw(w);else if(w.k==='stellar')szDraw(w)}}
+function hxDraw(){try{plFzDraw()}catch(_){}try{prGray()}catch(_){}for(const w of G.weapons){if(w.k==='polaris'){plDraw(w);plFlash(w)}else if(w.k==='soulwed')swDraw(w);else if(w.k==='glass')glDraw(w);else if(w.k==='prism'){prFdDraw(w);prDraw(w)}else if(w.k==='risha')rsDraw(w);else if(w.k==='stellar')szDraw(w);else if(w.k==='rouge')raDraw(w)}}
 
 // ===== 요정의 유리정원 (V103) =====
 Object.assign(WP,{glass:{name:'요정의 유리정원',icon:'🧊',evo:'stardust',evoName:'요정의 유리정원',hid:1,d:'아름다운 건, 유리 안에서만 시들지 않아요.',ed:'아름다운 건, 유리 안에서만 시들지 않아요.',extra:1}});
@@ -5595,7 +5598,7 @@ function sprFor(id,walk,f,idleF){const fz=!!SAVE.fancy[id]||id==='쥬은';
   if(fz){const ms=mskCur(id);if(ms||MSK_IMG[id+'|0'])return mskFrame(id,ms||0,walk?4+f:idleF)}
   return SPRF(id,fz?'fancy':'plain',walk?f:0)}
 function lines(id){const o=(typeof LINES!=='undefined'&&LINES[id])||{};const a=[].concat(...Object.values(o).filter(Array.isArray));return a.length?a:['오늘도 기갈나게!','어디로 출격할까?','단톡방 지키러 가자']}
-const LBL={"임재영": {"n": ["웅니 나 심심해엉", "공주 오늘 화장 잘 먹었지?", "죽은게임소식 또 낋여왔어요", "공주는 별빛을 먹고 자라요", "거울아 거울아, 오늘도 내가 제일이지?", "하트는 아끼는 게 아니라 넘쳐서 흘리는 거야"], "tap": "공주 얼굴 만지지마!!", "hint": ["오로라 왕관에 얼음 화살을 꽂으면… 녹지 않는 별이 될까?", "별가루가 내려앉은 유리 상자 안엔 요정이 산대요", "떨어지는 별은 사라지는 게 아니래, 누군가의 하늘에 다시 뜨는 거래"]}, "영규형": {"n": ["한 판만 더 돌리고 잘래", "출근싫어..", "확변 터지면 언니가 쏜다", "구슬 구르는 소리는 내 심장 소리야", "오늘의 운은 내일에서 빌려올래", "잭팟은 늘 한 칸 옆에서 웃어"], "tap": "그만질러!!!!", "hint": ["우연에 우연이 겹치면 기적이 된대… 우리가 태어난 것처럼"]}, "박계원": {"n": ["또 나한테 들이미노", "억울숙 출근했노", "무룩이년이지?", "베일 뒤엔 아무도 모르는 내가 있어", "신부는 늘 마지막에 웃는 법이야", "계절을 건너 여기까지 왔노"], "tap": "ㅅㅂ어디까지 들이미노", "hint": ["웨딩드레스에 부적 한 장 붙이면 하객이 저승에서 오노"]}, "창환이형": {"n": ["쁘니맘 등판!", "기싸움 좆된다 왜 저럴까;;", "넘모무서워", "레이저는 빛이 아니라 내 진심이야", "쁘니언니의 밤은 네온보다 밝아", "찌릿한 건 사랑일까 테슬라일까"], "tap": "꺄아아악!!", "hint": ["스포츠카 언니랑 지옥 신부가 테슬라에서 만나면… 어머 짜릿해", "날개짓 소리가 들리면 언니가 기도한 거야, 천사들이 줄줄이 내려와", "너희들이 이 세상을 지킬 수 있도록, 나는 너희를 지켜낼께."]}, "진형우": {"n": ["어디서 또 열받는거 가져왔네", "언니 오늘 기분 좋아~", "어머,,, 너무 별로;;", "솜사탕은 녹아도 단맛은 남아", "구름 한 입, 위로 한 입", "퐁퐁 터지는 건 걱정이 아니라 웃음이야"], "tap": "나한테 (그만)해!!!ㅜ", "hint": ["내 설탕 결정들로 빛을 반사시킬 수도 있을지 몰라"]}, "조혁래": {"n": ["고상하게 참는 중이에요...", "어우배고파죽겠어", "점례 순대국 먹고싶다", "빛기둥은 하늘이 보낸 답장이에요", "은방울꽃은 조용히 종을 울려요", "천사도 가끔은 배가 고파요"], "tap": "그만!!", "hint": ["천국에서 먹는 음식이요? 점례순대국이랍니다", "하늘에서 내린 한 줄기 빛은, 누군가의 기도가 닿았다는 증거래요"]}, "김세진": {"n": ["어머;; 무서와요", "미친거같아오ㅡ진짜", "휴... 어디로 이민가지...", "찻잔 속에도 폭풍은 불어요", "향기로운 건 대개 위험하죠", "에메랄드빛 오후가 좋아요"], "tap": "안돼요", "hint": ["모든 생명은 물에서 태어났고, 그 물은 별에서 내려왔대"]}, "승태민": {"n": ["오늘만 3년치 늙었노 ㅅㅂ", "ㄷㄷ 빡세겠노", "도토리 어딨긔?", "번개는 내가 숨긴 도토리를 비춰요", "~긔로 끝나는 말엔 마법이 있긔", "안경 너머 세상은 조금 더 선명하긔"], "tap": "아오 ㅅㅂ련아", "hint": ["사진을 찍으면 그 시간이 영원히 갇히게 돼"]}, "박준형": {"n": ["언니 예뻐요^^", "아 시발집가고싶다", "립스틱 번지면 다 너때매야", "입술에 남은 건 거짓말뿐이야", "마녀는 늙지 않아, 리쥬란을 맞을 뿐", "채찍 끝에 장미가 피었어"], "tap": "미친련아! 비취련아!", "hint": ["기갈부적 붙인 하객은 죽어서도 식장에 온대 이련아"]}, "박민규": {"n": ["결재 올렸는데 반려됐노...", "알!빠!노!", "시험치고...올게요...", "서류는 돌아와도 마음은 돌아오지 않아", "천사의 도장은 하늘색이야", "헤드셋 너머로 별들이 출근해"], "tap": "하시발...", "hint": ["북극 직행 화살이 날아가는 끝엔, 녹지 않는 왕관이 있대요"]}, "송기호": {"n": ["곧퇴근이다 버텨~", "꽃 사러 오셨어요?", "짐승이야짐승 멍충이 어휴", "장미는 가시까지 사랑해야 해요", "화원의 아침은 늘 이슬로 시작돼요", "던진 꽃은 다시 피지 않아요"], "tap": "헐..", "hint": ["가장 아름다운 가짜는 레이디의 차를 타고 온대요"]}, "박준영": {"n": ["어머 안대", "목아파죽것슈", "0관문 빡세 ㅋㅋㅜ", "요정들은 내 노래를 좋아해", "숲의 비밀은 지팡이 끝에 매달려 있어", "작은 날개가 큰 꿈을 데려와"], "tap": "미친년앜ㅋㄱ", "hint": ["요정의 주문이 유리 안에 갇히면, 영원히 시들지 않는대", "보이지 않는 선의도, 간절히 부르면 모습을 드러낸대"]}, "쥬은": {"n": ["어머~ 오늘도 shining 하네요?", "Honestly, 나 좀 예쁘지 않아요?", "괜찮아요, 나 쿨해요", "보석은 빛을 품고, 나는 추억을 품어요", "언니, 우린 다시 만날 거예요", "5월의 초록이 나를 해방시켜요"], "tap": "Oh my gosh! 그만~", "hint": ["공주님은 항상 자신이 사랑하던 별에 대한 기억을 이야기해줬어"]}, "재건": {"n": ["하… 제가 또 뭘 잘못했나요", "아뇨 괜찮아요… 저는 원래 이래요", "선글라스 쓰면 좀 덜 피곤해요", "차단은 끝이 아니라 쉼표예요", "검은 조용히 울어요, 저처럼", "오버 드라이브… 마음은 아직 1단이에요"], "tap": "하… 저 때문에 피곤하시죠", "hint": ["우리 모두의 힘을 합치면. 너무 눈부셔서 선글라스를 껴야해요"]}, "하도": {"n": ["어? 바로 신화 뽑았는데요?", "쉬운데~", "저는 이미 있는데요?", "행운은 미저리하게 웃어요", "총알보다 빠른 건 제 운이에요", "별이 저한테만 윙크해요"], "tap": "그게 터치에요?", "hint": []}};let lbLast='',lbTap=[],LBH=false;
+const LBL={"임재영": {"n": ["웅니 나 심심해엉", "공주 오늘 화장 잘 먹었지?", "죽은게임소식 또 낋여왔어요", "공주는 별빛을 먹고 자라요", "거울아 거울아, 오늘도 내가 제일이지?", "하트는 아끼는 게 아니라 넘쳐서 흘리는 거야"], "tap": "공주 얼굴 만지지마!!", "hint": ["오로라 왕관에 얼음 화살을 꽂으면… 녹지 않는 별이 될까?", "별가루가 내려앉은 유리 상자 안엔 요정이 산대요", "떨어지는 별은 사라지는 게 아니래, 누군가의 하늘에 다시 뜨는 거래"]}, "영규형": {"n": ["한 판만 더 돌리고 잘래", "출근싫어..", "확변 터지면 언니가 쏜다", "구슬 구르는 소리는 내 심장 소리야", "오늘의 운은 내일에서 빌려올래", "잭팟은 늘 한 칸 옆에서 웃어"], "tap": "그만질러!!!!", "hint": ["우연에 우연이 겹치면 기적이 된대… 우리가 태어난 것처럼"]}, "박계원": {"n": ["또 나한테 들이미노", "억울숙 출근했노", "무룩이년이지?", "베일 뒤엔 아무도 모르는 내가 있어", "신부는 늘 마지막에 웃는 법이야", "계절을 건너 여기까지 왔노"], "tap": "ㅅㅂ어디까지 들이미노", "hint": ["웨딩드레스에 부적 한 장 붙이면 하객이 저승에서 오노"]}, "창환이형": {"n": ["쁘니맘 등판!", "기싸움 좆된다 왜 저럴까;;", "넘모무서워", "레이저는 빛이 아니라 내 진심이야", "쁘니언니의 밤은 네온보다 밝아", "찌릿한 건 사랑일까 테슬라일까"], "tap": "꺄아아악!!", "hint": ["스포츠카 언니랑 지옥 신부가 테슬라에서 만나면… 어머 짜릿해", "날개짓 소리가 들리면 언니가 기도한 거야, 천사들이 줄줄이 내려와", "너희들이 이 세상을 지킬 수 있도록, 나는 너희를 지켜낼께."]}, "진형우": {"n": ["어디서 또 열받는거 가져왔네", "언니 오늘 기분 좋아~", "어머,,, 너무 별로;;", "솜사탕은 녹아도 단맛은 남아", "구름 한 입, 위로 한 입", "퐁퐁 터지는 건 걱정이 아니라 웃음이야"], "tap": "나한테 (그만)해!!!ㅜ", "hint": ["내 설탕 결정들로 빛을 반사시킬 수도 있을지 몰라"]}, "조혁래": {"n": ["고상하게 참는 중이에요...", "어우배고파죽겠어", "점례 순대국 먹고싶다", "빛기둥은 하늘이 보낸 답장이에요", "은방울꽃은 조용히 종을 울려요", "천사도 가끔은 배가 고파요"], "tap": "그만!!", "hint": ["천국에서 먹는 음식이요? 점례순대국이랍니다", "하늘에서 내린 한 줄기 빛은, 누군가의 기도가 닿았다는 증거래요"]}, "김세진": {"n": ["어머;; 무서와요", "미친거같아오ㅡ진짜", "휴... 어디로 이민가지...", "찻잔 속에도 폭풍은 불어요", "향기로운 건 대개 위험하죠", "에메랄드빛 오후가 좋아요"], "tap": "안돼요", "hint": ["모든 생명은 물에서 태어났고, 그 물은 별에서 내려왔대", "위고비 맞고 내 안에 진정한 아름다움을 찾았어요 어머님."]}, "승태민": {"n": ["오늘만 3년치 늙었노 ㅅㅂ", "ㄷㄷ 빡세겠노", "도토리 어딨긔?", "번개는 내가 숨긴 도토리를 비춰요", "~긔로 끝나는 말엔 마법이 있긔", "안경 너머 세상은 조금 더 선명하긔"], "tap": "아오 ㅅㅂ련아", "hint": ["사진을 찍으면 그 시간이 영원히 갇히게 돼"]}, "박준형": {"n": ["언니 예뻐요^^", "아 시발집가고싶다", "립스틱 번지면 다 너때매야", "입술에 남은 건 거짓말뿐이야", "마녀는 늙지 않아, 리쥬란을 맞을 뿐", "채찍 끝에 장미가 피었어"], "tap": "미친련아! 비취련아!", "hint": ["기갈부적 붙인 하객은 죽어서도 식장에 온대 이련아", "내 립스틱 한 방으로 세상을 모두 담아내겠어"]}, "박민규": {"n": ["결재 올렸는데 반려됐노...", "알!빠!노!", "시험치고...올게요...", "서류는 돌아와도 마음은 돌아오지 않아", "천사의 도장은 하늘색이야", "헤드셋 너머로 별들이 출근해"], "tap": "하시발...", "hint": ["북극 직행 화살이 날아가는 끝엔, 녹지 않는 왕관이 있대요"]}, "송기호": {"n": ["곧퇴근이다 버텨~", "꽃 사러 오셨어요?", "짐승이야짐승 멍충이 어휴", "장미는 가시까지 사랑해야 해요", "화원의 아침은 늘 이슬로 시작돼요", "던진 꽃은 다시 피지 않아요"], "tap": "헐..", "hint": ["가장 아름다운 가짜는 레이디의 차를 타고 온대요"]}, "박준영": {"n": ["어머 안대", "목아파죽것슈", "0관문 빡세 ㅋㅋㅜ", "요정들은 내 노래를 좋아해", "숲의 비밀은 지팡이 끝에 매달려 있어", "작은 날개가 큰 꿈을 데려와"], "tap": "미친년앜ㅋㄱ", "hint": ["요정의 주문이 유리 안에 갇히면, 영원히 시들지 않는대", "보이지 않는 선의도, 간절히 부르면 모습을 드러낸대"]}, "쥬은": {"n": ["어머~ 오늘도 shining 하네요?", "Honestly, 나 좀 예쁘지 않아요?", "괜찮아요, 나 쿨해요", "보석은 빛을 품고, 나는 추억을 품어요", "언니, 우린 다시 만날 거예요", "5월의 초록이 나를 해방시켜요"], "tap": "Oh my gosh! 그만~", "hint": ["공주님은 항상 자신이 사랑하던 별에 대한 기억을 이야기해줬어"]}, "재건": {"n": ["하… 제가 또 뭘 잘못했나요", "아뇨 괜찮아요… 저는 원래 이래요", "선글라스 쓰면 좀 덜 피곤해요", "차단은 끝이 아니라 쉼표예요", "검은 조용히 울어요, 저처럼", "오버 드라이브… 마음은 아직 1단이에요"], "tap": "하… 저 때문에 피곤하시죠", "hint": ["우리 모두의 힘을 합치면. 너무 눈부셔서 선글라스를 껴야해요", "언니들 화려함 따라가려면 한참 멀었네 ㅎㅎ"]}, "하도": {"n": ["어? 바로 신화 뽑았는데요?", "쉬운데~", "저는 이미 있는데요?", "행운은 미저리하게 웃어요", "총알보다 빠른 건 제 운이에요", "별이 저한테만 윙크해요"], "tap": "그게 터치에요?", "hint": []}};let lbLast='',lbTap=[],LBH=false;
 function lbLine(id){const o=LBL[id];if(!o){const a=lines(id);return a[Math.random()*a.length|0]}const now=performance.now();lbTap=lbTap.filter(t=>now-t<2500);lbTap.push(now);if(lbTap.length>3){lbTap=[];LBH=false;return o.tap}
   let pool=o.hint.length&&Math.random()<.1?o.hint:o.n;LBH=pool===o.hint;let v,g=0;do{v=pool[Math.random()*pool.length|0]}while(v===lbLast&&pool.length>1&&g++<8);lbLast=v;return v}
 function geo(){const Wd=world();const sz=Math.round(Math.max(110,Math.min(190,Math.min(W,H)*.36)));return{gy:Wd.gy,sz,Wd}}
@@ -5819,7 +5822,7 @@ window.rkSkin=id=>rkSkin(id);function rkSkin(id){const fz=id==='쥬은'||!!(SAVE
 function rkSpr(id,k){try{if(id==='쥬은')return k&&k.ms?mskFrame(id,k.ms,0):juFrame('wt0');if(k&&k.f){if(k.ms)return mskFrame(id,k.ms,0);if(MSK_IMG[id+'|0']&&!k.sk)return mskFrame(id,0,0);return skinSpr(id,k.sk||null,0)}return SPR.draw(id,'plain',0)}catch(e){return null}}
 function rkWD(g){try{const K=(g.stats&&g.stats.k)||{},agg={},hasGl=g.weapons.some(w=>w.k==='glass');for(const k in K){const w=HXR(k,g.weapons)?HXR(k,g.weapons):WP[k]?k:DPS_ALIAS[k]||(k==='ult'||k==='kiss'?'_ult':'_etc');agg[w]=(agg[w]||0)+K[k]}
   const T=Math.max(1,g.t);return Object.keys(agg).filter(k=>agg[k]>0).map(k=>{const w=g.weapons.find(q=>q.k===k),span=w?Math.max(1,T-(w.t0||0)):T;return{k,d:Math.round(agg[k]),s:Math.round(agg[k]/span)}}).sort((a,b)=>b.d-a.d).slice(0,14)}catch(e){return[]}}
-window.WICO={prism:'fx/hx_prism.png'};window.wIco=(k,c)=>WICO[k]?`<img class="${c||'wIco'}" src="${WICO[k]}" alt="">`:(WP[k]?WP[k].icon:'');const rkIco=k=>HXICO[k]?`<img class="rkHx" src="${HXICO[k]}" alt="">`:(WP[k]?WP[k].icon:'');
+window.WICO={prism:'fx/hx_prism.png',rouge:'fx/hx_rouge.png'};window.wIco=(k,c)=>WICO[k]?`<img class="${c||'wIco'}" src="${WICO[k]}" alt="">`:(WP[k]?WP[k].icon:'');const rkIco=k=>HXICO[k]?`<img class="rkHx" src="${HXICO[k]}" alt="">`:(WP[k]?WP[k].icon:'');
 const rkStar=k=>WP[k]&&WP[k].hid?'<i class="rbw">★</i>':'<i>★</i>';
 function rkDetail(r){const old=document.getElementById('rkDov');if(old)old.remove();const c=CHAR.find(q=>q.id===r.ch),E={};for(const w of r.ws||[])E[w.k]=w;
   const wn=k=>k==='_ult'?'💥 필살기':k==='_etc'?'✨ 기타':WP[k]?(E[k]&&E[k].e||WP[k].hid?WP[k].evoName||WP[k].name:WP[k].name):k;
@@ -5844,7 +5847,7 @@ try{window.endGame=endGame}catch(e){}
 // ---- 화면 ----
 const RKS={map:'gigal',tab:'surv',ch:'',cat:'surv',bd:'h'};let RKC={};
 const fmtD=n=>n>=1e6?(n/1e6).toFixed(1)+'M':n>=1e4?Math.round(n/1e3)+'k':n.toLocaleString();
-const HXICO={prism:'fx/hx_prism.png',polaris:'fx/hx_polaris.png',soulwed:'fx/hx_soulwed.png',glass:'fx/hx_glass.png',stellar:'fx/hx_stellar.png',risha:'fx/hx_rave.png'};
+const HXICO={prism:'fx/hx_prism.png',polaris:'fx/hx_polaris.png',soulwed:'fx/hx_soulwed.png',glass:'fx/hx_glass.png',stellar:'fx/hx_stellar.png',risha:'fx/hx_rave.png',rouge:'fx/hx_rouge.png'};
 function rkM(){if(!window.GRANK||!GRANK.on()){ovM(`<div class="lbM"><h3>🏆 랭킹</h3><p class="c">${window.GRANK?'랭킹은 <b>로그인</b>하면 볼 수 있어요.':'랭킹은 <b>게임 사이트(앱)에서 로그인</b>해야 볼 수 있어요.'}</p><div class="btns">${window.GRANK?'<button type="button" class="big" id="rkL">🔑 로그인</button>':''}<button type="button" class="ghost" id="lbX">닫기</button></div></div>`);const l=document.getElementById('rkL');if(l)l.onclick=()=>{document.getElementById('lbOv').remove();const g=document.getElementById('gaccB');if(g)g.click()};return}
   const cat=RKS.cat,bp=cat==='bps';
   const desc=cat==='surv'?'💀 헬 모드에서 최종 보스를 잡은 판만 올라가요 · 30분이 넘으면 총 딜량으로 겨뤄요':cat==='dps'?'💀 헬 모드 클리어 기록의 초당 딜(총 딜 ÷ 생존 시간)로 겨뤄요':'🔥 어려움 · 💀 헬에서 10·15·20분이 될 때 잰 BPS예요 · 더 늦은 시간대 기록이 먼저 와요';
@@ -6188,6 +6191,300 @@ function szDraw(w){const st=w.st,p=G.p;ctx.save();ctx.globalCompositeOperation='
       let LS=[TX];if(ctx.measureText(TX).width>VW*.9){const cs=[...TX];let bi=-1,bd=1e9;cs.forEach((ch,i)=>{if(ch!==','&&ch!=='.'&&ch!==' ')return;const l1=cs.slice(0,i+1).join('').trim(),l2=cs.slice(i+1).join('').trim();const w0=Math.max(ctx.measureText(l1).width,ctx.measureText(l2).width);if(w0>VW*.94&&ch!==' ')return;const w=w0*(ch===' '?1:.65);if(w<bd){bd=w;bi=i}});if(bi>0)LS=[cs.slice(0,bi+1).join('').trim(),cs.slice(bi+1).join('').trim()]}
       const lh=parseInt(ctx.font.match(/(\d+)px/)[1])*1.35;let ci=0;LS.forEach((L,li)=>{const W0=ctx.measureText(L).width;let x=p.x-W0/2;const y=p.y-R*.55-(LS.length-1-li)*lh;[...L].forEach(ch=>{const a=Math.max(0,Math.min(1,(tt*6-ci)/5))*out;if(a>0){ctx.globalAlpha=a;ctx.fillText(ch,x,y)}x+=ctx.measureText(ch).width;ci++})});ctx.restore()}}
   if(!G.__gh&&!st.fn){const Z=ZD[st.zi||0];ctx.save();ctx.globalAlpha=.85;ctx.font='700 13px "Noto Sans KR",sans-serif';ctx.textAlign='center';ctx.lineWidth=3;ctx.strokeStyle='#0a0820';const tx='★ '+((st.zi||0)+1)+'/12',y=p.y+46;ctx.strokeText(tx,p.x,y);ctx.fillStyle=ZC[Z.e];ctx.fillText(tx,p.x,y);ctx.restore()}}
+</script>
+<script>/* ===== 💋 하모닉스 「에클라땅뜨 아르떼」 (11-09 사용자 기획, 처음 이름 루즈 아르테): 립스틱★ + 하트 네일★ + 💉 위고비 =====
+   상상의 손과 립스틱으로 그린 그림이 현실이 돼요. 글씨·그림은 빛나는 립스틱 선 → 먼저 그린 쪽부터 스르륵 사라져요. */
+Object.assign(WP,{rouge:{name:'에클라땅뜨 아르떼',icon:'💋',evo:'wegovy',evoName:'에클라땅뜨 아르떼',hid:1,d:'더 화려하게, 더 아름답게, 더 눈부시게!',ed:'더 화려하게, 더 아름답게, 더 눈부시게!',extra:1}});
+KC.rouge='#ff4f9a';
+HX.push({k:'rouge',a:'lipstick',b:'nail',it:'wegovy',q:'네 안에 화려함을 터트려볼까?',lore:'더 화려하게, 더 아름답게, 더 눈부시게!',col:'#ff4f9a',sub:'💄 립스틱 난도 + 💅 하트 네일 + 💉 위고비'});
+const RA={CD:1.8,M:3.3,VUL:.15,VD:4,VCD:20,STOP:5,SCD:22,FHOLD:5,MCD:15,MD:5,FIN:100,HOLD:.9,FADE:.55,
+  N:{pink:{line:'#ff2a6d',glow:'#ff6fae',core:'#ffe3f0',pt:['#ff2a6d','#ff7ab8','#ffd0e4','#ffffff']},cyan:{line:'#1ec8ff',glow:'#7fe9ff',core:'#e8fbff',pt:['#1ec8ff','#7fe9ff','#d8f8ff','#ffffff']},yellow:{line:'#ffc61a',glow:'#ffe48a',core:'#fff8dc',pt:['#ffc61a','#ffe48a','#fff3c0','#ffffff']},purple:{line:'#a64dff',glow:'#d39bff',core:'#f3e6ff',pt:['#a64dff','#d39bff','#efdcff','#ffffff']},green:{line:'#22e07a',glow:'#8dffc0',core:'#e6fff1',pt:['#22e07a','#8dffc0','#dcffe9','#ffffff']},orange:{line:'#ff7a1a',glow:'#ffb070',core:'#fff0e0',pt:['#ff7a1a','#ffb070','#ffe0c4','#ffffff']},magenta:{line:'#ff2bd6',glow:'#ff86ec',core:'#ffe6fa',pt:['#ff2bd6','#ff86ec','#ffd6f6','#ffffff']},red:{line:'#ff1e3c',glow:'#ff6a7a',core:'#ffe0e4',pt:['#ff1e3c','#ff6a7a','#ffd0d6','#ffffff']},sig:{line:'#9a0016',glow:'#c8001f',core:'#d81a33',pt:['#9a0016','#c8001f','#e0203a','#ffffff']}},
+  C:{line:'#ff2a6d',glow:'#ff6fae',core:'#ffe3f0',pt:['#ff2a6d','#ff7ab8','#ffd0e4','#ffffff','#ffb3d9']}};
+// ---- 모양 (단위 좌표 −1~1) ----
+const RAS={
+  circle:n=>{const a=[];for(let i=0;i<=n;i++){const t=i/n*6.283-1.57;a.push([Math.cos(t),Math.sin(t)])}return a},
+  heart:n=>{const a=[];for(let i=0;i<=n;i++){const t=i/n*6.283;a.push([Math.pow(Math.sin(t),3),-(13*Math.cos(t)-5*Math.cos(2*t)-2*Math.cos(3*t)-Math.cos(4*t))/16])}return a},
+  flower:n=>{const a=[];for(let i=0;i<=n;i++){const t=i/n*Math.PI,r=Math.sin(5*t);a.push([r*Math.cos(t),r*Math.sin(t)])}return a},
+  lips:n=>{const a=[],h=n/2;for(let i=0;i<=h;i++){const x=-1+2*i/h;a.push([x,-.42*(1-x*x)+.22*Math.exp(-x*x/.03)])}for(let i=0;i<=h;i++){const x=1-2*i/h;a.push([x,.45*(1-x*x)])}return a},
+  star:()=>{const a=[];for(let i=0;i<=5;i++){const t=-1.57+i*2.513;a.push([Math.cos(t),Math.sin(t)])}return a},
+  rocket:()=>[[0,-1],[.28,-.62],[.36,-.1],[.36,.48],[.66,.82],[.36,.74],[.22,.9],[-.22,.9],[-.36,.74],[-.66,.82],[-.36,.48],[-.36,-.1],[-.28,-.62],[0,-1]],
+  ring:n=>{const a=[];for(let i=0;i<=n;i++){const t=i/n*6.283,x=Math.cos(t),y=Math.sin(t)*.28;a.push([x*Math.cos(-.35)-y*Math.sin(-.35),x*Math.sin(-.35)+y*Math.cos(-.35)])}return a},
+  ufo:n=>{const a=[];for(let i=0;i<=n;i++){const t=Math.PI+i/n*Math.PI;a.push([Math.cos(t)*.42,-.1+Math.sin(t)*.42])}for(let i=0;i<=n*2;i++){const t=i/(n*2)*6.283;a.push([Math.cos(t+Math.PI)*1,Math.sin(t+Math.PI)*.26])}return a},
+  bfly:n=>{const a=[];for(let i=0;i<=n;i++){const t=i/n*12.566,e=Math.exp(Math.cos(t))-2*Math.cos(4*t)-Math.pow(Math.sin(t/12),5);a.push([Math.sin(t)*e/3.2,-Math.cos(t)*e/3.2])}return a},
+  mirror:n=>{const a=[];for(let i=0;i<=n;i++){const t=i/n*6.283+1.57;a.push([Math.cos(t)*.62,-.32+Math.sin(t)*.68])}a.push([0,.36],[0,1]);return a},
+  sign:n=>{const a=[];for(let i=0;i<=n;i++){const u=i/n,x=-1+2*u;a.push([x+.12*Math.sin(u*40),.32*Math.sin(u*18)+.18*Math.cos(u*31)-.2*u])}return a}};
+// 그림 하나 = 점 목록 + 그려지는 시간 → 점마다 태어난 시각이 있어서, 먼저 그린 쪽부터 사라져요
+function raStroke(pts,cx,cy,sc,dur,o){o=o||{};const SL=o.slant===undefined?.28:o.slant,J=o.jit===undefined?.035:o.jit,ph=[Math.random()*6,Math.random()*6,Math.random()*6],n=pts.length;
+  let P=pts.map(([x,y],i)=>{const u=i/(n-1);return[x-y*SL+J*(Math.sin(u*9+ph[0])+.5*Math.sin(u*23+ph[1])),y+J*(Math.sin(u*11+ph[2])+.5*Math.cos(u*19+ph[0]))]});
+  if(!o.noTail&&n>3){const a=P[0],b=P[2],z=P[n-1],y=P[n-3];P=[[a[0]-(b[0]-a[0])*1.6,a[1]-(b[1]-a[1])*1.6+.04],...P,[z[0]+(z[0]-y[0])*2.2+.06,z[1]+(z[1]-y[1])*2.2-.08]]}
+  return{so:!!o.so,col:o.col?(typeof o.col==='string'?RA.N[o.col]:o.col):null,pts:P.map(([x,y])=>[cx+x*sc*(o.sx||1),cy+y*sc]),cx,cy,t:-(o.dl||0),dur,hold:o.hold===undefined?RA.HOLD:o.hold,fol:o.fol||null,w:o.w||5,done:0,keep:!!o.keep,fin:!!o.fin,mini:!!o.mini}}
+// 점 i가 태어난 시각 = i/n*dur, 그 점이 사라지기 시작하는 시각 = 태어난 뒤 dur+hold → 먼저 그린 쪽부터 스르륵
+function raAl(t,born,dur,hold,kill){let a=t<born?0:Math.max(0,Math.min(1,1-(t-born-dur-hold)/RA.FADE));if(kill!==undefined)a*=Math.max(0,1-(t-kill)/.25);return a}
+// 손글씨 네온: 손글씨(나눔펜·Sacramento, OFL)를 뼈대만 남겨 만든 획 데이터 → 립스틱 선으로 한 획씩 써요
+const RAG={"약하구나?":{"w":3.821,"s":[[113,344,106,364,79,377,20,450,0,530,13,589,40,616,93,629,159,609,192,576,205,536,192,464,99,371],[517,26,530,464,649,470,709,444,854,411,1040,430,1139,377,1232,371,1278,325,1298,285,1298,252,1212,106,1119,0],[550,589,536,536,543,470],[430,808,550,748,596,742,642,755,669,815,669,894,649,1000],[907,185,828,179,662,225,623,252,523,258],[1238,364,1252,391,1245,450,1225,570,1199,603,1172,709,1172,781,1205,808,1265,795,1311,755,1331,702,1318,629,1298,609,1245,603,1219,583],[1616,199,1603,503,1616,662,1636,722],[1868,404,1788,397,1689,424,1603,430],[2026,212,2179,119,2245,106,2278,113,2298,159,2298,285,2272,444],[1980,656,2053,623,2172,596,2232,596,2265,576,2417,550,2464,556],[2272,960,2252,808,2252,589],[2649,371,2629,437,2623,543,2636,642,2656,662,2675,669,2728,656,2781,623,2868,550,2927,470],[3073,225,3079,278,3066,477,3079,603,3099,689,3132,748],[3384,344,3166,417,3073,411],[3556,338,3556,272,3603,219,3629,205,3709,192,3768,205,3808,238,3821,298,3808,364,3768,430,3675,530,3662,563,3662,609,3682,656]]},"너 멈추도록해":{"w":4.263,"s":[[17,307,0,413,0,536,22,631,67,659,117,654,223,609,274,575],[229,425,419,346,492,335,520,346,536,318,536,279],[536,698,525,676,520,592,520,346],[514,346,469,385,475,391,475,380],[1095,235,1073,553],[1391,508,1291,553,1218,564,1207,553,1078,542],[1419,369,1654,296,1782,285,1804,207],[1095,318,1134,324,1251,296,1285,307,1285,374,1229,464,1212,553],[1570,603,1542,732,1547,832],[1765,486,1782,285],[1860,849,1793,872,1704,872,1715,788,1749,709,1754,648,1743,637,1709,631,1564,648],[1950,307,2034,268,2123,257,2128,156,2112,0],[2022,531,2056,447,2101,419,2128,274,2117,263],[2073,682,2246,670,2391,631,2436,609],[2391,436,2302,419,2101,425],[2257,1000,2251,955,2263,916,2268,665],[2559,229,2592,235,2654,212,2732,201],[2615,737,2732,715,2749,704,2788,497,2771,469,2615,480,2592,464,2592,385,2609,335,2620,229],[2994,687,2799,704,2749,698],[3089,78,3134,56,3190,56,3207,61,3218,84,3212,134,3184,168,3162,229,3151,240,3106,246],[3117,682,3212,659,3235,637,3240,559,3268,447,3263,408,3140,402,3168,279,3156,240],[3480,609,3235,642],[3363,408,3285,397,3268,413],[3240,849,3318,810,3402,804,3419,832,3419,899,3408,972,3397,989],[3626,123,3749,235],[3603,397,3609,402,3665,374,3715,363,3765,363,3777,374,3754,503,3737,525,3721,592,3715,648,3732,682,3810,665,3838,626,3832,559,3810,536,3771,536,3749,514],[4017,318,4006,441,4011,553,4028,626],[4263,285,4246,397,4229,413,4145,425,4101,447,4011,464],[4235,687,4223,598,4235,413]]},"Queen":{"w":2.64,"s":[[263,737,229,686,177,669,120,669,109,657,103,629,69,583,29,486,23,377,29,326,51,263,86,200,177,103,223,69,337,17,440,0,554,6,629,29,709,69,806,160,840,211,880,331,880,446,863,520,794,640,703,726,634,766,606,800,543,800,514,760,406,709,320,680,257,674,234,691],[23,714,114,669],[23,714,0,754,6,811,69,857,143,874,326,874,491,834,520,823,531,800],[1171,971,1057,1000,960,1000,886,983,800,943,646,846,623,829,611,800],[1046,623,1006,697,1000,817,1040,869,1063,874,1109,869,1189,811,1200,646],[1394,800,1440,771,1457,669,1497,623,1514,617,1554,623,1577,663,1577,703,1560,749,1520,789,1474,806,1486,851,1514,874,1549,886,1640,874,1669,857,1720,794,1760,771],[1394,800,1354,851,1291,880,1240,869,1189,811],[2189,846,2194,823,2177,806,2183,634,2171,623,2131,629,2109,651,2017,829,1960,874,1920,886,1869,886,1817,863,1794,806,1760,777,1777,669,1817,623,1874,623,1891,640,1897,703,1880,749,1840,789,1794,806],[2640,720,2583,817,2543,857,2486,880,2451,874,2417,823,2411,651,2371,634,2349,646,2303,697,2251,789,2194,823]]},"never":{"w":5.932,"s":[[0,475,85,305,153,237,271,220,305,254,288,763,339,814,322,881],[881,254,729,356,508,712,339,814],[2661,220,2610,407,2610,644,2525,695,2339,915,2136,1000,1983,1000,1831,932,1763,763,1661,678,1712,356,1831,220,2000,220,2051,271,2068,458,2017,593,1898,712,1763,763],[881,254,983,305,1000,814,1102,966,1203,983,1373,915,1559,712,1661,661],[3237,220,3271,407,3186,508,3102,763,2966,949,2814,949,2729,864,2678,712,2593,661],[3271,407,3542,610,3780,627,3864,576,3915,322,4017,220,4186,220,4254,339,4237,525,4085,712,3983,729,3949,797,3983,898,4068,966,4322,1000,4441,966,4610,831,4814,475,4864,203],[3847,593,3881,627,3881,712,3949,763],[4814,0,4797,136,4864,203,5051,203,5169,254,5169,780,5203,864,5305,966,5458,983,5627,915,5763,780,5932,508]]},"Cry":{"w":1.277,"s":[[317,157,297,177,281,213,281,257,293,285,325,317,349,329,382,337,458,337,506,325,578,281,610,237,627,189,618,120,602,92,566,56,518,28,458,8,357,0,261,16,177,52,100,108,60,153,20,221,4,273,0,361,12,422,44,486,100,542,129,562,213,598,289,614,386,614,470,594,538,562,598,522,667,446],[743,369,739,402,755,418,799,418,827,430,827,554,835,574,859,598,876,602,912,598,936,586,968,554,1000,538,1012,478,1036,426],[743,482,755,418],[1153,458,1129,574,1068,598,1036,594,1016,578,1000,538],[1141,627,1133,695,1124,707,1096,719,1076,747,1020,884,1016,948,1024,980,1040,996,1072,1000,1092,992,1108,972,1120,944,1137,859,1137,715,1124,707],[1277,490,1245,546,1181,614,1141,627,1137,578,1129,574]]}};
+function raWrite(st,str,x,y,h,dur,o){o=o||{};const G0=RAG[str];if(!G0){st.tx.push(raText(str,x,y,h,dur,o));return}
+  const SL=.22,W=G0.w*h,x0=x-W/2,y0=y-h/2,S=G0.s.map(a=>{const P=[];for(let i=0;i<a.length;i+=2){const u=a[i]/1000*h,v=a[i+1]/1000*h;P.push([x0+u-(v-h/2)*SL,y0+v])}return P}),
+    len=S.map(P=>{let L=0;for(let i=1;i<P.length;i++)L+=Math.hypot(P[i][0]-P[i-1][0],P[i][1]-P[i-1][1]);return L}),tot=len.reduce((a,b)=>a+b,0)||1,gap=dur*.12/Math.max(1,S.length),wr=dur-gap*S.length;
+  let t=o.dl||0;S.forEach((P,i)=>{const d=Math.max(.04,wr*len[i]/tot);st.dr.push({pts:P,cx:x,cy:y,t:-t,dur:d,hold:(o.hold===undefined?RA.HOLD:o.hold)+(dur-t-d)*.15,w:o.w||Math.max(3,h*.07),col:o.col?RA.N[o.col]:null,fin:!!o.fin,mini:1,wr:1});t+=d+gap})}
+function raText(str,x,y,sz,dur,o){o=o||{};return{str,x,y,sz,t:-(o.dl||0),dur,hold:o.hold===undefined?RA.HOLD:o.hold,keep:!!o.keep,big:!!o.big,col:o.col?RA.N[o.col]:null,fin:!!o.fin,en:!!o.en}}
+function raTick(w,dt){const S=G.S,st=w.st,p=G.p,m=S.might*RA.M;
+  st.dr=st.dr||[];st.tx=st.tx||[];st.sk=st.sk||[];
+  // 취약(약하구나?) 시간 줄이기
+  for(const e of G.enemies){if(e.raV>0)e.raV-=dt;if(e.raS>0)e.raS-=dt;if(e.raF>0){e.raF-=dt;if(e.raFx===undefined){e.raFx=e.x;e.raFy=e.y}e.x=e.raFx;e.y=e.raFy}else if(e.raFx!==undefined){e.raFx=e.raFy=undefined}}
+  // 기술 고르기 — 위고비가 손을 빠르게 해 줘요
+  st.u=(st.u===undefined?1:st.u)-dt;st.vc=(st.vc===undefined?6:st.vc)-dt;st.sc=(st.sc===undefined?12:st.sc)-dt;st.mc=(st.mc===undefined?6:st.mc)-dt;st.bc=(st.bc||0)-dt;st.fn=(st.fn===undefined?RA.FIN*.6:st.fn)-dt;
+  const vis=G.enemies.filter(e=>!e.dead&&Math.abs(e.x-p.x)<VW/2+20&&Math.abs(e.y-p.y)<VH/2+20);
+  if(st.fn<=0&&!st.F&&vis.length){st.fn=RA.FIN*S.cd;raFinale(st)}
+  if(st.u<=0&&!st.F){st.u=RA.CD*S.cd;raPick(st,vis,m)}
+  // 진행 중인 기술
+  st.sk=st.sk.filter(k=>raSkill(st,k,dt,m,vis));
+  if(st.F)raFinTick(st,dt,m);
+  // 방벽
+  if(st.bar){const b=st.bar;b.t+=dt;const R=b.R;b.k=(b.k||0)-dt;
+    for(const e of G.enemies){if(e.dead)continue;const dx=e.x-p.x,dy=e.y-p.y,d=Math.hypot(dx,dy)||1,lim=R+e.r;if(d<lim&&b.t>.45){const k=e.boss?.3:1;e.x=p.x+dx/d*(d+(lim-d)*k);e.y=p.y+dy/d*(d+(lim-d)*k);if(b.k<=0)hurt(e,22*m,'rouge',{kb:4})}}
+    if(b.k<=0)b.k=.25;
+    if(G.eb&&b.t>.45)for(const q of G.eb){const d=Math.hypot(q.x-p.x,q.y-p.y);if(d<R+8&&d>R-26){q.life=0;if(!G.bot&&Math.random()<.5)px(q.x,q.y,rnd(-40,40),rnd(-60,-10),.4,pick(RA.C.pt),2,1,2)}}
+    if(b.t>6)st.bar=null}
+  // 손거울: 날아오는 적 탄을 되돌려 줘요
+  if(st.mir){const M=st.mir;M.t+=dt;if(M.t>.5){const R=150*S.area;if(G.eb)for(const q of G.eb){if(q.life<=0||(q.x-p.x)**2+(q.y-p.y)**2>R*R)continue;q.life=0;let tg=q.src&&!q.src.dead?q.src:null;if(!tg){let bd=1e12;for(const e of G.enemies){if(e.dead)continue;const d=(e.x-q.x)**2+(e.y-q.y)**2;if(d<bd){bd=d;tg=e}}}
+      if(tg){hurt(tg,40*m,'rouge',{kb:6});if(!G.bot){for(let i=0;i<6;i++){const u=i/6;px(q.x+(tg.x-q.x)*u,q.y+(tg.y-q.y)*u,rnd(-20,20),rnd(-20,20),.35,pick(RA.N.cyan.pt),2,1,2)}sparks(q.x,q.y,4,['#ffffff','#7fe9ff'],120,.25,2)}}}}
+    if(M.t>RA.MD)st.mir=null}
+  // 그림·글씨 나이 먹기
+  for(const s of st.dr){s.t+=dt;if(s.fol){s.ox=p.x-s.fol[0]+(s.mx||0);s.oy=p.y-s.fol[1]+(s.my||0)}}
+  st.dr=st.dr.filter(s=>s.keep||(s.kill!==undefined?s.t<s.kill+.3:s.t<s.dur*2+s.hold+RA.FADE+.1));for(const q of st.tx)q.t+=dt;st.tx=st.tx.filter(q=>q.keep||(q.kill!==undefined?q.t<q.kill+.35:q.t<q.dur*2+q.hold+RA.FADE+.1));
+  if(!G.bot)raDust(st,dt);
+  // 쓰는 끝에서 빛 가루
+  if(!G.bot){for(const s of st.dr){if(s.t<0||s.t>s.dur)continue;const u=s.t/s.dur,i=Math.min(s.pts.length-1,Math.floor(u*(s.pts.length-1))),q=s.pts[i],ox=s.ox||0,oy=s.oy||0,k2=pn(3);for(let k=0;k<k2;k++)px(q[0]+ox+rnd(-3,3),q[1]+oy+rnd(-3,3),rnd(-50,50),rnd(-70,10),rnd(.35,.7),pick(RA.C.pt),pick([2,2,3]),1,2)}
+    for(const q of st.tx){if(q.t<0||q.t>q.dur)continue;const k2=pn(4);for(let k=0;k<k2;k++)px(q.hx||q.x,q.y+rnd(-q.sz*.4,q.sz*.3),rnd(-60,60),rnd(-80,20),rnd(.4,.8),pick(RA.C.pt),pick([2,3]),1,2)}}}
+// 그림이 완성되면 반짝 + 사라지는 자리에서 픽셀 가루가 흩날려요
+function raDust(st,dt){const P=RA.C.pt;
+  for(const s of st.dr){if(s.t<0||s.art)continue;const n=s.pts.length-1,ox=s.ox||0,oy=s.oy||0;
+    if(!s.pop&&s.t>=s.dur&&!s.bar){s.pop=1;const k2=pn(s.mini?3:16);for(let k=0;k<k2;k++){const q=s.pts[Math.random()*n|0];sparks(q[0]+ox,q[1]+oy,1,['#ffffff','#ffe3f0'],90,.35,2)}}
+    for(let i=0;i<n;i+=2){const born=i/n*s.dur;let hold=s.hold;if(s.bar&&st.bar)hold=999;const al=raAl(s.t,born,s.dur,hold,s.kill);if(al<=0||al>=.999)continue;
+      if(Math.random()>(s.mini?.18:.42))continue;const q=s.pts[i],x=q[0]+ox,y=q[1]+oy,dx=q[0]+ox-(s.cx+(s.bar?ox:0)),dy=q[1]+oy-(s.cy+(s.bar?oy:0)),d=Math.hypot(dx,dy)||1,v=rnd(30,110);
+      px(x+rnd(-2,2),y+rnd(-2,2),dx/d*v+rnd(-25,25),dy/d*v-rnd(20,60),rnd(.5,1.1),pick(Math.random()<.25?['#ffffff','#fff4fa']:(s.col||RA.C).pt),pick([2,2,3]),1,1.2)}}}
+// ---- 상황 보고 기술 고르기 ----
+function raCluster(vis,R){let best=null,bn=0;for(let i=0;i<vis.length;i+=Math.max(1,vis.length/30|0)){const c=vis[i];let n=0,sx=0,sy=0;for(const e of vis){if((e.x-c.x)**2+(e.y-c.y)**2<R*R){n++;sx+=e.x;sy+=e.y}}if(n>bn){bn=n;best={x:sx/n,y:sy/n,n}}}return best}
+function raPick(st,vis,m,force){const S=G.S,p=G.p;if(!vis.length)return;
+  const hpLow=p.hp<S.maxHp*.45,bul=(G.eb||[]).filter(b=>b.life>0&&(b.x-p.x)**2+(b.y-p.y)**2<320*320).length,bigV=vis.filter(e=>e.boss||e.elite),near=vis.filter(e=>(e.x-p.x)**2+(e.y-p.y)**2<260*260),big=vis.filter(e=>(e.boss||e.elite)&&(e.x-p.x)**2+(e.y-p.y)**2<380*380),cl=raCluster(vis,140);
+  let k;
+  if(force)k=force;else if(hpLow&&!st.bar&&st.bc<=0)k='circle';
+  else if(st.vc<=0&&vis.length>=6)k='weak';
+  else if(st.mc<=0&&!st.mir&&(bul>=3||(bigV.some(e=>e.boss)&&Math.random()<.35)))k='mirror';
+  else if(st.sc<=0&&bigV.length)k='stop';
+  else if(near.length>=10&&Math.random()<.45)k='grab';
+  else if(big.length&&Math.random()<.5)k='palm';
+  else{const L=vis.filter(e=>e.x<p.x).length,Rr=vis.length-L;k=pick(Math.abs(L-Rr)>vis.length*.4?['sweep','heart','lips','flower','rocket','ufo']:['heart','lips','flower','rocket','planet','ufo','bfly','sweep'])}
+  const sc=Math.min(VW,VH);
+  if(k==='circle'){st.bc=12*S.cd;const R=95*S.area;st.bar={t:0,R};st.dr.push(Object.assign(raStroke(RAS.circle(48),0,0,R,.45,{keep:1,w:6,noTail:1,slant:.08,jit:.02}),{fol:[0,0],ox:p.x,oy:p.y,bar:1}));return}
+  if(k==='weak'){st.vc=RA.VCD*S.cd;const x=p.x,y=p.y-sc*.22,sz=Math.max(34,Math.round(sc*.085));raWrite(st,'약하구나?',x,y,sz*1.6,1,{hold:1.1});st.sk.push({k,t:0,x,y});return}
+  if(k==='mirror'){st.mc=RA.MCD*S.cd;const s1=raStroke(RAS.mirror(40),0,0,46*S.area,.5,{hold:RA.MD-.5,col:'cyan',w:4,noTail:1,slant:.15,jit:.01});s1.fol=[0,0];s1.mx=46;s1.my=-58;st.dr.push(s1);st.mir={t:0,s:s1};return}
+  if(k==='stop'){const tg=bigV.find(e=>e.boss&&!(e.raF>0))||bigV.filter(e=>!(e.raF>0)).sort((a,b)=>((a.x-p.x)**2+(a.y-p.y)**2)-((b.x-p.x)**2+(b.y-p.y)**2))[0];if(!tg)return;st.sc=RA.SCD*S.cd;const x=p.x,y=p.y-sc*.3,sz=Math.max(30,Math.round(sc*.07));raWrite(st,'너 멈추도록해',x,y,sz*1.5,1.1,{hold:1.2});
+    tg.raF=Math.max(tg.raF||0,1.5);tg.raFx=undefined;const ax=x+(tg.x>x?1:-1)*sz*2.6,ay=y+sz*.7,tx=tg.x,ty=tg.y-tg.r*.2,dx=tx-ax,dy=ty-ay,L=Math.hypot(dx,dy)||1,ux=dx/L,uy=dy/L,ex=tx-ux*(tg.r+14),ey=ty-uy*(tg.r+14),pts=[];for(let i=0;i<=24;i++){const u=i/24;pts.push([ax+(ex-ax)*u-uy*Math.sin(u*Math.PI)*L*.12,ay+(ey-ay)*u+ux*Math.sin(u*Math.PI)*L*.12])}
+    const hd=[[ex-ux*22-uy*14,ey-uy*22+ux*14],[ex,ey],[ex-ux*22+uy*14,ey-uy*22-ux*14]];
+    st.dr.push({pts,cx:ax,cy:ay,t:-1.05,dur:.3,hold:1.3,w:5,col:RA.N.red},{pts:hd,cx:ex,cy:ey,t:-1.35,dur:.12,hold:1.2,w:5,col:RA.N.red});st.sk.push({k,t:0,x,y,e:tg});return}
+  if(k==='grab'){const c=raCluster(near,170)||{x:p.x,y:p.y};st.sk.push({k,t:0,x:c.x,y:c.y});return}
+  const c0=cl||{x:p.x+rnd(-120,120),y:p.y+rnd(-120,120)};
+  if(k==='rocket'){const sx=p.x+(c0.x>p.x?-70:70),sy=p.y-60,s1=raStroke(RAS.rocket(),sx,sy,30*S.area,.45,{hold:.6,col:'purple',w:4,jit:.02});const s2=raStroke(RAS.circle(16),sx,sy-6*S.area,8*S.area,.2,{dl:.45,hold:.6,col:'pink',w:3,noTail:1});st.dr.push(s1,s2);st.sk.push({k,t:0,x:sx,y:sy,tx:c0.x,ty:c0.y,ss:[s1,s2]});return}
+  if(k==='planet'){const s1=raStroke(RAS.circle(30),c0.x,c0.y,34*S.area,.4,{hold:3,col:'yellow',w:4,noTail:1}),s2=raStroke(RAS.ring(40),c0.x,c0.y,68*S.area,.45,{dl:.35,hold:2.8,col:'cyan',w:4});st.dr.push(s1,s2);st.sk.push({k,t:0,x:c0.x,y:c0.y,a:0});return}
+  if(k==='ufo'){const s1=raStroke(RAS.ufo(24),c0.x,c0.y-110,52*S.area,.5,{hold:2.4,col:'green',w:4});st.dr.push(s1);st.sk.push({k,t:0,x:c0.x,y:c0.y});return}
+  if(k==='bfly'){const bx=p.x+rnd(-40,40),by=p.y-50,s1=raStroke(RAS.bfly(160),bx,by,30*S.area,.6,{hold:2.8,col:pick(['purple','cyan','pink']),w:3,slant:.1,jit:.015,noTail:1});st.dr.push(s1);st.sk.push({k,t:0,x:bx,y:by,s:s1,tx:c0.x,ty:c0.y,hit:new Set()});return}
+  if(k==='palm'){const b=big.find(e=>e.boss)||big[0];st.sk.push({k,t:0,e:b,x:b.x,y:b.y});return}
+  if(k==='sweep'){const L=vis.filter(e=>e.x<p.x).length,dir=L>vis.length-L?-1:1;st.sk.push({k,t:0,dir,hit:new Set()});return}
+  const c=c0;
+  if(k==='heart'){st.dr.push(raStroke(RAS.heart(40),c.x,c.y,58*S.area,.55));st.sk.push({k,t:0,x:c.x,y:c.y});return}
+  if(k==='lips'){st.dr.push(raStroke(RAS.lips(36),c.x,c.y,52*S.area,.45));st.sk.push({k,t:0,x:c.x,y:c.y});return}
+  if(k==='flower'){st.dr.push(raStroke(RAS.flower(60),c.x,c.y,64*S.area,.6,{hold:4.2}));st.sk.push({k,t:0,x:c.x,y:c.y,a:0});return}}
+// ---- 기술 진행 (true면 계속) ----
+function raSkill(st,k,dt,m,vis){const S=G.S,p=G.p;k.t+=dt;
+  if(k.k==='grab'){const R=170*S.area;
+    if(k.t>.3&&k.t<.95)for(const e of G.enemies){if(e.dead||e.boss)continue;const dx=k.x-e.x,dy=k.y-e.y;if(dx*dx+dy*dy<R*R){e.x+=dx*Math.min(1,dt*6);e.y+=dy*Math.min(1,dt*6)}}
+    if(k.t>.95){k.h=(k.h||0);const ticks=[.95,1.15,1.35];while(k.h<3&&k.t>=ticks[k.h]){k.h++;for(const e of G.enemies)if(!e.dead&&(e.x-k.x)**2+(e.y-k.y)**2<(95*S.area+e.r)**2)hurt(e,(k.h===3?120:55)*m,'rouge',{kb:k.h===3?30:2});if(!G.bot)sparks(k.x,k.y,10,RA.C.pt,180,.35,2)}}
+    return k.t<1.6}
+  if(k.k==='palm'){if(k.e&&!k.e.dead){k.x=k.e.x;k.y=k.e.y}
+    if(k.t>=.45&&!k.hit){k.hit=1;const R=100*S.area;for(const e of G.enemies)if(!e.dead&&(e.x-k.x)**2+(e.y-k.y)**2<(R+e.r)**2){hurt(e,220*m,'rouge',{kb:0});if(!e.boss&&!G.hell)e.stun=Math.max(e.stun||0,1.6);if(e.boss)e.slow=Math.max(e.slow||0,1.2)}
+      if(!G.bot){G.fx.push({ring:1,x:k.x,y:k.y,r:0,R:R*1.3,life:.4,L:.4,c:'#ff6fae'});sparks(k.x,k.y,22,RA.C.pt,260,.45,3);G.shk=Math.max(G.shk||0,.15)}}
+    return k.t<1.4}
+  if(k.k==='sweep'){const u=Math.min(1,Math.max(0,(k.t-.25)/.55)),x=p.x+k.dir*(-VW/2+u*VW);k.hx=x;
+    if(u>0&&u<1)for(const e of G.enemies){if(e.dead||k.hit.has(e))continue;if(Math.abs(e.y-p.y)>VH/2+20)continue;if(k.dir>0?e.x<x:e.x>x){k.hit.add(e);hurt(e,90*m,'rouge',{kb:0});if(!e.boss){e.x+=k.dir*150;}}}
+    return k.t<1.1}
+  if(k.k==='heart'){if(k.t>=.55+.35&&!k.hit){k.hit=1;const R=120*S.area;for(const e of G.enemies)if(!e.dead&&(e.x-k.x)**2+(e.y-k.y)**2<(R+e.r)**2)hurt(e,260*m,'rouge',{kb:30});if(!G.bot){G.fx.push({ring:1,x:k.x,y:k.y,r:0,R:R*1.2,life:.5,L:.5,c:'#ff2a6d'});sparks(k.x,k.y,30,RA.C.pt,320,.55,3);G.shk=Math.max(G.shk||0,.2)}}
+    return k.t<1.3}
+  if(k.k==='lips'){if(k.t>=.5&&!k.hit){k.hit=1;const R=100*S.area;for(const e of G.enemies)if(!e.dead&&(e.x-k.x)**2+(e.y-k.y)**2<(R+e.r)**2)hurt(e,180*m,'rouge',{kb:24});if(!G.bot){sparks(k.x,k.y,24,RA.C.pt,260,.45,3);G.texts.length<70&&G.texts.push({x:k.x,y:k.y-30,v:'쪽!',life:.7,col:'#ffd0e4'})}}
+    return k.t<.9}
+  if(k.k==='flower'){if(k.t>.6){k.a+=dt*5;k.tk=(k.tk||0)-dt;if(k.tk<=0){k.tk=.2;const R=85*S.area;for(const e of G.enemies){if(e.dead)continue;const dx=e.x-k.x,dy=e.y-k.y;if(dx*dx+dy*dy<(R+e.r)**2){hurt(e,26*m,'rouge',{kb:0});if(!e.boss){e.x-=dx*.06;e.y-=dy*.06}}}}}
+    return k.t<4.8}
+  if(k.k==='stop'){if(k.t>=1.45&&!k.hit){k.hit=1;const e=k.e;if(e&&!e.dead){e.raF=RA.STOP;e.raS=RA.STOP;e.raFx=undefined;if(!G.bot){sparks(e.x,e.y,26,RA.N.red.pt,240,.5,3);G.fx.push({ring:1,x:e.x,y:e.y,r:0,R:e.r+40,life:.4,L:.4,c:'#ff1e3c'})}}}
+    return k.t<1.6}
+  if(k.k==='rocket'){if(k.t>.5&&k.t<1.05){const u=Math.min(1,(k.t-.5)/.55),e=u*u;for(const s of k.ss){s.ox=(k.tx-k.x)*e;s.oy=(k.ty-k.y)*e}if(!G.bot&&Math.random()<.9)px(k.x+(k.tx-k.x)*e+rnd(-4,4),k.y+(k.ty-k.y)*e+20,rnd(-30,30),rnd(20,80),.45,pick(['#ffffff',...RA.N.orange.pt]),3,1,2)}
+    if(k.t>=1.05&&!k.hit){k.hit=1;for(const s of k.ss)s.kill=s.t;const R=105*S.area;for(const e of G.enemies)if(!e.dead&&(e.x-k.tx)**2+(e.y-k.ty)**2<(R+e.r)**2)hurt(e,210*m,'rouge',{kb:30});if(!G.bot){G.fx.push({ring:1,x:k.tx,y:k.ty,r:0,R:R*1.2,life:.45,L:.45,c:'#d39bff'});sparks(k.tx,k.ty,28,[...RA.N.purple.pt,...RA.N.orange.pt],300,.5,3);G.shk=Math.max(G.shk||0,.15)}}
+    return k.t<1.5}
+  if(k.k==='planet'){if(k.t>.7){k.a+=dt*3;k.tk=(k.tk||0)-dt;if(k.tk<=0){k.tk=.2;const R=95*S.area;for(const e of G.enemies){if(e.dead)continue;const d2=(e.x-k.x)**2+(e.y-k.y)**2;if(d2<(R+e.r)**2&&d2>(R*.35)**2)hurt(e,30*m,'rouge',{kb:0})}}
+      if(!G.bot&&Math.random()<.7){const a=k.a*2+Math.random()*.4,x=Math.cos(a)*68*S.area,y=Math.sin(a)*.28*68*S.area;px(k.x+x*Math.cos(-.35)-y*Math.sin(-.35),k.y+x*Math.sin(-.35)+y*Math.cos(-.35),rnd(-15,15),rnd(-15,15),.4,pick(RA.N.cyan.pt),2,1,2)}}
+    return k.t<3.6}
+  if(k.k==='ufo'){if(k.t>.55&&k.t<2.4){k.tk=(k.tk||0)-dt;const R=70*S.area;if(k.tk<=0){k.tk=.25;for(const e of G.enemies){if(e.dead)continue;if(Math.abs(e.x-k.x)<R+e.r&&e.y>k.y-120&&e.y<k.y+R){hurt(e,34*m,'rouge',{kb:0});if(!e.boss){e.stun=Math.max(e.stun||0,.3);e.y-=8}}}}}
+    if(k.t>=2.4&&!k.hit){k.hit=1;for(const e of G.enemies)if(!e.dead&&Math.abs(e.x-k.x)<75*S.area+e.r&&Math.abs(e.y-k.y)<80)hurt(e,120*m,'rouge',{kb:20});if(!G.bot)sparks(k.x,k.y,18,RA.N.green.pt,200,.4,3)}
+    return k.t<2.8}
+  if(k.k==='bfly'){if(k.t>.6&&k.t<3.4){const u=(k.t-.6)/2.8,dx=k.tx-k.x,dy=k.ty-k.y,L=Math.hypot(dx,dy)||1,nx=-dy/L,ny=dx/L,w=Math.sin(u*12)*50,bx=dx*Math.min(1,u*1.6)+nx*w,by=dy*Math.min(1,u*1.6)+ny*w-Math.abs(Math.sin(u*20))*8;k.s.ox=bx;k.s.oy=by;const X=k.x+bx,Y=k.y+by;
+      for(const e of G.enemies){if(e.dead||k.hit.has(e))continue;if((e.x-X)**2+(e.y-Y)**2<(40*S.area+e.r)**2){k.hit.add(e);hurt(e,70*m,'rouge',{kb:8})}}
+      if(!G.bot&&Math.random()<.8)px(X+rnd(-10,10),Y+rnd(-10,10),rnd(-20,20),rnd(-10,30),.6,pick((k.s.col||RA.C).pt),2,1,2)}
+    return k.t<3.6}
+  if(k.k==='weak'){if(k.t>=.9&&!k.hit){k.hit=1;let n=0;for(const e of G.enemies)if(!e.dead&&Math.abs(e.x-p.x)<VW/2+30&&Math.abs(e.y-p.y)<VH/2+30){e.raV=RA.VD;n++}if(!G.bot)sparks(k.x,k.y,20,RA.C.pt,220,.5,3)}
+    return k.t<1.2}
+  return false}
+// ---- 피날레 「서명」 ----
+// 피날레 그림 부품: [점(화면 높이 절반 = 1, 가로는 ±ar), 색, 굵기]
+function raArt(v,ar){const A=[],L=(pts,col,w)=>A.push([pts,col,w||4]),line=(a,b,n)=>{const r=[];n=n||8;for(let i=0;i<=n;i++)r.push([a[0]+(b[0]-a[0])*i/n,a[1]+(b[1]-a[1])*i/n]);return r},arc=(cx,cy,rx,ry,a0,a1,n)=>{const r=[];n=n||24;for(let i=0;i<=n;i++){const t=a0+(a1-a0)*i/n;r.push([cx+Math.cos(t)*rx,cy+Math.sin(t)*ry])}return r},rect=(x0,y0,x1,y1)=>[...line([x0,y1],[x0,y0],6),...line([x0,y0],[x1,y0],6),...line([x1,y0],[x1,y1],6)],
+    cr=(P,n)=>{n=n||8;const r=[];for(let i=0;i<P.length-1;i++){const p0=P[Math.max(0,i-1)],p1=P[i],p2=P[i+1],p3=P[Math.min(P.length-1,i+2)];for(let k=0;k<n;k++){const t=k/n,t2=t*t,t3=t2*t;r.push([0,1].map(j=>.5*(2*p1[j]+(-p0[j]+p2[j])*t+(2*p0[j]-5*p1[j]+4*p2[j]-p3[j])*t2+(-p0[j]+3*p1[j]-3*p2[j]+p3[j])*t3)))}}r.push(P[P.length-1]);return r},
+    star=(x,y,s)=>{const r=[];for(let i=0;i<=5;i++){const t=-1.57+i*2.513;r.push([x+Math.cos(t)*s,y+Math.sin(t)*s])}return r},X=f=>f*ar*.96,R=Math.random;
+  if(v===1){// 도시의 야경: 현수교 · 빌딩 숲 · 대관람차 · 달 · 강
+    const WY=.3;
+    // 하늘: 달과 별
+    const mx=X(.12),my=-.7;L([...arc(mx,my,.13,.13,-2.1,2.1,26),...arc(mx+.06,my,.1,.1,1.9,-1.9,22)],'yellow',5);
+    L(line([X(-.9),-.9],[X(-.62),-.74],8),'cyan',2.5);L(star(X(-.62),-.74,.025),'cyan',2.5);for(let i=0;i<30;i++){const x=X(-.95+R()*1.9),y=-.95+R()*.45;if(Math.abs(x-mx)<.25&&y<-.5)continue;L(star(x,y,.012+R()*.016),pick(['yellow','cyan','pink']),2)}
+    // 뒤쪽 빌딩(보라) — 다리 뒤부터 관람차 뒤까지 빽빽하게
+    const BK=[];for(let x=-.5;x<.98;){const w=.06+R()*.07,h=-.15-R()*.45;BK.push([x,h,x+w]);x+=w*(.75+R()*.2)}
+    BK.forEach(([x0,y0,x1])=>{L(rect(X(x0),y0,X(x1),WY),'purple',3);if(R()<.3)L(line([X((x0+x1)/2),y0],[X((x0+x1)/2),y0-.08],3),'purple',2)});
+    // 현수교 (왼쪽)
+    const t1=X(-.84),t2=X(-.5),top=-.46,dk=.14;
+    for(const tx of [t1,t2]){L(line([tx-.025,WY],[tx-.02,top],8),'cyan',5);L(line([tx+.025,WY],[tx+.02,top],8),'cyan',5);L(line([tx-.025,top+.06],[tx+.025,top+.06],2),'cyan',4);L(line([tx-.025,-.12],[tx+.025,-.12],2),'cyan',4)}
+    L(line([X(-1),dk],[X(-.2),dk+.03],24),'yellow',4);
+    const sag=(x0,y0,x1,y1,lo,n)=>{const r=[];for(let i=0;i<=n;i++){const u=i/n,x=x0+(x1-x0)*u;r.push([x,y0+(y1-y0)*u+(lo-(y0+(y1-y0)*.5))*4*u*(1-u)])}return r};
+    const main=sag(t1,top,t2,top,dk-.03,30);L(main,'pink',4);L(sag(X(-1),dk-.12,t1,top,(dk-.12+top)/2+.05,14),'pink',4);L(sag(t2,top,X(-.2),dk+.03,(top+dk)/2+.06,16),'pink',4);
+    for(let i=2;i<main.length-2;i+=2){const [x,y]=main[i];L(line([x,y],[x,dk],2),'cyan',1.6)}
+    for(let i=0;i<10;i++){const x=X(-.98+i*.085);L(line([x,dk+.03],[x+.01,dk+.03],1),pick(['yellow','orange']),3)}
+    // 앞쪽 빌딩 (분홍·하늘) — 가운데 빌딩 숲
+    const FR=[];for(let x=-.28;x<.5;){const w=.05+R()*.08,h=-.02-R()*.5;FR.push([x,h,x+w]);x+=w*(.95+R()*.25)}
+    FR.forEach(([x0,y0,x1],i)=>{const c=['pink','cyan','pink','yellow'][i%4];L(rect(X(x0),y0,X(x1),WY),c,4);if(R()<.35){L(line([X((x0+x1)/2),y0],[X((x0+x1)/2),y0-.12],3),c,2.5);L(star(X((x0+x1)/2),y0-.13,.012),'orange',2)}});
+    // 창문 불빛
+    let nw=0;for(const [x0,y0,x1] of [...FR,...BK.filter(b=>b[0]>.5)]){for(let y=y0+.06;y<WY-.04;y+=.075)for(let x=x0+.02;x<x1-.025;x+=.035)if(R()<.45&&nw<170){nw++;L(line([X(x),y],[X(x)+.018,y],1),pick(['yellow','yellow','orange','cyan']),3.2)}}
+    // 대관람차 (오른쪽) — 뒤로 건물
+    const wr=Math.min(.36,ar*.4),wx=Math.min(X(.8),X(1)-wr-.03),wy=WY-.12-wr;
+    L(line([wx,wy],[wx-.2,WY],6),'purple',4);L(line([wx,wy],[wx+.2,WY],6),'purple',4);
+    L(arc(wx,wy,wr,wr,0,6.283,48),'pink',5);L(arc(wx,wy,wr*.9,wr*.9,0,6.283,44),'magenta',2.5);L(arc(wx,wy,.04,.04,0,6.283,12),'yellow',3);
+    for(let i=0;i<12;i++){const a=i/12*6.283;L(line([wx,wy],[wx+Math.cos(a)*wr*.9,wy+Math.sin(a)*wr*.9],3),'cyan',1.8);const gx=wx+Math.cos(a)*wr,gy=wy+Math.sin(a)*wr;L(arc(gx,gy+.04,.028,.026,0,6.283,10),pick(['yellow','cyan','orange','green']),3)}
+    // 강: 물가 · 반사 · 물결
+    L(line([X(-1),WY],[X(1),WY],40),'cyan',3);
+    L(arc(mx,.62,.05,.012,0,6.283,10),'yellow',2.5);for(let j=0;j<3;j++)L(line([mx-.06+j*.02,.68+j*.05],[mx+.04-j*.02,.68+j*.05],2),'yellow',2);
+    for(const tx of [t1,t2])for(let j=0;j<4;j++){const y=WY+.06+j*.1;L(line([tx-.02+(j%2)*.01,y],[tx-.02+(j%2)*.01,y+.06],2),'cyan',2.5)}
+    for(const [x0,y0,x1] of FR){const c=pick(['pink','cyan','yellow','purple']),hh=Math.min(.6,(WY-y0)*.7);for(let y=WY+.05;y<WY+hh;y+=.08){const xa=X(x0)+R()*.02;L(line([xa,y],[xa+(X(x1)-X(x0))*(.4+R()*.5),y],2),c,2.2)}}
+    for(let i=4;i<main.length-4;i+=4){const seg=main.slice(i,i+3).map(([x,y])=>[x,WY+(WY-y)*.55]);if(seg[0][1]<.98)L(seg,'pink',2.5)}
+    for(let i=0;i<5;i++){const y=WY+.1+i*.11;L(line([X(-1)+i*.03,y],[X(-.25)-i*.05,y],6),pick(['yellow','cyan']),1.6)}
+    for(const [bx,by,c] of [[X(-.62),.62,'orange'],[X(.32),.84,'green']]){L([[bx-.09,by],[bx-.06,by+.04],[bx+.06,by+.04],[bx+.09,by],[bx-.09,by]],c,3);L(line([bx-.02,by],[bx-.02,by-.06],2),c,2.5);L(arc(bx+.02,by-.035,.03,.025,-1.57,1.57,6),c,2.5)}
+    for(let i=0;i<24;i++){const a=i/24*6.283,rx=wr,ry=wr*.45,x=wx+Math.cos(a)*rx,y=WY+.05+wr*.45+Math.sin(a)*ry;if(y>.98||i%2)continue;L(line([x,y],[x+.05,y],1),pick(['pink','magenta']),2.6)}
+    for(let i=0;i<16;i++){const y=WY+.08+i*.04,x=X(-.95+R()*1.8);L(arc(x,y,.06+R()*.08,.012,Math.PI,6.283,8),pick(['cyan','purple','pink']),2)}
+    return A}
+  if(v===2){// 팝아트 디바: 우리만의 네온 여인 — 오른쪽에, 선글라스 · 막대사탕 · 긴 머리
+    const PT=ar<.8,k=PT?Math.min(.8,ar*.96/1.2):Math.min(.8,ar*.96/1.55),cx=X(1)-(PT?.7:.78)*k,cy=PT?.95-1.2*k:-.02,T=P=>P.map(([x,y])=>[cx+x*k,cy+y*k]),C=(P,c,w,n)=>L(T(cr(P,n)),c,w),Lr=(P,c,w)=>L(T(P),c,w);
+    // 머리카락 (자홍)
+    C([[-.12,-.6],[-.1,-.82],[.02,-.96],[.2,-1.0],[.4,-.93],[.54,-.77],[.62,-.52],[.65,-.2],[.63,.15],[.6,.48],[.64,.8],[.74,1.04],[.66,1.2]],'magenta',5.5,7);
+    C([[-.12,-.6],[.04,-.72],[.2,-.68],[.31,-.52],[.37,-.22],[.39,.12],[.37,.48],[.44,.82],[.4,1.0]],'magenta',4.5,7);
+    C([[.5,-.62],[.54,-.22],[.52,.28],[.55,.72],[.62,1.0]],'magenta',3,6);
+    // 얼굴 옆선 · 귀 · 목 · 어깨 (분홍)
+    C([[-.12,-.6],[-.16,-.44],[-.19,-.28],[-.23,-.16],[-.29,-.04],[-.36,.05],[-.31,.1],[-.29,.14]],'pink',4.5,6);
+    C([[-.3,.27],[-.29,.37],[-.22,.47],[-.1,.52],[.05,.5],[.2,.36]],'pink',4.5,6);
+    L(T(arc(.21,.04,.05,.08,-1.4,1.9,12)),'pink',3.5);
+    C([[-.07,.5],[-.06,.7],[-.05,.86]],'pink',4,5);C([[.17,.4],[.19,.62],[.22,.8]],'pink',4,5);
+    C([[-.05,.86],[-.22,.96],[-.4,1.06]],'pink',4,5);C([[.22,.8],[.4,.9],[.56,.98]],'pink',4,5);
+    // 보잉 선글라스 (하늘)
+    C([[-.29,-.25],[-.18,-.27],[-.05,-.27],[.08,-.27],[.18,-.25]],'cyan',4,6);
+    L(T([...arc(.04,-.17,.13,.1,Math.PI,6.283,14),...cr([[.17,-.17],[.13,-.06],[.04,-.02],[-.05,-.07],[-.09,-.17]],5)]),'cyan',4.5);
+    L(T([...arc(-.25,-.17,.06,.09,Math.PI,6.283,10),...cr([[-.19,-.17],[-.2,-.08],[-.25,-.05],[-.3,-.1],[-.31,-.17]],4)]),'cyan',4.5);
+    Lr(line([-.19,-.2],[-.09,-.21],3),'cyan',3.5);C([[.17,-.2],[.25,-.14],[.2,-.02]],'cyan',3.5,5);
+    // 빨간 입술 + 막대사탕
+    Lr(RAS.lips(28).map(([x,y])=>[-.305+x*.055,.2+y*.06]),'red',5);
+    const lx=-.47,ly=.17;L(T(arc(lx,ly,.085,.085,0,6.283,28)),'red',5);{const sp=[];for(let i=0;i<=40;i++){const t=i/40*10,r=.075*i/40;sp.push([lx+Math.cos(t)*r,ly+Math.sin(t)*r])}L(T(sp),'red',2.5)}
+    Lr(line([-.43,.25],[-.6,.58],8),'yellow',3.5);
+    // 막대를 쥔 손 (보라) — 손가락이 막대를 감싸 쥔 주먹
+    C([[-.66,.5],[-.7,.56],[-.7,.64],[-.66,.7],[-.58,.72],[-.52,.68],[-.51,.6],[-.54,.52]],'purple',3.5,6);
+    for(const fy of [.56,.62,.68])Lr(cr([[-.69,fy],[-.62,fy-.012],[-.55,fy]],5),'purple',2.5);
+    C([[-.62,.5],[-.57,.46],[-.52,.48],[-.53,.53]],'purple',3,5);
+    C([[-.67,.69],[-.7,.86],[-.72,1.05]],'purple',3.5,5);C([[-.55,.71],[-.53,.88],[-.52,1.05]],'purple',3.5,5);
+    // 반짝이
+    for(const [x,y] of [[.9,-.75],[-.62,-.1],[.78,.3]])Lr([[x-.05,y],[x+.05,y]],'yellow',3),Lr([[x,y-.05],[x,y+.05]],'yellow',3);
+    return {A,k,cx,PT,left:X(1)-1.62*k}}
+  return null}
+function raFinale(st){const p=G.p,S=G.S,sc=Math.min(VW,VH);for(const s of st.dr)if(s.fin&&s.kill===undefined)s.kill=s.t;for(const q of st.tx)if(q.fin&&q.kill===undefined)q.kill=q.t;st.fv=((st.fv===undefined?-1:st.fv)+1)%3;const v=st.fv;const F={t:0,v,x0:p.x-VW/2,y0:p.y-VH/2,W:VW,H:VH,mi:[],k:0,in:Math.round(sc*.05)};st.F=F;const T=3.2;
+  // 전체 화면 5초 홀딩 — 보스까지
+  for(const e of G.enemies)if(!e.dead&&e.x>F.x0-30&&e.x<F.x0+F.W+30&&e.y>F.y0-30&&e.y<F.y0+F.H+30){e.raF=RA.FHOLD;e.raFx=undefined}
+  if(v===0){const C=VW>VH?14:9,Rw=VW>VH?8:13,cells=[];for(let i=0;i<C;i++)for(let j=0;j<Rw;j++)cells.push([i,j]);for(let i=cells.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[cells[i],cells[j]]=[cells[j],cells[i]]}
+    const big=[];for(let i=0;i<8;i++)big.push([rnd(.12,.88),rnd(.15,.85)]);
+    const N=cells.length+big.length,iw=VW-F.in*2,ih=VH-F.in*2;
+    [...big.map(b=>[b,1]),...cells.map(c=>[c,0])].forEach(([c,B],q)=>{const u=q/N,sh=pick(['heart','lips','flower','star','heart','flower','bfly','circle','rocket','ufo']),x=B?F.x0+F.in+iw*c[0]:F.x0+F.in+iw*(c[0]+.5+rnd(-.35,.35))/C,y=B?F.y0+F.in+ih*c[1]:F.y0+F.in+ih*(c[1]+.5+rnd(-.35,.35))/Rw,sz=sc*(B?rnd(.1,.14):rnd(.03,.055)),dur=(B?.6:.5)-.36*u;
+      const pts=sh==='star'?RAS.star():sh==='rocket'?RAS.rocket():RAS[sh](sh==='flower'?50:sh==='bfly'?120:sh==='ufo'?14:34);
+      F.mi.push({at:T*Math.pow(u,.62),x,y,sz,mk:()=>raStroke(pts,x,y,sh==='bfly'?sz*.8:sz,dur,{hold:99,w:B?4.2:3,fin:1,mini:1,col:pick(['pink','pink','cyan','yellow','purple','magenta','green']),noTail:sh==='bfly'||sh==='rocket'||sh==='star'})})});return}
+  const ar=VW/VH*.92,res=raArt(v,ar),art=v===2?res.A:res,N=art.length,cx=F.x0+VW/2,cy=F.y0+VH/2,hs=VH/2*.9;
+  art.forEach(([pts,col,w],q)=>{const u=q/N,dur=Math.max(.1,.5-.4*u);F.mi.push({at:T*Math.pow(u,.62),x:cx,y:cy,sz:0,mk:()=>Object.assign(raStroke(pts,cx,cy,hs,dur,{hold:99,w:w*.9,fin:1,mini:1,col,slant:.04,jit:.003,noTail:1}),{art:1})})});
+  if(v===2){// 왼쪽: Queen / never / Cry
+    const lw=res.PT?VW*.62:(res.left+ar*.96)*hs,lx=res.PT?F.x0+F.in+VW*.33:F.x0+VW/2+(-ar*.96+res.left)/2*hs,fz=Math.round(Math.min(lw/3.1,VH*.19)),YY=res.PT?[-.8,-.6,-.38]:[-.42,-.02,.4];
+    [['Queen','pink',YY[0],1],['never','cyan',YY[1],.9],['Cry','magenta',YY[2],1.18]].forEach(([s,c,y,z],i)=>F.tx=(F.tx||[]).concat([{at:.5+i*.85,mk:()=>{const h=Math.min(fz*z*1.15,lw*.92/RAG[s].w);raWrite(st,s,lx,cy+y*hs,h,.6,{hold:99,col:c,fin:1,w:Math.max(3,h*.045)})}}]))}}
+function raFinTick(st,dt,m){const F=st.F,p=G.p,S=G.S;F.t+=dt;
+  while(F.k<F.mi.length&&F.t>=F.mi[F.k].at){const q=F.mi[F.k++],sd=q.mk();st.dr.push(sd);
+    if(q.sz)for(const e of G.enemies)if(!e.dead&&(e.x-q.x)**2+(e.y-q.y)**2<(q.sz*1.2+e.r)**2)hurt(e,10*m,'rouge',{kb:0})}
+  if(F.tx)for(const q of F.tx)if(!q.d&&F.t>=q.at){q.d=1;q.mk()}
+  if(F.v&&F.t>=1.6&&!F.mid){F.mid=1;for(const e of G.enemies)if(!e.dead&&e.x>F.x0&&e.x<F.x0+F.W&&e.y>F.y0&&e.y<F.y0+F.H)hurt(e,40*m,'rouge',{kb:0})}
+  // 액자: 테두리를 그리면서 바깥을 하얗게 칠해요
+  if(F.t>=3.25&&!F.fr){F.fr=1;F.ft=F.t;const i=F.in,x0=F.x0+i,y0=F.y0+i,x1=F.x0+F.W-i,y1=F.y0+F.H-i,L=[];const seg=(a,b,nn)=>{for(let k=0;k<=nn;k++)L.push([a[0]+(b[0]-a[0])*k/nn,a[1]+(b[1]-a[1])*k/nn])};
+    seg([x0,y0],[x1,y0],60);seg([x1,y0],[x1,y1],40);seg([x1,y1],[x0,y1],60);seg([x0,y1],[x0,y0],40);
+    st.dr.push({pts:L,cx:p.x,cy:p.y,t:0,dur:.75,hold:99,w:4,fin:1,so:1,col:RA.N.pink});
+    for(const [cx,cy,sx,sy] of [[x0,y0,1,1],[x1,y0,-1,1],[x1,y1,-1,-1],[x0,y1,1,-1]]){const c=[];for(let k=0;k<=24;k++){const a=k/24*6.283;c.push([cx-sx*(i*.5)+sx*(i*.32)*Math.cos(a),cy-sy*(i*.5)+sy*(i*.32)*Math.sin(a)])}st.dr.push({pts:c,cx,cy,t:-.7,dur:.3,hold:99,w:3,fin:1,so:1,col:RA.N.pink})}}
+  // 서명: 아주 진한 빨강
+  if(F.t>=4.05&&!F.sg){F.sg=1;const sc=Math.min(VW,VH)*.1;st.dr.push(raStroke(RAS.sign(70),F.x0+F.W-F.in-14-sc*1.15,F.y0+F.H-F.in-14-sc*.5,sc,.7,{hold:99,w:4.5,fin:1,slant:.35,col:'sig',so:1}))}
+  if(F.t>=4.85&&!F.hit){F.hit=1;F.kt=F.t;for(const e of G.enemies){if(e.dead||e.x<F.x0-30||e.x>F.x0+F.W+30||e.y<F.y0-30||e.y>F.y0+F.H+30)continue;hurt(e,(e.boss?150:320)*m,'rouge',{kb:40})}
+    for(const q of st.tx)if(q.fin)q.kill=q.t;
+    for(const s of st.dr)if(s.fin){s.kill=s.t;if(!G.bot){const k2=pn(s.mini?8:24);for(let k=0;k<k2;k++){const q=s.pts[Math.random()*s.pts.length|0],a=Math.atan2(q[1]-p.y,q[0]-p.x)+rnd(-.8,.8),v=rnd(120,420);px(q[0],q[1],Math.cos(a)*v,Math.sin(a)*v,rnd(.6,1.3),pick(Math.random()<.3?['#ffffff']:RA.C.pt),pick([2,3,4]),1,1.4)}}}
+    if(!G.bot){for(let k=0;k<pn(60);k++){const sd=Math.random()*4|0,x=sd<2?F.x0+Math.random()*F.W:(sd===2?F.x0+F.in*.5:F.x0+F.W-F.in*.5),y=sd>=2?F.y0+Math.random()*F.H:(sd===0?F.y0+F.in*.5:F.y0+F.H-F.in*.5);px(x,y,rnd(-200,200),rnd(-200,200),rnd(.5,1),'#ffffff',pick([3,4,5]),1,1.2)}
+      G.wflash=Math.max(G.wflash||0,.45);G.shk=Math.max(G.shk||0,.4);sparks(p.x,p.y,40,['#ffffff',...RA.C.pt],420,.6,3)}}
+  if(F.t>5.6)st.F=null}
+// 취약: 「약하구나?」에 걸린 적은 받는 피해 +15%
+{const _h=hurt;hurt=function(e,amt,key,opts){if(e&&e.raV>0)amt*=1+RA.VUL;return _h(e,amt,key,opts)}}
+// ---- 그리기 ----
+function raLine(s,ox,oy,hold,so){const pts=s.pts,t=s.t,dur=s.dur,w=s.w,n=pts.length-1,C=s.col||RA.C;if(n<1)return;ctx.lineCap='round';ctx.lineJoin='round';const CH=3;
+  for(let pass=0;pass<4;pass++){const mul=so?(pass===0?.12:pass===1?1:pass===2?.5:.55):pass===0?.26:pass===1?.95:pass===2?.55:.9;ctx.strokeStyle=pass===0?C.glow:pass===1?C.line:pass===2?C.glow:C.core;const off=pass===2?1.6:0;
+    for(let i0=0;i0<n;i0+=CH){const born=i0/n*dur;if(t<born)break;const al=raAl(t,born,dur,hold,s.kill);if(al<=0)continue;const u=i0/n,pr=.45+.75*Math.sin(Math.PI*Math.min(1,Math.max(0,u*1.05)));
+      ctx.lineWidth=(pass===0?w*4:pass===1?w*1.7:pass===2?w*.7:w*.45)*pr;const i1=Math.min(n,i0+CH,Math.max(i0+1,Math.ceil(t/dur*n)));ctx.globalAlpha=al*mul;ctx.beginPath();ctx.moveTo(pts[i0][0]+ox+off,pts[i0][1]+oy-off*.6);for(let i=i0+1;i<=i1;i++)ctx.lineTo(pts[i][0]+ox+off,pts[i][1]+oy-off*.6);ctx.stroke()}}
+  ctx.globalAlpha=1}
+function raDraw(w){const st=w.st,p=G.p;if(!st.dr)return;
+  // 피날레 캔버스: 밤처럼 어둡게 깔아 네온이 살아나게
+  if(st.F){const F=st.F,a=Math.min(1,F.t/.4)*(F.kt?Math.max(0,1-(F.t-F.kt)/.3):1);if(a>0){ctx.save();ctx.globalAlpha=a*.62;ctx.fillStyle='#0a0516';ctx.fillRect(F.x0,F.y0,F.W,F.H);ctx.restore()}}
+  ctx.save();ctx.globalCompositeOperation='lighter';
+  for(const s of st.dr){if(s.t<0)continue;let hold=s.hold;if(s.bar&&st.bar)hold=999;const ox=s.ox||0,oy=s.oy||0;
+    if(s.bar&&st.bar){ctx.save();ctx.globalAlpha=.08+.04*Math.sin(G.t*6);ctx.fillStyle=RA.C.glow;ctx.beginPath();ctx.arc(p.x,p.y,st.bar.R,0,6.283);ctx.fill();ctx.restore()}
+    if(!s.so)raLine(s,ox,oy,hold)}
+  ctx.restore();
+  // 손거울이 지키는 범위: 은빛 물결
+  if(st.mir&&st.mir.t>.4){const M=st.mir,R=150*G.S.area,a=Math.min(1,(M.t-.4)*3)*Math.min(1,(RA.MD-M.t)*2);ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=a*.1;ctx.fillStyle='#7fe9ff';ctx.beginPath();ctx.arc(p.x,p.y,R,0,6.283);ctx.fill();ctx.globalAlpha=a*.7;ctx.strokeStyle='#d8f8ff';ctx.lineWidth=3;ctx.lineCap='round';for(let i=0;i<3;i++){const b=G.t*2.2+i*2.094;ctx.beginPath();ctx.arc(p.x,p.y,R,b,b+.9);ctx.stroke()}ctx.restore()}
+  // 액자: 테두리 바깥을 하얗게
+  const F=st.F;if(F&&F.fr){const u=Math.min(1,(F.t-F.ft)/.75),out=F.kt?Math.max(0,1-(F.t-F.kt)/.3):1,i=F.in;if(u>0&&out>0){ctx.save();ctx.globalAlpha=out;ctx.fillStyle='#fffaf6';ctx.beginPath();const E=60;ctx.rect(F.x0-E,F.y0-E,F.W+E*2,F.H+E*2);
+      const x0=F.x0+i,y0=F.y0+i,x1=F.x0+F.W-i,y1=F.y0+F.H-i,ww=i*u;ctx.rect(x0-i+ww,y0-i+ww,x1-x0+(i-ww)*2,y1-y0+(i-ww)*2);ctx.fill('evenodd');
+      ctx.strokeStyle='rgba(60,0,30,.35)';ctx.lineWidth=5;ctx.globalAlpha=out*u;ctx.strokeRect(x0+3,y0+3,x1-x0-6,y1-y0-6);ctx.restore()}}
+  ctx.save();for(const s of st.dr){if(s.t<0||!s.so)continue;raLine(s,s.ox||0,s.oy||0,s.hold,1)}ctx.restore();
+  // 꽃이 실제로 피어 돌아요
+  for(const k of st.sk){if(k.k==='flower'&&k.t>.6){const R=85*G.S.area,al=Math.min(1,(k.t-.6)*3)*Math.min(1,(4.8-k.t)*2);ctx.save();ctx.translate(k.x,k.y);ctx.rotate(k.a);ctx.globalAlpha=al;ctx.globalCompositeOperation='lighter';
+      for(let i=0;i<5;i++){ctx.rotate(1.2566);const g=ctx.createRadialGradient(R*.45,0,2,R*.45,0,R*.5);g.addColorStop(0,'rgba(255,230,240,.95)');g.addColorStop(.5,'rgba(255,90,160,.55)');g.addColorStop(1,'rgba(255,40,110,0)');ctx.fillStyle=g;ctx.beginPath();ctx.ellipse(R*.45,0,R*.5,R*.22,0,0,6.283);ctx.fill()}
+      ctx.fillStyle='rgba(255,240,200,.9)';ctx.beginPath();ctx.arc(0,0,R*.12,0,6.283);ctx.fill();ctx.restore()}
+    // 손 (봉인 풀린 그 손을 크게)
+    const im=NL_IMG.h3;if(!imOk(im))continue;
+    if(k.k==='grab'||k.k==='palm'){const down=Math.min(1,k.t/.35),up=k.k==='grab'?(k.t>1.3?(k.t-1.3)/.3:0):(k.t>1.0?(k.t-1)/.4:0),sc=(k.k==='grab'?1.25:1.1)*(k.k==='grab'&&k.t>.95?.85:1),hy=k.y-60*(1-down)-80*up-(k.k==='palm'&&k.t<.45?20*(1-k.t/.45):0);
+      ctx.save();ctx.translate(k.x,hy-20);ctx.rotate(k.k==='palm'?Math.PI/2:-Math.PI/2);ctx.globalAlpha=Math.min(1,down*1.5)*(1-up);ctx.shadowColor=RA.C.glow;ctx.shadowBlur=24;ctx.imageSmoothingEnabled=true;ctx.drawImage(im,-im.width*sc/2,-im.height*sc/2,im.width*sc,im.height*sc);ctx.restore()}
+    if(k.k==='sweep'&&k.hx!==undefined){const al=Math.min(1,k.t*4)*Math.min(1,(1.1-k.t)*4);ctx.save();ctx.translate(k.hx,p.y);ctx.rotate(k.dir>0?0:Math.PI);ctx.globalAlpha=al;ctx.shadowColor=RA.C.glow;ctx.shadowBlur=24;const sc=1.3;ctx.drawImage(im,-im.width*sc/2,-im.height*sc/2,im.width*sc,im.height*sc);ctx.globalCompositeOperation='lighter';ctx.globalAlpha=al*.25;ctx.fillStyle=RA.C.glow;ctx.fillRect(-90*(k.dir>0?1:1),-VH/2,90,VH);ctx.restore()}
+    if(k.k==='heart'&&k.t>.55&&k.t<.9){const u=(k.t-.55)/.35,yy=k.y-260*(1-u);ctx.save();ctx.globalCompositeOperation='lighter';const g=ctx.createRadialGradient(k.x,yy,2,k.x,yy,36);g.addColorStop(0,'#fff');g.addColorStop(.4,'#ff7ab8');g.addColorStop(1,'rgba(255,42,109,0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(k.x,yy,36,0,6.283);ctx.fill();ctx.strokeStyle='rgba(255,122,184,.6)';ctx.lineWidth=10;ctx.beginPath();ctx.moveTo(k.x,yy);ctx.lineTo(k.x,yy-90);ctx.stroke();ctx.restore()}}
+  // 글씨: 빛나는 립스틱 글씨, 먼저 쓴 글자부터 스르륵
+  for(const q of st.tx){if(q.t<0)continue;const cs=[...q.str],n=cs.length;ctx.save();ctx.font=`900 ${q.sz}px "Nanum Brush Script","Nanum Pen Script","Noto Serif KR",cursive`;ctx.textBaseline='middle';
+    const W0=ctx.measureText(q.str).width;let x=q.x-W0/2;
+    for(let i=0;i<n;i++){const cw=ctx.measureText(cs[i]).width,born=i/n*q.dur;if(q.t<born)break;const age=q.t-born,al=raAl(q.t,born,q.dur,q.hold,q.kill),pop=Math.min(1,age/.12),TC=q.col||RA.C;
+      if(i===Math.min(n-1,Math.floor(q.t/q.dur*n)))q.hx=x+cw;
+      if(al>0){ctx.globalAlpha=al;ctx.save();ctx.translate(x+cw/2,q.y);ctx.transform(1,0,-.22,1,0,0);ctx.rotate(Math.sin(i*1.7+q.sz)*.06);ctx.scale(.7+.3*pop,.7+.3*pop);
+        ctx.globalCompositeOperation='lighter';ctx.shadowColor=TC.glow;ctx.shadowBlur=34;ctx.lineJoin='round';ctx.lineWidth=Math.max(6,q.sz*.16);ctx.strokeStyle=TC.glow;ctx.globalAlpha=al*.45;ctx.strokeText(cs[i],-cw/2,0);
+        ctx.shadowBlur=16;ctx.globalAlpha=al;ctx.fillStyle=TC.line;ctx.fillText(cs[i],-cw/2,0);ctx.shadowBlur=0;ctx.fillStyle=TC.core;ctx.globalAlpha=al*.35;ctx.fillText(cs[i],-cw/2-1,-1);ctx.restore();
+        if(!G.bot&&al<1&&al>.05)for(let k=0;k<2;k++)if(Math.random()<.6)px(x+cw*Math.random(),q.y+rnd(-q.sz*.35,q.sz*.3),rnd(-35,35),rnd(-90,-25),rnd(.5,1),pick(Math.random()<.25?['#ffffff']:RA.C.pt),pick([2,3]),1,1.3)}
+      x+=cw}
+    ctx.restore()}
+  // 취약 표시: 걸린 적 머리 위 작은 립스틱 하트
+  if(!G.bot){ctx.save();ctx.font='700 12px "Noto Sans KR",sans-serif';ctx.textAlign='center';ctx.fillStyle='#ff6fae';for(const e of G.enemies){if(e.dead||!(e.raV>0)||!onScreen(e))continue;ctx.globalAlpha=Math.min(1,e.raV*2);ctx.fillText('♥',e.x,e.y-e.r-8)}ctx.restore()
+    // 「너 멈추도록해」에 묶인 적: 립스틱 동그라미가 조여요
+    ctx.save();ctx.globalCompositeOperation='lighter';ctx.lineCap='round';for(const e of G.enemies){if(e.dead||!(e.raS>0)||!onScreen(e))continue;const a=Math.min(1,e.raS*2),R=e.r+14+3*Math.sin(G.t*8);ctx.globalAlpha=a*.35;ctx.strokeStyle='#ff6a7a';ctx.lineWidth=12;ctx.beginPath();ctx.arc(e.x,e.y,R,0,6.283);ctx.stroke();ctx.globalAlpha=a;ctx.strokeStyle='#ff1e3c';ctx.lineWidth=4;ctx.beginPath();ctx.arc(e.x,e.y,R,-1.2,-1.2+6.283*Math.min(1,e.raS/RA.STOP)+.01);ctx.stroke()}ctx.restore()}}
+WU.rouge=raTick;
 </script>
 <script>/* ===== 👻 유령 무기 (V113): 멀티에서 친구 무기를 내 화면에 그림만 그려요 (피해·효과 없음) ===== */
 (()=>{if(!window.MP)return;
@@ -8565,7 +8862,7 @@ setInterval(()=>{const lb=document.getElementById('lobby'),tl=document.querySele
 const LBN=[['언니들의 기갈이 하나로 합쳐지는 순간, 제가 마음의 선으로 이어요. 그 때 하모닉스 기갈이 탄생해요.','s'],['하모닉스 개발 완료 {hx}/12.','p',1],['다음 하모닉스 연구 중 ... 크로니클 아츠 관측 중...','c'],['다음 하모닉스 연구 중 ... 기갈 최대치 관측 중...','w'],['어머, {n}. 실이 당겨지길래 누군가 했더니 언니였네요.','s'],['기갈은 강함이 아니라 BPS예요.','p'],['오늘은 어디까지 버텨 볼까요?','w'],['아껴 쓰는 여자가 아름다워요.','c'],['무수리들이 또 몰려와요. 화장 고치고 나가요.','c'],['상향이요? 어머, 못 들은 걸로 할게요.','p'],['통신기에 새 소식이 와 있을지도 몰라요.','w'],['꼭두각시라뇨. 제가 실을 쥔 쪽이에요.','s'],['제 말투가 무룩이랑 닮았다고요? 기분 탓이에요.','w'],['5분만 싸우고 오세요. 통신이 기다려요.','s'],['귀여워 보이는 애들일수록 독해요. 언니처럼요.','w'],['폴라리스의 별빛이 오늘따라 차갑네요.','c']];
 const LBT=['어머!!! 언니, 제정신이에요? 홀로그램도 아파요.','o'];
 const LBH0=['절 자꾸 건드리셔도 숨겨진 대사 같은 건 없어요. 다른 인공지능한테 분석하게 하실 거잖아요?','w'];
-const LBHX={polaris:['플로리스 폴라리스, 지금 우리 머리 위에 있는 푸른 별의 이름이에요.','c'],stellar:['스텔라 디센던트, 언니에게만 하늘에 있는 천체들로부터 전자기파가 도착해요. 제가 음성으로 번역해 드렸어요.','w'],roadster:['레이디 로드스터, 두 분은 잘 계신가요? 그 차 운전 사실 제가 하는 건데 말이죠.','s'],risha:['R.A.V.E. 네 천사의 이름이에요. 라그비엔, 아나벨라, 비비엔, 엘로이즈.','c'],glass:['시공간을 멈추는 고대 요정의 마법. 저도 몰라요. 아이기스 차원 아카이브에도 이름만 남아 있어요.','c'],soulwed:['영혼결혼식. 죽음은 인간에게 무엇인가요? 제게도 죽음이 올까요?','c'],prism:['그레이스 프리즘. 여러분들의 마음의 빛이 모두 모일 때, 분명 우리는 승리할 거예요.','c']};
+const LBHX={rouge:['에클라땅뜨 아르떼, 진정한 빛은 어둠이 있을 때 더욱 아름다워 보이는 법이에요.','c'],polaris:['플로리스 폴라리스, 지금 우리 머리 위에 있는 푸른 별의 이름이에요.','c'],stellar:['스텔라 디센던트, 언니에게만 하늘에 있는 천체들로부터 전자기파가 도착해요. 제가 음성으로 번역해 드렸어요.','w'],roadster:['레이디 로드스터, 두 분은 잘 계신가요? 그 차 운전 사실 제가 하는 건데 말이죠.','s'],risha:['R.A.V.E. 네 천사의 이름이에요. 라그비엔, 아나벨라, 비비엔, 엘로이즈.','c'],glass:['시공간을 멈추는 고대 요정의 마법. 저도 몰라요. 아이기스 차원 아카이브에도 이름만 남아 있어요.','c'],soulwed:['영혼결혼식. 죽음은 인간에게 무엇인가요? 제게도 죽음이 올까요?','c'],prism:['그레이스 프리즘. 여러분들의 마음의 빛이 모두 모일 때, 분명 우리는 승리할 거예요.','c']};
 const LA={say:null,f:'n',T:0,box:null,taps:[],last:''};
 function lbPick(){const now=performance.now();LA.taps=LA.taps.filter(t=>now-t<2500);LA.taps.push(now);if(LA.taps.length>3){LA.taps=[];return LBT}return lbLine(.1)}
 function lbLine(hp){

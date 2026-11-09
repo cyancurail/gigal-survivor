@@ -9165,7 +9165,7 @@ const D={
  spa:{g:'R',n:'스파',v:[.3,.8,1.5,2,3],d:v=>`게임 시작 2분 동안 초당 체력 회복 +${v}`},
  corset:{g:'R',n:'코르셋',v:[1,3,5,7,10],d:v=>`게임 시작 2분 동안 방어력 +${v}`},
  study:{g:'R',n:'스터디',v:[1,2,4,6,8],d:v=>`게임 시작 2분 동안 경험치 +${v}%`},
- payday:{g:'R',n:'월급날',v:[3,8,13,21,30],d:v=>`15분부터 2분 동안 얻은 골드 +${v}%`},
+ payday:{g:'R',n:'월급날',v:[3,8,13,21,30],d:v=>`보스를 쓰러뜨리면 5분 동안 얻는 골드 +${v}%`},
  magnet:{g:'R',n:'자석',v:[4,10,18,28,40],d:v=>`경험치 흡수 범위 +${v}%`},
  boss:{g:'R',n:'보스 등장',v:[2,5,9,14,20],d:v=>`보스가 나타나면 30초 동안 이동속도 +${v}%`},
  nag:{g:'R',n:'잔소리',v:[.03,.08,.14,.21,.3],d:v=>`맞은 뒤 무적 시간 +${v}초`},
@@ -9203,12 +9203,14 @@ function stat(s){if(!G||G.td)return;const t=G.t||0;
   if(C.study&&t<120)s.growth*=1+C.study/100;
   if(C.night&&t>=600&&t<720)s.growth*=1+C.night/100}
 function phase(){const t=G.t||0;return [t<120,t<180,t>=600&&t<720,!!(G._sn&&t-G._sn.bt<30)].map(b=>b?1:0).join('')}
-function init(){refresh();G._sn={bt:-99,qg:0,ph:null,pay:null,payD:0}}
-function settlePay(){const s=G._sn;if(!s||s.pay==null||s.payD||!C.payday)return;s.payD=1;const g=Math.max(0,Math.floor((runGold()-s.pay)*C.payday/100));if(g>0){G.bonusGold=(G.bonusGold||0)+g;toast('💍 세인트 월급날','골드 +'+g+'G')}}
+function init(){refresh();G._sn={bt:-99,qg:0,ph:null,pay:null,payE:0}}
+/* 월급날(사용자 11-09 23:25): 보스 처치 후 5분 동안 얻은 골드(runGold 차이) +%, 끝날 때 정산. 창 안에서 보스를 또 잡으면 정산 후 새로 5분 */
+function settlePay(){const s=G._sn;if(!s||s.pay==null||!C.payday)return;const g=Math.max(0,Math.floor((runGold()-s.pay)*C.payday/100));s.pay=null;if(g>0){G.bonusGold=(G.bonusGold||0)+g;toast('💍 세인트 월급날','보너스 골드 +'+g+'G')}}
+function startPay(){if(!C.payday||!G._sn)return;settlePay();G._sn.pay=runGold();G._sn.payE=G.t+300;toast('💍 세인트 월급날','5분 동안 골드 +'+C.payday+'%')}
 function tick(){if(!G||!G.p||G.td)return;if(!G._sn)init();const s=G._sn,p=G.p;
   const ph=phase();if(ph!==s.ph){const first=s.ph===null;s.ph=ph;if(!first||Object.keys(C).length)try{recalc()}catch(e){}}
   if(C.qg&&!s.qg&&p.hp>0&&!p.dead&&p.hp<G.S.maxHp*.3){s.qg=1;p.inv=Math.max(p.inv||0,C.qg);toast('💍 세인트 퀸즈가드',C.qg+'초 무적 · 화장 고치고 집중해요',true);if(!G.bot)try{pring(p.x,p.y,60,'#ffe9a8',24,.5)}catch(e){}}
-  if(C.payday){if(G.t>=900&&s.pay==null)s.pay=runGold();if(G.t>=1020)settlePay()}}
+  if(C.payday&&s.pay!=null&&G.t>=s.payE)settlePay()}
 function rev(){if(!C.rev||!G||!G.p)return false;if(Math.random()*100>=C.rev)return false;const p=G.p;p.hp=G.S.maxHp*.6;p.inv=Math.max(p.inv||0,2);
   toast('💍 세인트 리버스','언니, 아직 끝나지 않았어요.',true);if(!G.bot){try{SND.p('ult')}catch(e){}try{pring(p.x,p.y,120,['#ffffff','#ff9ad5'],80,.6);sparks(p.x,p.y,40,['#ffffff','#ffd6f0','#9ff0ff'],260,.8,2)}catch(e){}}G._sn&&(G._sn.revN=(G._sn.revN||0)+1);return true}
 function dmg(e,d){if(C.nail&&G.t<120)d+=C.nail;if(C.arena&&G.arena&&e.boss)d*=1+C.arena/100;return d}
@@ -9220,6 +9222,7 @@ const ultM=()=>C.ult?1/(1-C.ult/100):1;
  const _hp=hitP;hitP=function(dm){if(C.shield&&G&&G.t<120)dm*=1-C.shield/100;return _hp.call(this,dm)};
  const _hl=healP;healP=function(v,k){if(k==='_food'&&C.soup)v*=1+C.soup/100;return _hl.call(this,v,k)};
  const _mk=mkEnemy;mkEnemy=function(){const e=_mk.apply(this,arguments);try{if(e&&G&&!G.td){if(e.boss){if(G._sn&&G.t-G._sn.bt>=30){G._sn.bt=G.t}}else if(C.curse&&G.t<120){e.hp*=1-C.curse/100;e.max=e.hp}}}catch(x){}return e};
+ const _kl=kill;kill=function(e){const b=e&&e.boss&&!e.dead;const r=_kl.apply(this,arguments);try{if(b&&e.dead&&G)startPay()}catch(x){}return r};
  const _eg=endGame;endGame=function(){try{settlePay()}catch(e){}return _eg.apply(this,arguments)};
  const _up=update;update=function(dt){const r=_up.apply(this,arguments);try{if(G&&G.running)tick()}catch(e){}return r};}
 

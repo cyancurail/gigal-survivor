@@ -6197,7 +6197,7 @@ function szDraw(w){const st=w.st,p=G.p;ctx.save();ctx.globalCompositeOperation='
 Object.assign(WP,{rouge:{name:'에클라땅뜨 아르떼',icon:'💋',evo:'wegovy',evoName:'에클라땅뜨 아르떼',hid:1,d:'더 화려하게, 더 아름답게, 더 눈부시게!',ed:'더 화려하게, 더 아름답게, 더 눈부시게!',extra:1}});
 KC.rouge='#ff4f9a';
 HX.push({k:'rouge',a:'lipstick',b:'nail',it:'wegovy',q:'네 안에 화려함을 터트려볼까?',lore:'더 화려하게, 더 아름답게, 더 눈부시게!',col:'#ff4f9a',sub:'💄 립스틱 난도 + 💅 하트 네일 + 💉 위고비'});
-const RA={CD:1.8,HCD:6,M:2.95,VUL:.15,VD:4,VCD:20,STOP:5,SCD:22,FHOLD:5,MCD:15,MD:5,FIN:100,HOLD:.9,FADE:.55,
+const RA={CD:1.8,HCD:6,M:2.95,VUL:.15,VD:4,VCD:20,STOP:5,SCD:22,FHOLD:5,MCD:15,MD:5,FIN:40,HOLD:.9,FADE:.55,
   N:{pink:{line:'#ff2a6d',glow:'#ff6fae',core:'#ffe3f0',pt:['#ff2a6d','#ff7ab8','#ffd0e4','#ffffff']},cyan:{line:'#1ec8ff',glow:'#7fe9ff',core:'#e8fbff',pt:['#1ec8ff','#7fe9ff','#d8f8ff','#ffffff']},yellow:{line:'#ffc61a',glow:'#ffe48a',core:'#fff8dc',pt:['#ffc61a','#ffe48a','#fff3c0','#ffffff']},purple:{line:'#a64dff',glow:'#d39bff',core:'#f3e6ff',pt:['#a64dff','#d39bff','#efdcff','#ffffff']},green:{line:'#22e07a',glow:'#8dffc0',core:'#e6fff1',pt:['#22e07a','#8dffc0','#dcffe9','#ffffff']},orange:{line:'#ff7a1a',glow:'#ffb070',core:'#fff0e0',pt:['#ff7a1a','#ffb070','#ffe0c4','#ffffff']},magenta:{line:'#ff2bd6',glow:'#ff86ec',core:'#ffe6fa',pt:['#ff2bd6','#ff86ec','#ffd6f6','#ffffff']},red:{line:'#ff1e3c',glow:'#ff6a7a',core:'#ffe0e4',pt:['#ff1e3c','#ff6a7a','#ffd0d6','#ffffff']},sig:{line:'#9a0016',glow:'#c8001f',core:'#d81a33',pt:['#9a0016','#c8001f','#e0203a','#ffffff']}},
   C:{line:'#ff2a6d',glow:'#ff6fae',core:'#ffe3f0',pt:['#ff2a6d','#ff7ab8','#ffd0e4','#ffffff','#ffb3d9']}};
 // ---- 모양 (단위 좌표 −1~1) ----
@@ -6426,9 +6426,9 @@ function raFinale(st){const p=G.p,S=G.S,sc=Math.min(VW,VH);for(const s of st.dr)
     [['Queen','pink',YY[0],1],['never','cyan',YY[1],.9],['Cry','magenta',YY[2],1.18]].forEach(([s,c,y,z],i)=>F.tx=(F.tx||[]).concat([{at:.5+i*.85,mk:()=>{const h=Math.min(fz*z*1.15,lw*.92/RAG[s].w);raWrite(st,s,lx,cy+y*hs,h,.6,{hold:99,col:c,fin:1,w:Math.max(3,h*.045)})}}]))}}
 function raFinTick(st,dt,m){const F=st.F,p=G.p,S=G.S;F.t+=dt;
   while(F.k<F.mi.length&&F.t>=F.mi[F.k].at){const q=F.mi[F.k++],sd=q.mk();st.dr.push(sd);
-    if(q.sz)for(const e of G.enemies)if(!e.dead&&(e.x-q.x)**2+(e.y-q.y)**2<(q.sz*1.2+e.r)**2)hurt(e,10*m,'rouge',{kb:0})}
+    if(q.sz)for(const e of G.enemies)if(!e.dead&&(e.x-q.x)**2+(e.y-q.y)**2<(q.sz*1.2+e.r)**2)hurt(e,7*m,'rouge',{kb:0})}
   if(F.tx)for(const q of F.tx)if(!q.d&&F.t>=q.at){q.d=1;q.mk()}
-  if(F.v&&F.t>=1.6&&!F.mid){F.mid=1;for(const e of G.enemies)if(!e.dead&&e.x>F.x0&&e.x<F.x0+F.W&&e.y>F.y0&&e.y<F.y0+F.H)hurt(e,40*m,'rouge',{kb:0})}
+  if(F.v&&F.t>=1.6&&!F.mid){F.mid=1;for(const e of G.enemies)if(!e.dead&&e.x>F.x0&&e.x<F.x0+F.W&&e.y>F.y0&&e.y<F.y0+F.H)hurt(e,28*m,'rouge',{kb:0})}
   // 액자: 테두리를 그리면서 바깥을 하얗게 칠해요
   if(F.t>=3.25&&!F.fr){F.fr=1;F.ft=F.t;const i=F.in,x0=F.x0+i,y0=F.y0+i,x1=F.x0+F.W-i,y1=F.y0+F.H-i,L=[];const seg=(a,b,nn)=>{for(let k=0;k<=nn;k++)L.push([a[0]+(b[0]-a[0])*k/nn,a[1]+(b[1]-a[1])*k/nn])};
     seg([x0,y0],[x1,y0],60);seg([x1,y0],[x1,y1],40);seg([x1,y1],[x0,y1],60);seg([x0,y1],[x0,y0],40);
@@ -6436,7 +6436,7 @@ function raFinTick(st,dt,m){const F=st.F,p=G.p,S=G.S;F.t+=dt;
     for(const [cx,cy,sx,sy] of [[x0,y0,1,1],[x1,y0,-1,1],[x1,y1,-1,-1],[x0,y1,1,-1]]){const c=[];for(let k=0;k<=24;k++){const a=k/24*6.283;c.push([cx-sx*(i*.5)+sx*(i*.32)*Math.cos(a),cy-sy*(i*.5)+sy*(i*.32)*Math.sin(a)])}st.dr.push({pts:c,cx,cy,t:-.7,dur:.3,hold:99,w:3,fin:1,so:1,col:RA.N.pink})}}
   // 서명: 아주 진한 빨강
   if(F.t>=4.05&&!F.sg){F.sg=1;const sc=Math.min(VW,VH)*.1;st.dr.push(raStroke(RAS.sign(70),F.x0+F.W-F.in-14-sc*1.15,F.y0+F.H-F.in-14-sc*.5,sc,.7,{hold:99,w:4.5,fin:1,slant:.35,col:'sig',so:1}))}
-  if(F.t>=4.85&&!F.hit){F.hit=1;F.kt=F.t;for(const e of G.enemies){if(e.dead||e.x<F.x0-30||e.x>F.x0+F.W+30||e.y<F.y0-30||e.y>F.y0+F.H+30)continue;hurt(e,(e.boss?150:320)*m,'rouge',{kb:40})}
+  if(F.t>=4.85&&!F.hit){F.hit=1;F.kt=F.t;for(const e of G.enemies){if(e.dead||e.x<F.x0-30||e.x>F.x0+F.W+30||e.y<F.y0-30||e.y>F.y0+F.H+30)continue;hurt(e,(e.boss?100:220)*m,'rouge',{kb:40})}
     for(const q of st.tx)if(q.fin)q.kill=q.t;
     for(const s of st.dr)if(s.fin){s.kill=s.t;if(!G.bot){const k2=pn(s.mini?8:24);for(let k=0;k<k2;k++){const q=s.pts[Math.random()*s.pts.length|0],a=Math.atan2(q[1]-p.y,q[0]-p.x)+rnd(-.8,.8),v=rnd(120,420);px(q[0],q[1],Math.cos(a)*v,Math.sin(a)*v,rnd(.6,1.3),pick(Math.random()<.3?['#ffffff']:RA.C.pt),pick([2,3,4]),1,1.4)}}}
     if(!G.bot){for(let k=0;k<pn(60);k++){const sd=Math.random()*4|0,x=sd<2?F.x0+Math.random()*F.W:(sd===2?F.x0+F.in*.5:F.x0+F.W-F.in*.5),y=sd>=2?F.y0+Math.random()*F.H:(sd===0?F.y0+F.in*.5:F.y0+F.H-F.in*.5);px(x,y,rnd(-200,200),rnd(-200,200),rnd(.5,1),'#ffffff',pick([3,4,5]),1,1.2)}

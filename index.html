@@ -132,7 +132,7 @@ button:focus-visible{outline:3px solid var(--cyan);outline-offset:2px}
 .twbox{display:flex;flex-direction:column;gap:6px;background:rgba(59,26,110,.35);border:1px solid #6b4aa8;border-radius:12px;padding:10px}.twnote{margin:0;font-size:12px;line-height:1.55;color:#e6d8ff}.twh{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:12.5px;margin-top:4px}.twh span{opacity:.75}
 .twg{display:flex;flex-wrap:wrap;gap:5px}.twc{font-size:12px;padding:5px 8px;border-radius:999px;border:1px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer}.twc.on{background:#6b3fd0;border-color:#c89bff;color:#fff}.twc i{font-style:normal;color:#ffd34d}
 .hellb[aria-pressed="true"]{background:#5a0018!important;color:#fff!important;border-color:#ff3a5a!important}.wardrobe button.tR{border-color:#ffd34d}.wardrobe button.tL{border-color:#ff7ac8}.wardrobe button[aria-pressed="true"]{background:var(--gold);color:#2a1a00}
-#gres{z-index:40}.gcard{width:100%;max-width:360px;border-radius:22px;padding:18px;display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;background:var(--panel);border:3px solid #e8e8f0;animation:pop .4s cubic-bezier(.2,1.4,.4,1)}
+#gres{z-index:40}.gcard.gfocus{max-width:440px;animation:gFoc .5s cubic-bezier(.2,1.5,.4,1)}.gcard.gfocus .gprev canvas{width:220px;height:220px}.gcard.gfocus h3{font-size:22px}@keyframes gFoc{0%{transform:scale(.6);opacity:0}100%{transform:none;opacity:1}}.gcard{width:100%;max-width:360px;border-radius:22px;padding:18px;display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;background:var(--panel);border:3px solid #e8e8f0;animation:pop .4s cubic-bezier(.2,1.4,.4,1)}
 .gcard.tR{border-color:#ffd34d;box-shadow:0 0 40px rgba(255,211,77,.5)}.gcard.tL{border-color:#ff7ac8;box-shadow:0 0 60px rgba(255,122,200,.7);background:linear-gradient(160deg,#3a1450,#211830)}
 .gcard h3{margin:0;font-family:var(--f-dis);font-size:24px}.gcard p{margin:0;font-size:13px;color:var(--sub)}.gtier{font-weight:900;font-size:13px;letter-spacing:.2em}
 .gcard.tM{border-color:#fff3b0;box-shadow:0 0 80px rgba(255,243,176,.9),0 0 30px rgba(255,214,240,.8);background:linear-gradient(160deg,#5a4a20,#3a2a50 60%,#203a5a)}.gcard.tM .gtier{color:#fff3b0}.gprev canvas{max-height:200px}
@@ -4206,7 +4206,7 @@ function doGacha10(){
   if(!gachaOpen()||SAVE.gold<GACHA_COST*10)return;SAVE.gold-=GACHA_COST*10;persist();
   const res=[];for(let i=0;i<10;i++)res.push(rollGacha());
   const best=res.reduce((a,b)=>TORD[b.tier]>TORD[a.tier]?b:a);
-  runScene(best.tier==='M'?gachaSceneM(best.it.owner):gachaScene(best.it.owner,best.tier),()=>showGacha10(res,best),{menu:true});
+  runScene(best.tier==='M'?gachaSceneM(best.it.owner):gachaScene(best.it.owner,best.tier),()=>gachaFocusM(res.filter(r=>r.tier==='M'),()=>showGacha10(res,best)),{menu:true});
 }
 function showGacha10(res,best){
   const ov=$('#gres');ov.hidden=false;SND.p('t'+best.tier);const ref=res.reduce((n,r)=>n+r.refund,0),nw=res.filter(r=>!r.dupe&&r.it.kind!=='cards').length,ncd=res.reduce((n,r)=>n+(r.cards||0),0);
@@ -4216,6 +4216,11 @@ function showGacha10(res,best){
   ov.querySelectorAll('.gmp').forEach((d,i)=>d.appendChild(previewCv(res[i].it,64)));
   $('#gOk').onclick=()=>{ov.hidden=true;openShop()};$('#g10Again').onclick=()=>{ov.hidden=true;doGacha10()};
 }
+/* 11-10: 10연속에 신화가 있으면 신화 결과를 하나씩 크게 먼저 → 마지막에 10연속 결과 */
+function gachaFocusM(list,end){if(!list.length){end();return}const r=list[0];showGachaResult(r);const ov=$('#gres'),c=ov.querySelector('.gcard');c.classList.add('gfocus');
+  const pv=ov.querySelector('.gprev');pv.innerHTML='';pv.appendChild(previewCv(r.it,220));
+  ov.querySelector('.btns').innerHTML=`<button class="big" type="button" id="gNext">${list.length>1?'다음 신화 ▶':'10연속 결과 보기 ▶'}</button>`;const sm=c.querySelector(':scope>small');if(sm)sm.remove();
+  const go=()=>{ov.onclick=null;gachaFocusM(list.slice(1),end)};$('#gNext').onclick=e=>{e.stopPropagation();go()};ov.onclick=e=>{if(e.target===ov)go()}}
 function doGacha(){
   if(!gachaOpen()||SAVE.gold<GACHA_COST)return;SAVE.gold-=GACHA_COST;persist();
   const res=rollGacha();
@@ -9405,12 +9410,12 @@ const ultM=()=>C.ult?1/(1-C.ult/100):1;
 /* ---------- 뽑기 ---------- */
 function gacha(tier){const L=SNK.filter(k=>D[k].g===tier),k=L[Math.floor(Math.random()*L.length)],up=add(k,1);
   return{id:'sn:'+k,kind:'saint',sk:k,tier,n:'💍 '+nm(k),owner:(CHAR[selI]||CHAR[0]).id,up,lv:lv(k)}}
-function gdesc(it){const k=it.sk,L=lv(k);return (it.up?`✨ 같은 반지 3개가 모여 ${it.up}단계로 합성! · `:'')+`${L}단계 · ${D[k].d(D[k].v[L-1])} · ${D[k].g==='M'?'📿 장비 탭에서 걸어요':'💍 장비 탭에서 끼워요'}`}
+function gdesc(it){const k=it.sk,L=lv(k);return (it.up?`✨ 같은 반지 3개가 모여 ${it.up}단계로 합성! · `:'')+(D[k].g==='M'?`${L}단계 · 효과는 ???? · 📿 장비 탭에서 걸어요`:`${L}단계 · ${D[k].d(D[k].v[L-1])} · 💍 장비 탭에서 끼워요`)}
 
 /* ---------- 이미지 ---------- */
 const IM={};function img(p){if(!IM[p]){const i=new Image();i.src=p;IM[p]=i}return IM[p]}
 const rImg=k=>'saint/r_'+k+'.webp',hImg=k=>'saint/h_'+k+'.webp';
-function drawPrev(x,k,size){const im=img(rImg(k));const go=()=>{const s=Math.min(size*.9/im.naturalWidth,size*.9/im.naturalHeight),w=im.naturalWidth*s,h=im.naturalHeight*s;x.imageSmoothingEnabled=true;x.drawImage(im,(size-w)/2,(size-h)/2,w,h)};
+function drawPrev(x,k,size){const im=img(D[k].g==='M'?'saint/g_'+k+'.webp':rImg(k));const go=()=>{const s=Math.min(size*.9/im.naturalWidth,size*.9/im.naturalHeight),w=im.naturalWidth*s,h=im.naturalHeight*s;x.imageSmoothingEnabled=true;x.drawImage(im,(size-w)/2,(size-h)/2,w,h)};
   if(im.complete&&im.naturalWidth)go();else{x.font=Math.round(size*.6)+'px serif';x.textAlign='center';x.textBaseline='middle';x.fillText('💍',size/2,size/2);im.addEventListener('load',()=>{x.clearRect(0,0,size,size);go()},{once:true})}}
 
 /* ---------- 💍 장비 화면 ---------- */
@@ -9440,7 +9445,7 @@ const css=`
 #saint .snSay b{display:block;font-size:11px;color:#5aaee0;letter-spacing:.05em}
 #saint .snSlots{display:flex;gap:6px;padding:10px 12px 0}
 #saint .snTab{position:absolute;right:10px;top:10px;z-index:3;display:flex;gap:4px}#saint .snTab button{border-radius:999px;border:1.5px solid rgba(255,214,234,.6);background:rgba(20,10,30,.6);color:#fff;font:700 12px inherit;font-family:inherit;padding:5px 10px}#saint .snTab button[aria-pressed=true]{background:linear-gradient(#ff7ac8,#c54a9a)}
-#saint .snIn.neck{background-image:url(saint/neck_bg.webp)}#saint .snNk{position:absolute;pointer-events:none;filter:drop-shadow(0 4px 6px rgba(80,40,20,.45))}#saint .snNk.fade{-webkit-mask-image:linear-gradient(transparent,#000 14%);mask-image:linear-gradient(transparent,#000 14%)}#saint .snNk.pop{animation:snNkPop .6s cubic-bezier(.2,1.4,.4,1)}@keyframes snNkPop{0%{opacity:0;transform:translateY(-50px)}100%{opacity:1;transform:none}}
+#saint .snIn.neck{background-image:url(saint/neck_bg.webp)}#saint .snNkBg{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none}#saint .snNkBg.pop{animation:snNkPop .9s ease}@keyframes snNkPop{0%{opacity:0;filter:brightness(1.8)}100%{opacity:1;filter:none}}
 #saint .snSlots button{flex:1;min-width:0;border-radius:12px;border:1.5px solid rgba(255,214,234,.35);background:rgba(255,255,255,.06);color:#fff;padding:6px 4px;font:700 11.5px inherit;font-family:inherit;display:flex;flex-direction:column;align-items:center;gap:2px}
 #saint .snSlots button img{height:30px}#saint .snSlots button small{color:#cbb;font-weight:400;font-size:10.5px}
 #saint .snList{padding:6px 12px calc(20px + env(safe-area-inset-bottom,0px))}
@@ -9479,7 +9484,7 @@ function slotsHTML(){const E=eqKeys();return SLOT.map((o,i)=>{const k=E[i];if(!k
   const w=Math.round(o.w*(D[k].g==='L'?.95:.85));return `<img class="snRing${SEL===i?' pop':''}" src="${hImg(k)}" alt="" style="--r:${o.r}deg;width:${w}px;left:${o.x-w/2}px;top:${o.y-w*.45}px;transform:rotate(${o.r}deg)"><button type="button" class="snHit" data-slot="${i}" aria-label="${i+1}번 반지 칸: ${nm(k)}" style="left:${o.x-o.w/2-12}px;top:${o.y-34}px;width:${o.w+24}px;height:62px"></button>`}).join('')}
 const FING=['약지','중지','검지'];
 function neckHTML(){const k=neckKey();if(!k)return `<div class="snGlow" style="left:600px;top:470px;width:540px;height:60px;border-radius:50%"></div><button type="button" class="snHit" data-neck="1" aria-label="목걸이 칸 (비어 있음)" style="left:560px;top:300px;width:620px;height:420px"></button>`;
-  const [cx,top,w,f]=D[k].ps||[870,300,600,1];return `<img class="snNk${f?' fade':''}${SEL==='n'?' pop':''}" src="saint/k_${k}.webp" alt="" style="left:${cx-w/2}px;top:${top}px;width:${w}px"><button type="button" class="snHit" data-neck="1" aria-label="목걸이: ${esc(nm(k))}" style="left:${cx-w/2}px;top:${top}px;width:${w}px;height:${Math.round(w*1.2)}px"></button>`}
+  return `<img class="snNkBg${SEL==='n'?' pop':''}" src="saint/nk_${k}.webp" alt=""><button type="button" class="snHit" data-neck="1" aria-label="목걸이: ${esc(nm(k))}" style="left:520px;top:280px;width:700px;height:700px"></button>`}
 function render(sayKind,sayTxt){build();const sec=document.getElementById('saint'),E=eqKeys(),own=SNK.filter(k=>lv(k)>0).length,sc=sec.scrollTop;
   const card=k=>{const L=lv(k),a=cnt(k),on=E.includes(k)||(D[k].g==='M'&&neckKey()===k);return `<button type="button" class="snC ${D[k].g}${L?'':' no'}" data-k="${k}">${on?'<span class="on">장착 중</span>':''}<img src="${rImg(k)}" alt="" loading="lazy"><b>${L?esc(D[k].n):'???'}</b>${L?`<span class="st">${'★'.repeat(L)}${'☆'.repeat(5-L)}</span><small>${L<5?`${L}단계 ${a[L-1]}/3`:'최고 단계'}</small>`:'<small>아직 없어요</small>'}</button>`};
   sec.innerHTML=`<div class="snHead"><button class="ghost" type="button" id="snBack">← 로비</button><h2>💍 장비 · 세인트썸띵</h2><small>${own}/${SNK.length}</small></div>
@@ -9503,11 +9508,11 @@ function info(k){close();const d=D[k],L=lv(k),a=cnt(k),E=eqKeys(),M=d.g==='M',on
   const o=document.createElement('div');o.id='snOv';
   o.innerHTML=`<div class="m ${d.g}"><img class="snBig${L?'':' no'}" src="${rImg(k)}" alt=""><h3>${L?esc(nm(k)):'???'}</h3><div class="gr ${d.g}">${GN[d.g]}${L?` · ${'★'.repeat(L)}${'☆'.repeat(5-L)}`:''}</div>
   ${L?`<div class="own">가진 ${M?'목걸이':'반지'}: ${a.map((n,i)=>n?`${i+1}단계 ×${n}`:'').filter(Boolean).join(' · ')}</div>`:'<div class="own">아직 없어요 · 뽑기 '+({L:'전설',R:'희귀',M:'신화'}[d.g])+'에서 나와요</div>'}
-  <table>${d.v.map((v,i)=>`<tr class="${L===i+1?'cur':''}"><td class="n">${i+1}단계</td><td>${esc(d.d(v))}</td></tr>`).join('')}</table>
+  <table>${d.v.map((v,i)=>`<tr class="${L===i+1?'cur':''}"><td class="n">${i+1}단계</td><td>${M?'????':esc(d.d(v))}</td></tr>`).join('')}</table>
   <div class="bs">${!L?'':M?(on?'<button type="button" data-a="noff">📿 풀기</button>':`<button type="button" class="pri" data-a="non">📿 목에 걸기${neckKey()?' ('+esc(D[neckKey()].n)+' 대신)':''}</button>`):on?`<button type="button" data-a="off">💍 빼기 (${FING[E.indexOf(k)]})</button>`:free>=0?`<button type="button" class="pri" data-a="eq" data-i="${free}">💍 ${FING[free]}에 끼우기</button>`:E.map((q,i)=>`<button type="button" data-a="eq" data-i="${i}">${FING[i]}의 ${esc(D[q].n)} 대신 끼우기</button>`).join('')}<button type="button" data-a="x">닫기</button></div></div>`;
   document.body.appendChild(o);o.addEventListener('pointerdown',e=>{if(e.target===o)close()});
   o.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>{try{SND.p('click')}catch(e){}const a=b.dataset.a;close();if(a==='eq')equip(k,+b.dataset.i);else if(a==='off')unequip(k);else if(a==='non'){SAVE.neckEq=k;persist();VIEW='neck';SEL='n';render('eqL','어머, 목선이 반짝여요. 오늘 언니 제일 비싸요. 💅');SEL=null}else if(a==='noff'){SAVE.neckEq=null;persist();VIEW='neck';render('off')}})}
-function open(){build();hideAll();close();const sec=document.getElementById('saint');sec.hidden=false;sec.scrollTop=0;render();img('saint/bg.webp');img('saint/neck_bg.webp')}
+function open(){build();hideAll();close();const sec=document.getElementById('saint');sec.hidden=false;sec.scrollTop=0;render();img('saint/bg.webp');img('saint/neck_bg.webp');{const k=neckKey();if(k)img('saint/nk_'+k+'.webp')}}
 
 window.SN={D,SNK,lv,cnt,add,merge,refresh,eqKeys,neckKey,gachaN,regRoll,regAsk,c:cv,v:cv,mm,rm,dmg,rev,ultM,gacha,gdesc,drawPrev,open,render,tick,init};
 })();

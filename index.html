@@ -836,16 +836,16 @@ function fmSealTick(){const d=G.fmD||0,ws=G.weapons;
 function fmCone(){if(FM.cone)return FM.cone;const N=256,c=document.createElement('canvas');c.width=c.height=N;const g=c.getContext('2d'),D=g.createImageData(N,N),h=N/2,HA=35*Math.PI/180;
   for(let y=0;y<N;y++)for(let x=0;x<N;x++){const dx=x-h,dy=y-h,r=Math.hypot(dx,dy)/h;if(r>1||dx<=0)continue;const an=Math.abs(Math.atan2(dy,dx));if(an>HA)continue;const ea=Math.min(1,(HA-an)/(HA*.35)),er=r<.6?1:Math.max(0,(1-r)/.4);D.data[(y*N+x)*4+3]=Math.round(255*ea*er)}
   g.putImageData(D,0,0);return FM.cone=c}
-/* ===== 11-10 🔪 사냥꾼(죽지 않는 추적자): 장수 어려움·헬. 헬 2분부터 90초·어려움 4분부터 120초마다 45초 사냥.
+/* ===== 11-10 🔪 사냥꾼(죽지 않는 추적자): 장수 어려움·헬. 헬 2분부터 90초·어려움 4분부터 120초마다 50% 확률로 나타나 45초 사냥.
    배회 → 들키면 「!」 0.4초 → 추격(헬 = 캐릭터 이동속도, 어려움 ×0.85). 수풀·건물에 숨기 / 켜진 횃불 빛 / 멀리 벗어나면 놓침.
    잡히면 최대 체력 50% 고정 피해 후 사라짐. 무기에 맞으면 0.3초 휘청. 감지 범위는 붉은 빛(어둠이 짙을수록 넓음). 심장박동 소리. */
 function fmHuntTick(dt){const lv=fmLv(),p=G.p;if(lv<1)return;const H=G.fmHT||(G.fmHT={t:lv===2?120:240,e:null,hb:0});let e=H.e;
   if(e&&(e.dead||!G.enemies.includes(e))){H.e=e=null;H.t=Math.max(H.t,lv===2?90:120)}
-  if(!e){if(G.arena)return;H.t-=dt;if(H.t>0)return;H.t=lv===2?90:120;const [x,y]=spawnPos();e=mkEnemy('fm_hunter',x,y,{fixed:1,hunt:1,fmInv:1e9,xp:0,dmg:0});e.hp=e.max=1e12;e.life=45;e.st='w';e.tx=x;e.ty=y;e.wt=0;e.sR=200;H.e=e;
+  if(!e){if(G.arena)return;H.t-=dt;if(H.t>0)return;H.t=lv===2?90:120;if(Math.random()<.5)return;/* 11-10: 주기마다 50% 확률로 등장 */const [x,y]=spawnPos();e=mkEnemy('fm_hunter',x,y,{fixed:1,hunt:1,fmInv:1e9,xp:0,dmg:0});e.hp=e.max=1e12;e.life=45;e.st='w';e.tx=x;e.ty=y;e.wt=0;e.sR=200;H.e=e;
     if(!G.bot){toast('👁️ 무언가 깨어났어요','들키지 마세요… 수풀에 숨거나 횃불 빛으로!');G.shk=Math.max(G.shk||0,.15)}return}
   e.life-=dt;e.fmInv=1e9;e.hp=e.max;e.kx=e.ky=0;
   if(G.arena||(e.life<=0&&e.st!=='c')||e.life<-15){fmHuntGone(e,0);return}
-  const dx=p.x-e.x,dy=p.y-e.y,d=Math.hypot(dx,dy)||1,dk=G.fmD||0,R=(lv===2?260:220)*(1+.6*dk);e.sR=R;
+  const dx=p.x-e.x,dy=p.y-e.y,d=Math.hypot(dx,dy)||1,dk=G.fmD||0,R=(lv===2?221:187)*(1+.6*dk)/* 11-10: 감지 범위 −15% */;e.sR=R;
   const hid=!!(G.fmH&&G.fmH.on),lit=fmNearTorch(),ps=G.S.speed,can=!hid&&!lit&&d<R;if(e.stg>0)e.stg-=dt;e.ph=(e.ph||0)+dt;
   const mv=(tx,ty,v)=>{if(e.stg>0)v*=.15;const ax=tx-e.x,ay=ty-e.y,l=Math.hypot(ax,ay);if(l>2){const st=Math.min(l,v*dt);e.x+=ax/l*st;e.y+=ay/l*st;e.mvx=ax/l}};
   if(e.st==='w'){if(can){e.st='a';e.at=.4;if(!G.bot){G.texts.push({x:e.x,y:e.y-80,v:'!',life:.9,col:'#ff2a2a'});G.shk=Math.max(G.shk||0,.18)}}

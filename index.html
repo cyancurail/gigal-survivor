@@ -25,7 +25,7 @@
 .holo[data-low]{opacity:.55;filter:saturate(.6)}.holo.lock{font-size:13px;font-weight:700}
 #shop.sh2 .shBody{padding:10px 12px calc(20px + env(safe-area-inset-bottom,0px))}
 #shop.sh2 .shPity{margin:0 0 10px;text-align:center;font-size:12.5px;color:#cfe9ff}#shop.sh2 .shPity b{color:#ffe9a8}
-#shop.sh2 .shRow{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}#shop.sh2 .shRow .holo{flex:1 1 150px;max-width:260px}#shop.sh2 .shRow .holo.wide{flex-basis:100%;max-width:528px}
+#shop.sh2 .shRow{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}#shop.sh2 .shRow .holo{flex:1 1 150px;max-width:260px}#shop.sh2 .shRow .holo.wide{flex-basis:100%;max-width:528px}@media(min-width:700px){#shop.sh2 .shRow .holo.wide{flex-basis:auto;max-width:300px}}
 #shOv{position:fixed;inset:0;z-index:95;background:rgba(6,2,14,.72);display:flex;align-items:center;justify-content:center;padding:14px}
 #shOv .m{width:min(100%,460px);max-height:88vh;overflow:auto;background:linear-gradient(#1a1030,#120a22);color:#fff;border-radius:18px;border:1.5px solid rgba(165,238,255,.6);box-shadow:0 0 30px rgba(120,220,255,.3);padding:16px;font-family:'Noto Sans KR',sans-serif;display:flex;flex-direction:column;gap:6px}
 #shOv h3{margin:0 0 4px;text-align:center}#shOv h4{margin:10px 0 0;font-size:14px}#shOv .c{margin:0;font-size:12px;color:#cbb}
@@ -35,6 +35,22 @@
 #shOv .shSk{margin:4px 0 0;font-size:12.5px;color:#e8dcff}#shOv .shSk small{color:#a99}#shOv .shCol{display:flex;flex-direction:column;gap:8px}#shOv>.m>.holo{margin-top:8px}
 #saint .snTab button{border:1.5px solid rgba(165,238,255,.9)!important;background:linear-gradient(rgba(25,55,100,.75),rgba(12,25,60,.72))!important;color:#eafcff!important;font-size:14px!important;padding:8px 14px!important;text-shadow:0 0 6px rgba(120,220,255,.9);animation:holoG 2.4s ease-in-out infinite;backdrop-filter:blur(4px)}
 #saint .snTab button[aria-pressed=true]{border-color:rgba(255,225,140,.95)!important;background:linear-gradient(rgba(95,62,15,.8),rgba(60,35,8,.75))!important;color:#fff7dc!important;animation-name:holoGg}
+
+#shop.sh2 .shStage::after{content:'';position:absolute;left:0;right:0;bottom:0;height:60px;background:linear-gradient(transparent,rgba(24,16,44,.85));pointer-events:none;z-index:1}
+#shop.sh2 .shPad{position:relative;margin:-14px auto 12px;width:calc(100% - 16px);max-width:900px;min-height:calc(100vh - var(--shStH,420px) - 60px);box-sizing:border-box;border-radius:22px 22px 18px 18px;overflow:hidden;z-index:2;
+ background:radial-gradient(ellipse 70% 45% at 50% 30%,rgba(140,225,255,.22),transparent 70%),radial-gradient(ellipse 60% 40% at 50% 100%,rgba(200,160,255,.18),transparent 70%),repeating-linear-gradient(0deg,rgba(150,230,255,.07) 0 1px,transparent 1px 22px),repeating-linear-gradient(90deg,rgba(150,230,255,.07) 0 1px,transparent 1px 22px),linear-gradient(#211839,#150e28 60%,#110a20);
+ border:1.5px solid rgba(165,238,255,.55);box-shadow:0 0 0 1px rgba(255,220,140,.25) inset,0 -6px 30px rgba(120,220,255,.35),inset 0 0 40px rgba(120,220,255,.15)}
+#shop.sh2 .shPad::before{content:'';position:absolute;left:8%;right:8%;top:0;height:3px;border-radius:3px;background:linear-gradient(90deg,transparent,#ffe2a0,#fff7e0,#ffe2a0,transparent);box-shadow:0 0 14px rgba(255,220,140,.9)}
+#shop.sh2 .shRing{position:absolute;left:50%;top:70px;border-radius:50%;pointer-events:none;transform:translate(-50%,-50%)}
+#shop.sh2 .shRing.r1{width:320px;height:320px;border:1.5px dashed rgba(150,230,255,.35);animation:shSpin 40s linear infinite}
+#shop.sh2 .shRing.r2{width:220px;height:220px;border:1px solid rgba(255,220,140,.35);box-shadow:0 0 20px rgba(255,220,140,.15),inset 0 0 20px rgba(150,230,255,.15);animation:shSpin 24s linear infinite reverse}
+@keyframes shSpin{to{transform:translate(-50%,-50%) rotate(360deg)}}
+#shop.sh2 .shScan{position:absolute;left:0;right:0;height:40px;top:-40px;background:linear-gradient(transparent,rgba(150,230,255,.12),transparent);animation:shScanA 5s linear infinite;pointer-events:none}
+@keyframes shScanA{to{top:100%}}
+#shop.sh2 .shCn{position:absolute;width:16px;height:16px;border-color:rgba(255,226,160,.85);border-style:solid;pointer-events:none}
+#shop.sh2 .shCn.tl{left:8px;top:10px;border-width:2px 0 0 2px}#shop.sh2 .shCn.tr{right:8px;top:10px;border-width:2px 2px 0 0}#shop.sh2 .shCn.bl{left:8px;bottom:8px;border-width:0 0 2px 2px}#shop.sh2 .shCn.br{right:8px;bottom:8px;border-width:0 2px 2px 0}
+#shop.sh2 .shPad .shBody{position:relative;padding:22px 16px calc(18px + env(safe-area-inset-bottom,0px))}
+#shop.sh2 .shPad .shPulls{position:relative;left:auto;right:auto;bottom:auto;padding:0;margin:4px 0 12px}
 </style><link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#000000"><link rel="icon" href="icons/icon-192.png"><link rel="apple-touch-icon" href="icons/apple-touch-icon.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="기갈 서바이버"><style>.clocard.disc{position:relative}.clocard .discb{position:absolute;top:2px;right:2px;font-style:normal;font-size:9px;background:#555;color:#fff;border-radius:6px;padding:0 4px}.clocard canvas[data-msk]{image-rendering:pixelated}</style></head><body>
 <style>#boot{position:fixed;inset:0;z-index:99999;background:#000;display:grid;place-items:center;color:#eee;font-family:'Noto Serif KR',Georgia,serif;transition:opacity .7s}#boot.out{opacity:0;pointer-events:none}
 #boot .bl{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .8s}
@@ -4294,8 +4310,8 @@ function showGachaResult(res){
 const SHW=1168,SHH=784,SH_MQ=[450,430];
 const SH_LN=['언니를 위한 옷, 오늘은 뭘 지어 볼까요?','실은 준비됐어요. 언니 마음만 주세요.','어머, 골드 냄새가 나요. 💅','오늘의 운은… 제 손끝이 알아요. 비밀이에요.','폴라리스가 오늘따라 반짝여요. 좋은 징조예요.'];
 function shBox(){const sec=$('#shop'),W=sec.clientWidth||innerWidth,narrow=W<700,Ht=Math.max(220,innerHeight*(narrow?.5:.62)),Hf=W*SHH/SHW;
-  const H=Hf>=Ht?Math.min(Hf,innerHeight*.72):Ht,s=H/SHH,vw=W/s,cx=690,left=vw<SHW?Math.max(0,Math.min(SHW-vw,cx-vw/2)):-(vw-SHW)/2;return{H,s,left}}
-function shLayout(){const st=$('#shop .shStage'),inn=$('#shop .shIn');if(!st||!inn)return;const b=shBox();st.style.height=b.H+'px';inn.style.transform=`scale(${b.s}) translate(${-b.left}px,0px)`}
+  const H=Hf>=Ht?Math.min(Hf,innerHeight*(narrow?.72:.58)):Ht,s=H/SHH,vw=W/s,cx=690,left=vw<SHW?Math.max(0,Math.min(SHW-vw,cx-vw/2)):-(vw-SHW)/2;return{H,s,left}}
+function shLayout(){const st=$('#shop .shStage'),inn=$('#shop .shIn');if(!st||!inn)return;const b=shBox();st.style.height=b.H+'px';$('#shop').style.setProperty('--shStH',b.H+'px');inn.style.transform=`scale(${b.s}) translate(${-b.left}px,0px)`}
 addEventListener('resize',()=>{const s=$('#shop');if(s&&!s.hidden&&s.classList.contains('sh2'))shLayout()});
 function shSay(t){const el=$('#shop .shSay span');if(el)el.textContent=t}
 function shPct(v){const p=v*100;return (Math.round(p*10)/10)+'%'}
@@ -4322,10 +4338,11 @@ function openShop(){
   hideAll();const sec=$('#shop');sec.hidden=false;sec.classList.add('sh2');const open=gachaOpen(),n=fancyCount(),t=SAVE.tix||{},nt=(t.R||0)+(t.L||0)+(t.M||0);
   sec.innerHTML=`<div class="shHead"><button class="ghost" type="button" id="shBack">← 로비</button><h2>🎰 뽑기</h2><div class="gold">💰 ${SAVE.gold}G</div></div>
   <div class="shStage"><div class="shIn"><div class="shGlow" style="left:${SH_MQ[0]-230}px;top:${SH_MQ[1]-300}px"></div></div><div class="shSay"><b>아리아드네</b><span></span></div>
-   ${open?`<div class="shPulls"><button type="button" class="holo hbig" id="shPull" ${SAVE.gold<GACHA_COST?'data-low':''}>✨ 1회 뽑기<small>${GACHA_COST}G</small></button><button type="button" class="holo hbig gold" id="shPull10" ${SAVE.gold<GACHA_COST*10?'data-low':''}>✨ 10회 뽑기<small>${GACHA_COST*10}G</small></button></div>`
-   :`<div class="shPulls"><div class="holo lock">🔒 화려한 모습을 <b>${GACHA_NEED}명</b> 해금하면 열려요 (${n}/${GACHA_NEED})</div></div>`}</div>
-  <div class="shBody">${open?`<p class="shPity">전설 확정까지 <b>${PITY-SAVE.pity}회</b> · 신화 확정까지 <b>${PITYM-SAVE.pityM}회</b></p>`:'<p class="shPity">골드는 지금부터 모여요. 판마다 버틴 시간과 보스 처치로 받아요.</p>'}
-   <div class="shRow"><button type="button" class="holo wide" id="shList">📜 획득 가능한 아이템 목록</button>${(t.S||0)>0?`<button type="button" class="holo hot" id="shSelB">👑 신화 선택권 ${t.S}장</button>`:''}${nt>0?`<button type="button" class="holo hot" id="shTixB">🎟️ 확정권 ${nt}장</button>`:''}<button type="button" class="holo" id="shCloset">👗 옷장</button></div></div>`;
+</div>
+  <div class="shPad"><i class="shRing r1"></i><i class="shRing r2"></i><i class="shScan"></i><b class="shCn tl"></b><b class="shCn tr"></b><b class="shCn bl"></b><b class="shCn br"></b><div class="shBody">${open?`<div class="shPulls"><button type="button" class="holo hbig" id="shPull" ${SAVE.gold<GACHA_COST?'data-low':''}>✨ 1회 뽑기<small>${GACHA_COST}G</small></button><button type="button" class="holo hbig gold" id="shPull10" ${SAVE.gold<GACHA_COST*10?'data-low':''}>✨ 10회 뽑기<small>${GACHA_COST*10}G</small></button></div>`
+   :`<div class="shPulls"><div class="holo lock">🔒 화려한 모습을 <b>${GACHA_NEED}명</b> 해금하면 열려요 (${n}/${GACHA_NEED})</div></div>`}
+   ${open?`<p class="shPity">전설 확정까지 <b>${PITY-SAVE.pity}회</b> · 신화 확정까지 <b>${PITYM-SAVE.pityM}회</b></p>`:'<p class="shPity">골드는 지금부터 모여요. 판마다 버틴 시간과 보스 처치로 받아요.</p>'}
+   <div class="shRow"><button type="button" class="holo wide" id="shList">📜 획득 가능한 아이템 목록</button>${(t.S||0)>0?`<button type="button" class="holo hot" id="shSelB">👑 신화 선택권 ${t.S}장</button>`:''}${nt>0?`<button type="button" class="holo hot" id="shTixB">🎟️ 확정권 ${nt}장</button>`:''}<button type="button" class="holo" id="shCloset">👗 옷장</button></div></div></div>`;
   shLayout();shSay(open?(SAVE.gold<GACHA_COST?'골드가 조금 모자라요. 한 판 이기고 와요, 언니.':pick(SH_LN)):'아직 실이 모자라요. 화려한 모습부터 깨워 와요, 언니.');
   $('#shBack').onclick=()=>{sec.hidden=true;titleScreen()};
   $('#shCloset').onclick=()=>{window.CLO_FROM='lobby';openCloset(CHAR[selI].ju?0:selI)};

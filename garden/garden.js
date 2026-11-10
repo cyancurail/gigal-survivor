@@ -15,7 +15,7 @@ function white(i,col){const key=i.src+(col||'');let c=WH.get(key);if(c)return c;
 
 /* ---------- 대원 (원작 식물 동작 · 스킨은 매칭표 기준) ---------- */
 const U={
-  sun:{n:'맘터',sk:'해바라기 피크닉',img:'msk2/cc05.png',cost:50,cd:7.5,hp:300,role:'🌻 실타래 짜기',desc:'20초마다 실타래를 짜요.',prod:{first:5,every:20,amt:25}},
+  sun:{n:'맘터',sk:'코지카드',img:'garden/sk/mt_cozy.png',cost:50,cd:7.5,hp:300,role:'🌻 실타래 짜기',desc:'20초마다 실타래를 짜요.',prod:{first:5,every:20,amt:25}},
   pea:{n:'태태영',sk:'토끼 레인저',img:'msk2/06.png',cost:100,cd:7.5,hp:300,role:'💗 하트 사격',desc:'같은 줄에 하트를 한 발씩 쏴요.',shoot:{every:1.4,dmg:20,n:1,k:'heart'}},
   cherry:{n:'태태영',sk:'체리 원피스',img:'msk2/cc01.png',cost:150,cd:50,cd0:30,hp:300,role:'🍒 체리 폭탄',desc:'심으면 잠시 뒤 주변 3×3을 날려요. (1회용)',bomb:{t:1.1,dmg:1800}},
   wall:{n:'무룩',sk:'실드카드',img:'msk2/cd02.png',cost:50,cd:30,cd0:20,hp:4000,role:'🛡️ 방패',desc:'단단하게 길을 막아요.',wall:1},

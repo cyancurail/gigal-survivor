@@ -2,7 +2,40 @@
 #cutin img.jutall{position:absolute;left:4%;bottom:0;height:min(94vh,150vw);image-rendering:pixelated;filter:drop-shadow(0 0 22px rgba(255,211,77,.65)) drop-shadow(0 8px 0 rgba(0,0,0,.35));animation:juIn 2s cubic-bezier(.2,.9,.2,1) forwards}@keyframes juIn{0%{opacity:0;transform:translateX(-30%) scale(.92)}20%{opacity:1;transform:none}85%{opacity:1}100%{opacity:0;transform:translateX(6%)}}.pc.jlock{filter:saturate(.3);opacity:.85}
 .lbZoom{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:4px 0}.lbZoom .on{background:#ffd76a;color:#2a1a00;border-color:#ffd76a}
 .volrow{display:grid;gap:6px;margin-top:8px;width:100%}.vol{display:flex;align-items:center;gap:8px;font:700 13px 'Noto Sans KR',sans-serif;color:#fff}.vol .vn{min-width:66px}.vol input{flex:1;accent-color:#ff7ac8;min-width:0}.vol b{min-width:40px;text-align:right;font-variant-numeric:tabular-nums}
-.mselm{text-align:center}.mselm canvas{display:block;margin:6px auto;width:200px;height:200px;border-radius:16px;background:radial-gradient(circle at 50% 60%,#2a1a44,#120a20)}.mseln{font-weight:800;font-size:16px;margin:4px 0 0}.msels{font-size:12.5px;color:#ffd34d;margin:2px 0}</style><link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#000000"><link rel="icon" href="icons/icon-192.png"><link rel="apple-touch-icon" href="icons/apple-touch-icon.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="기갈 서바이버"><style>.clocard.disc{position:relative}.clocard .discb{position:absolute;top:2px;right:2px;font-style:normal;font-size:9px;background:#555;color:#fff;border-radius:6px;padding:0 4px}.clocard canvas[data-msk]{image-rendering:pixelated}</style></head><body>
+.mselm{text-align:center}.mselm canvas{display:block;margin:6px auto;width:200px;height:200px;border-radius:16px;background:radial-gradient(circle at 50% 60%,#2a1a44,#120a20)}.mseln{font-weight:800;font-size:16px;margin:4px 0 0}.msels{font-size:12.5px;color:#ffd34d;margin:2px 0}
+#shop.sh2{padding:0;gap:0;display:block;background:#0f0818;overflow-y:auto}
+#shop.sh2 .shHead{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:8px;padding:calc(8px + env(safe-area-inset-top,0px)) 12px 8px;background:linear-gradient(#0f0818f2,#0f0818cc);border-bottom:1px solid rgba(160,235,255,.25)}
+#shop.sh2 .shHead h2{margin:0;flex:1;font-size:17px;color:#fff}#shop.sh2 .shHead .gold{color:#ffe9a8;font-weight:800}
+#shop.sh2 .shStage{position:relative;width:100%;overflow:hidden;background:#1a1028}
+#shop.sh2 .shStage::before{content:'';position:absolute;inset:-20px;background:url(img/shop_bg.webp) center/cover;filter:blur(14px) brightness(.5)}
+#shop.sh2 .shIn{position:absolute;left:0;top:0;width:1168px;height:784px;transform-origin:0 0;background:url(img/shop_bg.webp) 0 0/100% 100% no-repeat}
+#shop.sh2 .shGlow{position:absolute;width:460px;height:600px;border-radius:50%;background:radial-gradient(closest-side,rgba(200,245,255,.55),rgba(140,220,255,.18) 55%,transparent);mix-blend-mode:screen;animation:shBreath 3.2s ease-in-out infinite;pointer-events:none}
+#shop.sh2 .shGlow.go{animation:shFlash .6s ease-out}
+@keyframes shBreath{0%,100%{opacity:.25}50%{opacity:.6}}@keyframes shFlash{0%{opacity:.4;transform:scale(.9)}40%{opacity:1;transform:scale(1.25);filter:brightness(2)}100%{opacity:.3;transform:scale(1)}}
+#shop.sh2 .shSay{position:absolute;left:10px;top:10px;max-width:min(58%,320px);background:rgba(250,244,255,.92);color:#3a2050;border:1.5px solid #b9e8ff;border-radius:14px;padding:8px 12px;font-size:13px;line-height:1.45;box-shadow:0 4px 18px rgba(80,180,255,.35)}
+#shop.sh2 .shSay b{display:block;font-size:11px;color:#5aaee0}
+#shop.sh2 .shPulls{position:absolute;left:0;right:0;bottom:12px;display:flex;justify-content:center;gap:10px;padding:0 12px}
+.holo{position:relative;border-radius:14px;border:1.5px solid rgba(165,238,255,.9);background:linear-gradient(rgba(140,225,255,.18),rgba(90,170,255,.1)),repeating-linear-gradient(0deg,rgba(255,255,255,.06) 0 1px,transparent 1px 3px);color:#eafcff;font:800 14px 'Noto Sans KR',sans-serif;padding:10px 14px;text-shadow:0 0 6px rgba(120,220,255,.9);box-shadow:0 0 10px rgba(120,220,255,.55),inset 0 0 12px rgba(120,220,255,.3);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);animation:holoG 2.4s ease-in-out infinite;cursor:pointer}
+.holo:active{transform:scale(.97)}
+@keyframes holoG{0%,100%{box-shadow:0 0 8px rgba(120,220,255,.45),inset 0 0 10px rgba(120,220,255,.25)}50%{box-shadow:0 0 20px rgba(150,235,255,.95),inset 0 0 16px rgba(150,235,255,.45)}}
+.holo.hbig{flex:1;max-width:220px;font-size:17px;padding:12px 10px;display:flex;flex-direction:column;align-items:center;gap:2px;background:linear-gradient(rgba(25,55,100,.72),rgba(12,25,60,.7)),repeating-linear-gradient(0deg,rgba(255,255,255,.07) 0 1px,transparent 1px 3px)}#shop.sh2 .holo.hbig.gold{background:linear-gradient(rgba(95,62,15,.75),rgba(60,35,8,.72)),repeating-linear-gradient(0deg,rgba(255,255,255,.07) 0 1px,transparent 1px 3px)}.holo.hbig small{font-size:12px;opacity:.9}
+.holo.gold{border-color:rgba(255,225,140,.95);background:linear-gradient(rgba(255,215,120,.22),rgba(255,180,90,.1)),repeating-linear-gradient(0deg,rgba(255,255,255,.06) 0 1px,transparent 1px 3px);color:#fff7dc;text-shadow:0 0 6px rgba(255,210,120,.95);animation-name:holoGg}
+@keyframes holoGg{0%,100%{box-shadow:0 0 8px rgba(255,210,120,.45),inset 0 0 10px rgba(255,210,120,.25)}50%{box-shadow:0 0 22px rgba(255,220,140,.95),inset 0 0 16px rgba(255,220,140,.45)}}
+.holo.hot{border-color:rgba(255,180,230,.95);color:#fff0fa;text-shadow:0 0 6px rgba(255,150,220,.9)}
+.holo[data-low]{opacity:.55;filter:saturate(.6)}.holo.lock{font-size:13px;font-weight:700}
+#shop.sh2 .shBody{padding:10px 12px calc(20px + env(safe-area-inset-bottom,0px))}
+#shop.sh2 .shPity{margin:0 0 10px;text-align:center;font-size:12.5px;color:#cfe9ff}#shop.sh2 .shPity b{color:#ffe9a8}
+#shop.sh2 .shRow{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}#shop.sh2 .shRow .holo{flex:1 1 150px;max-width:260px}#shop.sh2 .shRow .holo.wide{flex-basis:100%;max-width:528px}
+#shOv{position:fixed;inset:0;z-index:95;background:rgba(6,2,14,.72);display:flex;align-items:center;justify-content:center;padding:14px}
+#shOv .m{width:min(100%,460px);max-height:88vh;overflow:auto;background:linear-gradient(#1a1030,#120a22);color:#fff;border-radius:18px;border:1.5px solid rgba(165,238,255,.6);box-shadow:0 0 30px rgba(120,220,255,.3);padding:16px;font-family:'Noto Sans KR',sans-serif;display:flex;flex-direction:column;gap:6px}
+#shOv h3{margin:0 0 4px;text-align:center}#shOv h4{margin:10px 0 0;font-size:14px}#shOv .c{margin:0;font-size:12px;color:#cbb}
+#shOv .shRate{width:100%;border-collapse:collapse;font-size:13px}#shOv .shRate td{padding:5px 6px;border:1px solid rgba(255,255,255,.1);text-align:center}
+#shOv .shGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(62px,1fr));gap:6px}
+#shOv .shR{display:flex;flex-direction:column;align-items:center;gap:1px;background:rgba(255,255,255,.04);border-radius:10px;padding:4px 2px}#shOv .shR img{width:48px;height:44px;object-fit:contain}#shOv .shR small{font-size:10.5px}#shOv .shR.no img{filter:brightness(.25) saturate(0)}#shOv .shR.no small{opacity:.55}
+#shOv .shSk{margin:4px 0 0;font-size:12.5px;color:#e8dcff}#shOv .shSk small{color:#a99}#shOv .shCol{display:flex;flex-direction:column;gap:8px}#shOv>.m>.holo{margin-top:8px}
+#saint .snTab button{border:1.5px solid rgba(165,238,255,.9)!important;background:linear-gradient(rgba(25,55,100,.75),rgba(12,25,60,.72))!important;color:#eafcff!important;font-size:14px!important;padding:8px 14px!important;text-shadow:0 0 6px rgba(120,220,255,.9);animation:holoG 2.4s ease-in-out infinite;backdrop-filter:blur(4px)}
+#saint .snTab button[aria-pressed=true]{border-color:rgba(255,225,140,.95)!important;background:linear-gradient(rgba(95,62,15,.8),rgba(60,35,8,.75))!important;color:#fff7dc!important;animation-name:holoGg}
+</style><link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#000000"><link rel="icon" href="icons/icon-192.png"><link rel="apple-touch-icon" href="icons/apple-touch-icon.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="기갈 서바이버"><style>.clocard.disc{position:relative}.clocard .discb{position:absolute;top:2px;right:2px;font-style:normal;font-size:9px;background:#555;color:#fff;border-radius:6px;padding:0 4px}.clocard canvas[data-msk]{image-rendering:pixelated}</style></head><body>
 <style>#boot{position:fixed;inset:0;z-index:99999;background:#000;display:grid;place-items:center;color:#eee;font-family:'Noto Serif KR',Georgia,serif;transition:opacity .7s}#boot.out{opacity:0;pointer-events:none}
 #boot .bl{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .8s}
 #boot .bl img{width:min(46vw,260px);-webkit-mask-image:radial-gradient(closest-side,#000 62%,transparent);mask-image:radial-gradient(closest-side,#000 62%,transparent);opacity:0;transform:scale(.94);filter:brightness(.6);transition:opacity 1.2s,transform 1.6s,filter 1.6s}
@@ -4257,25 +4290,50 @@ function showGachaResult(res){
   ov.querySelector('.gprev').appendChild(previewCv(it,128));
   $('#gOk').onclick=()=>{ov.hidden=true;openShop()};$('#gAgain').onclick=()=>{ov.hidden=true;doGacha()};
 }
+/* 11-11 사용자: 🎰 상점 개편 — 아리아드네 아틀리에 그림(img/shop_bg.webp, 1168×784) + 홀로그램 버튼 + [획득 가능한 아이템 목록] 창 */
+const SHW=1168,SHH=784,SH_MQ=[450,430];
+const SH_LN=['언니를 위한 옷, 오늘은 뭘 지어 볼까요?','실은 준비됐어요. 언니 마음만 주세요.','어머, 골드 냄새가 나요. 💅','오늘의 운은… 제 손끝이 알아요. 비밀이에요.','폴라리스가 오늘따라 반짝여요. 좋은 징조예요.'];
+function shBox(){const sec=$('#shop'),W=sec.clientWidth||innerWidth,narrow=W<700,Ht=Math.max(220,innerHeight*(narrow?.5:.62)),Hf=W*SHH/SHW;
+  const H=Hf>=Ht?Math.min(Hf,innerHeight*.72):Ht,s=H/SHH,vw=W/s,cx=690,left=vw<SHW?Math.max(0,Math.min(SHW-vw,cx-vw/2)):-(vw-SHW)/2;return{H,s,left}}
+function shLayout(){const st=$('#shop .shStage'),inn=$('#shop .shIn');if(!st||!inn)return;const b=shBox();st.style.height=b.H+'px';inn.style.transform=`scale(${b.s}) translate(${-b.left}px,0px)`}
+addEventListener('resize',()=>{const s=$('#shop');if(s&&!s.hidden&&s.classList.contains('sh2'))shLayout()});
+function shSay(t){const el=$('#shop .shSay span');if(el)el.textContent=t}
+function shPct(v){const p=v*100;return (Math.round(p*10)/10)+'%'}
+function shOv(html){let o=document.getElementById('shOv');if(o)o.remove();o=document.createElement('div');o.id='shOv';o.innerHTML=`<div class="m">${html}<button type="button" class="holo" data-x>닫기</button></div>`;document.body.appendChild(o);
+  o.addEventListener('pointerdown',e=>{if(e.target===o)o.remove()});o.querySelector('[data-x]').onclick=()=>o.remove();return o}
+function shItems(){const D=window.SN?SN.D:{},rings=g=>Object.keys(D).filter(k=>D[k].g===g),own=k=>window.SN&&SN.lv(k)>0;
+  const ring=k=>`<div class="shR${own(k)?'':' no'}"><img src="saint/r_${k}.webp" alt="" loading="lazy"><small>${esc(D[k].n)}</small></div>`;
+  const sk=(t,nm)=>{const L=POOL.filter(p=>p.tier===t&&!p.nog),o=L.filter(p=>SAVE.inv[p.id]).length;return L.length?`<p class="shSk">${nm} <b>${L.length}종</b> · 가진 것 ${o}종 <small>(👗 옷장에서 봐요)</small></p>`:''};
+  const C=1-RATE.M-RATE.L-RATE.R;
+  shOv(`<h3>📜 획득 가능한 아이템</h3>
+  <table class="shRate"><tr><td class="tC">일반</td><td>${shPct(C)}</td><td class="tR">희귀</td><td>${shPct(RATE.R)}</td></tr><tr><td class="tL">전설</td><td>${shPct(RATE.L)}</td><td class="tM">신화</td><td>${shPct(RATE.M)}</td></tr></table>
+  <p class="c">전설 확정까지 최대 <b>${PITY-SAVE.pity}회</b> · 신화 확정까지 최대 <b>${PITYM-SAVE.pityM}회</b></p>
+  <h4><b class="tM">신화</b> ${shPct(RATE.M)}</h4><p class="c">신화의 75% = 신화 스킨 · 25% = 📿 세이크리드 썸띵 목걸이</p><div class="shGrid">${rings('M').map(ring).join('')}</div>${sk('M','👑 신화 스킨')}
+  <h4><b class="tL">전설</b> ${shPct(RATE.L)}</h4><p class="c">💍 세인트썸띵 금 반지</p><div class="shGrid">${rings('L').map(ring).join('')}</div>
+  <h4><b class="tR">희귀</b> ${shPct(RATE.R)}</h4><p class="c">80% = 💍 세인트썸띵 은 반지 · 20% = 안 가진 무기 스킨 또는 💠 강화 칩</p><div class="shGrid">${rings('R').map(ring).join('')}</div>${sk('R','🎨 희귀 무기 스킨')}
+  <h4><b class="tC">일반</b> ${shPct(C)}</h4><p class="c">💠 무작위 대원의 아스가르드 강화 칩 3~8</p>
+  <p class="c">중복이면 골드 환급 (희귀 ${REFUND.R} · 전설 ${REFUND.L} · 신화 ${REFUND.M}G) · 반지·목걸이는 중복이면 자동 합성</p>`)}
+function shTix(){const t=SAVE.tix||{};const o=shOv(`<h3>🎟️ 확정권</h3><div class="shCol">${t.M>0?`<button type="button" class="holo" data-t="M">👑 신화 확정 뽑기권 (${t.M}장)</button>`:''}${t.L>0?`<button type="button" class="holo" data-t="L">🎟️ 전설 확정 뽑기권 (${t.L}장)</button>`:''}${t.R>0?`<button type="button" class="holo" data-t="R">🎟️ 희귀 확정 뽑기권 (${t.R}장)</button>`:''}</div>`);
+  o.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{o.remove();useTicket(b.dataset.t)})}
+function shSel(){const L=POOL.filter(q=>q.tier==='M'&&!q.nog&&!SAVE.inv[q.id]);const o=shOv(`<h3>👑 신화 선택권 ${SAVE.tix.S}장</h3><p class="c">갖고 싶은 신화를 골라요</p><div class="shCol">${L.map(q=>`<button type="button" class="holo" data-id="${q.id}">👑 ${esc(q.n)}</button>`).join('')||'<span class="c">이미 모든 신화를 가지고 있어요</span>'}</div>`);
+  o.querySelectorAll('[data-id]').forEach(b=>b.onclick=()=>{if((SAVE.tix.S||0)<=0)return;o.remove();SND.p('click');mselPreview(b.dataset.id)})}
+function shPull(fn,need){if(SAVE.gold<need){shSay('골드가 조금 모자라요. 한 판 이기고 와요, 언니.');return}const g=$('#shop .shGlow');if(g){g.classList.remove('go');void g.offsetWidth;g.classList.add('go')}shSay('실을 엮을게요… 숨 참아요, 언니. ✨');try{SND.p('click')}catch(e){}setTimeout(fn,520)}
 function openShop(){
-  hideAll();$('#shop').hidden=false;const n=fancyCount(),open=gachaOpen(),own=POOL.filter(p=>SAVE.inv[p.id]&&!p.nog).length;
-  const tierList=t=>POOL.filter(p=>p.tier===t&&!p.nog).map(p=>`<span class="gi ${SAVE.inv[p.id]?'own':''}" title="${esc(p.n)}">${SAVE.inv[p.id]?esc(p.n):'???'}</span>`).join('');
-  const wl=Object.keys(WFX).filter(k=>SAVE.inv['w:'+k]||SAVE.inv['wh:'+k]);const il=CHAR.filter(c=>introItems(c.id).length);
-  $('#shop').innerHTML=`<div class="shead"><button class="ghost" type="button" id="shBack">← 뒤로</button><h2>🎰 소매치기 뽑기</h2><div class="gold">💰 ${SAVE.gold}G</div></div>
-  ${open?`<div class="spull"><div class="pullrow"><button class="big" type="button" id="shPull" ${SAVE.gold<GACHA_COST?'disabled':''}>뽑기 1회 · ${GACHA_COST}G</button><button class="big pull10" type="button" id="shPull10" ${SAVE.gold<GACHA_COST*10?'disabled':''}>10연속 · ${GACHA_COST*10}G</button></div>
-    <p class="c">일반 ${Math.round((1-RATE.M-RATE.L-RATE.R)*100)}% · 희귀 ${Math.round(RATE.R*100)}% · 전설 ${Math.round(RATE.L*100)}% · <b style="color:#fff3b0">신화 ${Math.round(RATE.M*100)}%</b><br>전설 확정까지 최대 <b>${PITY-SAVE.pity}회</b> · 신화 확정까지 최대 <b>${PITYM-SAVE.pityM}회</b><br>💍 전설 = 전설 세인트썸띵(금 반지) · 희귀 = 희귀 세인트썸띵(은 반지) 80%, 나머지는 안 가진 무기 스킨 또는 강화 칩<br>💠 일반 = 무작위 대원의 아스가르드 강화 칩 3~8<br>중복이면 골드 환급 (희귀 ${REFUND.R} · 전설 ${REFUND.L} · 신화 ${REFUND.M}G)<br>💰 보통 모드 30분 ≈ 6회 · 어려움 ≈ 12회</p></div>`
-   :`<div class="spull locked"><p>🔒 화려한 모습을 <b>${GACHA_NEED}명</b> 해금하면 뽑기가 열려요 (${n}/${GACHA_NEED})</p><p class="c">골드는 지금부터 모여요. 판마다 버틴 시간과 보스 처치로 받아요.</p></div>`}
-  ${(SAVE.tix.S||0)>0?`<h4>👑 신화 선택권 ${SAVE.tix.S}장 · 갖고 싶은 신화를 골라요</h4><div class="wfxl">${POOL.filter(q=>q.tier==='M'&&!q.nog&&!SAVE.inv[q.id]).map(q=>`<button type="button" class="wfxb msel" data-id="${q.id}">👑 ${esc(q.n)}</button>`).join('')||'<span class="c">이미 모든 신화를 가지고 있어요</span>'}</div>`:''}
-  ${(SAVE.tix.R||0)+(SAVE.tix.L||0)+(SAVE.tix.M||0)>0?`<div class="wfxl">${SAVE.tix.M>0?`<button type="button" class="big tixb" data-t="M">👑 신화 확정 뽑기권 사용 (${SAVE.tix.M}장)</button>`:''}${SAVE.tix.L>0?`<button type="button" class="big tixb" data-t="L">🎟️ 전설 확정 뽑기권 사용 (${SAVE.tix.L}장)</button>`:''}${SAVE.tix.R>0?`<button type="button" class="big tixb" data-t="R">🎟️ 희귀 확정 뽑기권 사용 (${SAVE.tix.R}장)</button>`:''}</div>`:''}
-  <div class="wfxl"><button type="button" class="big" id="shCloset">👗 옷장에서 스킨 · 무기 스킨 고르기</button></div>
-  <h4>📖 도감 ${own}/${POOL.length}</h4>
-  <div class="gsec"><b class="tM">신화</b>${tierList('M')}</div><div class="gsec"><b class="tL">전설</b><span class="gi own">💍 세인트썸띵 금 반지 12종 · 💍 장비 탭에서 봐요</span></div><div class="gsec"><b class="tR">희귀</b>${tierList('R')}</div><div class="gsec"><b class="tC">일반</b><span class="gi own">💠 아스가르드 강화 칩</span></div>
-  <p class="c">스킨과 무기 스킨은 👗 옷장에서 고를 수 있어요.</p>`;
-  $('#shBack').onclick=()=>{$('#shop').hidden=true;titleScreen()};
-  $('#shCloset').onclick=()=>{window.CLO_FROM='lobby';openCloset(CHAR[selI].ju?0:selI)};$('#shop').querySelectorAll('.msel').forEach(b=>b.onclick=()=>{if((SAVE.tix.S||0)<=0)return;SND.p('click');mselPreview(b.dataset.id)});if($('#shPull'))$('#shPull').onclick=doGacha;if($('#shPull10'))$('#shPull10').onclick=doGacha10;$('#shop').querySelectorAll('.tixb').forEach(b=>b.onclick=()=>useTicket(b.dataset.t));
-  $('#shop').querySelectorAll('.vidb').forEach(b=>b.onclick=()=>playVid(b.dataset.v,()=>{}));$('#shop').querySelectorAll('.mpk').forEach(b=>b.onclick=()=>{SAVE.mpick=SAVE.mpick||{};SAVE.mpick[b.dataset.c]=b.dataset.i;persist();openShop()});
-  $('#shop').querySelectorAll('.introb').forEach(b=>b.onclick=()=>{const k=b.dataset.t;SAVE.introOff=SAVE.introOff||{};SAVE.introOff[k]=!SAVE.introOff[k];persist();openShop()});
-  $('#shop').querySelectorAll('.wsb').forEach(b=>b.onclick=()=>{const k=b.dataset.k,v=b.dataset.v;SAVE.wsel=SAVE.wsel||{};SAVE.wsel[k]=v;if(v==='r')SAVE.wfx[k]=true;else if(SAVE.inv['w:'+k])SAVE.wfx[k]=false;persist();openShop()});
+  hideAll();const sec=$('#shop');sec.hidden=false;sec.classList.add('sh2');const open=gachaOpen(),n=fancyCount(),t=SAVE.tix||{},nt=(t.R||0)+(t.L||0)+(t.M||0);
+  sec.innerHTML=`<div class="shHead"><button class="ghost" type="button" id="shBack">← 로비</button><h2>🎰 뽑기</h2><div class="gold">💰 ${SAVE.gold}G</div></div>
+  <div class="shStage"><div class="shIn"><div class="shGlow" style="left:${SH_MQ[0]-230}px;top:${SH_MQ[1]-300}px"></div></div><div class="shSay"><b>아리아드네</b><span></span></div>
+   ${open?`<div class="shPulls"><button type="button" class="holo hbig" id="shPull" ${SAVE.gold<GACHA_COST?'data-low':''}>✨ 1회 뽑기<small>${GACHA_COST}G</small></button><button type="button" class="holo hbig gold" id="shPull10" ${SAVE.gold<GACHA_COST*10?'data-low':''}>✨ 10회 뽑기<small>${GACHA_COST*10}G</small></button></div>`
+   :`<div class="shPulls"><div class="holo lock">🔒 화려한 모습을 <b>${GACHA_NEED}명</b> 해금하면 열려요 (${n}/${GACHA_NEED})</div></div>`}</div>
+  <div class="shBody">${open?`<p class="shPity">전설 확정까지 <b>${PITY-SAVE.pity}회</b> · 신화 확정까지 <b>${PITYM-SAVE.pityM}회</b></p>`:'<p class="shPity">골드는 지금부터 모여요. 판마다 버틴 시간과 보스 처치로 받아요.</p>'}
+   <div class="shRow"><button type="button" class="holo wide" id="shList">📜 획득 가능한 아이템 목록</button>${(t.S||0)>0?`<button type="button" class="holo hot" id="shSelB">👑 신화 선택권 ${t.S}장</button>`:''}${nt>0?`<button type="button" class="holo hot" id="shTixB">🎟️ 확정권 ${nt}장</button>`:''}<button type="button" class="holo" id="shCloset">👗 옷장</button></div></div>`;
+  shLayout();shSay(open?(SAVE.gold<GACHA_COST?'골드가 조금 모자라요. 한 판 이기고 와요, 언니.':pick(SH_LN)):'아직 실이 모자라요. 화려한 모습부터 깨워 와요, 언니.');
+  $('#shBack').onclick=()=>{sec.hidden=true;titleScreen()};
+  $('#shCloset').onclick=()=>{window.CLO_FROM='lobby';openCloset(CHAR[selI].ju?0:selI)};
+  $('#shList').onclick=()=>{try{SND.p('click')}catch(e){}shItems()};
+  if($('#shSelB'))$('#shSelB').onclick=()=>{try{SND.p('click')}catch(e){}shSel()};
+  if($('#shTixB'))$('#shTixB').onclick=()=>{try{SND.p('click')}catch(e){}shTix()};
+  if($('#shPull'))$('#shPull').onclick=()=>shPull(doGacha,GACHA_COST);
+  if($('#shPull10'))$('#shPull10').onclick=()=>shPull(doGacha10,GACHA_COST*10);
 }
 
 /* ---- gacha cinematic: pickpocket ---- */
@@ -9461,7 +9519,7 @@ const css=`
 #saint .snSay{position:absolute;left:10px;top:10px;max-width:min(58%,320px);background:rgba(250,244,255,.93);color:#3a2050;border:1.5px solid #b9e8ff;border-radius:14px;padding:8px 12px;font-size:13px;line-height:1.45;box-shadow:0 4px 18px rgba(80,180,255,.35);transition:opacity .3s}
 #saint .snSay b{display:block;font-size:11px;color:#5aaee0;letter-spacing:.05em}
 #saint .snSlots{display:flex;gap:6px;padding:10px 12px 0}
-#saint .snTab{position:absolute;right:10px;top:10px;z-index:3;display:flex;gap:4px}#saint .snTab button{border-radius:999px;border:1.5px solid rgba(255,214,234,.6);background:rgba(20,10,30,.6);color:#fff;font:700 12px inherit;font-family:inherit;padding:5px 10px}#saint .snTab button[aria-pressed=true]{background:linear-gradient(#ff7ac8,#c54a9a)}
+#saint .snTab{position:absolute;right:10px;bottom:10px;z-index:3;display:flex;gap:4px}#saint .snTab button{border-radius:999px;border:1.5px solid rgba(255,214,234,.6);background:rgba(20,10,30,.6);color:#fff;font:700 12px inherit;font-family:inherit;padding:5px 10px}#saint .snTab button[aria-pressed=true]{background:linear-gradient(#ff7ac8,#c54a9a)}
 #saint .snIn.neck{background-image:url(saint/neck_bg.webp)}#saint .snNkBg{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none}#saint .snNkBg.pop{animation:snNkPop .9s ease}@keyframes snNkPop{0%{opacity:0;filter:brightness(1.8)}100%{opacity:1;filter:none}}
 #saint .snSlots button{flex:1;min-width:0;border-radius:12px;border:1.5px solid rgba(255,214,234,.35);background:rgba(255,255,255,.06);color:#fff;padding:6px 4px;font:700 11.5px inherit;font-family:inherit;display:flex;flex-direction:column;align-items:center;gap:2px}
 #saint .snSlots button img{height:30px}#saint .snSlots button small{color:#cbb;font-weight:400;font-size:10.5px}

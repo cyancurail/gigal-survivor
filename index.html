@@ -2835,7 +2835,7 @@ function optHTML(o,i){s2Desc();
   return `<button type="button" class="opt" data-i="${i}"><span class="ic">${icon}</span><span class="tx"><b>${esc(title)}${tag}</b><small>${esc(desc)}</small>${lu?`<small class="lu">${esc(lu)}</small>`:''}${pair?`<small class="pr">${esc(pair)}</small>`:''}${pair2?`<small class="pr2">${esc(pair2)}</small>`:''}</span><span class="key">${i+1}</span></button>`;
 }
 function levelUp(){
-  G.paused=true;SND.p('lvl');if(G.rr===undefined)G.rr=8+(window.SN?SN.v('roll'):0);if(G.bn===undefined)G.bn=3;const jk=window.SN&&SN.jokerOn&&SN.jokerOn(),ops=choices(jk?4:0);lvRender(ops,-1);if(jk&&!G.bot)try{toast('📿 세인트 목걸이 조커','이번 레벨업은 카드 4장!')}catch(e){}
+  G.paused=true;SND.p('lvl');if(G.rr===undefined)G.rr=8+(window.SN?SN.v('roll'):0);if(G.bn===undefined)G.bn=3;const ops=choices();lvRender(ops,-1);if(window.SN&&SN.regRoll&&SN.regRoll()){const m=$('#lvmodal'),b=document.createElement('button');b.type='button';b.className='rrb';b.style.cssText='background:linear-gradient(#2a3a8a,#162058);border-color:#8fa8ff';b.textContent='🥀 르그레 · 무기 하나 버리기 (이번 판 1회)';b.onclick=()=>SN.regAsk();m.insertBefore(b,m.querySelector('h3').nextSibling.nextSibling)}
 }
 /* V123 [이 련은 빼버리기]: NEW 무기 카드만, 한 판 2번, 그 판 끝까지 안 나옴, 그 칸만 새로 뽑기 */
 function lvRender(ops,fresh){
@@ -9315,18 +9315,18 @@ const D={
  pierce:{g:'L',n:'관통',v:[10,20,35,50,70],d:v=>`장수 무수리 방어장갑의 피해 경감 ${v}% 무시`},
  moon:{g:'L',n:'달빛',v:[10,20,35,50,70],d:v=>`장수 어둠 속 적의 피해 감소 ${v}% 무시`},
  wall:{g:'L',n:'철벽',v:[15,20,25,32,40],p:[30,28,26,23,20],d:v=>`받는 근거리(충돌) 피해 −${v}% · ⚠️ 받는 원거리 피해 +${[30,28,26,23,20][[15,20,25,32,40].indexOf(v)]}%`},
- /* 11-10 사용자: 📿 신화 목걸이 (목걸이 칸 1개, 신화 뽑기의 25%) — 판 시작 때 확률로 무기/아이템 하나를 골라 들고 시작 */
- nbag:{g:'M',n:'짐가방',v:[5,7,9,11,15],d:v=>`판을 시작할 때 ${v}% 확률로 무기 하나를 골라 들고 시작`},
- npouch:{g:'M',n:'파우치',v:[5,7,9,11,15],d:v=>`판을 시작할 때 ${v}% 확률로 아이템 하나를 골라 들고 시작`},
- nmut:{g:'M',n:'돌연변이',v:[5,7,9,11,15],d:v=>`무기가 처음 Lv8이 되는 순간 ${v}% 확률로 진화 짝 없이 바로 진화 (한 판에 한 번 · 하모닉스 재료·보석 제외)`},
- njok:{g:'M',n:'조커',v:[10,13,16,20,25],d:v=>`레벨업할 때마다 ${v}% 확률로 카드 4장`},
- nsprout:{g:'M',n:'새싹',v:[5,7,9,11,15],d:v=>`판을 시작할 때 ${v}% 확률로 레벨 3에서 시작 (레벨업 2번)`},
+ /* 11-10 사용자: 📿 세이크리드 썸띵 (신화 목걸이 · 목걸이 칸 1개 · 신화 뽑기의 25%). ps = 목 그림 위치 [가운데 x, 위 y, 너비, 위쪽 흐림] */
+ nmort:{g:'M',n:'모르',v:[1,2,3,4,10],ps:[870,280,600,1],d:v=>`게임 시작 때 ${v}% 확률로 무기 하나를 추가로 골라 들고 시작`},
+ nmal:{g:'M',n:'말라디',v:[1,2,3,4,10],ps:[870,300,660,1],d:v=>`게임 시작 때 ${v}% 확률로 아이템 하나를 추가로 골라 들고 시작`},
+ nveuve:{g:'M',n:'뵈브',v:[.5,1,1.5,2,5],ps:[870,320,580,0],d:v=>`게임 시작 때 ${v}% 확률로 레벨 3에서 시작`},
+ nacc:{g:'M',n:'아쿠슈망',v:[.5,1,1.5,2,5],ps:[870,270,480,1],d:v=>`진화 짝이 없는 무기가 레벨업할 때마다 ${v}% 확률로 바로 진화 (하모닉스 재료·보석 제외)`},
+ nreg:{g:'M',n:'르그레',v:[1,2,3,4,10],ps:[870,430,640,0],d:v=>`무기 칸이 가득 찼을 때 레벨업하면 ${v}% 확률로 무기 하나를 버릴 수 있어요 (한 판에 1회)`},
  umb:{g:'L',n:'우산',v:[15,20,25,32,40],p:[30,28,26,23,20],d:v=>`받는 원거리(탄막) 피해 −${v}% · ⚠️ 받는 근거리 피해 +${[30,28,26,23,20][[15,20,25,32,40].indexOf(v)]}%`},
 };
 /* 저장 코드 순서 — 새 반지는 반드시 끝에 */
-const SNK=['rev','crit','qg','arena','roll','ult','curse','shield','heart','heel','nail','spa','corset','study','payday','magnet','boss','nag','box','cool','kb','night','soup','pierce','moon','wall','umb','nbag','npouch','nmut','njok','nsprout'];
+const SNK=['rev','crit','qg','arena','roll','ult','curse','shield','heart','heel','nail','spa','corset','study','payday','magnet','boss','nag','box','cool','kb','night','soup','pierce','moon','wall','umb','nmort','nmal','nveuve','nacc','nreg'];
 const ORD=[...SNK.filter(k=>D[k].g==='L'),...SNK.filter(k=>D[k].g==='R')];
-const nm=k=>(D[k].g==='M'?'세인트 목걸이 ':'세인트 ')+D[k].n;
+const nm=k=>(D[k].g==='M'?'세이크리드 ':'세인트 ')+D[k].n;
 function st(){if(!SAVE.saint||typeof SAVE.saint!=='object')SAVE.saint={};if(!Array.isArray(SAVE.saintEq))SAVE.saintEq=[null,null,null];while(SAVE.saintEq.length<3)SAVE.saintEq.push(null);return SAVE.saint}
 function cnt(k){const a=st()[k];return Array.isArray(a)&&a.length===5?a.map(n=>Math.max(0,n|0)):[0,0,0,0,0]}
 function lv(k){const a=cnt(k);for(let i=4;i>=0;i--)if(a[i]>0)return i+1;return 0}
@@ -9334,23 +9334,29 @@ function merge(k){const a=cnt(k);let up=0;for(let i=0;i<4;i++)while(a[i]>=3){a[i
 function add(k,n){const a=cnt(k);a[0]+=n||1;st()[k]=a;return merge(k)}
 function eqKeys(){st();return SAVE.saintEq.map(k=>k&&D[k]&&lv(k)>0?k:null)}
 function neckKey(){const k=SAVE.neckEq;return k&&D[k]&&D[k].g==='M'&&lv(k)>0?k:null}
-/* 📿 판 시작 0.3초 뒤 한 번: 목걸이 확률 → 무기/아이템 3장 중 1장 골라 들고 시작 (트와일라잇 제외) */
-function neckTick(){const s=G._sn;if(!s||G.tw||G.td)return;const k0=neckKey();if(k0==='nmut')mutTick(s);if(s.nk)return;if(G.t<.3||G.paused||G.freeze>0||!G.running)return;s.nk=1;const k=k0;if(!k||k==='nmut'||k==='njok')return;const pr=D[k].v[lv(k)-1];if(Math.random()*100>=pr)return;
-  if(k==='nsprout'){const n2=Math.floor(4+(G.lvl+1)*4+1.4*Math.pow(G.lvl+1,1.8));G.xp=Math.max(G.xp,G.next+n2);if(!G.bot)try{toast('📿 '+nm(k),'레벨 3에서 시작해요!',true)}catch(e){}return}
-  let ops;if(k==='nbag'){if(G.weapons.length>=6)return;ops=Object.keys(WP).filter(q=>WU[q]&&!WP[q].hid&&!WP[q].ju&&!W(q)&&juAllow(q,G.id)).map(q=>({t:'wnew',k:q}))}
+/* 📿 세이크리드 썸띵: 시작형(모르·말라디·뵈브)은 판 시작 0.3초 뒤 한 번 굴림 (트와일라잇 제외) */
+const HXM=()=>{const ex=new Set();try{for(const h of HX){ex.add(h.a);ex.add(h.b)}}catch(e){}return ex};
+const nkP=k=>D[k].v[lv(k)-1];
+function neckTick(){const s=G._sn;if(!s||G.tw||G.td)return;const k=neckKey();if(k==='nacc')accTick(s);if(s.nk)return;if(G.t<.3||G.paused||G.freeze>0||!G.running)return;s.nk=1;if(!k||!['nmort','nmal','nveuve'].includes(k))return;if(Math.random()*100>=nkP(k))return;
+  if(k==='nveuve'){const n2=Math.floor(4+(G.lvl+1)*4+1.4*Math.pow(G.lvl+1,1.8));G.xp=Math.max(G.xp,G.next+n2);if(!G.bot)try{toast('📿 '+nm(k),'레벨 3에서 시작해요!',true)}catch(e){}return}
+  let ops;if(k==='nmort'){if(G.weapons.length>=6)return;ops=Object.keys(WP).filter(q=>WU[q]&&!WP[q].hid&&!WP[q].ju&&!W(q)&&juAllow(q,G.id)).map(q=>({t:'wnew',k:q}))}
   else{if(Object.keys(G.items).length>=6)return;ops=Object.keys(IT).filter(q=>!G.items[q]&&!IT[q].ju&&juAllow(q,G.id)).map(q=>({t:'inew',k:q}))}
   for(let i=ops.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[ops[i],ops[j]]=[ops[j],ops[i]]}ops=ops.slice(0,3);if(!ops.length)return;
   if(G.bot){applyChoice(ops[0]);return}
   G.paused=true;try{SND.p('lvl')}catch(e){}const m=document.getElementById('lvmodal');
-  m.innerHTML=`<h3>📿 목걸이가 빛나요!</h3><p class="c">세인트 목걸이 ${esc(D[k].n)} · ${k==='nbag'?'무기':'아이템'} 하나를 골라 들고 시작해요</p>${ops.map((o,i)=>`<div class="optw">${optHTML(o,i)}</div>`).join('')}`;
+  m.innerHTML=`<h3>📿 목걸이가 빛나요!</h3><p class="c">${esc(nm(k))} · ${k==='nmort'?'무기':'아이템'} 하나를 골라 들고 시작해요</p>${ops.map((o,i)=>`<div class="optw">${optHTML(o,i)}</div>`).join('')}`;
   m.querySelectorAll('canvas[data-spr]').forEach(c=>{const x=c.getContext('2d');x.imageSmoothingEnabled=false;x.drawImage(SPRF(c.dataset.spr,'plain',0),0,0,64,64)});
   m.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{applyChoice(ops[+b.dataset.i]);document.getElementById('lvov').hidden=true;G.paused=false;try{toast('📿 '+nm(k),'들고 시작해요!')}catch(e){}});
   document.getElementById('lvov').hidden=false}
-/* 🧬 돌연변이: Lv8이 된 무기마다 한 번 굴림, 성공은 한 판에 한 번 */
-function mutTick(s){if(s.mu||G.paused)return;const k='nmut',pr=D[k].v[lv(k)-1],ex=new Set();try{for(const h of HX){ex.add(h.a);ex.add(h.b)}}catch(e){}
-  for(const w of G.weapons){if(w.evo||w.lvl<8||w._mu)continue;w._mu=1;if(WP[w.k].hid||WP[w.k].ju||ex.has(w.k))continue;if(Math.random()*100<pr){s.mu=1;w.evo=true;
-    if(!G.bot){try{SND.p('evo');toast('🧬 돌연변이!',`${WP[w.k].name} → ${WP[w.k].evoName}`,true);sparks(G.p.x,G.p.y-20,60,['#9dff6a','#ff7ad8','#ffffff'],300,.9,3)}catch(e){}}break}}}
-const jokerOn=()=>neckKey()==='njok'&&!(G&&G.tw)&&Math.random()*100<D.njok.v[lv('njok')-1];
+/* 📿 아쿠슈망: 진화 짝 아이템이 없는 무기가 레벨이 오를 때마다(레벨업 카드·보스 상자) 확률로 바로 진화 → Lv8 */
+function accTick(s){if(G.paused&&!G.chestBusy)return;const pr=nkP('nacc');let ex=null;
+  for(const w of G.weapons){if(w._pl===undefined){w._pl=w.lvl;continue}if(w.lvl<=w._pl){w._pl=w.lvl;continue}const up=w.lvl-w._pl;w._pl=w.lvl;if(w.evo||G.items[WP[w.k].evo])continue;ex=ex||HXM();if(WP[w.k].hid||WP[w.k].ju||ex.has(w.k))continue;
+    for(let i=0;i<up;i++)if(Math.random()*100<pr){w.evo=true;w.lvl=8;w._pl=8;if(!G.bot){try{SND.p('evo');toast('📿 세이크리드 아쿠슈망',`🧬 ${WP[w.k].name} → ${WP[w.k].evoName}`,true);sparks(G.p.x,G.p.y-20,60,['#ffb0e0','#ff7ad8','#ffffff'],300,.9,3)}catch(e){}}break}}}
+/* 📿 르그레: 무기 칸이 가득 찬 레벨업에서 확률로 「무기 하나 버리기」 버튼 (한 판에 1회 · 성공 전까지 레벨업마다 굴림) */
+function regRoll(){if(neckKey()!=='nreg'||!G||G.tw||G.bot||!G._sn||G._sn.rg)return false;if(G.weapons.length+(G.fmSW?1:0)<6)return false;if(G._sn.rgOk)return true;if(Math.random()*100>=nkP('nreg'))return false;G._sn.rgOk=1;return true}/* 성공하면 버튼은 쓸 때까지 남음 */
+function regAsk(){const m=document.getElementById('lvmodal');m.innerHTML=`<h3>🥀 르그레</h3><p class="c">버릴 무기를 하나 골라요 · 비운 칸에 새 무기가 들어올 수 있어요</p>${G.weapons.map((w,i)=>`<div class="optw"><button type="button" class="opt" data-i="${i}"><span class="wi">${WP[w.k].icon}</span><span class="ot"><b>${esc(w.evo?WP[w.k].evoName||WP[w.k].name:WP[w.k].name)}</b><small>${w.evo?'진화':'Lv'+w.lvl}</small></span></button></div>`).join('')}<button type="button" class="rrb" id="rgNo">안 버릴래요</button>`;
+  m.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{const w=G.weapons[+b.dataset.i];if(!w)return;G._sn.rg=1;G._sn.rgOk=0;G.weapons.splice(+b.dataset.i,1);G.projs=G.projs.filter(q=>q.wk!==w.k);try{toast('🥀 '+WP[w.k].name+'을(를) 버렸어요','미련은 없어요')}catch(e){}levelUp()});
+  m.querySelector('#rgNo').onclick=()=>levelUp()}
 function gachaN(){const L=SNK.filter(k=>D[k].g==='M'),k=L[Math.floor(Math.random()*L.length)],up=add(k,1);return{id:'sn:'+k,kind:'saint',sk:k,tier:'M',n:'📿 '+nm(k),owner:(CHAR[selI]||CHAR[0]).id,up,lv:lv(k)}}
 let C={};
 function refresh(){C={};for(const k of eqKeys())if(k)C[k]=D[k].v[lv(k)-1];return C}
@@ -9433,6 +9439,8 @@ const css=`
 #saint .snSay{position:absolute;left:10px;top:10px;max-width:min(58%,320px);background:rgba(250,244,255,.93);color:#3a2050;border:1.5px solid #b9e8ff;border-radius:14px;padding:8px 12px;font-size:13px;line-height:1.45;box-shadow:0 4px 18px rgba(80,180,255,.35);transition:opacity .3s}
 #saint .snSay b{display:block;font-size:11px;color:#5aaee0;letter-spacing:.05em}
 #saint .snSlots{display:flex;gap:6px;padding:10px 12px 0}
+#saint .snTab{position:absolute;right:10px;top:10px;z-index:3;display:flex;gap:4px}#saint .snTab button{border-radius:999px;border:1.5px solid rgba(255,214,234,.6);background:rgba(20,10,30,.6);color:#fff;font:700 12px inherit;font-family:inherit;padding:5px 10px}#saint .snTab button[aria-pressed=true]{background:linear-gradient(#ff7ac8,#c54a9a)}
+#saint .snIn.neck{background-image:url(saint/neck_bg.webp)}#saint .snNk{position:absolute;pointer-events:none;filter:drop-shadow(0 4px 6px rgba(80,40,20,.45))}#saint .snNk.fade{-webkit-mask-image:linear-gradient(transparent,#000 14%);mask-image:linear-gradient(transparent,#000 14%)}#saint .snNk.pop{animation:snNkPop .6s cubic-bezier(.2,1.4,.4,1)}@keyframes snNkPop{0%{opacity:0;transform:translateY(-50px)}100%{opacity:1;transform:none}}
 #saint .snSlots button{flex:1;min-width:0;border-radius:12px;border:1.5px solid rgba(255,214,234,.35);background:rgba(255,255,255,.06);color:#fff;padding:6px 4px;font:700 11.5px inherit;font-family:inherit;display:flex;flex-direction:column;align-items:center;gap:2px}
 #saint .snSlots button img{height:30px}#saint .snSlots button small{color:#cbb;font-weight:400;font-size:10.5px}
 #saint .snList{padding:6px 12px calc(20px + env(safe-area-inset-bottom,0px))}
@@ -9458,22 +9466,24 @@ const css=`
 #snOv .bs{display:flex;flex-direction:column;gap:6px;margin-top:10px}#snOv .bs button{border-radius:12px;padding:10px;font:700 14px inherit;font-family:inherit;border:1.5px solid rgba(255,214,234,.5);background:rgba(255,255,255,.08);color:#fff}
 #snOv .bs button.pri{background:linear-gradient(#ff7ac8,#c54a9a);border-color:#ffc6e8}
 `;
-let built=false,SEL=null;
+let built=false,SEL=null,VIEW='hand';/* 11-10: 💍 손 / 📿 목 보기 */
 function build(){if(built)return;built=true;const s=document.createElement('style');s.textContent=css;document.head.appendChild(s);
   const sec=document.createElement('section');sec.className='scr';sec.id='saint';sec.hidden=true;document.body.appendChild(sec);
   addEventListener('resize',()=>{if(!sec.hidden)layout()})}
 function stageBox(){const sec=document.getElementById('saint'),W=sec.clientWidth||innerWidth,narrow=W<700,Ht=Math.max(220,innerHeight*(narrow?.5:.62)),Hf=W*BGH/BGW;
   /* 그림 위아래는 자르지 않음(사용자 11-09). 좁은 화면은 양옆을 손 중심으로 자르고, 넓은 화면은 양옆을 흐린 그림으로 채움 */
-  const H=Hf>=Ht?Math.min(Hf,innerHeight*.75):Ht,s=H/BGH,vw=W/s,cx=800,left=vw<BGW?Math.max(0,Math.min(BGW-vw,cx-vw/2)):-(vw-BGW)/2;return{W,H,s,left,top:0}}
+  const H=Hf>=Ht?Math.min(Hf,innerHeight*.75):Ht,s=H/BGH,vw=W/s,cx=VIEW==='neck'?870:800,left=vw<BGW?Math.max(0,Math.min(BGW-vw,cx-vw/2)):-(vw-BGW)/2;return{W,H,s,left,top:0}}
 function layout(){const st=document.querySelector('#saint .snStage'),inn=document.querySelector('#saint .snIn');if(!st||!inn)return;const b=stageBox();st.style.height=b.H+'px';inn.style.transform=`scale(${b.s}) translate(${-b.left}px,${-b.top}px)`}
 function say(kind,txt){const el=document.querySelector('#saint .snSay span');if(!el)return;el.textContent=txt||pk(LINES[kind]||LINES.hi)}
 function slotsHTML(){const E=eqKeys();return SLOT.map((o,i)=>{const k=E[i];if(!k)return `<div class="snGlow" style="left:${o.x-o.w/2-8}px;top:${o.y-10}px;width:${o.w+16}px;height:20px;transform:rotate(${o.r}deg)"></div><button type="button" class="snHit" data-slot="${i}" aria-label="${i+1}번 반지 칸 (비어 있음)" style="left:${o.x-o.w/2-12}px;top:${o.y-34}px;width:${o.w+24}px;height:62px"></button>`;
   const w=Math.round(o.w*(D[k].g==='L'?.95:.85));return `<img class="snRing${SEL===i?' pop':''}" src="${hImg(k)}" alt="" style="--r:${o.r}deg;width:${w}px;left:${o.x-w/2}px;top:${o.y-w*.45}px;transform:rotate(${o.r}deg)"><button type="button" class="snHit" data-slot="${i}" aria-label="${i+1}번 반지 칸: ${nm(k)}" style="left:${o.x-o.w/2-12}px;top:${o.y-34}px;width:${o.w+24}px;height:62px"></button>`}).join('')}
 const FING=['약지','중지','검지'];
+function neckHTML(){const k=neckKey();if(!k)return `<div class="snGlow" style="left:600px;top:470px;width:540px;height:60px;border-radius:50%"></div><button type="button" class="snHit" data-neck="1" aria-label="목걸이 칸 (비어 있음)" style="left:560px;top:300px;width:620px;height:420px"></button>`;
+  const [cx,top,w,f]=D[k].ps||[870,300,600,1];return `<img class="snNk${f?' fade':''}${SEL==='n'?' pop':''}" src="saint/k_${k}.webp" alt="" style="left:${cx-w/2}px;top:${top}px;width:${w}px"><button type="button" class="snHit" data-neck="1" aria-label="목걸이: ${esc(nm(k))}" style="left:${cx-w/2}px;top:${top}px;width:${w}px;height:${Math.round(w*1.2)}px"></button>`}
 function render(sayKind,sayTxt){build();const sec=document.getElementById('saint'),E=eqKeys(),own=SNK.filter(k=>lv(k)>0).length,sc=sec.scrollTop;
   const card=k=>{const L=lv(k),a=cnt(k),on=E.includes(k)||(D[k].g==='M'&&neckKey()===k);return `<button type="button" class="snC ${D[k].g}${L?'':' no'}" data-k="${k}">${on?'<span class="on">장착 중</span>':''}<img src="${rImg(k)}" alt="" loading="lazy"><b>${L?esc(D[k].n):'???'}</b>${L?`<span class="st">${'★'.repeat(L)}${'☆'.repeat(5-L)}</span><small>${L<5?`${L}단계 ${a[L-1]}/3`:'최고 단계'}</small>`:'<small>아직 없어요</small>'}</button>`};
   sec.innerHTML=`<div class="snHead"><button class="ghost" type="button" id="snBack">← 로비</button><h2>💍 장비 · 세인트썸띵</h2><small>${own}/${SNK.length}</small></div>
-  <div class="snStage"><div class="snIn">${slotsHTML()}</div><div class="snSay"><b>아리아드네</b><span></span></div></div>
+  <div class="snStage"><div class="snIn${VIEW==='neck'?' neck':''}">${VIEW==='neck'?neckHTML():slotsHTML()}</div><div class="snSay"><b>아리아드네</b><span></span></div><div class="snTab"><button type="button" data-view="hand" aria-pressed="${VIEW==='hand'}">💍 반지</button><button type="button" data-view="neck" aria-pressed="${VIEW==='neck'}">📿 목걸이</button></div></div>
   <div class="snSlots">${E.map((k,i)=>`<button type="button" data-slot="${i}">${k?`<img src="${hImg(k)}" alt="">${esc(D[k].n)} ${lv(k)}단계<small>${FING[i]}</small>`:`<span style="font-size:20px">○</span>비어 있음<small>${FING[i]}</small>`}</button>`).join('')}</div>
   <div class="snNeck">${(()=>{const n=neckKey();return `<button type="button" data-neck="1">${n?`<img src="${hImg(n)}" alt="">📿 ${esc(D[n].n)} ${lv(n)}단계`:'<span style="font-size:18px">📿</span>목걸이 칸 · 비어 있음'}<small>목</small></button>`})()}</div>
   <div class="snList"><p class="c" style="font-size:12px;color:#cbb;margin:10px 0 0">같은 반지 3개가 모이면 자동으로 다음 단계가 돼요 · 같은 반지는 하나만 낄 수 있어요 · 뽑기 희귀·전설에서 나와요 · 📿 목걸이는 신화에서 나와요</p>
@@ -9482,11 +9492,12 @@ function render(sayKind,sayTxt){build();const sec=document.getElementById('saint
   <h4><span class="snTR">희귀</span> · 은 반지</h4><div class="snGrid">${ORD.filter(k=>D[k].g==='R').map(card).join('')}</div></div>`;
   sec.scrollTop=sc;SEL=null;layout();say(sayKind||(own?'hi':'none'),sayTxt);
   sec.querySelector('#snBack').onclick=()=>{sec.hidden=true;titleScreen()};
-  sec.querySelectorAll('[data-slot]').forEach(b=>b.onclick=()=>{try{SND.p('click')}catch(e){}const i=+b.dataset.slot,k=eqKeys()[i];if(k)info(k);else{say('empty');const g=sec.querySelector('.snList');if(g)g.scrollIntoView({behavior:'smooth',block:'start'})}});
-  {const nb=sec.querySelector('[data-neck]');if(nb)nb.onclick=()=>{try{SND.p('click')}catch(e){}const n=neckKey();if(n)info(n);else{say('empty','목걸이는 신화에서 만나요, 언니. 아래에서 골라 주세요.');const g=sec.querySelector('.snList');if(g)g.scrollIntoView({behavior:'smooth',block:'start'})}}}
+  sec.querySelectorAll('[data-slot]').forEach(b=>b.onclick=()=>{try{SND.p('click')}catch(e){}if(VIEW!=='hand'){VIEW='hand';render();return}const i=+b.dataset.slot,k=eqKeys()[i];if(k)info(k);else{say('empty');const g=sec.querySelector('.snList');if(g)g.scrollIntoView({behavior:'smooth',block:'start'})}});
+  sec.querySelectorAll('[data-view]').forEach(b=>b.onclick=()=>{try{SND.p('click')}catch(e){}VIEW=b.dataset.view;render(VIEW==='neck'?'hi':'hi',VIEW==='neck'?'목선이 예뻐요, 언니. 오늘은 어떤 목걸이로 할까요?':undefined)});
+  sec.querySelectorAll('[data-neck]').forEach(nb=>{nb.onclick=()=>{if(VIEW!=='neck'){VIEW='neck';render('hi','목선이 예뻐요, 언니.');return}try{SND.p('click')}catch(e){}const n=neckKey();if(n)info(n);else{say('empty','목걸이는 신화에서 만나요, 언니. 아래에서 골라 주세요.');const g=sec.querySelector('.snList');if(g)g.scrollIntoView({behavior:'smooth',block:'start'})}}})
   sec.querySelectorAll('.snC').forEach(b=>b.onclick=()=>{try{SND.p('click')}catch(e){}info(b.dataset.k)})}
 function close(){const o=document.getElementById('snOv');if(o)o.remove()}
-function equip(k,i){st();const E=SAVE.saintEq;if(E.includes(k)){render('dup');return}E[i]=k;persist();refresh();SEL=i;render(D[k].g==='L'?'eqL':'eq');SEL=null}
+function equip(k,i){st();VIEW='hand';const E=SAVE.saintEq;if(E.includes(k)){render('dup');return}E[i]=k;persist();refresh();SEL=i;render(D[k].g==='L'?'eqL':'eq');SEL=null}
 function unequip(k){st();const i=SAVE.saintEq.indexOf(k);if(i<0)return;SAVE.saintEq[i]=null;persist();refresh();render('off')}
 function info(k){close();const d=D[k],L=lv(k),a=cnt(k),E=eqKeys(),M=d.g==='M',on=M?neckKey()===k:E.includes(k),free=E.indexOf(null),GN={L:'전설 · 금 반지',R:'희귀 · 은 반지',M:'신화 · 목걸이'};
   const o=document.createElement('div');o.id='snOv';
@@ -9495,10 +9506,10 @@ function info(k){close();const d=D[k],L=lv(k),a=cnt(k),E=eqKeys(),M=d.g==='M',on
   <table>${d.v.map((v,i)=>`<tr class="${L===i+1?'cur':''}"><td class="n">${i+1}단계</td><td>${esc(d.d(v))}</td></tr>`).join('')}</table>
   <div class="bs">${!L?'':M?(on?'<button type="button" data-a="noff">📿 풀기</button>':`<button type="button" class="pri" data-a="non">📿 목에 걸기${neckKey()?' ('+esc(D[neckKey()].n)+' 대신)':''}</button>`):on?`<button type="button" data-a="off">💍 빼기 (${FING[E.indexOf(k)]})</button>`:free>=0?`<button type="button" class="pri" data-a="eq" data-i="${free}">💍 ${FING[free]}에 끼우기</button>`:E.map((q,i)=>`<button type="button" data-a="eq" data-i="${i}">${FING[i]}의 ${esc(D[q].n)} 대신 끼우기</button>`).join('')}<button type="button" data-a="x">닫기</button></div></div>`;
   document.body.appendChild(o);o.addEventListener('pointerdown',e=>{if(e.target===o)close()});
-  o.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>{try{SND.p('click')}catch(e){}const a=b.dataset.a;close();if(a==='eq')equip(k,+b.dataset.i);else if(a==='off')unequip(k);else if(a==='non'){SAVE.neckEq=k;persist();render('eqL','어머, 목선이 반짝여요. 오늘 언니 제일 비싸요. 💅')}else if(a==='noff'){SAVE.neckEq=null;persist();render('off')}})}
-function open(){build();hideAll();close();const sec=document.getElementById('saint');sec.hidden=false;sec.scrollTop=0;render();img('saint/bg.webp')}
+  o.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>{try{SND.p('click')}catch(e){}const a=b.dataset.a;close();if(a==='eq')equip(k,+b.dataset.i);else if(a==='off')unequip(k);else if(a==='non'){SAVE.neckEq=k;persist();VIEW='neck';SEL='n';render('eqL','어머, 목선이 반짝여요. 오늘 언니 제일 비싸요. 💅');SEL=null}else if(a==='noff'){SAVE.neckEq=null;persist();VIEW='neck';render('off')}})}
+function open(){build();hideAll();close();const sec=document.getElementById('saint');sec.hidden=false;sec.scrollTop=0;render();img('saint/bg.webp');img('saint/neck_bg.webp')}
 
-window.SN={D,SNK,lv,cnt,add,merge,refresh,eqKeys,neckKey,gachaN,jokerOn,c:cv,v:cv,mm,rm,dmg,rev,ultM,gacha,gdesc,drawPrev,open,render,tick,init};
+window.SN={D,SNK,lv,cnt,add,merge,refresh,eqKeys,neckKey,gachaN,regRoll,regAsk,c:cv,v:cv,mm,rm,dmg,rev,ultM,gacha,gdesc,drawPrev,open,render,tick,init};
 })();
 </script>
 </body></html>

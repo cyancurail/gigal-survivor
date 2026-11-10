@@ -5890,7 +5890,9 @@ const SPP=[{title:'liar'},{g:1000},{g:1200},{g:1400},{pet:'butterfly'},{g:1600},
  {g:2800},{g:3000},{t:{M:1}},{g:3000},{pet:'ghost'},{g:3000},{g:3000},{t:{L:1}},{g:3000},{bg:'princess',title:'hero',t:{M:1}},
  {bg:'light'},{bg:'faith'},{t:{L:1}},{bg:'grave'},{bg:'beauty',t:{M:1}},  {g:3000},{t:{L:1}},{g:3000},{t:{M:1}},{bg:'lily'}];/* 11-08 밤: 새 배경 2장(빛의 길·믿음의 흔적)을 먼저, 영혼이 쉬는 곳·아름다움의 신전은 뒤로 */
 const spNow=()=>Date.now();const spLive=()=>spNow()>=SP.start&&spNow()<SP.end;
-function sp(){let S=SAVE.sp;if(!S||S.id!==SP.id)S=SAVE.sp={id:SP.id,xp:0,prem:0,f:{},p:{}};return S}
+function sp(){let S=SAVE.sp;if(!S||S.id!==SP.id)S=SAVE.sp={id:SP.id,xp:0,prem:0,f:{},p:{}};spFix(S);return S}
+/* 11-10 버그(람쥐 제보): 프리미엄 31·32단계 보상이 11-08 밤에 바뀜(3000G·영혼이 쉬는 곳 → 빛의 길·믿음의 흔적). 바뀌기 전에 받은 사람은 체크만 되고 새 배경이 없음 → 한 번 채워 줌 */
+function spFix(S){if(SAVE.spFix1)return;const o=SAVE.lbOwn||(SAVE.lbOwn={}),got=[];if(S.p&&S.p[31]&&!o.light){o.light=1;got.push(LBM.light.n)}if(S.p&&S.p[32]&&!o.faith){o.faith=1;got.push(LBM.faith.n)}if(!S.p||!S.p[31])return;SAVE.spFix1=1;try{persist()}catch(e){}if(got.length)setTimeout(()=>{try{toast('🖼️ 빠져 있던 로비 배경을 채워 드렸어요',got.join(' · '),true)}catch(e){}},1200)}
 const SPMAX=SPF.length;const spLv=()=>Math.min(SPMAX,1+Math.floor(sp().xp/SP.lvXp));
 function spAdd(x,why){if(!spLive()||!(x>0))return 0;const S=sp(),b=spLv();S.xp+=Math.round(x);const a=spLv();if(a>b)setTimeout(()=>toast('🎫 패스 '+a+'단계!','받을 보상이 생겼어요'),400);return Math.round(x)}
 window.spAdd=spAdd;

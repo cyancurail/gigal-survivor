@@ -838,7 +838,7 @@ function fmCone(){if(FM.cone)return FM.cone;const N=256,c=document.createElement
   g.putImageData(D,0,0);return FM.cone=c}
 /* ===== 11-10 🔪 사냥꾼(죽지 않는 추적자): 장수 어려움·헬. 헬 2분부터 90초·어려움 4분부터 120초마다 50% 확률로 나타나 45초 사냥.
    배회 → 들키면 「!」 0.4초 → 추격(헬 = 캐릭터 이동속도, 어려움 ×0.85). 수풀·건물에 숨기 / 켜진 횃불 빛 / 멀리 벗어나면 놓침.
-   잡히면 최대 체력 50% 고정 피해 후 사라짐. 무기에 맞으면 0.3초 휘청. 감지 범위는 붉은 빛(어둠이 짙을수록 넓음). 심장박동 소리. */
+   잡히면 최대 체력 50% 고정 피해 후 사라짐. 무기에 맞으면 0.3초 휘청. 감지 = 바라보는 방향 100° 붉은 부채꼴(어둠이 짙을수록 김) + 곁 60px. 심장박동 소리. */
 function fmHuntTick(dt){const lv=fmLv(),p=G.p;if(lv<1)return;const H=G.fmHT||(G.fmHT={t:lv===2?120:240,e:null,hb:0});let e=H.e;
   if(e&&(e.dead||!G.enemies.includes(e))){H.e=e=null;H.t=Math.max(H.t,lv===2?90:120)}
   if(!e){if(G.arena)return;H.t-=dt;if(H.t>0)return;H.t=lv===2?90:120;if(Math.random()<.5)return;/* 11-10: 주기마다 50% 확률로 등장 */const [x,y]=spawnPos();e=mkEnemy('fm_hunter',x,y,{fixed:1,hunt:1,fmInv:1e9,xp:0,dmg:0});e.hp=e.max=1e12;e.life=45;e.st='w';e.tx=x;e.ty=y;e.wt=0;e.sR=200;H.e=e;
@@ -846,8 +846,11 @@ function fmHuntTick(dt){const lv=fmLv(),p=G.p;if(lv<1)return;const H=G.fmHT||(G.
   e.life-=dt;e.fmInv=1e9;e.hp=e.max;e.kx=e.ky=0;
   if(G.arena||(e.life<=0&&e.st!=='c')||e.life<-15){fmHuntGone(e,0);return}
   const dx=p.x-e.x,dy=p.y-e.y,d=Math.hypot(dx,dy)||1,dk=G.fmD||0,R=(lv===2?221:187)*(1+.6*dk)/* 11-10: 감지 범위 −15% */;e.sR=R;
-  const hid=!!(G.fmH&&G.fmH.on),lit=fmNearTorch(),ps=G.S.speed,can=!hid&&!lit&&d<R;if(e.stg>0)e.stg-=dt;e.ph=(e.ph||0)+dt;
-  const mv=(tx,ty,v)=>{if(e.stg>0)v*=.15;const ax=tx-e.x,ay=ty-e.y,l=Math.hypot(ax,ay);if(l>2){const st=Math.min(l,v*dt);e.x+=ax/l*st;e.y+=ay/l*st;e.mvx=ax/l}};
+  const hid=!!(G.fmH&&G.fmH.on),lit=fmNearTorch(),ps=G.S.speed;if(e.stg>0)e.stg-=dt;e.ph=(e.ph||0)+dt;
+  /* 11-10: 감지 = 바라보는 방향 100° 부채꼴(길이 R) + 바로 곁 60px. 배회·수색 중엔 고개를 좌우로 훑음 */
+  if(e.fa===undefined)e.fa=Math.atan2(dy,dx);{const sw=(e.st==='w'||e.st==='s')?Math.sin(e.ph*1.4)*.6:0,tg=(e.st==='c'||e.st==='a')?Math.atan2(dy,dx):(e.mva===undefined?e.fa:e.mva)+sw;e.fa+=Math.atan2(Math.sin(tg-e.fa),Math.cos(tg-e.fa))*Math.min(1,dt*(e.st==='c'?8:2.5))}
+  const inCone=d<R&&Math.abs(Math.atan2(Math.sin(Math.atan2(dy,dx)-e.fa),Math.cos(Math.atan2(dy,dx)-e.fa)))<50*Math.PI/180,can=!hid&&!lit&&(inCone||d<60);
+  const mv=(tx,ty,v)=>{if(e.stg>0)v*=.15;const ax=tx-e.x,ay=ty-e.y,l=Math.hypot(ax,ay);if(l>2){const st=Math.min(l,v*dt);e.x+=ax/l*st;e.y+=ay/l*st;e.mvx=ax/l;e.mva=Math.atan2(ay,ax)}};
   if(e.st==='w'){if(can){e.st='a';e.at=.4;if(!G.bot){G.texts.push({x:e.x,y:e.y-80,v:'!',life:.9,col:'#ff2a2a'});G.shk=Math.max(G.shk||0,.18)}}
     else{e.wt-=dt;if(e.wt<=0||Math.hypot(e.tx-e.x,e.ty-e.y)<20){e.wt=rnd(2.5,4);const a=rnd(0,6.283),r=rnd(80,300);e.tx=p.x+Math.cos(a)*r;e.ty=p.y+Math.sin(a)*r}mv(e.tx,e.ty,ps*.45)}}
   else if(e.st==='a'){e.at-=dt;if(e.at<=0)e.st='c'}
@@ -860,9 +863,15 @@ function fmHuntDraw(e){const im=FM.img.hunter;if(!im||!im.width)return;const sc=
   const f=e.st==='a'?2:ch?3+Math.floor(e.ph*11)%5:Math.floor(e.ph*2.2)%2,bob=ch?Math.sin(e.ph*22)*2:Math.sin(e.ph*2.6)*5;
   ctx.save();ctx.globalAlpha=.35;ctx.fillStyle='#000';ctx.beginPath();ctx.ellipse(e.x,e.y+18,26,8,0,0,7);ctx.fill();ctx.globalAlpha=1;
   if(e.stg>0)ctx.translate(rnd(-2,2),0);const sx=(e.mvx||0)<-.2?-1:1;ctx.translate(e.x,e.y-30+bob);ctx.scale(sx,1);ctx.imageSmoothingEnabled=false;ctx.drawImage(im,f*fw,0,fw,fh,-64*sc,-68*sc,fw*sc,fh*sc);ctx.restore()}
-function fmHuntLight(){const H=G.fmHT,e=H&&H.e;if(!e||e.dead)return;if(!FM.rl){const c=document.createElement('canvas');c.width=c.height=128;const g=c.getContext('2d'),gr=g.createRadialGradient(64,64,0,64,64,64);gr.addColorStop(0,'rgba(255,40,50,.55)');gr.addColorStop(.7,'rgba(255,20,40,.22)');gr.addColorStop(.92,'rgba(255,30,50,.3)');gr.addColorStop(1,'rgba(255,0,30,0)');g.fillStyle=gr;g.fillRect(0,0,128,128);FM.rl=c}
-  const R=e.sR||220,ch=e.st==='c'||e.st==='a',pu=.75+.25*Math.sin(G.t*(ch?14:4));ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=(ch?.5:.3)*pu;ctx.drawImage(FM.rl,e.x-R,e.y-30-R,R*2,R*2);ctx.globalAlpha=(ch?.5:.3)*(.7+.3*pu);ctx.strokeStyle='#ff2a3a';ctx.lineWidth=2;ctx.setLineDash([10,8]);ctx.lineDashOffset=-G.t*30;ctx.beginPath();ctx.arc(e.x,e.y-30,R,0,7);ctx.stroke();ctx.setLineDash([]);
-  ctx.globalAlpha=.9;ctx.fillStyle='#ff2a3a';ctx.beginPath();ctx.arc(e.x,e.y-30+(ch?0:Math.sin(e.ph*2.6)*5),4.5,0,7);ctx.fill();ctx.restore()}
+function fmHuntLight(){const H=G.fmHT,e=H&&H.e;if(!e||e.dead)return;
+  if(!FM.rl){const N=256,c=document.createElement('canvas');c.width=c.height=N;const g=c.getContext('2d'),D=g.createImageData(N,N),h=N/2,HA=50*Math.PI/180;
+    for(let y=0;y<N;y++)for(let x=0;x<N;x++){const dx=x-h,dy=y-h,r=Math.hypot(dx,dy)/h;if(r>1||dx<=0)continue;const an=Math.abs(Math.atan2(dy,dx));if(an>HA)continue;const ea=Math.min(1,(HA-an)/(HA*.25)),er=r<.85?.55+.45*r/.85:Math.max(0,(1-r)/.15);const a=ea*er,o=(y*N+x)*4;D.data[o]=255;D.data[o+1]=30;D.data[o+2]=45;D.data[o+3]=Math.round(200*a)}
+    g.putImageData(D,0,0);FM.rl=c}
+  const R=e.sR||190,ch=e.st==='c'||e.st==='a',pu=.75+.25*Math.sin(G.t*(ch?14:4)),ex=e.x,ey=e.y-30;ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=(ch?.6:.38)*pu;
+  ctx.translate(ex,ey);ctx.rotate(e.fa||0);ctx.drawImage(FM.rl,-R,-R,R*2,R*2);
+  ctx.globalAlpha=(ch?.6:.38)*(.7+.3*pu);ctx.strokeStyle='#ff2a3a';ctx.lineWidth=2;ctx.setLineDash([10,8]);ctx.lineDashOffset=-G.t*30;const A=50*Math.PI/180;ctx.beginPath();ctx.moveTo(0,0);ctx.arc(0,0,R,-A,A);ctx.closePath();ctx.stroke();ctx.setLineDash([]);
+  ctx.globalAlpha=.25*pu;ctx.beginPath();ctx.arc(0,0,60,0,7);ctx.stroke();ctx.rotate(-(e.fa||0));
+  ctx.globalAlpha=.9;ctx.fillStyle='#ff2a3a';ctx.beginPath();ctx.arc(0,ch?0:Math.sin(e.ph*2.6)*5,4.5,0,7);ctx.fill();ctx.restore()}
 function fmUnseal(fx){const S=G.fmSW;if(!S)return;G.fmSW=null;const w=S.w;w.t=0;G.weapons.splice(Math.min(S.i,G.weapons.length),0,w);
   if(fx&&!G.bot){const nm=w.evo?WP[w.k].evoName||WP[w.k].name:WP[w.k].name;toast('✨ '+WP[w.k].icon+' '+nm+'을(를) 되찾았어요','어둠이 걷혔어요',true);SND.p('evo');sparks(G.p.x,G.p.y-20,40,['#ffd34d','#ffffff','#ff8ad8'],260,.8,3)}}
 function fmVis(){const lv=fmLv();if(!lv)return 0;const dk=G.fmD||0,mx=Math.hypot(VW,VH)*.62,mn=lv===2?175:260;let R=mx+(mn-mx)*dk;if(G.fmIn&&G.fmIn.t==='house_empty')R*=.62;if(G.fmH&&G.fmH.on)R=Math.min(R,120);/* 11-10: 숨으면 화면 크기와 상관없이 코앞만 */return R}

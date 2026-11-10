@@ -9329,7 +9329,7 @@ const D={
  nmort:{g:'M',n:'모르',v:[1,2,3,4,10],ps:[870,280,600,1],d:v=>`게임 시작 때 ${v}% 확률로 무기 하나를 추가로 골라 들고 시작`},
  nmal:{g:'M',n:'말라디',v:[1,2,3,4,10],ps:[870,300,660,1],d:v=>`게임 시작 때 ${v}% 확률로 아이템 하나를 추가로 골라 들고 시작`},
  nveuve:{g:'M',n:'뵈브',v:[.5,1,1.5,2,5],ps:[870,320,580,0],d:v=>`게임 시작 때 ${v}% 확률로 레벨 3에서 시작`},
- nacc:{g:'M',n:'아쿠슈망',v:[.5,1,1.5,2,5],ps:[870,270,480,1],d:v=>`진화 짝이 없는 무기가 레벨업할 때마다 ${v}% 확률로 바로 진화 (하모닉스 재료·보석 제외)`},
+ nacc:{g:'M',n:'아쿠슈망',v:[.5,1,1.5,2,5],ps:[870,270,480,1],d:v=>`진화 짝이 없는 무기가 레벨업할 때마다 ${v}% 확률로 바로 진화`},
  nreg:{g:'M',n:'르그레',v:[1,2,3,4,10],ps:[870,430,640,0],d:v=>`무기 칸이 가득 찼을 때 레벨업하면 ${v}% 확률로 무기 하나를 버릴 수 있어요 (한 판에 1회)`},
  umb:{g:'L',n:'우산',v:[15,20,25,32,40],p:[30,28,26,23,20],d:v=>`받는 원거리(탄막) 피해 −${v}% · ⚠️ 받는 근거리 피해 +${[30,28,26,23,20][[15,20,25,32,40].indexOf(v)]}%`},
 };
@@ -9360,7 +9360,7 @@ function neckTick(){const s=G._sn;if(!s||G.tw||G.td)return;const k=neckKey();if(
   document.getElementById('lvov').hidden=false}
 /* 📿 아쿠슈망: 진화 짝 아이템이 없는 무기가 레벨이 오를 때마다(레벨업 카드·보스 상자) 확률로 바로 진화 → Lv8 */
 function accTick(s){if(G.paused&&!G.chestBusy)return;const pr=nkP('nacc');let ex=null;
-  for(const w of G.weapons){if(w._pl===undefined){w._pl=w.lvl;continue}if(w.lvl<=w._pl){w._pl=w.lvl;continue}const up=w.lvl-w._pl;w._pl=w.lvl;if(w.evo||G.items[WP[w.k].evo])continue;ex=ex||HXM();if(WP[w.k].hid||WP[w.k].ju||ex.has(w.k))continue;
+  for(const w of G.weapons){if(w._pl===undefined){w._pl=w.lvl;continue}if(w.lvl<=w._pl){w._pl=w.lvl;continue}const up=w.lvl-w._pl;w._pl=w.lvl;if(w.evo||G.items[WP[w.k].evo])continue;if(WP[w.k].hid)continue;/* 11-10 사용자: 하모닉스 재료·보석도 진화 가능 */
     for(let i=0;i<up;i++)if(Math.random()*100<pr){w.evo=true;w.lvl=8;w._pl=8;if(!G.bot){try{SND.p('evo');toast('📿 세이크리드 아쿠슈망',`🧬 ${WP[w.k].name} → ${WP[w.k].evoName}`,true);sparks(G.p.x,G.p.y-20,60,['#ffb0e0','#ff7ad8','#ffffff'],300,.9,3)}catch(e){}}break}}}
 /* 📿 르그레: 무기 칸이 가득 찬 레벨업에서 확률로 「무기 하나 버리기」 버튼 (한 판에 1회 · 성공 전까지 레벨업마다 굴림) */
 function regRoll(){if(neckKey()!=='nreg'||!G||G.tw||G.bot||!G._sn||G._sn.rg)return false;if(G.weapons.length+(G.fmSW?1:0)<6)return false;if(G._sn.rgOk)return true;if(Math.random()*100>=nkP('nreg'))return false;G._sn.rgOk=1;return true}/* 성공하면 버튼은 쓸 때까지 남음 */

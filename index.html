@@ -3671,6 +3671,8 @@ const POOL_V20=POOL.length;[['박준형',8,'라 플리 벨 뉘','msk2/hx_rouge.p
 const POOL_V21=POOL.length;[['임재영',8,'예니스','msk2/cd01.png'],['조혁래',8,'실드카드','msk2/cd02.png'],['김세진',9,'샌드카드','msk2/cd03.png'],['박준형',9,'일루전카드','msk2/cd04.png'],['박민규',7,'메이즈카드','msk2/cd05.png'],['송기호',8,'사일런트카드','msk2/cd06.png'],['쥬은',6,'우드카드','msk2/cd07.png'],['박준영',8,'리턴카드','msk2/cd08.png'],['재건',4,'스루카드','msk2/cd09.png'],['승태민',7,'미러카드','msk2/cd10.png'],['영규형',7,'소드카드','msk2/cd11.png'],['박계원',9,'쏭카드','msk2/cd12.png'],['창환이형',8,'대쉬카드','msk2/cd13.png'],['진형우',8,'빅카드','msk2/cd14.png'],['하도',4,'드림카드','msk2/cd15.png']].forEach(([id,sl,n,f])=>{const o={id,s:sl,n,pid:'mx:'+id+'|'+sl,f};MSK2L.push(o);MSK2B[id+'|'+sl]=o;const c=CHAR.find(q=>q.id===id);POOL.push({id:o.pid,tier:'M',kind:'mskin',owner:id,s:sl,n:`${c?c.nick:({'재건':'짱재'}[id]||id)} · ${n}`})});
 /* 2026-11-11 신화 스킨 오리지널 카드 시리즈 17종 256px (신화 뽑기·선택권 포함, 마음의 정원 대원 스킨과 같은 그림) — POOL 맨 끝 */
 const POOL_V22=POOL.length;[['임재영',9,'체리건1','msk2/ce01.png'],['임재영',10,'체리건2','msk2/ce02.png'],['진형우',9,'코지카드','msk2/ce03.png'],['진형우',10,'스타카드','msk2/ce04.png'],['조혁래',9,'가디언카드','msk2/ce05.png'],['송기호',9,'클라우드카드','msk2/ce06.png'],['쥬은',7,'스톤카드','msk2/ce07.png'],['영규형',8,'이그니션카드','msk2/ce08.png'],['승태민',8,'그래비티카드','msk2/ce09.png'],['하도',5,'봄버카드','msk2/ce10.png'],['하도',6,'레이저카드','msk2/ce11.png'],['창환이형',9,'네온카드','msk2/ce12.png'],['창환이형',10,'플라워카드','msk2/ce13.png'],['박민규',8,'슬리피카드','msk2/ce14.png'],['승태민',9,'리브라카드','msk2/ce15.png'],['박민규',9,'샷카드','msk2/ce16.png'],['승태민',10,'스노우카드','msk2/ce17.png']].forEach(([id,sl,n,f])=>{const o={id,s:sl,n,pid:'mx:'+id+'|'+sl,f};MSK2L.push(o);MSK2B[id+'|'+sl]=o;const c=CHAR.find(q=>q.id===id);POOL.push({id:o.pid,tier:'M',kind:'mskin',owner:id,s:sl,n:`${c?c.nick:({'재건':'짱재'}[id]||id)} · ${n}`})});
+/* 2026-11-11 짱재 오리지널 카드 2종 (신화 뽑기·선택권 포함, 패치내역 미기재) — POOL 맨 끝 */
+const POOL_V23=POOL.length;[['재건',5,'골드카드','msk2/ce18.png'],['재건',6,'스톰카드','msk2/ce19.png']].forEach(([id,sl,n,f])=>{const o={id,s:sl,n,pid:'mx:'+id+'|'+sl,f};MSK2L.push(o);MSK2B[id+'|'+sl]=o;const c=CHAR.find(q=>q.id===id);POOL.push({id:o.pid,tier:'M',kind:'mskin',owner:id,s:sl,n:`${c?c.nick:({'재건':'짱재'}[id]||id)} · ${n}`})});
 {const t=POOL.find(p=>p.id==='ms:임재영');if(t){t.vid='ult3/taetae.mp4';t.role='intro';t.vn='태태영 Ⅲ'}}
 const PBY={};POOL.forEach(p=>PBY[p.id]=p);
 const TIERN={C:'일반',R:'희귀',L:'전설',M:'신화'},TIERC={C:'#e8e8f0',R:'#ffd34d',L:'#ff7ac8',M:'#fff3b0'};
@@ -3963,7 +3965,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)r
 
 /* ================= 저장 코드 (기기 간 이동) =================
    ※ POOL/ACH/AXN/WFX 순서가 코드 해석 순서예요. 새 항목은 반드시 "끝에" 추가하세요. */
-const SC_VER=25;/* v23: 맨 끝 세인트썸띵 블록 / v25: POOL 끝 카드 시리즈 2 (v22~24 코드 = POOL.slice(0,POOL_V22)) */
+const SC_VER=26;/* v26: POOL 끝 짱재 카드 2종 (v25 코드 = POOL.slice(0,POOL_V23)) *//* v23: 맨 끝 세인트썸띵 블록 / v25: POOL 끝 카드 시리즈 2 (v22~24 코드 = POOL.slice(0,POOL_V22)) */
 function scBits(list,has){const out=[];for(let i=0;i<list.length;i+=8){let b=0;for(let j=0;j<8&&i+j<list.length;j++)if(has(list[i+j],i+j))b|=1<<j;out.push(b)}return out}
 function scUnbits(bytes,pos,list,set){for(let i=0;i<list.length;i++){if(bytes[pos+(i>>3)]>>(i&7)&1)set(list[i],i)}return pos+Math.ceil(list.length/8)}
 function scVar(out,n){n=Math.max(0,Math.floor(n||0));do{let b=n&127;n=Math.floor(n/128);if(n)b|=128;out.push(b)}while(n)}
@@ -3999,7 +4001,7 @@ function parseCode(code){
   try{const C=CH12().map(c=>c.id),S={fancy:{},ult:{},cine:{},tallOff:{},best:{},bestH:{},inv:{},skin:{},wfx:{},ach:{},ax:{},xevo:{},achC:{},tix:{R:0,L:0,M:0}};let p=1;
     for(const k of ['fancy','ult','cine','tallOff'])p=scUnbits(body,p,C,id=>S[k][id]=true);
     C.forEach(id=>{const v=body[p++];if(v)S.best[id]=v*10});C.forEach(id=>{const v=body[p++];if(v)S.bestH[id]=v*10});
-    p=scUnbits(body,p,ver>=25?POOL:ver>=22?POOL.slice(0,POOL_V22):ver>=21?POOL.slice(0,POOL_V21):ver>=20?POOL.slice(0,POOL_V20):ver>=19?POOL.slice(0,POOL_V19):ver>=18?POOL.slice(0,POOL_V18):ver>=17?POOL.slice(0,POOL_V17):ver>=16?POOL.slice(0,POOL_V16):ver>=15?POOL.slice(0,POOL_V15):ver>=14?POOL.slice(0,POOL_V14):ver>=13?POOL.slice(0,POOL_V13):ver>=11?POOL.slice(0,POOL_V11):ver>=9?POOL.slice(0,POOL_V9):ver>=8?POOL.slice(0,POOL_V8):ver>=6?POOL.slice(0,POOL_V7):ver>=5?POOL.slice(0,POOL_V5):POOL.slice(0,POOL_V4),it=>S.inv[it.id]=true);
+    p=scUnbits(body,p,ver>=26?POOL:ver>=25?POOL.slice(0,POOL_V23):ver>=22?POOL.slice(0,POOL_V22):ver>=21?POOL.slice(0,POOL_V21):ver>=20?POOL.slice(0,POOL_V20):ver>=19?POOL.slice(0,POOL_V19):ver>=18?POOL.slice(0,POOL_V18):ver>=17?POOL.slice(0,POOL_V17):ver>=16?POOL.slice(0,POOL_V16):ver>=15?POOL.slice(0,POOL_V15):ver>=14?POOL.slice(0,POOL_V14):ver>=13?POOL.slice(0,POOL_V13):ver>=11?POOL.slice(0,POOL_V11):ver>=9?POOL.slice(0,POOL_V9):ver>=8?POOL.slice(0,POOL_V8):ver>=6?POOL.slice(0,POOL_V7):ver>=5?POOL.slice(0,POOL_V5):POOL.slice(0,POOL_V4),it=>S.inv[it.id]=true);
     C.forEach(id=>{const v=body[p++];if(v&&POOL[v-1]&&['color','swim','hanbok','wed','god'].includes(POOL[v-1].kind))S.skin[id]=POOL[v-1].id});
     p=scUnbits(body,p,WK(),k=>S.wfx[k]=false);
     p=scUnbits(body,p,AL,a=>S.ach[a.id]=1);p=scUnbits(body,p,AXK(),k=>S.ax[k]=false);p=scUnbits(body,p,XW(),k=>S.xevo[k]=1);S.achC={};if(ver>=2)p=scUnbits(body,p,AL,a=>S.achC[a.id]=1);else Object.keys(S.ach).forEach(k=>S.achC[k]=1);if(ver>=4){S.cpn={};p=scUnbits(body,p,COUPONS,q=>S.cpn[q.c]=1)}

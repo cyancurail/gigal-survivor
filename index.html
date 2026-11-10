@@ -1722,9 +1722,9 @@ const WU={
  docs(w,dt){
   const L=w.lvl,S=G.S,ev=w.evo,st=w.st;st.ps=st.ps||[];w.t-=dt;
   if(w.t<=0){w.t=(2.3-.08*L)*S.cd;const n=ev?8+S.amount:1+Math.floor(L/3)+S.amount;const stp=ev&&((w.vc=(w.vc||0)+1)%2===1);
-    const gi=ev&&Math.random()<.15?Math.floor(Math.random()*n):-1;const tg=docTargets(G.p.x,G.p.y,n,null);const dmg=(10+3*L)*S.might*(ev?.75:1)*1.9;
+    const gi=ev&&Math.random()<.15?Math.floor(Math.random()*n):-1;const tg=docTargets(G.p.x,G.p.y,n,null),vs=new Set()/* 11-11 사용자: 한 번에 날린 서류끼리 같은 적을 또 맞히면 피해 1/8 */;const dmg=(10+3*L)*S.might*(ev?.75:1)*1.9;
     for(let i=0;i<n;i++){const e=tg[i];let ba;if(ev)ba=i*Math.PI*2/n+rnd(-.15,.15);else{const ta=e?Math.atan2(e.y-G.p.y,e.x-G.p.x):Math.atan2(G.p.fy,G.p.fx);ba=ta+Math.PI+(i-(n-1)/2)*.45}
-      const q=docNew(G.p.x,G.p.y,ba,e,dmg,ev?1:0,stp,0,i*.05);if(ev&&i===gi)q.gold=2;st.ps.push(q)}}
+      const q=docNew(G.p.x,G.p.y,ba,e,dmg,ev?1:0,stp,0,i*.05);q.vs=vs;if(ev&&i===gi)q.gold=2;st.ps.push(q)}}
   for(const q of st.ps)docStep(w,q,dt);st.ps=st.ps.filter(q=>!q.gone)},
  rose(w,dt){
   const L=w.lvl,S=G.S,ev=w.evo;w.t-=dt;
@@ -2082,13 +2082,13 @@ function docStep(w,q,dt){const S=G.S;q.t+=dt;if(q.t<0){q.x=G.p.x;q.y=G.p.y;q.sx=
     if(q.t>=(q.mini?.06:.1)){q.ph='dash';q.t=0;q.ang=want;const v=(q.mini?820:950)*S.pspeed;q.vx=Math.cos(want)*v;q.vy=Math.sin(want)*v}}
   else if(q.ph==='dash'){if(q.tg&&!q.tg.dead&&!q.hitTg){const sp=Math.hypot(q.vx,q.vy),cur=Math.atan2(q.vy,q.vx),want=Math.atan2(q.tg.y-q.y,q.tg.x-q.x);let d=want-cur;while(d>Math.PI)d-=6.2832;while(d<-Math.PI)d+=6.2832;const mt=6*dt,na=cur+Math.max(-mt,Math.min(mt,d));q.vx=Math.cos(na)*sp;q.vy=Math.sin(na)*sp;q.ang=na}
     q.x+=q.vx*dt;q.y+=q.vy*dt;q.trav+=Math.hypot(q.vx,q.vy)*dt;if(!G.bot&&Math.random()<(q.mini?.5:.9)*(G.fxi||1)){const gd=q.gold>0||q.gl,hw=HW('docs'),rp=wfxOn('docs');px(q.x+rnd(-3,3),q.y+rnd(-3,3),-q.vx*.05+rnd(-15,15),-q.vy*.05+rnd(-15,15),.3,gd?pick(['#ffd34d','#fff3b0']):hw?pick(['#ff8a1a','#ffd0a0']):rp?pick(['#ffffff','#dfe8ff']):pick(['#d6303a','#ffffff']),q.mini?2:3,gd?1:0,2)}const rr=(q.mini?8:12)*S.area;
-    for(const e of G.enemies){if(e.dead||q.hit.has(e))continue;if((e.x-q.x)**2+(e.y-q.y)**2>(rr+e.r)**2)continue;q.hit.add(e);hurt(e,q.dmg*(q.mini?.5:1),'docs',{kb:40});
-      if(e===q.tg&&!q.hitTg){q.hitTg=1;docImpact(w,q,e)}}
+    for(const e of G.enemies){if(e.dead||q.hit.has(e))continue;if((e.x-q.x)**2+(e.y-q.y)**2>(rr+e.r)**2)continue;q.hit.add(e);const vm=q.vs&&q.vs.has(e)?1/8:1;if(q.vs)q.vs.add(e);hurt(e,q.dmg*(q.mini?.5:1)*vm,'docs',{kb:40});
+      if(e===q.tg&&!q.hitTg){q.hitTg=1;q.im=vm;docImpact(w,q,e)}}
     if(!q.hitTg&&q.tg&&q.tg.dead){q.hitTg=1;docImpact(w,q,q.tg)}
     if(q.hitTg&&q.hitAt===undefined)q.hitAt=q.trav;if((q.hitTg&&q.trav-q.hitAt>(q.mini||q.big?200:320))||q.trav>1100){q.ph='end';q.t=0}} // 11-09: 목표를 꿰뚫고 더 날아감(기본 320px · 진화·분열 서류 200px)
   else if(q.ph==='end'){q.x+=q.vx*dt*.3;q.y+=q.vy*dt*.3;if(q.t>.2)q.gone=1}}
 function docImpact(w,q,e){const S=G.S,hw=HW('docs'),rp=wfxOn('docs'),ev=w.evo;if(!G.bot){sparks(e.x,e.y,q.mini?4:8,hw?['#ff8a1a','#ffffff']:['#d6303a','#ffffff'],200,.25);if(!ev&&G.texts.length<70&&!q.mini&&Math.random()<.5)G.texts.push({x:e.x,y:e.y-14,v:hw?'싹둑!':'반려',life:.45,col:hw?'#ff8a1a':'#d6303a'})}
-  if(q.stp&&!q.mini){boom(e.x,e.y,70,30*S.might,hw?'#ff8a1a':'#d6303a','docs',{quiet:1})}
+  if(q.stp&&!q.mini){boom(e.x,e.y,70,30*S.might*(q.im||1),hw?'#ff8a1a':'#d6303a','docs',{quiet:1})}
   if(q.gold>0){const ed=q.dmg*(q.mini?.5:1);if(!G.bot){pring(e.x,e.y,q.mini?60:90,['#ffd34d','#fff3b0','#ffffff'],q.mini?30:50,.45);sparks(e.x,e.y,18,['#ffd34d','#ffffff','#fff3b0'],260,.4);if(!q.mini&&G.texts.length<70)G.texts.push({x:e.x,y:e.y-40,v:hw?'수확 완료!':rp?'탑승 완료!':'결재 완료!',life:1,big:1,col:'#ffd34d'})}const tg=docTargets(e.x,e.y,2,e,docTaken(w,null));for(let k=0;k<2;k++){const t2=tg[k]||null;const ta=t2?Math.atan2(t2.y-e.y,t2.x-e.x):rnd(0,6.283);const c=docNew(e.x,e.y,ta+Math.PI+(k?.5:-.5),t2,ed,0,0,1,0);c.gold=q.gold-1;c.gl=1;w.st.ps.push(c)}return}
   if(q.big&&!q.mini){const tg=docTargets(e.x,e.y,2,e,docTaken(w,null));for(let k=0;k<2;k++){const t2=tg[k]||null;const ta=t2?Math.atan2(t2.y-e.y,t2.x-e.x):rnd(0,6.283);w.st.ps.push(docNew(e.x,e.y,ta+Math.PI+(k?.5:-.5),t2,q.dmg,0,0,1,0))}}}
 const EMC={};function EMO(em,sz){const k=em+'|'+sz;if(EMC[k])return EMC[k];const c=document.createElement('canvas');c.width=c.height=Math.ceil(sz*1.35);const x=c.getContext('2d');x.textAlign='center';x.textBaseline='middle';x.font=sz+'px serif';x.fillText(em,c.width/2,c.height/2+sz*.05);return EMC[k]=c}

@@ -408,3 +408,8 @@
 - 그림 아래 **홀로그램 터치패드** `.shPad`(남보라 격자, 금빛 윗줄·모서리, 반대로 도는 고리 2개, 스캔 빛, PC 최대 900px) 위에 `.holo` 버튼: 1회(하늘)·10회(금) → 마네킹 빛 번쩍(`.shGlow.go`) 0.52초 뒤 doGacha/doGacha10. 천장 남은 횟수, [📜 획득 가능한 아이템 목록](`shItems`: 정확한 확률표·천장·등급별 반지/목걸이 그림·스킨은 개수만) · [👑 신화 선택권](`shSel`→mselPreview) · [🎟️ 확정권](`shTix`→useTicket) · [👗 옷장]. 예전 상점의 죽은 핸들러(introb·vidb·mpk·wsb)는 템플릿에 버튼이 없어서 뺌.
 - 장비 화면 [💍 반지][📿 목걸이] 탭을 홀로그램 버튼으로 강조하고 그림 오른쪽 아래로 옮김(말풍선에 가려 안 보였음).
 - `.holo` 공용 CSS(빛나는 홀로그램 버튼, `holoG`/`holoGg`). sw ASSETS `img/shop_bg.webp`, VERSION v211. 패치내역 「🎰 상점 새 단장」.
+
+## V213 (11-11) — 🧵 새 뽑기 연출 (아틀리에 영상)
+- 사용자 그록 영상(상점 그림에서 이어 만듦, 1168×784 → 960px, 소리 유지): `gacha/g1.mp4` 일반·희귀(6초, 하얀 실크) · `g2.mp4` 전설(12초, +금 자수·장신구) · `g3.mp4` 신화(18초, +오로라 드레스·아리아드네 호들갑). 신화 목걸이는 예전 우주 영상 `gacha/neck.mp4` 그대로.
+- `gVidSrc(res|res[])`: 목걸이 있으면 neck, 아니면 최고 등급(TORD) M→g3, L→g2, 그 외 g1. `gVid(rs,end,fallback)` = playVid + 자막 `GVCAP`(timeupdate, `#ultvid .gvcap`, ⚠는 빨간 깜빡임). doGacha·doGacha10·useTicket 모두 영상, 실패하면 예전 runScene 연출.
+- sw VERSION v213 (mp4는 sw가 캐시 안 함). 패치내역 「🧵 새 뽑기 연출」.

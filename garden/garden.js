@@ -67,7 +67,7 @@ const CH1={name:'1장 · 밤하늘 정원',floor:['#141b38','#182142'],stages:[
 CH1.stages.forEach((S,i)=>{if(S.hand)return;S.n=10+Math.floor(i*.4);S.g0=20-i*.2;S.g1=14-i*.2;S.b0=1+.03*i;S.bg=.15+.01*i});
 const CH2={name:'2장 · 상봉 네온 정원',floorImg:'garden/bg/sb_floor.png',stages:[
   {name:'신문 배달',     pool:{mu:3,cone:2,paper:2},                 gift:'three'},
-  {name:'세 줄의 빛',    pool:{mu:3,cone:2,paper:2,bucket:1},        gift:'jala'},
+  {name:'세 줄의 빛',    pool:{mu:3,cone:2,paper:2,bucket:1},        gift:'fume'},
   {name:'방충망 골목',   pool:{mu:2,cone:2,paper:2,screen:2},        gift:'spike'},
   {name:'가시 보도',     pool:{mu:2,cone:2,screen:2,pole:1,bucket:1},gift:'tall'},
   {name:'터치다운',      pool:{mu:2,cone:2,paper:1,screen:1,foot:1}, gift:'cabb'},
@@ -75,7 +75,7 @@ const CH2={name:'2장 · 상봉 네온 정원',floorImg:'garden/bg/sb_floor.png'
   {name:'풍선 축제',     pool:{mu:2,cone:2,paper:1,ball:2,bucket:1}, gift:'blover'},
   {name:'바람의 거리',   pool:{mu:2,cone:2,ball:2,screen:1,foot:1},  gift:'umb'},
   {name:'투석 소동',     pool:{mu:2,cone:2,cata:1,ball:1,screen:1,foot:1},gift:'torch'},
-  {name:'네온의 끝',     pool:{mu:2,cone:3,paper:1,screen:1,foot:1,ball:1,cata:1},flags:3,gift:null}
+  {name:'네온의 끝',     pool:{mu:2,cone:3,paper:1,screen:1,foot:1,ball:1,cata:1},flags:3,gift:'jala'}
 ]};
 CH2.stages.forEach((S,i)=>{S.n=11+Math.floor(i*.4);S.g0=20-i*.2;S.g1=14-i*.2;S.b0=1.1+.03*i;S.bg=.16+.01*i});
 Object.assign(CH2.stages[9],{n:13,b0:1.15,bg:.2,g0:20,g1:13});

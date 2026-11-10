@@ -15,6 +15,10 @@ def key(im):
   aa=np.maximum(al,1e-3)[...,None]
   col=np.clip((rgb-(1-aa)*bg)/aa,0,255)
   col=np.where(al[...,None]>0.995,rgb,col)
+  if bg[1]>bg[0]+40 and bg[1]>bg[2]+40:
+    edge=ndimage.binary_dilation(al<0.98,iterations=3)
+    mx=(col[...,0]+col[...,2])/2;gg=col[...,1]
+    col[...,1]=np.where(edge&(gg>mx),mx,gg)
   out=np.dstack([col,al*255]);return out
 def sheet(path,out,F=256):
   im=Image.open(path);a=key(im);H,W=a.shape[:2];cw,ch=W/4,H/2

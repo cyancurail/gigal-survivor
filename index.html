@@ -833,9 +833,39 @@ function fmSealTick(){const d=G.fmD||0,ws=G.weapons;
     G.projs=G.projs.filter(q=>q.wk!==w.k);G.zones=G.zones.filter(q=>q.wk!==w.k);G.fx=G.fx.filter(q=>q.wk!==w.k);
     if(!G.bot){const nm=w.evo?WP[w.k].evoName||WP[w.k].name:WP[w.k].name;toast('🌑 어둠이 '+WP[w.k].icon+' '+nm+'을(를) 삼켰어요','어둠을 10%까지 걷어 내면 되찾아요');SND.p('whoosh');sparks(G.p.x,G.p.y-20,30,['#2a1840','#6a3aa0','#000000'],200,.7,3)}}
   else if(G.fmSW&&d<=.1)fmUnseal(1)}
+function fmCone(){if(FM.cone)return FM.cone;const N=256,c=document.createElement('canvas');c.width=c.height=N;const g=c.getContext('2d'),D=g.createImageData(N,N),h=N/2,HA=35*Math.PI/180;
+  for(let y=0;y<N;y++)for(let x=0;x<N;x++){const dx=x-h,dy=y-h,r=Math.hypot(dx,dy)/h;if(r>1||dx<=0)continue;const an=Math.abs(Math.atan2(dy,dx));if(an>HA)continue;const ea=Math.min(1,(HA-an)/(HA*.35)),er=r<.6?1:Math.max(0,(1-r)/.4);D.data[(y*N+x)*4+3]=Math.round(255*ea*er)}
+  g.putImageData(D,0,0);return FM.cone=c}
+/* ===== 11-10 🔪 사냥꾼(죽지 않는 추적자): 장수 어려움·헬. 헬 2분부터 90초·어려움 4분부터 120초마다 45초 사냥.
+   배회 → 들키면 「!」 0.4초 → 추격(헬 = 캐릭터 이동속도, 어려움 ×0.85). 수풀·건물에 숨기 / 켜진 횃불 빛 / 멀리 벗어나면 놓침.
+   잡히면 최대 체력 50% 고정 피해 후 사라짐. 무기에 맞으면 0.3초 휘청. 감지 범위는 붉은 빛(어둠이 짙을수록 넓음). 심장박동 소리. */
+function fmHuntTick(dt){const lv=fmLv(),p=G.p;if(lv<1)return;const H=G.fmHT||(G.fmHT={t:lv===2?120:240,e:null,hb:0});let e=H.e;
+  if(e&&(e.dead||!G.enemies.includes(e))){H.e=e=null;H.t=Math.max(H.t,lv===2?90:120)}
+  if(!e){if(G.arena)return;H.t-=dt;if(H.t>0)return;H.t=lv===2?90:120;const [x,y]=spawnPos();e=mkEnemy('fm_hunter',x,y,{fixed:1,hunt:1,fmInv:1e9,xp:0,dmg:0});e.hp=e.max=1e12;e.life=45;e.st='w';e.tx=x;e.ty=y;e.wt=0;e.sR=200;H.e=e;
+    if(!G.bot){toast('👁️ 무언가 깨어났어요','들키지 마세요… 수풀에 숨거나 횃불 빛으로!');G.shk=Math.max(G.shk||0,.15)}return}
+  e.life-=dt;e.fmInv=1e9;e.hp=e.max;e.kx=e.ky=0;
+  if(G.arena||(e.life<=0&&e.st!=='c')||e.life<-15){fmHuntGone(e,0);return}
+  const dx=p.x-e.x,dy=p.y-e.y,d=Math.hypot(dx,dy)||1,dk=G.fmD||0,R=(lv===2?260:220)*(1+.6*dk);e.sR=R;
+  const hid=!!(G.fmH&&G.fmH.on),lit=fmNearTorch(),ps=G.S.speed,can=!hid&&!lit&&d<R;if(e.stg>0)e.stg-=dt;e.ph=(e.ph||0)+dt;
+  const mv=(tx,ty,v)=>{if(e.stg>0)v*=.15;const ax=tx-e.x,ay=ty-e.y,l=Math.hypot(ax,ay);if(l>2){const st=Math.min(l,v*dt);e.x+=ax/l*st;e.y+=ay/l*st;e.mvx=ax/l}};
+  if(e.st==='w'){if(can){e.st='a';e.at=.4;if(!G.bot){G.texts.push({x:e.x,y:e.y-80,v:'!',life:.9,col:'#ff2a2a'});G.shk=Math.max(G.shk||0,.18)}}
+    else{e.wt-=dt;if(e.wt<=0||Math.hypot(e.tx-e.x,e.ty-e.y)<20){e.wt=rnd(2.5,4);const a=rnd(0,6.283),r=rnd(80,300);e.tx=p.x+Math.cos(a)*r;e.ty=p.y+Math.sin(a)*r}mv(e.tx,e.ty,ps*.45)}}
+  else if(e.st==='a'){e.at-=dt;if(e.at<=0)e.st='c'}
+  else if(e.st==='c'){if(hid||lit||d>R*2.2){e.st='s';e.lx=p.x;e.ly=p.y;e.sT=3;if(!G.bot)G.texts.push({x:e.x,y:e.y-80,v:'?',life:.9,col:'#ffb0b0'})}else mv(p.x,p.y,ps*(lv===2?1:.85))}
+  else if(e.st==='s'){e.sT-=dt;mv(e.lx+Math.cos(e.ph*2)*50,e.ly+Math.sin(e.ph*2)*35,ps*.5);if(can){e.st='a';e.at=.25}else if(e.sT<=0)e.st='w'}
+  if(!hid&&!lit&&e.st!=='a'&&d<e.r+16&&!p.dead){if(p.inv<=0&&!(G.ultOn&&G.ultOn.inv)){p.hp-=G.S.maxHp*.5;p.inv=Math.max(G.S.iframe,1);G.hurtFlash=.6;SND.p('hurt');if(!G.bot){G.shk=Math.max(G.shk||0,.5);G.texts.push({x:p.x,y:p.y-50,v:'사냥당했어요!',life:1.4,col:'#ff3a3a'})}fmHuntGone(e,1);return}}
+  if(!G.bot){const near=Math.max(0,1-d/900),ch=e.st==='c'||e.st==='a';if(near>0||ch){H.hb-=dt;if(H.hb<=0){const q=Math.max(near,ch?.65:0);H.hb=1.15-.8*q;SND.p(q>.5?'hbeat':'hbeat2')}}}}
+function fmHuntGone(e,hit){e.dead=true;const H=G.fmHT;if(H){H.e=null;H.t=Math.max(H.t,G.hell?90:120)}if(!G.bot){sparks(e.x,e.y-30,26,['#2a0a14','#ff2a3a','#000000'],200,.6,3);if(!hit)toast('👁️ 사냥꾼이 사라졌어요','…다시 올 거예요')}}
+function fmHuntDraw(e){const im=FM.img.hunter;if(!im||!im.width)return;const sc=.72,fw=128,fh=150,ch=e.st==='c'||e.st==='s';
+  const f=e.st==='a'?2:ch?3+Math.floor(e.ph*11)%5:Math.floor(e.ph*2.2)%2,bob=ch?Math.sin(e.ph*22)*2:Math.sin(e.ph*2.6)*5;
+  ctx.save();ctx.globalAlpha=.35;ctx.fillStyle='#000';ctx.beginPath();ctx.ellipse(e.x,e.y+18,26,8,0,0,7);ctx.fill();ctx.globalAlpha=1;
+  if(e.stg>0)ctx.translate(rnd(-2,2),0);const sx=(e.mvx||0)<-.2?-1:1;ctx.translate(e.x,e.y-30+bob);ctx.scale(sx,1);ctx.imageSmoothingEnabled=false;ctx.drawImage(im,f*fw,0,fw,fh,-64*sc,-68*sc,fw*sc,fh*sc);ctx.restore()}
+function fmHuntLight(){const H=G.fmHT,e=H&&H.e;if(!e||e.dead)return;if(!FM.rl){const c=document.createElement('canvas');c.width=c.height=128;const g=c.getContext('2d'),gr=g.createRadialGradient(64,64,0,64,64,64);gr.addColorStop(0,'rgba(255,40,50,.55)');gr.addColorStop(.7,'rgba(255,20,40,.22)');gr.addColorStop(.92,'rgba(255,30,50,.3)');gr.addColorStop(1,'rgba(255,0,30,0)');g.fillStyle=gr;g.fillRect(0,0,128,128);FM.rl=c}
+  const R=e.sR||220,ch=e.st==='c'||e.st==='a',pu=.75+.25*Math.sin(G.t*(ch?14:4));ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=(ch?.5:.24)*pu;ctx.drawImage(FM.rl,e.x-R,e.y-30-R,R*2,R*2);
+  ctx.globalAlpha=.9;ctx.fillStyle='#ff2a3a';ctx.beginPath();ctx.arc(e.x,e.y-30+(ch?0:Math.sin(e.ph*2.6)*5),4.5,0,7);ctx.fill();ctx.restore()}
 function fmUnseal(fx){const S=G.fmSW;if(!S)return;G.fmSW=null;const w=S.w;w.t=0;G.weapons.splice(Math.min(S.i,G.weapons.length),0,w);
   if(fx&&!G.bot){const nm=w.evo?WP[w.k].evoName||WP[w.k].name:WP[w.k].name;toast('✨ '+WP[w.k].icon+' '+nm+'을(를) 되찾았어요','어둠이 걷혔어요',true);SND.p('evo');sparks(G.p.x,G.p.y-20,40,['#ffd34d','#ffffff','#ff8ad8'],260,.8,3)}}
-function fmVis(){const lv=fmLv();if(!lv)return 0;const dk=G.fmD||0,mx=Math.hypot(VW,VH)*.62,mn=lv===2?175:260;let R=mx+(mn-mx)*dk;if(G.fmIn&&G.fmIn.t==='house_empty')R*=.62;return R}
+function fmVis(){const lv=fmLv();if(!lv)return 0;const dk=G.fmD||0,mx=Math.hypot(VW,VH)*.62,mn=lv===2?175:260;let R=mx+(mn-mx)*dk;if(G.fmIn&&G.fmIn.t==='house_empty')R*=.62;if(G.fmH&&G.fmH.on)R=Math.min(R,120);/* 11-10: 숨으면 화면 크기와 상관없이 코앞만 */return R}
 function fmDarkDraw(){const lv=fmLv();if(!lv)return;const p=G.p;let R=fmVis();G.fmVR=(G.fmVR||R)+(R-(G.fmVR||R))*.08;R=G.fmVR;
   // 11-08 밤: 어둠을 ¼ 크기 그림판에 그리고 구멍(캐릭터 시야 + 켜진 횃불)을 뚫은 뒤 한 번에 덮음
   const al=lv===2?.9:.72,x0=p.x-VW/2-20,y0=p.y-VH/2-20,WW=VW+40,HH=VH+40,k=.25;
@@ -844,7 +874,9 @@ function fmDarkDraw(){const lv=fmLv();if(!lv)return;const p=G.p;let R=fmVis();G.
     const O=document.createElement('canvas');O.width=O.height=128;const g5=O.getContext('2d'),g6=g5.createRadialGradient(64,64,0,64,64,64);g6.addColorStop(0,'rgba(255,150,60,.5)');g6.addColorStop(1,'rgba(255,90,20,0)');g5.fillStyle=g6;g5.fillRect(0,0,128,128);FM.glow=O}
   const D=FM.dk||(FM.dk=document.createElement('canvas')),dw=Math.ceil(WW*k),dh=Math.ceil(HH*k);if(D.width!==dw||D.height!==dh){D.width=dw;D.height=dh}const g=D.getContext('2d');
   g.globalCompositeOperation='source-over';g.clearRect(0,0,dw,dh);g.fillStyle=`rgba(4,2,10,${al})`;g.fillRect(0,0,dw,dh);g.globalCompositeOperation='destination-out';
-  g.drawImage(FM.hole,(p.x-R-x0)*k,(p.y-10-R-y0)*k,R*2*k,R*2*k);
+  /* 11-10: 어둠 속 시야 = 발밑 작은 원 + 이동 방향 부채꼴(70°). 어둠이 옅으면 원이 커서 거의 다 보임. 숨으면 원만 */
+  {const cx=(p.x-x0)*k,cy=(p.y-10-y0)*k,dk=G.fmD||0,hid=G.fmH&&G.fmH.on,rc=hid?R:Math.max(64,R*(1-1.45*dk));g.drawImage(FM.hole,cx-rc*k,cy-rc*k,rc*2*k,rc*2*k);
+   if(!hid&&rc<R*1.3){const C=fmCone(),L=Math.max(300,R*1.45),fa=Math.atan2(p.fy||0,(p.fx||p.fy)?p.fx||0:1);G.fmFa=G.fmFa===undefined?fa:G.fmFa+Math.atan2(Math.sin(fa-G.fmFa),Math.cos(fa-G.fmFa))*.2;g.save();g.translate(cx,cy);g.rotate(G.fmFa);g.drawImage(C,-L*k,-L*k,L*2*k,L*2*k);g.restore()}}
   const TL=G.fmTL,TR=lv===2?135:160;if(TL)for(const t of TL){if(t.lit<=0)continue;const r=TR*t.lit*(1+.05*Math.sin(G.t*11+t.ph));if(t.x+r<x0||t.x-r>x0+WW||t.y-80+r<y0||t.y-80-r>y0+HH)continue;g.globalAlpha=.95;g.drawImage(FM.hole2,(t.x-r-x0)*k,(t.y-80-r-y0)*k,r*2*k,r*2*k)}
   g.globalAlpha=1;g.globalCompositeOperation='source-over';
   const sm=ctx.imageSmoothingEnabled;ctx.imageSmoothingEnabled=true;ctx.drawImage(D,x0,y0,WW,HH);
@@ -879,7 +911,7 @@ function fmAllyArrows(){const A=G.fmA;if(!A||!A.length||G.bot)return;const p=G.p
 // 제자리 버티기 방지: 오래 한곳에 있으면 흙에서 새싹 토마토
 function fmCamp(dt){if(!fmLv())return;const p=G.p,C=G.fmC||(G.fmC={x:p.x,y:p.y,t:0});if(G.fmH&&G.fmH.on){C.t=0;return}if(Math.hypot(p.x-C.x,p.y-C.y)>90){C.x=p.x;C.y=p.y;C.t=0;return}C.t+=dt;
   const lim=[14,11,8][fmLv()];let live=0;for(const e of G.enemies)if(e.fmT)live++;if(C.t>lim&&!G.arena&&live<fmCap()){C.t=lim-5;const n=Math.min(fmCap()-live,3+fmLv()+Math.floor(em()/6));for(let i=0;i<n;i++){const a=rnd(0,6.283),r=rnd(110,170),x=p.x+Math.cos(a)*r,y=p.y+Math.sin(a)*r;const e=fmPop(mkEnemy('fm_sprout',x,y));if(!G.bot)sparks(x,y,8,['#5a3a1a','#9be15d'],90,.4,2)}if(!G.bot){G.texts.push({x:p.x,y:p.y-46,v:'흙이 들썩…',life:1,col:'#c8a070'})}}}
-function fmTick(dt){if(!G.fmL)return;fmTrig(dt);fmTick4(dt);fmHide(dt);fmDarkTick(dt);fmAllyTick(dt);fmCamp(dt);for(const o of G.fmL)if(o.shk>0)o.shk-=dt;for(const e of G.enemies)if(e.pop>0)e.pop-=dt}
+function fmTick(dt){if(!G.fmL)return;fmTrig(dt);fmTick4(dt);fmHide(dt);fmDarkTick(dt);fmHuntTick(dt);fmAllyTick(dt);fmCamp(dt);for(const o of G.fmL)if(o.shk>0)o.shk-=dt;for(const e of G.enemies)if(e.pop>0)e.pop-=dt}
 // 농장 몹 그리기(③: 화난 토마토·새싹 — ④에서 늘림)
 function fmEDraw(e,k,w){const im0=FM.img[k];if(!im0||!im0.width)return;if(e.mad&&!e.fmSplit&&!G.bot){ctx.font='12px serif';ctx.textAlign='center';ctx.fillText('💢',e.x+e.r*.6,e.y-e.r*1.5)}if(e.esz){w*=e.esz;fmEliteRing(e)}const im=fmSC(k,w)||im0,h=w*im0.height/im0.width,pp=e.pop>0?1-e.pop/.35:1,fz=e.fz>0?1-e.fz/e.fzF:0,s=(.35+.65*pp)*(1+fz*.4),by=Math.abs(Math.sin(G.t*9+(e.i||0)))*2;
   const fl=e.dash?e.dash.vx<0:G.p.x<e.x,sk=(e.hold>0?Math.sin(G.t*60)*2:0);ctx.save();ctx.translate(e.x+sk,e.y+e.r*.6-by*s);if(fl)ctx.scale(-1,1);ctx.drawImage(im,-w*s/2,-h*s,w*s,h*s);
@@ -978,7 +1010,7 @@ function fmTick4(dt){fmPenTick(dt);fmFenceTick(dt);fmMobTick(dt);fmBossTick(dt);
 /* ---- 장수 ⑦ (11-08 밤, 사용자 승인): 장수 엘리트 · 감시 드론(4번) · 헬 보스 호위대(10번) · 무수리 떼 출현 · 무수리 8마리 떼 · 횃불 · 하늘의 감시함(9번) ---- */
 for(const k in FM_MU)FM_ENT[k].spd=Math.round(FM_ENT[k].spd*1.2); // 무수리 이동속도 +20%
 FM_MU.fm_drone=4;FM_ENT.fm_drone={hp:22,spd:26,dmg:6,xp:6,r:15,name:'감시 무수리'};
-{const _fr=fmReg;fmReg=function(){_fr();S2D.fm_drone=fmDroneDraw;const im=new Image();im.src='farm/torch.png';FM.img.torch=im}}
+{const _fr=fmReg;fmReg=function(){_fr();ENT.fm_hunter={hp:1,spd:0,dmg:0,xp:0,r:22,name:'사냥꾼'};S2D.fm_hunter=fmHuntDraw;if(!FM.img.hunter){const hi=new Image();hi.src='farm/hunter.png';FM.img.hunter=hi}S2D.fm_drone=fmDroneDraw;const im=new Image();im.src='farm/torch.png';FM.img.torch=im}}
 // ① 엘리트: 기본 맵과 같은 간격·배율, 종류만 장수 몹
 function fmEliteT(){return fmOff()} /* 11-08 밤 사용자: 장수 엘리트는 전부 무수리 */
 function fmEliteRing(e){if(!e.elite||e.boss||e.fixed||!e.esz)return;ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=.35+.15*Math.sin(G.t*5);ctx.strokeStyle='#ffd34d';ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(e.x,e.y+e.r*.5,e.r*1.1,e.r*.45,0,0,7);ctx.stroke();ctx.restore()}
@@ -1294,7 +1326,7 @@ function nearestEnemy(x,y,maxD=1e9){let b=null,bd=maxD*maxD;for(const e of G.ene
 function onScreen(e){return Math.abs(e.x-G.p.x)<VW/2+20&&Math.abs(e.y-G.p.y)<VH/2+20}
 function canHit(e,key,cd){const n=e.h[key]||0;if(n>G.t)return false;e.h[key]=G.t+cd;return true}
 function hurt(e,amt,key,opts={}){
-  if(e.dead)return;if(G.mskA&&(key===G.mskA||(key==='star'&&G.mskA==='fairy')))G.mAtk=.35;
+  if(e.dead)return;if(e.hunt){e.stg=.3;e.flash=.06;return}if(G.mskA&&(key===G.mskA||(key==='star'&&G.mskA==='fairy')))G.mAtk=.35;
   let d=amt;let crit=false;if(window.SN)d=SN.dmg(e,d);if(G.ultOn&&G.ultOn.juInv&&JUB_K[key])d*=2;if(e.fmInv>0)return;if(e.fmCalm)fmAggro(e);if(e.tpl==='witch'&&G.knN>0)d*=.7;if(e.fmG&&e.fmG.some(q=>!q.dead))d*=.5;if(e.boss&&(key==='unnie'||key==='bride'||key==='emerald'||key==='sapphire'||key==='diamond')){const n=sumN(key);if(n>1)d/=Math.sqrt(n)}
   if((G.ultOn&&G.ultOn.lucky)||Math.random()<G.S.crit*(opts.critMul||1)){d*=opts.critDmg||2;crit=true}
   if(e.frog>0)d*=2;
@@ -1316,7 +1348,7 @@ function hurt(e,amt,key,opts={}){
   if(key==='talis'&&G.lsB>0){const tw=W('talis');if(tw&&tw.evo){const h=Math.min(d*.08,G.lsB);G.lsB-=h;healP(h)}}
   if(e.hp<=0)kill(e,key);
 }
-function kill(e,key){if(G.map==='farm'&&e.type&&e.type.slice(0,3)==='fm_')fmDie(e);if(G.map==='farm'&&e.boss&&e.type==='fm_b_queen'&&!G.bot&&!G.tw&&G.hard){achGet('jangsuH');if(G.hell)achGet('jangsuX')}if(key==='kkh'&&!e.boss&&!e.guard&&!e.elite&&e.type!=='dtower'){const kw=W('kkheart');juCharm(e,5*(G.S.sdur||1),(16+5*(kw?kw.lvl:1))*G.S.might*(kw&&kw.evo?1.5:1),'kkhA')}if(key==='pearl'&&!e.boss&&!e.guard&&e.type!=='dtower'&&G.id==='쥬은'){const pw=W('pearl');if(pw&&pw.evo&&pw.st.evd)juCharm(e)}
+function kill(e,key){if(e.hunt)return;if(G.map==='farm'&&e.type&&e.type.slice(0,3)==='fm_')fmDie(e);if(G.map==='farm'&&e.boss&&e.type==='fm_b_queen'&&!G.bot&&!G.tw&&G.hard){achGet('jangsuH');if(G.hell)achGet('jangsuX')}if(key==='kkh'&&!e.boss&&!e.guard&&!e.elite&&e.type!=='dtower'){const kw=W('kkheart');juCharm(e,5*(G.S.sdur||1),(16+5*(kw?kw.lvl:1))*G.S.might*(kw&&kw.evo?1.5:1),'kkhA')}if(key==='pearl'&&!e.boss&&!e.guard&&e.type!=='dtower'&&G.id==='쥬은'){const pw=W('pearl');if(pw&&pw.evo&&pw.st.evd)juCharm(e)}
   if(MPKILL&&MPKILL(e,key))return;e.dead=true;G.kills++;if(e.boss&&!G.bot)G.spB=(G.spB||0)+1;if(e.tal>G.t)swGuest(e);if(key==='soulwed')healP(.6);if(!G.bot)SND.p(e.boss?'bosskill':'kill');
   const xpv=e.xp;
   if(!G.tw){const gv=xpv*XPV*(G.hell?1.3:1);if(!(MPXP&&MPXP(gv)))G.gems.push({x:e.x,y:e.y,v:gv,big:xpv>=10})}
@@ -3292,7 +3324,7 @@ function draw(){
     ctx.globalAlpha=Math.min(1,sy.life*4);ctx.fillStyle=lv===3?'#ff2a4a':lv===2?'#ffe14d':'#fff';ctx.strokeStyle='#1a1020';ctx.lineWidth=2;ctx.beginPath();ctx.roundRect(bx,by,bw,bh,9);ctx.moveTo(p.x-5,by+bh);ctx.lineTo(p.x,by+bh+6);ctx.lineTo(p.x+5,by+bh);ctx.fill();ctx.stroke();
     ctx.fillStyle=lv===3?'#fff':'#1a1020';const tb=ctx.textBaseline;ctx.textBaseline='middle';ctx.fillText(sy.v,p.x,by+bh/2+1);ctx.textBaseline=tb;ctx.globalAlpha=1}
   if(mpDraw)mpDraw();
-  if(G.sbL&&G.map==='sangbong')sbDraw(1);else if(G.map==='farm'){fmDraw(1);fmBurstDraw();fmEvDraw();fmDarkDraw();fmSkyDraw();fmSupDraw()}
+  if(G.sbL&&G.map==='sangbong')sbDraw(1);else if(G.map==='farm'){fmDraw(1);fmBurstDraw();fmEvDraw();fmDarkDraw();fmHuntLight();fmSkyDraw();fmSupDraw()}
   // texts
   for(const t of G.texts){ctx.globalAlpha=Math.min(1,t.life*3);ctx.font=t.big?'900 22px "Black Han Sans",sans-serif':(t.crit?'900 14px':'700 11px')+' sans-serif';ctx.lineWidth=3;ctx.strokeStyle='#000';ctx.strokeText(t.v,t.x,t.y);ctx.fillStyle=t.col||(t.crit?'#ffd34d':'#fff');ctx.fillText(t.v,t.x,t.y);ctx.globalAlpha=1}
   try{prPost()}catch(_){}
@@ -3757,6 +3789,8 @@ const SND=(()=>{
   const arp=(ns,dt,o,t0)=>{const t=t0||AC.currentTime;ns.forEach((n,i)=>tone(Object.assign({f:hz(mid(n)),d:dt*1.6},o),SG,t+i*dt))};
   // ---- sound effects ----
   const FX={
+    hbeat:()=>{const t=AC.currentTime;tone({w:'sine',f:70,f2:38,sl:.12,d:.17,v:.55},SG,t);tone({w:'sine',f:62,f2:34,sl:.12,d:.2,v:.42},SG,t+.2)},
+    hbeat2:()=>{const t=AC.currentTime;tone({w:'sine',f:62,f2:36,sl:.12,d:.15,v:.26},SG,t);tone({w:'sine',f:56,f2:32,sl:.12,d:.17,v:.2},SG,t+.21)},
     radio:()=>{const t=AC.currentTime;noise({f:1800,d:.12,v:.05,q:3},SG,t);tone({w:'square',f:1250,d:.07,v:.035},SG,t+.12);tone({w:'square',f:1250,d:.07,v:.035},SG,t+.22);noise({f:2400,f2:1200,d:.35,v:.03,q:4},SG,t+.3)},
     mgun:()=>{noise({ft:'highpass',f:2500,d:.03,v:.035});tone({w:'square',f:180,f2:90,d:.03,v:.02})},
     sboom:()=>{noise({ft:'lowpass',f:700,f2:90,d:.28,v:.09});tone({w:'sine',f:95,f2:38,d:.25,v:.08})},
@@ -3811,7 +3845,7 @@ const SND=(()=>{
     tL:()=>{arp(['G4','C5','E5','G5','C6','E6','G6','C7'],.06,{w:'square',v:.09});noise({ft:'highpass',f:6000,d:.9,v:.04},SG,AC.currentTime+.3)},
     tM:()=>{FX.choir();arp(['C5','E5','G5','C6','E6','G6','C7'],.08,{w:'pulse',v:.08},AC.currentTime+.2)},
   };
-  const GAP={uzi:.07,dlz:.15,swish:.1,hit:.05,crit:.06,kill:.04,gem:.03,boom:.08,hurt:.2,click:.03,card:.05,rain:.3,thunder:.35,paper:.2,shutter:.1,mic:.1,pop:.15,glass:.1,flap:1.5,angel:1.5,whoosh:.15,radio:1.2,mgun:.05,sboom:.07,zap:.3};
+  const GAP={hbeat:.25,hbeat2:.25,uzi:.07,dlz:.15,swish:.1,hit:.05,crit:.06,kill:.04,gem:.03,boom:.08,hurt:.2,click:.03,card:.05,rain:.3,thunder:.35,paper:.2,shutter:.1,mic:.1,pop:.15,glass:.1,flap:1.5,angel:1.5,whoosh:.15,radio:1.2,mgun:.05,sboom:.07,zap:.3};
   function p(name){if(!ok()||!SAVE.snd.s||!FX[name])return;if(G&&G.bot)return;const t=AC.currentTime,g=GAP[name]||.02;if(last[name]&&t-last[name]<g)return;if(active.n>48&&GAP[name])return;last[name]=t;try{FX[name]()}catch(e){}}
   // ---- music sequencer (8th-note melodies, 16th drums) ----
   let PF=null,SBUS=null;

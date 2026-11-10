@@ -813,11 +813,23 @@ function fmHide(dt){const p=G.p,lv=fmLv(),H=G.fmH||(G.fmH={t:0,cd:0,on:0,x:0,y:0
   if(H.on){for(const e of G.enemies){if(e.boss||e.fixed||e.dash||e.type==='fm_drone')continue;/* 11-09: 보스·감시자 빼고 바로 옆 몬스터까지 전부 못 봄 */if(!e.tnt||!e.tnt.hid||e.tntT<G.t){const a=rnd(0,6.283),r=rnd(120,260);e.tnt={x:H.x+Math.cos(a)*r,y:H.y+Math.sin(a)*r,on:true,hid:1}}e.tntT=G.t+.4}}}
 // 시야(어둠): 어려움·헬, 시간이 갈수록 좁아짐, 착한 토마토를 구하면 넓어짐
 function fmDarkTick(dt){const lv=fmLv();if(!lv){G.fmD=0;return}
-  // 11-09: 어둠 = 바탕(천천히, 헬 8분에 60%·어려움 15분에 45%까지) + 밀려오는 어둠(헬 90초·어려움 150초마다 5초에 +45%, 그 뒤 약 40초에 걸쳐 걷힘)
-  const cap=lv===2?.6:.45;G.fmD0=Math.min(cap,(G.fmD0||0)+dt*cap/(lv===2?480:900));
-  if(!G.arena){G.fmSgT=(G.fmSgT===undefined?(lv===2?90:150):G.fmSgT)-dt;if(G.fmSgT<=0){G.fmSgT=lv===2?90:150;G.fmSg=5;if(!G.bot){toast('🌑 어둠이 밀려와요','숨은 착한 토마토를 구하면 다시 밝아져요');SND.p('whoosh');G.shk=Math.max(G.shk||0,.12)}}}
-  if(G.fmSg>0){G.fmSg-=dt;G.fmDs=Math.min(.45,(G.fmDs||0)+.09*dt)}else G.fmDs=Math.max(0,(G.fmDs||0)-.012*dt);
-  G.fmD=Math.min(1,G.fmD0+(G.fmDs||0))}
+  // 11-10 장수 리밸런싱: 바탕(헬 5분에 60%·어려움 10분에 45%) + 밀려오는 어둠(헬 첫 40초·이후 60초, 어려움 첫 60초·이후 100초마다 3초에 +45%)
+  // 💋 에클라땅뜨 아르떼를 가지고 있으면 어둠이 차오르는 속도 절반 · 켜진 횃불 곁에선 2초에 1%씩 걷힘
+  const sl=fmHasW('rouge')?.5:1,cap=lv===2?.6:.45;G.fmD0=Math.min(cap,(G.fmD0||0)+sl*dt*cap/(lv===2?300:600));
+  if(!G.arena){G.fmSgT=(G.fmSgT===undefined?(lv===2?40:60):G.fmSgT)-dt;if(G.fmSgT<=0){G.fmSgT=lv===2?60:100;G.fmSg=3;if(!G.bot){toast('🌑 어둠이 밀려와요','숨은 착한 토마토를 구하면 다시 밝아져요');SND.p('whoosh');G.shk=Math.max(G.shk||0,.12)}}}
+  if(G.fmSg>0){G.fmSg-=dt;G.fmDs=Math.min(.45,(G.fmDs||0)+.15*sl*dt)}else G.fmDs=Math.max(0,(G.fmDs||0)-.012*dt);
+  if(fmNearTorch()){let r=.005*dt;const a=Math.min(G.fmDs||0,r);G.fmDs=(G.fmDs||0)-a;r-=a;G.fmD0=Math.max(0,G.fmD0-r)}
+  G.fmD=Math.min(1,G.fmD0+(G.fmDs||0));fmSealTick()}
+function fmHasW(k){return !!(W(k)||(G.fmSW&&G.fmSW.w.k===k))}
+function fmNearTorch(){const TL=G.fmTL;if(!TL)return false;const p=G.p,TR=fmLv()===2?135:160;for(const t of TL){if(t.lit<=0)continue;const r=TR*t.lit;if((t.x-p.x)**2+(t.y-80-p.y)**2<r*r)return true}return false}
+// 어둠 70% 이상 → 무기 하나가 잠시 사라짐(하모닉스 우선 → 진화 → 아무거나). 어둠을 10%까지 걷어야 되찾음. 칸은 그대로 차 있음(레벨업에서 새 무기 안 들어옴)
+function fmSealTick(){const d=G.fmD||0,ws=G.weapons;
+  if(!G.fmSW&&d>=.7&&ws.length>=2){let c=ws.filter(w=>WP[w.k].hid);if(!c.length)c=ws.filter(w=>w.evo);if(!c.length)c=ws.slice();const w=pick(c),i=ws.indexOf(w);ws.splice(i,1);G.fmSW={w,i};
+    G.projs=G.projs.filter(q=>q.wk!==w.k);G.zones=G.zones.filter(q=>q.wk!==w.k);G.fx=G.fx.filter(q=>q.wk!==w.k);
+    if(!G.bot){const nm=w.evo?WP[w.k].evoName||WP[w.k].name:WP[w.k].name;toast('🌑 어둠이 '+WP[w.k].icon+' '+nm+'을(를) 삼켰어요','어둠을 10%까지 걷어 내면 되찾아요');SND.p('whoosh');sparks(G.p.x,G.p.y-20,30,['#2a1840','#6a3aa0','#000000'],200,.7,3)}}
+  else if(G.fmSW&&d<=.1)fmUnseal(1)}
+function fmUnseal(fx){const S=G.fmSW;if(!S)return;G.fmSW=null;const w=S.w;w.t=0;G.weapons.splice(Math.min(S.i,G.weapons.length),0,w);
+  if(fx&&!G.bot){const nm=w.evo?WP[w.k].evoName||WP[w.k].name:WP[w.k].name;toast('✨ '+WP[w.k].icon+' '+nm+'을(를) 되찾았어요','어둠이 걷혔어요',true);SND.p('evo');sparks(G.p.x,G.p.y-20,40,['#ffd34d','#ffffff','#ff8ad8'],260,.8,3)}}
 function fmVis(){const lv=fmLv();if(!lv)return 0;const dk=G.fmD||0,mx=Math.hypot(VW,VH)*.62,mn=lv===2?175:260;let R=mx+(mn-mx)*dk;if(G.fmIn&&G.fmIn.t==='house_empty')R*=.62;return R}
 function fmDarkDraw(){const lv=fmLv();if(!lv)return;const p=G.p;let R=fmVis();G.fmVR=(G.fmVR||R)+(R-(G.fmVR||R))*.08;R=G.fmVR;
   // 11-08 밤: 어둠을 ¼ 크기 그림판에 그리고 구멍(캐릭터 시야 + 켜진 횃불)을 뚫은 뒤 한 번에 덮음
@@ -2741,7 +2753,7 @@ function cutin(cb,label){
 function choices(n0,ex){
   const opts=[];const BAN=G.ban||{};const S=G.S;
   G.weapons.forEach(w=>{if(w.lvl<8&&!w.evo)opts.push({t:'wup',k:w.k})});
-  G.weapons.length<6&&Object.keys(WP).forEach(k=>{if(!W(k)&&!BAN[k]&&juAllow(k,G.id))opts.push({t:'wnew',k})});
+  G.weapons.length+(G.fmSW?1:0)<6&&Object.keys(WP).forEach(k=>{if(!W(k)&&!(G.fmSW&&G.fmSW.w.k===k)&&!BAN[k]&&juAllow(k,G.id))opts.push({t:'wnew',k})});
   Object.keys(G.items).forEach(k=>{if(G.items[k]<(IT[k].max||5))opts.push({t:'iup',k})});
   Object.keys(G.items).length<6&&Object.keys(IT).forEach(k=>{if(!G.items[k]&&juAllow(k,G.id))opts.push({t:'inew',k})});
   // weight: prefer owned upgrades
@@ -3061,7 +3073,7 @@ function update(dt){
   // temporarily apply toggle mods to stats
   const S0={cd:S.cd,might:S.might,area:S.area};S.cd*=um.cd;S.might*=um.might;S.area*=um.area;
   spawnTick(dt);
-  {const ge=!G.bot&&achOn('goldevo');for(const w of G.weapons){PXG=ge&&w.evo;const f0=G.fx.length,z0=G.zones.length;G._hk=w.k;if(G.sealed!==w)WU[w.k](w,dt);if(PXG){for(let i=f0;i<G.fx.length;i++)G.fx[i].gx=1;for(let i=z0;i<G.zones.length;i++)G.zones[i].gx=1}}PXG=false}
+  {const ge=!G.bot&&achOn('goldevo');for(const w of G.weapons){PXG=ge&&w.evo;const f0=G.fx.length,z0=G.zones.length,q0=G.projs.length;G._hk=w.k;if(G.sealed!==w)WU[w.k](w,dt);if(G.map==='farm'){for(let i=f0;i<G.fx.length;i++)G.fx[i].wk=w.k;for(let i=z0;i<G.zones.length;i++)G.zones[i].wk=w.k;for(let i=q0;i<G.projs.length;i++)G.projs[i].wk=w.k}if(PXG){for(let i=f0;i<G.fx.length;i++)G.fx[i].gx=1;for(let i=z0;i<G.zones.length;i++)G.zones[i].gx=1}}PXG=false}
   G._hk=null;S.cd=S0.cd;S.might=S0.might;S.area=S0.area;juQTick(dt);if(window.bpsTick)bpsTick(dt);
   for(let i=timers.length-1;i>=0;i--){timers[i].t-=dt;if(timers[i].t<=0){const f=timers[i].fn;timers.splice(i,1);f()}}
   projZoneStep(dt);
@@ -3346,7 +3358,7 @@ function dpsHTML(){const K=(G.stats&&G.stats.k)||{},agg={};for(const k in K){con
   if(!rows.length)return '';const top=rows[0].dps||1;
   return `<details class="dpsbox" open><summary>⚔️ 무기별 딜 · 총 ${fmtN(tot)}</summary><div class="dpsl">${rows.map(r=>`<div class="dpsr"><span class="dpsn">${r.k&&WICO[r.k]?wIco(r.k)+' '+esc(r.nm.replace(/^\S+ /,'')):esc(r.nm)}</span><span class="dpsv"><b>${fmtN(r.dps)}</b>/초 · ${fmtN(r.d)} · ${Math.round(r.p*100)}%</span><i style="width:${Math.max(3,r.dps/top*100).toFixed(1)}%"></i></div>`).join('')}</div><p class="dpsnote">DPS는 무기를 얻은 뒤부터 계산해요</p></details>`}
 function endGame(win){
-  if(G.cleared)win=true;G.running=false;try{window.__ariRun&&__ariRun(G.t,!!G.bot)}catch(e){}SND.p(win?'clear':'die');const c=CHAR[G.ci];const lines=[];
+  try{if(G.fmSW)fmUnseal(0)}catch(e){}if(G.cleared)win=true;G.running=false;try{window.__ariRun&&__ariRun(G.t,!!G.bot)}catch(e){}SND.p(win?'clear':'die');const c=CHAR[G.ci];const lines=[];
   const BK=G.hard?'bestH':'best',best=SAVE[BK][c.id]||0;if(G.t>best&&!G.tw)SAVE[BK][c.id]=Math.floor(G.t);
   lines.push(...G.unlockedNow);
   const gold=runGold();SAVE.gold+=gold;

@@ -20,7 +20,7 @@ const U={
   cherry:{n:'태태영',sk:'체리 원피스',img:'msk2/cc01.png',cost:150,cd:50,cd0:30,hp:300,role:'🍒 체리 폭탄',desc:'심으면 잠시 뒤 주변 3×3을 날려요. (1회용)',bomb:{t:1.1,dmg:1800}},
   wall:{n:'무룩',sk:'실드카드',img:'msk2/cd02.png',cost:50,cd:30,cd0:20,hp:4000,role:'🛡️ 방패',desc:'단단하게 길을 막아요.',wall:1},
   mine:{n:'세나',sk:'샌드카드',img:'msk2/cd03.png',cost:25,cd:30,cd0:20,hp:300,role:'⏳ 모래 지뢰',desc:'14초 동안 모래에 숨었다가, 밟으면 터져요. (1회용)',mine:{arm:14,dmg:1800}},
-  snow:{n:'세나',sk:'별자리 카드',img:'msk2/cc07.png',cost:175,cd:7.5,hp:300,role:'❄️ 얼음 하트',desc:'맞은 무수리가 10초 동안 느려져요.',shoot:{every:1.4,dmg:20,n:1,k:'ice',slow:10}},
+  snow:{n:'밍키',sk:'슬리피카드',img:'garden/sk/mk_sleepy.png',cost:175,cd:7.5,hp:300,role:'💤 졸음 구름',desc:'맞은 무수리가 10초 동안 졸려서 느려져요.',shoot:{every:1.4,dmg:20,n:1,k:'ice',slow:10}},
   chomp:{n:'쥬은',sk:'돼지 탈',img:'msk2/29.png',cost:150,cd:7.5,hp:300,role:'🐷 통째로 꿀꺽',desc:'바로 앞 무수리를 삼키고 한참 씹어요.',chomp:{range:1.4,chew:42}},
   rep:{n:'태태영',sk:'토끼 알바생',img:'msk2/19.png',cost:200,cd:7.5,hp:300,role:'💗💗 두 발 사격',desc:'하트를 두 발씩 쏴요.',shoot:{every:1.4,dmg:20,n:2,k:'heart'}},
   puff:{n:'K1',sk:'쏭카드',img:'msk2/cd12.png',cost:0,cd:7.5,hp:300,role:'🎵 공짜 노래',desc:'공짜! 대신 3칸 앞까지만 닿아요.',shoot:{every:1.4,dmg:20,n:1,k:'note',range:3}},
@@ -149,7 +149,7 @@ function step(dt){const t0=T.t;T.t+=dt;
   // 투사체
   for(const pr of T.pr){if(pr.wait>0){pr.wait-=dt;continue}pr.p+=pr.sp*dt;pr.a+=dt;if(pr.p>10||pr.p-pr.p0>pr.R){pr.dead=1;continue}
     let best=null;for(const e of T.ens){if(e.die||e.l!==pr.l||e.p>9.8||e.jump>0)continue;if(pr.p>=e.p-.3&&pr.p<=e.p+.4&&(!best||e.p<best.p))best=e}
-    if(best){hurtE(best,pr.dmg);if(pr.slow){best.slow=Math.max(best.slow,pr.slow)}pr.dead=1;burst(pr.l,pr.p,pr.k==='ice'?'#a8e4ff':pr.k==='note'?'#d6b8ff':'#ff7ab6',5)}}
+    if(best){hurtE(best,pr.dmg);if(pr.slow){best.slow=Math.max(best.slow,pr.slow)}pr.dead=1;burst(pr.l,pr.p,pr.k==='ice'?'#d6e6ff':pr.k==='note'?'#d6b8ff':'#ff7ab6',5)}}
   T.pr=T.pr.filter(p=>!p.dead);
   // 무수리
   for(const e of T.ens){const d=E[e.k];e.fl=Math.max(0,e.fl-dt);e.slow=Math.max(0,e.slow-dt);const sm=e.slow>0?.5:1;e.bob+=dt*(e.eat?11:6)*sm;
@@ -210,7 +210,8 @@ function draw(){g.setTransform(DPR,0,0,DPR,0,0);UI=[];sky();
   for(const it of L){if(it.k===0)drawUnit(it,UD,t);else if(it.k===1)drawEnemy(it,t);else frame(img(U[it.o].img),0,it.x,it.y,cs*UD,.45,0)}
   for(const pr of T.pr){if(pr.wait>0)continue;const[x,y]=S(pr.l,pr.p);const yy=y-(vert?cs*.3:cs*.32);g.save();
     if(pr.k==='note'){g.shadowColor='#b48cff';g.shadowBlur=10;note(x,yy,cs*.2,'#d9c2ff')}
-    else{g.shadowColor=pr.k==='ice'?'#6fd0ff':'#ff5fa8';g.shadowBlur=10;heart(x,yy,cs*.17*(1+.12*Math.sin(pr.a*20)),pr.k==='ice'?'#9fe4ff':'#ff6fb1')}g.restore()}
+    else if(pr.k==='ice'){g.shadowColor='#9fc8ff';g.shadowBlur=10;const r=cs*.1;g.fillStyle='#e3efff';for(const[a,b,c]of[[-1,0,1],[0,-.6,1.2],[1,0,1],[0,.2,1.1]]){g.beginPath();g.arc(x+a*r,yy+b*r,r*c,0,6.29);g.fill()}g.shadowBlur=0;g.fillStyle='#6f8fd8';g.font=`900 ${Math.round(r*1.3)}px sans-serif`;g.textAlign='center';g.textBaseline='middle';g.fillText('z',x,yy)}
+    else{g.shadowColor='#ff5fa8';g.shadowBlur=10;heart(x,yy,cs*.17*(1+.12*Math.sin(pr.a*20)),'#ff6fb1')}g.restore()}
   for(const f of T.fx){const k=f.t/f.life;const[x,y]=S(f.l,f.p);g.globalAlpha=1-k;if(f.ring){g.strokeStyle=f.col;g.lineWidth=cs*.12*(1-k);g.beginPath();g.arc(x,y-cs*.3,cs*f.r*(.3+k),0,6.29);g.stroke()}else{g.fillStyle=f.col;g.beginPath();g.arc(x+f.dx*cs*.6*k,y-cs*.35+f.dy*cs*.6*k,cs*f.r*(1-k*.5),0,6.29);g.fill()}}g.globalAlpha=1;
   for(const th of T.thr){let[x,y]=S(th.lf,th.p);if(th.f>0)y-=th.f*cs*3.2;if(th.pop>0)y-=Math.sin((1-th.pop/.5)*Math.PI)*cs*.6;
     let a=1;if(!th.col&&th.f<=0&&th.life<2)a=.4+.6*Math.abs(Math.sin(th.t*6));

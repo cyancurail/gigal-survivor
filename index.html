@@ -4206,7 +4206,9 @@ function doGacha10(){
   if(!gachaOpen()||SAVE.gold<GACHA_COST*10)return;SAVE.gold-=GACHA_COST*10;persist();
   const res=[];for(let i=0;i<10;i++)res.push(rollGacha());
   const best=res.reduce((a,b)=>TORD[b.tier]>TORD[a.tier]?b:a);
-  runScene(best.tier==='M'?gachaSceneM(best.it.owner):gachaScene(best.it.owner,best.tier),()=>gachaFocusM(res.filter(r=>r.tier==='M'),()=>showGacha10(res,best)),{menu:true});
+  const fin=()=>gachaFocusM(res.filter(r=>r.tier==='M'),()=>showGacha10(res,best));
+  if(res.some(isNeckRes)){playVid('gacha/neck.mp4',fin,()=>runScene(gachaSceneM(best.it.owner),fin,{menu:true}));return}
+  runScene(best.tier==='M'?gachaSceneM(best.it.owner):gachaScene(best.it.owner,best.tier),fin,{menu:true});
 }
 function showGacha10(res,best){
   const ov=$('#gres');ov.hidden=false;SND.p('t'+best.tier);const ref=res.reduce((n,r)=>n+r.refund,0),nw=res.filter(r=>!r.dupe&&r.it.kind!=='cards').length,ncd=res.reduce((n,r)=>n+(r.cards||0),0);
@@ -4216,6 +4218,8 @@ function showGacha10(res,best){
   ov.querySelectorAll('.gmp').forEach((d,i)=>d.appendChild(previewCv(res[i].it,64)));
   $('#gOk').onclick=()=>{ov.hidden=true;openShop()};$('#g10Again').onclick=()=>{ov.hidden=true;doGacha10()};
 }
+/* 11-10: 📿 목걸이가 뽑히면 30초 영상(소리 포함, 터치하면 건너뛰기) */
+const isNeckRes=r=>!!(r&&r.it&&r.it.kind==='saint'&&window.SN&&SN.D[r.it.sk]&&SN.D[r.it.sk].g==='M');
 /* 11-10: 10연속에 신화가 있으면 신화 결과를 하나씩 크게 먼저 → 마지막에 10연속 결과 */
 function gachaFocusM(list,end){if(!list.length){end();return}const r=list[0];showGachaResult(r);const ov=$('#gres'),c=ov.querySelector('.gcard');c.classList.add('gfocus');
   const pv=ov.querySelector('.gprev');pv.innerHTML='';pv.appendChild(previewCv(r.it,220));
@@ -4224,6 +4228,7 @@ function gachaFocusM(list,end){if(!list.length){end();return}const r=list[0];sho
 function doGacha(){
   if(!gachaOpen()||SAVE.gold<GACHA_COST)return;SAVE.gold-=GACHA_COST;persist();
   const res=rollGacha();
+  if(isNeckRes(res)){playVid('gacha/neck.mp4',()=>showGachaResult(res),()=>runScene(gachaSceneM(res.it.owner),()=>showGachaResult(res),{menu:true}));return}
   runScene(res.tier==='M'?gachaSceneM(res.it.owner):gachaScene(res.it.owner,res.tier),()=>showGachaResult(res),{menu:true});
 }
 function previewCv(it,size){const c=document.createElement('canvas');c.width=c.height=size;const x=c.getContext('2d');x.imageSmoothingEnabled=false;

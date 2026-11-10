@@ -51,6 +51,7 @@
 #shop.sh2 .shCn.tl{left:8px;top:10px;border-width:2px 0 0 2px}#shop.sh2 .shCn.tr{right:8px;top:10px;border-width:2px 2px 0 0}#shop.sh2 .shCn.bl{left:8px;bottom:8px;border-width:0 0 2px 2px}#shop.sh2 .shCn.br{right:8px;bottom:8px;border-width:0 2px 2px 0}
 #shop.sh2 .shPad .shBody{position:relative;padding:22px 16px calc(18px + env(safe-area-inset-bottom,0px))}
 #shop.sh2 .shPad .shPulls{position:relative;left:auto;right:auto;bottom:auto;padding:0;margin:4px 0 12px}
+#ultvid .gvcap{position:absolute;left:50%;bottom:12%;transform:translateX(-50%);z-index:5;pointer-events:none;opacity:0;transition:opacity .35s;font:800 clamp(16px,4.6vw,30px) 'Noto Sans KR',sans-serif;color:#eafcff;text-shadow:0 0 10px rgba(120,220,255,.95),0 2px 6px #000;white-space:nowrap;padding:8px 18px;border-radius:14px;background:rgba(10,20,40,.45);border:1.5px solid rgba(165,238,255,.7)}#ultvid .gvcap.on{opacity:1}#ultvid .gvcap.warn{color:#ffe6f0;border-color:#ff7ab0;text-shadow:0 0 12px rgba(255,90,150,.95),0 2px 6px #000;animation:gvWarn .4s steps(2) infinite}@keyframes gvWarn{50%{background:rgba(120,10,40,.55)}}
 </style><link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#000000"><link rel="icon" href="icons/icon-192.png"><link rel="apple-touch-icon" href="icons/apple-touch-icon.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="기갈 서바이버"><style>.clocard.disc{position:relative}.clocard .discb{position:absolute;top:2px;right:2px;font-style:normal;font-size:9px;background:#555;color:#fff;border-radius:6px;padding:0 4px}.clocard canvas[data-msk]{image-rendering:pixelated}</style></head><body>
 <style>#boot{position:fixed;inset:0;z-index:99999;background:#000;display:grid;place-items:center;color:#eee;font-family:'Noto Serif KR',Georgia,serif;transition:opacity .7s}#boot.out{opacity:0;pointer-events:none}
 #boot .bl{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .8s}
@@ -4261,15 +4262,14 @@ function gachaSceneM(cid){
   }};
 }
 
-function useTicket(t){if(!(SAVE.tix[t]>0))return;SAVE.tix[t]--;persist();const res=rollGacha(t);runScene(t==='M'?gachaSceneM(res.it.owner):gachaScene(res.it.owner,t),()=>showGachaResult(res),{menu:true})}
+function useTicket(t){if(!(SAVE.tix[t]>0))return;SAVE.tix[t]--;persist();const res=rollGacha(t);gVid(res,()=>showGachaResult(res),()=>runScene(t==='M'?gachaSceneM(res.it.owner):gachaScene(res.it.owner,t),()=>showGachaResult(res),{menu:true}))}
 const TORD={C:0,R:1,L:2,M:3};
 function doGacha10(){
   if(!gachaOpen()||SAVE.gold<GACHA_COST*10)return;SAVE.gold-=GACHA_COST*10;persist();
   const res=[];for(let i=0;i<10;i++)res.push(rollGacha());
   const best=res.reduce((a,b)=>TORD[b.tier]>TORD[a.tier]?b:a);
   const fin=()=>gachaFocusM(res.filter(r=>r.tier==='M'),()=>showGacha10(res,best));
-  if(res.some(isNeckRes)){playVid('gacha/neck.mp4',fin,()=>runScene(gachaSceneM(best.it.owner),fin,{menu:true}));return}
-  runScene(best.tier==='M'?gachaSceneM(best.it.owner):gachaScene(best.it.owner,best.tier),fin,{menu:true});
+  gVid(res,fin,()=>runScene(best.tier==='M'?gachaSceneM(best.it.owner):gachaScene(best.it.owner,best.tier),fin,{menu:true}));
 }
 function showGacha10(res,best){
   const ov=$('#gres');ov.hidden=false;SND.p('t'+best.tier);const ref=res.reduce((n,r)=>n+r.refund,0),nw=res.filter(r=>!r.dupe&&r.it.kind!=='cards').length,ncd=res.reduce((n,r)=>n+(r.cards||0),0);
@@ -4281,6 +4281,12 @@ function showGacha10(res,best){
 }
 /* 11-10: 📿 목걸이가 뽑히면 30초 영상(소리 포함, 터치하면 건너뛰기) */
 const isNeckRes=r=>!!(r&&r.it&&r.it.kind==='saint'&&window.SN&&SN.D[r.it.sk]&&SN.D[r.it.sk].g==='M');
+/* 11-11 사용자: 🧵 아틀리에 뽑기 영상 — 마네킹 위에 마음의 선이 입혀져요. 일반·희귀 g1(하얀 실크 6초) · 전설 g2(+금 자수 12초) · 신화 g3(+오로라 드레스 18초) · 신화 목걸이는 예전 우주 영상(neck). 영상이 안 되면 예전 연출 */
+const GVCAP={'gacha/g1.mp4':[[3.8,6.2,'✨ 실이 하나로 엮여요…']],'gacha/g2.mp4':[[6,9,'✨ 금실이 반응해요…']],'gacha/g3.mp4':[[6,9,'✨ 금실이 반응해요…'],[12,14.4,'⚠ 기갈 이상수치 관측'],[14.4,18.5,'어머어머어머!!! 신화예요!!! ✨']]};
+function gVidSrc(rs){const L=[].concat(rs);if(L.some(isNeckRes))return'gacha/neck.mp4';const t=L.reduce((a,r)=>Math.max(a,TORD[r.tier]),0);return t>=3?'gacha/g3.mp4':t>=2?'gacha/g2.mp4':'gacha/g1.mp4'}
+function gVid(rs,end,fb){const src=gVidSrc(rs),el=$('#ultvid'),v=el&&el.querySelector('.vmain');let c=el&&el.querySelector('.gvcap');if(el&&!c){c=document.createElement('div');c.className='gvcap';el.appendChild(c)}
+  const cap=GVCAP[src]||[];if(c){c.textContent='';c.className='gvcap'}const tu=()=>{const t=v.currentTime,k=cap.find(q=>t>=q[0]&&t<q[1]);const txt=k?k[2]:'';if(c.textContent!==txt){c.textContent=txt;c.className='gvcap'+(txt?' on':'')+(txt.startsWith('⚠')?' warn':'')}};
+  if(v){v.addEventListener('timeupdate',tu);}const done=f=>()=>{if(v)v.removeEventListener('timeupdate',tu);if(c){c.textContent='';c.className='gvcap'}f()};playVid(src,done(end),done(fb))}
 /* 11-10: 10연속에 신화가 있으면 신화 결과를 하나씩 크게 먼저 → 마지막에 10연속 결과 */
 function gachaFocusM(list,end){if(!list.length){end();return}const r=list[0];showGachaResult(r);const ov=$('#gres'),c=ov.querySelector('.gcard');c.classList.add('gfocus');
   const pv=ov.querySelector('.gprev');pv.innerHTML='';pv.appendChild(previewCv(r.it,220));
@@ -4289,8 +4295,7 @@ function gachaFocusM(list,end){if(!list.length){end();return}const r=list[0];sho
 function doGacha(){
   if(!gachaOpen()||SAVE.gold<GACHA_COST)return;SAVE.gold-=GACHA_COST;persist();
   const res=rollGacha();
-  if(isNeckRes(res)){playVid('gacha/neck.mp4',()=>showGachaResult(res),()=>runScene(gachaSceneM(res.it.owner),()=>showGachaResult(res),{menu:true}));return}
-  runScene(res.tier==='M'?gachaSceneM(res.it.owner):gachaScene(res.it.owner,res.tier),()=>showGachaResult(res),{menu:true});
+  gVid(res,()=>showGachaResult(res),()=>runScene(res.tier==='M'?gachaSceneM(res.it.owner):gachaScene(res.it.owner,res.tier),()=>showGachaResult(res),{menu:true}));
 }
 function previewCv(it,size){const c=document.createElement('canvas');c.width=c.height=size;const x=c.getContext('2d');x.imageSmoothingEnabled=false;
   if(it.kind==='saint'){SN.drawPrev(x,it.sk,size);return c}

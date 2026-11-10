@@ -818,12 +818,11 @@ function fmHide(dt){const p=G.p,lv=fmLv(),H=G.fmH||(G.fmH={t:0,cd:0,on:0,x:0,y:0
   if(H.on){for(const e of G.enemies){if(e.boss||e.fixed||e.dash||e.type==='fm_drone')continue;/* 11-09: 보스·감시자 빼고 바로 옆 몬스터까지 전부 못 봄 */if(!e.tnt||!e.tnt.hid||e.tntT<G.t){const a=rnd(0,6.283),r=rnd(120,260);e.tnt={x:H.x+Math.cos(a)*r,y:H.y+Math.sin(a)*r,on:true,hid:1}}e.tntT=G.t+.4}}}
 // 시야(어둠): 어려움·헬, 시간이 갈수록 좁아짐, 착한 토마토를 구하면 넓어짐
 function fmDarkTick(dt){const lv=fmLv();if(!lv){G.fmD=0;G.fmVz=null;return}
-  // 11-10 장수 리밸런싱: 바탕(헬 5분에 60%·어려움 10분에 45%) + 밀려오는 어둠(헬 첫 40초·이후 60초, 어려움 첫 60초·이후 100초마다 3초에 +45%)
+  // 11-10 장수 리밸런싱: 바탕(헬 5분에 60%·어려움 10분에 45%) + 밀려오는 어둠(헬 첫 40초·이후 60초, 어려움 첫 60초·이후 100초마다 10초에 걸쳐 +45%)
   // 💋 에클라땅뜨 아르떼를 가지고 있으면 어둠이 차오르는 속도 절반 · 켜진 횃불 곁에선 2초에 1%씩 걷힘
   const sl=fmHasW('rouge')?.5:1,cap=lv===2?.6:.45;G.fmD0=Math.min(cap,(G.fmD0||0)+sl*dt*cap/(lv===2?300:600));
-  if(!G.arena){G.fmSgT=(G.fmSgT===undefined?(lv===2?40:60):G.fmSgT)-dt;if(G.fmSgT<=0){G.fmSgT=lv===2?60:100;G.fmSg=3;if(!G.bot){toast('🌑 어둠이 밀려와요','숨은 착한 토마토를 구하면 다시 밝아져요');SND.p('whoosh');G.shk=Math.max(G.shk||0,.12)}}}
-  if(G.fmSg>0){G.fmSg-=dt;G.fmDs=Math.min(.45,(G.fmDs||0)+.15*sl*dt)}else G.fmDs=Math.max(0,(G.fmDs||0)-.012*dt);
-  if(G.fmClr>0){let r=Math.min(G.fmClr,.05*dt);G.fmClr-=r;const a=Math.min(G.fmDs||0,r);G.fmDs=(G.fmDs||0)-a;r-=a;G.fmD0=Math.max(0,G.fmD0-r)}
+  if(!G.arena){G.fmSgT=(G.fmSgT===undefined?(lv===2?40:60):G.fmSgT)-dt;if(G.fmSgT<=0){G.fmSgT=lv===2?60:100;G.fmSg=10;if(!G.bot){toast('🌑 어둠이 밀려와요','숨은 착한 토마토를 구하면 다시 밝아져요');SND.p('whoosh');G.shk=Math.max(G.shk||0,.12)}}}
+  if(G.fmSg>0){G.fmSg-=dt;G.fmDs=Math.min(.45,(G.fmDs||0)+.045*sl*dt)}/* 11-10 사용자: 한 번에 확 말고 10초에 걸쳐 서서히 */else G.fmDs=Math.max(0,(G.fmDs||0)-.012*dt);
   if(fmNearTorch()){let r=.005*dt;const a=Math.min(G.fmDs||0,r);G.fmDs=(G.fmDs||0)-a;r-=a;G.fmD0=Math.max(0,G.fmD0-r)}
   G.fmD=Math.min(1,G.fmD0+(G.fmDs||0));fmSealTick();fmVzTick()}
 /* 11-10: 어둠 속(시야 원·부채꼴·켜진 횃불 빛 밖) 적은 받는 피해 −40% (보스 제외). 판정값은 프레임마다 한 번 계산 */
@@ -847,7 +846,7 @@ function fmCone(){if(FM.cone)return FM.cone;const N=256,c=document.createElement
    잡히면 최대 체력 50% 고정 피해 후 사라짐. 무기에 맞으면 0.3초 휘청. 감지 = 바라보는 방향 100° 붉은 부채꼴(어둠이 짙을수록 김) + 곁 90px(11-10 크기 2배). 심장박동 소리. */
 function fmHuntTick(dt){const lv=fmLv(),p=G.p;if(lv<1)return;const H=G.fmHT||(G.fmHT={t:lv===2?120:240,e:null,hb:0});let e=H.e;
   if(e&&(e.dead||!G.enemies.includes(e))){H.e=e=null;H.t=Math.max(H.t,lv===2?90:120)}
-  if(!e){if(G.arena||G.fmEv)return;/* 11-10: 이벤트 중엔 안 나옴 */H.t-=dt;if(H.t>0)return;H.t=lv===2?90:120;if(Math.random()<.5)return;/* 11-10: 주기마다 50% 확률로 등장 */const [x,y]=spawnPos();e=mkEnemy('fm_hunter',x,y,{fixed:1,hunt:1,fmInv:1e9,xp:0,dmg:0});e.hp=e.max=1e12;e.life=45;e.st='w';e.tx=x;e.ty=y;e.wt=0;e.sR=200;H.e=e;
+  if(!e){if(G.arena)return;H.t-=dt;if(H.t>0)return;H.t=lv===2?90:120;if(Math.random()<.5)return;/* 11-10: 주기마다 50% 확률로 등장 */const [x,y]=spawnPos();e=mkEnemy('fm_hunter',x,y,{fixed:1,hunt:1,fmInv:1e9,xp:0,dmg:0});e.hp=e.max=1e12;e.life=45;e.st='w';e.tx=x;e.ty=y;e.wt=0;e.sR=200;H.e=e;
     if(!G.bot){toast('👁️ 무언가 깨어났어요','들키지 마세요… 수풀에 숨거나 횃불 빛으로!');G.shk=Math.max(G.shk||0,.15)}return}
   e.life-=dt;e.fmInv=1e9;e.hp=e.max;e.kx=e.ky=0;
   if(G.arena||(e.life<=0&&e.st!=='c')||e.life<-15){fmHuntGone(e,0);return}
@@ -883,15 +882,16 @@ function fmUnseal(fx){const S=G.fmSW;if(!S)return;G.fmSW=null;const w=S.w;w.t=0;
 function fmVis(){const lv=fmLv();if(!lv)return 0;const dk=G.fmD||0,mx=Math.hypot(VW,VH)*.62,mn=lv===2?175:260;let R=mx+(mn-mx)*dk;if(G.fmIn&&G.fmIn.t==='house_empty')R*=.62;if(G.fmH&&G.fmH.on)R=Math.min(R,120);/* 11-10: 숨으면 화면 크기와 상관없이 코앞만 */return R}
 function fmDarkDraw(){const lv=fmLv();if(!lv)return;const p=G.p;let R=fmVis();G.fmVR=(G.fmVR||R)+(R-(G.fmVR||R))*.035;R=G.fmVR;
   // 11-08 밤: 어둠을 ¼ 크기 그림판에 그리고 구멍(캐릭터 시야 + 켜진 횃불)을 뚫은 뒤 한 번에 덮음
-  const al=lv===2?.9:.72,x0=p.x-VW/2-20,y0=p.y-VH/2-20,WW=VW+40,HH=VH+40,k=.25;
+  const hidN=!!(G.fmH&&G.fmH.on),al=hidN?(lv===2?.5:.42):lv===2?.9:.72,x0=p.x-VW/2-20,y0=p.y-VH/2-20,WW=VW+40,HH=VH+40,k=.25;
   if(!FM.hole){const V=document.createElement('canvas');V.width=V.height=128;const g2=V.getContext('2d'),gr=g2.createRadialGradient(64,64,64*.55,64,64,64);gr.addColorStop(0,'rgba(0,0,0,1)');gr.addColorStop(1,'rgba(0,0,0,0)');g2.fillStyle=gr;g2.fillRect(0,0,128,128);FM.hole=V;
     const U=document.createElement('canvas');U.width=U.height=128;const g3=U.getContext('2d'),g4=g3.createRadialGradient(64,64,0,64,64,64);g4.addColorStop(0,'rgba(0,0,0,1)');g4.addColorStop(.35,'rgba(0,0,0,.85)');g4.addColorStop(1,'rgba(0,0,0,0)');g3.fillStyle=g4;g3.fillRect(0,0,128,128);FM.hole2=U;
     const O=document.createElement('canvas');O.width=O.height=128;const g5=O.getContext('2d'),g6=g5.createRadialGradient(64,64,0,64,64,64);g6.addColorStop(0,'rgba(255,150,60,.5)');g6.addColorStop(1,'rgba(255,90,20,0)');g5.fillStyle=g6;g5.fillRect(0,0,128,128);FM.glow=O}
   const D=FM.dk||(FM.dk=document.createElement('canvas')),dw=Math.ceil(WW*k),dh=Math.ceil(HH*k);if(D.width!==dw||D.height!==dh){D.width=dw;D.height=dh}const g=D.getContext('2d');
-  g.globalCompositeOperation='source-over';g.clearRect(0,0,dw,dh);g.fillStyle=`rgba(4,2,10,${al})`;g.fillRect(0,0,dw,dh);g.globalCompositeOperation='destination-out';
+  g.globalCompositeOperation='source-over';g.clearRect(0,0,dw,dh);g.fillStyle=hidN?`rgba(8,20,6,${al})`:`rgba(4,2,10,${al})`;/* 11-10: 수풀에 숨으면 옅은 초록빛 어둠 */g.fillRect(0,0,dw,dh);g.globalCompositeOperation='destination-out';
   /* 11-10: 어둠 속 시야 = 발밑 작은 원 + 이동 방향 부채꼴(70°). 어둠이 옅으면 원이 커서 거의 다 보임. 숨으면 원만 */
   {const cx=(p.x-x0)*k,cy=(p.y-10-y0)*k,dk=G.fmD||0,hid=G.fmH&&G.fmH.on,rc=hid?R:Math.max(64,R*(1-1.45*dk));g.drawImage(FM.hole,cx-rc*k,cy-rc*k,rc*2*k,rc*2*k);
    if(!hid&&rc<R*1.3){const C=fmCone(),L=Math.max(300,R*1.45),fa=Math.atan2(p.fy||0,(p.fx||p.fy)?p.fx||0:1);G.fmFa=G.fmFa===undefined?fa:G.fmFa+Math.atan2(Math.sin(fa-G.fmFa),Math.cos(fa-G.fmFa))*.2;g.save();g.translate(cx,cy);g.rotate(G.fmFa);g.drawImage(C,-L*k,-L*k,L*2*k,L*2*k);g.restore()}}
+  if(G.fmA)for(const a of G.fmA){if(a.st)continue;const r=72*(1+.08*Math.sin(G.t*4+a.ph));if(Math.abs(a.x-p.x)>VW/2+r||Math.abs(a.y-p.y)>VH/2+r)continue;g.globalAlpha=.9;g.drawImage(FM.hole2,(a.x-r-x0)*k,(a.y-20-r-y0)*k,r*2*k,r*2*k);g.globalAlpha=1}/* 11-10: 숨은 착한 토마토는 어둠 속에서도 빛남 */
   const TL=G.fmTL,TR=lv===2?135:160;if(TL)for(const t of TL){if(t.lit<=0)continue;const r=TR*t.lit*(1+.05*Math.sin(G.t*11+t.ph));if(t.x+r<x0||t.x-r>x0+WW||t.y-80+r<y0||t.y-80-r>y0+HH)continue;g.globalAlpha=.95;g.drawImage(FM.hole2,(t.x-r-x0)*k,(t.y-80-r-y0)*k,r*2*k,r*2*k)}
   g.globalAlpha=1;g.globalCompositeOperation='source-over';
   const sm=ctx.imageSmoothingEnabled;ctx.imageSmoothingEnabled=true;ctx.drawImage(D,x0,y0,WW,HH);
@@ -911,13 +911,20 @@ function fmAllyTick(dt){const p=G.p,lv=fmLv();const A=G.fmA||(G.fmA=[]);G.fmAT=(
     else{if(a.t>(lv?1.6:.5)){if(lv&&a.home){const o=a.home;const n=G.hell?3:2;for(let k=0;k<n;k++){const e=fmPop(mkEnemy('fm_angry',o.x+rnd(-20,20),o.y-6));e.kx=rnd(-20,20);e.ky=rnd(10,30);e.fmBad=1}if(!G.bot&&Math.hypot(p.x-o.x,p.y-o.y)<VW*.7){G.texts.push({x:o.x,y:o.y-50,v:'…화난 토마토가 됐어요',life:1.2,col:'#ff6a6a'});SND.p('whoosh')}}A.splice(i,1)}}}}
 function fmRescue(a){const p=G.p,lv=fmLv();healP(Math.round(G.S.maxHp*.03),'fm');
   const n=3+Math.floor(em()/4);for(let k=0;k<n;k++)G.gems.push({x:a.x+rnd(-14,14),y:a.y+rnd(-10,10),v:Math.max(2,Math.round(G.next*.035)),big:1});
-  if(lv&&!a.fol){G.fmClr=(G.fmClr||0)+.3}/* 11-10: 한 번에 걷지 않고 서서히(초당 5%) *//* 11-09: 숨은 토마토만 시야 회복(-15%) */G.fmSaved=(G.fmSaved||0)+1;
+  if(lv&&!a.fol){G.fmD0=Math.max(0,(G.fmD0||0)-.15);G.fmDs=Math.max(0,(G.fmDs||0)-.15)}/* 11-09: 숨은 토마토만 시야 회복(-15%) */G.fmSaved=(G.fmSaved||0)+1;
   if(G.bot)return;G.texts.push({x:a.x,y:a.y-34,v:pick(['고마워요!','살았다!','언니 최고!']),life:1,col:'#ffd0e4'});sparks(a.x,a.y-10,18,['#ff4a5a','#ffd0e4','#9be15d','#ffffff'],140,.6,2);pring(a.x,a.y-8,30,'#ffd0e4',14,.4);SND.p('heal')}
 function fmAllyDraw(){const A=G.fmA;if(!A||!A.length)return;const im0=FM.img.m_ally;if(!im0||!im0.width)return;const w=44,im=fmSC('m_ally',w)||im0,h=w*im0.height/im0.width,p=G.p;
   for(const a of A){let al=1,s=1;if(a.st===1){const k=Math.min(1,a.t/(fmLv()?1.6:.5));al=1-k;s=1-k*.4}const by=Math.abs(Math.sin(a.t*7+a.ph))*3;
     ctx.globalAlpha=.3*al;ctx.fillStyle='#120a04';ctx.beginPath();ctx.ellipse(a.x,a.y+2,13*s,4,0,0,7);ctx.fill();ctx.globalAlpha=al;
     ctx.save();ctx.translate(a.x,a.y-by);if(a.fl)ctx.scale(-1,1);ctx.drawImage(im,-w*s/2,-h*s,w*s,h*s);ctx.restore();
     if(a.st===0){ctx.globalAlpha=.8+.2*Math.sin(G.t*5);ctx.font='12px sans-serif';ctx.textAlign='center';ctx.fillText('💗',a.x,a.y-h-6-by)}ctx.globalAlpha=1}}
+/* 11-10 사용자: 어둠을 밝혀 주는 착한 토마토 = 흰·노란 빛 + 반짝이 (어둠 위에 그림) */
+function fmAllyGlow(){const A=G.fmA;if(!A||!A.length||G.bot)return;const p=G.p;if(!FM.agl){const c=document.createElement('canvas');c.width=c.height=64;const g=c.getContext('2d'),gr=g.createRadialGradient(32,32,0,32,32,32);gr.addColorStop(0,'rgba(255,255,240,.95)');gr.addColorStop(.35,'rgba(255,236,140,.55)');gr.addColorStop(1,'rgba(255,210,80,0)');g.fillStyle=gr;g.fillRect(0,0,64,64);FM.agl=c}
+  ctx.save();ctx.globalCompositeOperation='lighter';for(const a of A){if(a.st)continue;if(Math.abs(a.x-p.x)>VW/2+80||Math.abs(a.y-p.y)>VH/2+80)continue;const pu=.75+.25*Math.sin(G.t*5+a.ph),r=46*pu,cy=a.y-20;
+    ctx.globalAlpha=.75;ctx.drawImage(FM.agl,a.x-r,cy-r,r*2,r*2);
+    for(let i=0;i<4;i++){const ph=G.t*1.3+i*1.7+a.ph,f=(ph%1),an=i*1.57+Math.floor(ph)*2.1,rr=18+f*22,sx=a.x+Math.cos(an)*rr,sy=cy+Math.sin(an)*rr*.8-f*14,s=(1-f)*5+1;ctx.globalAlpha=(1-f)*.95;ctx.fillStyle=i%2?'#fff6c0':'#ffffff';
+      ctx.beginPath();ctx.moveTo(sx,sy-s*1.6);ctx.lineTo(sx+s*.35,sy-s*.35);ctx.lineTo(sx+s*1.6,sy);ctx.lineTo(sx+s*.35,sy+s*.35);ctx.lineTo(sx,sy+s*1.6);ctx.lineTo(sx-s*.35,sy+s*.35);ctx.lineTo(sx-s*1.6,sy);ctx.lineTo(sx-s*.35,sy-s*.35);ctx.closePath();ctx.fill()}}
+  ctx.restore()}
 // 화면 밖 착한 토마토 방향 표시(화면 좌표)
 function fmAllyArrows(){const A=G.fmA;if(!A||!A.length||G.bot)return;const p=G.p;
   for(const a of A){if(a.st)continue;const dx=a.x-p.x,dy=a.y-p.y;if(Math.abs(dx)<VW/2-20&&Math.abs(dy)<VH/2-20)continue;const k=Math.min((VW/2-30)/Math.abs(dx||1),(VH/2-40)/Math.abs(dy||1));
@@ -1167,7 +1174,7 @@ function fmAggro(e){if(!e.fmCalm)return;e.fmCalm=0;e.mad=1;e.tnt=null;e.tntT=0;i
 // 이벤트 공통
 function fmEvTick(dt){const lv=fmLv();if(!lv)return;const E=G.fmEv;
   if(E){E.t+=dt;FM_EVT[E.k].tick(E,dt);if(E.done)G.fmEv=null;return}
-  if(G.arena||G.fmRd||em()<2||(G.fmHT&&G.fmHT.e))return;/* 11-10: 사냥꾼이 있으면 이벤트 안 남 */G.fmEvT=(G.fmEvT===undefined?(lv===2?60:90):G.fmEvT)-dt;if(G.fmEvT>0)return;
+  if(G.arena||G.fmRd||em()<2)return;G.fmEvT=(G.fmEvT===undefined?(lv===2?60:90):G.fmEvT)-dt;if(G.fmEvT>0)return;
   const ks=Object.keys(FM_EVT).filter(k=>k!==G.fmEvL);for(let n=0;n<ks.length;n++){const k=ks.splice(Math.random()*ks.length|0,1)[0];const E2={k,t:0};if(FM_EVT[k].start(E2)){G.fmEv=E2;G.fmEvL=k;G.fmEvT=lv===2?75:100;G.fmHush=G.t+3.6;return}n--;if(!ks.length)break}G.fmEvT=10}
 function fmEvChest(x,y,msg){G.pickups.push({x,y,k:'chest'});if(!G.bot){toast('🎁 '+msg,'보물상자가 떨어졌어요',true);SND.p('ach');sparks(x,y-10,30,['#ffd34d','#ffffff'],200,.6,2)}}
 function fmFreeSpot(x0,y0,r0,r1,gap){for(let k=0;k<14;k++){const a=rnd(0,6.283),r=rnd(r0,r1),x=Math.round(x0+Math.cos(a)*r),y=Math.round(y0+Math.sin(a)*r*.75);if(!(G.fmL||[]).some(o=>Math.abs(o.x-x)<gap&&Math.abs(o.y-y)<gap*.8))return{x,y}}return null}
@@ -3340,7 +3347,7 @@ function draw(){
     ctx.globalAlpha=Math.min(1,sy.life*4);ctx.fillStyle=lv===3?'#ff2a4a':lv===2?'#ffe14d':'#fff';ctx.strokeStyle='#1a1020';ctx.lineWidth=2;ctx.beginPath();ctx.roundRect(bx,by,bw,bh,9);ctx.moveTo(p.x-5,by+bh);ctx.lineTo(p.x,by+bh+6);ctx.lineTo(p.x+5,by+bh);ctx.fill();ctx.stroke();
     ctx.fillStyle=lv===3?'#fff':'#1a1020';const tb=ctx.textBaseline;ctx.textBaseline='middle';ctx.fillText(sy.v,p.x,by+bh/2+1);ctx.textBaseline=tb;ctx.globalAlpha=1}
   if(mpDraw)mpDraw();
-  if(G.sbL&&G.map==='sangbong')sbDraw(1);else if(G.map==='farm'){fmDraw(1);fmBurstDraw();fmEvDraw();fmDarkDraw();fmHuntLight();fmSkyDraw();fmSupDraw()}
+  if(G.sbL&&G.map==='sangbong')sbDraw(1);else if(G.map==='farm'){fmDraw(1);fmBurstDraw();fmEvDraw();fmDarkDraw();fmAllyGlow();fmHuntLight();fmSkyDraw();fmSupDraw()}
   // texts
   for(const t of G.texts){ctx.globalAlpha=Math.min(1,t.life*3);ctx.font=t.big?'900 22px "Black Han Sans",sans-serif':(t.crit?'900 14px':'700 11px')+' sans-serif';ctx.lineWidth=3;ctx.strokeStyle='#000';ctx.strokeText(t.v,t.x,t.y);ctx.fillStyle=t.col||(t.crit?'#ffd34d':'#fff');ctx.fillText(t.v,t.x,t.y);ctx.globalAlpha=1}
   try{prPost()}catch(_){}

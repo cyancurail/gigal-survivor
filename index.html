@@ -2835,7 +2835,7 @@ function optHTML(o,i){s2Desc();
   return `<button type="button" class="opt" data-i="${i}"><span class="ic">${icon}</span><span class="tx"><b>${esc(title)}${tag}</b><small>${esc(desc)}</small>${lu?`<small class="lu">${esc(lu)}</small>`:''}${pair?`<small class="pr">${esc(pair)}</small>`:''}${pair2?`<small class="pr2">${esc(pair2)}</small>`:''}</span><span class="key">${i+1}</span></button>`;
 }
 function levelUp(){
-  G.paused=true;SND.p('lvl');if(G.rr===undefined)G.rr=8+(window.SN?SN.v('roll'):0);if(G.bn===undefined)G.bn=3;const ops=choices();lvRender(ops,-1);
+  G.paused=true;SND.p('lvl');if(G.rr===undefined)G.rr=8+(window.SN?SN.v('roll'):0);if(G.bn===undefined)G.bn=3;const jk=window.SN&&SN.jokerOn&&SN.jokerOn(),ops=choices(jk?4:0);lvRender(ops,-1);if(jk&&!G.bot)try{toast('📿 세인트 목걸이 조커','이번 레벨업은 카드 4장!')}catch(e){}
 }
 /* V123 [이 련은 빼버리기]: NEW 무기 카드만, 한 판 2번, 그 판 끝까지 안 나옴, 그 칸만 새로 뽑기 */
 function lvRender(ops,fresh){
@@ -9318,10 +9318,13 @@ const D={
  /* 11-10 사용자: 📿 신화 목걸이 (목걸이 칸 1개, 신화 뽑기의 25%) — 판 시작 때 확률로 무기/아이템 하나를 골라 들고 시작 */
  nbag:{g:'M',n:'짐가방',v:[5,7,9,11,15],d:v=>`판을 시작할 때 ${v}% 확률로 무기 하나를 골라 들고 시작`},
  npouch:{g:'M',n:'파우치',v:[5,7,9,11,15],d:v=>`판을 시작할 때 ${v}% 확률로 아이템 하나를 골라 들고 시작`},
+ nmut:{g:'M',n:'돌연변이',v:[5,7,9,11,15],d:v=>`무기가 처음 Lv8이 되는 순간 ${v}% 확률로 진화 짝 없이 바로 진화 (한 판에 한 번 · 하모닉스 재료·보석 제외)`},
+ njok:{g:'M',n:'조커',v:[10,13,16,20,25],d:v=>`레벨업할 때마다 ${v}% 확률로 카드 4장`},
+ nsprout:{g:'M',n:'새싹',v:[5,7,9,11,15],d:v=>`판을 시작할 때 ${v}% 확률로 레벨 3에서 시작 (레벨업 2번)`},
  umb:{g:'L',n:'우산',v:[15,20,25,32,40],p:[30,28,26,23,20],d:v=>`받는 원거리(탄막) 피해 −${v}% · ⚠️ 받는 근거리 피해 +${[30,28,26,23,20][[15,20,25,32,40].indexOf(v)]}%`},
 };
 /* 저장 코드 순서 — 새 반지는 반드시 끝에 */
-const SNK=['rev','crit','qg','arena','roll','ult','curse','shield','heart','heel','nail','spa','corset','study','payday','magnet','boss','nag','box','cool','kb','night','soup','pierce','moon','wall','umb','nbag','npouch'];
+const SNK=['rev','crit','qg','arena','roll','ult','curse','shield','heart','heel','nail','spa','corset','study','payday','magnet','boss','nag','box','cool','kb','night','soup','pierce','moon','wall','umb','nbag','npouch','nmut','njok','nsprout'];
 const ORD=[...SNK.filter(k=>D[k].g==='L'),...SNK.filter(k=>D[k].g==='R')];
 const nm=k=>(D[k].g==='M'?'세인트 목걸이 ':'세인트 ')+D[k].n;
 function st(){if(!SAVE.saint||typeof SAVE.saint!=='object')SAVE.saint={};if(!Array.isArray(SAVE.saintEq))SAVE.saintEq=[null,null,null];while(SAVE.saintEq.length<3)SAVE.saintEq.push(null);return SAVE.saint}
@@ -9332,7 +9335,8 @@ function add(k,n){const a=cnt(k);a[0]+=n||1;st()[k]=a;return merge(k)}
 function eqKeys(){st();return SAVE.saintEq.map(k=>k&&D[k]&&lv(k)>0?k:null)}
 function neckKey(){const k=SAVE.neckEq;return k&&D[k]&&D[k].g==='M'&&lv(k)>0?k:null}
 /* 📿 판 시작 0.3초 뒤 한 번: 목걸이 확률 → 무기/아이템 3장 중 1장 골라 들고 시작 (트와일라잇 제외) */
-function neckTick(){const s=G._sn;if(!s||s.nk||G.tw||G.td)return;if(G.t<.3||G.paused||G.freeze>0||!G.running)return;s.nk=1;const k=neckKey();if(!k)return;const pr=D[k].v[lv(k)-1];if(Math.random()*100>=pr)return;
+function neckTick(){const s=G._sn;if(!s||G.tw||G.td)return;const k0=neckKey();if(k0==='nmut')mutTick(s);if(s.nk)return;if(G.t<.3||G.paused||G.freeze>0||!G.running)return;s.nk=1;const k=k0;if(!k||k==='nmut'||k==='njok')return;const pr=D[k].v[lv(k)-1];if(Math.random()*100>=pr)return;
+  if(k==='nsprout'){const n2=Math.floor(4+(G.lvl+1)*4+1.4*Math.pow(G.lvl+1,1.8));G.xp=Math.max(G.xp,G.next+n2);if(!G.bot)try{toast('📿 '+nm(k),'레벨 3에서 시작해요!',true)}catch(e){}return}
   let ops;if(k==='nbag'){if(G.weapons.length>=6)return;ops=Object.keys(WP).filter(q=>WU[q]&&!WP[q].hid&&!WP[q].ju&&!W(q)&&juAllow(q,G.id)).map(q=>({t:'wnew',k:q}))}
   else{if(Object.keys(G.items).length>=6)return;ops=Object.keys(IT).filter(q=>!G.items[q]&&!IT[q].ju&&juAllow(q,G.id)).map(q=>({t:'inew',k:q}))}
   for(let i=ops.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[ops[i],ops[j]]=[ops[j],ops[i]]}ops=ops.slice(0,3);if(!ops.length)return;
@@ -9342,6 +9346,11 @@ function neckTick(){const s=G._sn;if(!s||s.nk||G.tw||G.td)return;if(G.t<.3||G.pa
   m.querySelectorAll('canvas[data-spr]').forEach(c=>{const x=c.getContext('2d');x.imageSmoothingEnabled=false;x.drawImage(SPRF(c.dataset.spr,'plain',0),0,0,64,64)});
   m.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{applyChoice(ops[+b.dataset.i]);document.getElementById('lvov').hidden=true;G.paused=false;try{toast('📿 '+nm(k),'들고 시작해요!')}catch(e){}});
   document.getElementById('lvov').hidden=false}
+/* 🧬 돌연변이: Lv8이 된 무기마다 한 번 굴림, 성공은 한 판에 한 번 */
+function mutTick(s){if(s.mu||G.paused)return;const k='nmut',pr=D[k].v[lv(k)-1],ex=new Set();try{for(const h of HX){ex.add(h.a);ex.add(h.b)}}catch(e){}
+  for(const w of G.weapons){if(w.evo||w.lvl<8||w._mu)continue;w._mu=1;if(WP[w.k].hid||WP[w.k].ju||ex.has(w.k))continue;if(Math.random()*100<pr){s.mu=1;w.evo=true;
+    if(!G.bot){try{SND.p('evo');toast('🧬 돌연변이!',`${WP[w.k].name} → ${WP[w.k].evoName}`,true);sparks(G.p.x,G.p.y-20,60,['#9dff6a','#ff7ad8','#ffffff'],300,.9,3)}catch(e){}}break}}}
+const jokerOn=()=>neckKey()==='njok'&&!(G&&G.tw)&&Math.random()*100<D.njok.v[lv('njok')-1];
 function gachaN(){const L=SNK.filter(k=>D[k].g==='M'),k=L[Math.floor(Math.random()*L.length)],up=add(k,1);return{id:'sn:'+k,kind:'saint',sk:k,tier:'M',n:'📿 '+nm(k),owner:(CHAR[selI]||CHAR[0]).id,up,lv:lv(k)}}
 let C={};
 function refresh(){C={};for(const k of eqKeys())if(k)C[k]=D[k].v[lv(k)-1];return C}
@@ -9489,7 +9498,7 @@ function info(k){close();const d=D[k],L=lv(k),a=cnt(k),E=eqKeys(),M=d.g==='M',on
   o.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>{try{SND.p('click')}catch(e){}const a=b.dataset.a;close();if(a==='eq')equip(k,+b.dataset.i);else if(a==='off')unequip(k);else if(a==='non'){SAVE.neckEq=k;persist();render('eqL','어머, 목선이 반짝여요. 오늘 언니 제일 비싸요. 💅')}else if(a==='noff'){SAVE.neckEq=null;persist();render('off')}})}
 function open(){build();hideAll();close();const sec=document.getElementById('saint');sec.hidden=false;sec.scrollTop=0;render();img('saint/bg.webp')}
 
-window.SN={D,SNK,lv,cnt,add,merge,refresh,eqKeys,neckKey,gachaN,c:cv,v:cv,mm,rm,dmg,rev,ultM,gacha,gdesc,drawPrev,open,render,tick,init};
+window.SN={D,SNK,lv,cnt,add,merge,refresh,eqKeys,neckKey,gachaN,jokerOn,c:cv,v:cv,mm,rm,dmg,rev,ultM,gacha,gdesc,drawPrev,open,render,tick,init};
 })();
 </script>
 </body></html>

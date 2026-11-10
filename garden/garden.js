@@ -17,7 +17,7 @@ function white(i,col){const key=i.src+(col||'');let c=WH.get(key);if(c)return c;
 const U={
   sun:{n:'맘터',sk:'코지카드',img:'garden/sk/mt_cozy.png',cost:50,cd:7.5,hp:300,role:'🌻 실타래 짜기',desc:'20초마다 실타래를 짜요.',prod:{first:5,every:20,amt:25}},
   pea:{n:'태태영',sk:'체리건1',img:'garden/sk/tt_cherrygun1.png',cost:100,cd:7.5,hp:300,role:'💗 하트 사격',desc:'같은 줄에 하트를 한 발씩 쏴요.',shoot:{every:1.4,dmg:20,n:1,k:'heart'}},
-  cherry:{n:'태태영',sk:'체리 원피스',img:'msk2/cc01.png',cost:150,cd:50,cd0:30,hp:300,role:'🍒 체리 폭탄',desc:'심으면 잠시 뒤 주변 3×3을 날려요. (1회용)',bomb:{t:1.1,dmg:1800}},
+  cherry:{n:'쁘니',sk:'플라워카드',img:'garden/sk/pn_flower.png',cost:150,cd:50,cd0:30,hp:300,role:'🍒 체리 폭탄',desc:'심으면 잠시 뒤 주변 3×3을 날려요. (1회용)',bomb:{t:1.1,dmg:1800}},
   wall:{n:'무룩',sk:'실드카드',img:'msk2/cd02.png',cost:50,cd:30,cd0:20,hp:4000,role:'🛡️ 방패',desc:'단단하게 길을 막아요.',wall:1},
   mine:{n:'세나',sk:'샌드카드',img:'msk2/cd03.png',cost:25,cd:30,cd0:20,hp:300,role:'⏳ 모래 지뢰',desc:'14초 동안 모래에 숨었다가, 밟으면 터져요. (1회용)',mine:{arm:14,dmg:1800}},
   snow:{n:'밍키',sk:'슬리피카드',img:'garden/sk/mk_sleepy.png',cost:175,cd:7.5,hp:300,role:'💤 졸음 구름',desc:'맞은 무수리가 10초 동안 졸려서 느려져요.',shoot:{every:1.4,dmg:20,n:1,k:'ice',slow:10}},

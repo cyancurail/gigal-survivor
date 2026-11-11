@@ -1,4 +1,5 @@
 import sys,numpy as np
+STRONG=len(sys.argv)>3 and sys.argv[3]=='strong'
 from PIL import Image
 from scipy import ndimage
 def key(im):
@@ -19,6 +20,12 @@ def key(im):
     edge=ndimage.binary_dilation(al<0.98,iterations=3)
     mx=(col[...,0]+col[...,2])/2;gg=col[...,1]
     col[...,1]=np.where(edge&(gg>mx),mx,gg)
+  if bg[0]>bg[1]+60 and bg[2]>bg[1]+60:
+    # 마젠타 배경: 가장자리 밝은 부분(흰 옷·이펙트)에 남은 분홍기를 G 쪽으로 눌러 줌
+    edge=ndimage.binary_dilation(al<0.98,iterations=3)
+    R,G,B=col[...,0],col[...,1],col[...,2];m=np.minimum(R,B)-G
+    fix=edge&(m>0)&((G>100)|((al<.9)&STRONG))
+    col[...,0]=np.where(fix,R-.8*m,R);col[...,2]=np.where(fix,B-.8*m,B)
   out=np.dstack([col,al*255]);return out
 def sheet(path,out,F=256):
   im=Image.open(path);a=key(im);H,W=a.shape[:2];cw,ch=W/4,H/2

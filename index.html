@@ -3238,7 +3238,7 @@ function update(dt){
   if(G.ultReady)ultTick(dt);
   // unlocks & end
   if(p.hp<=0&&!p.dead){if(window.SN&&SN.rev())return;p.hp=0;if(MPDIE&&MPDIE())return;endGame(false);return}
-  if(G.t>=GLEN&&!G.endless&&!G.escPending){endGame(true);return}
+  if(G.t>=GLEN&&!G.endless&&!G.escPending&&!G.enemies.some(e=>e.boss&&!e.dead&&e.name===GB()[GB().length-1].name)){endGame(true);return}/* 11-11: 최종 보스가 살아 있으면 25분이 지나도 계속 */
   if(G.xp>=G.next&&!G.paused)checkLevel();
 }
 
@@ -5353,7 +5353,7 @@ function schedule(now){if(!ACC.user||!ACC.on)return;clearTimeout(tmr);const wait
 function apply(cloud){try{localStorage.setItem(SAVE_KEY,cloud.save)}catch(e){}setMeta({uid:ACC.user.uid,at:cloud.at,dirty:false,lat:cloud.at});try{sessionStorage.setItem('gs_skipboot','1')}catch(e){}location.reload()}
 async function reconcile(){const fb=await load(),u=ACC.user;let cloud=null;try{cloud=await fb.get(u.uid)}catch(e){console.warn(e);return}
  if(cloud&&cloud.id)ACC.id=cloud.id;btn();const m=meta();
- const done=()=>{ACC.on=true;if(meta().dirty)schedule(true)};
+ const done=()=>{ACC.on=true;try{const L=ACH_GRANT[norm(ACC.id||'')];if(L)L.forEach(a=>{if(!SAVE.ach[a])achGet(a)})}catch(e){}if(meta().dirty)schedule(true)};
  if(!cloud||!cloud.save){await upload().catch(()=>{});return done()}
  if(m.uid===u.uid&&m.at===cloud.at){return done()}
  if(m.uid===u.uid&&!m.dirty)return apply(cloud);
@@ -5364,7 +5364,9 @@ try{persist=window.persist}catch(e){}
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&meta().dirty)upload().catch(()=>{})});
 addEventListener('pagehide',()=>{if(meta().dirty)upload().catch(()=>{})});
 // ---- 📮 우편함 (V105) ----
-const DEV_ID='조무룩';const isDev=()=>!!(ACC.user&&ACC.id&&norm(ACC.id)===DEV_ID);
+const DEV_ID='조무룩';
+/* 11-11 사용자: 계정별 업적 지급 (25분 시간제한 버그로 놓친 장수 헬 클리어) */
+const ACH_GRANT={'gefwer89':['jangsuX']};const isDev=()=>!!(ACC.user&&ACC.id&&norm(ACC.id)===DEV_ID);
 let MAILS=[],mailAt=0;
 const ariMx=()=>{let r=[];try{r=window.__ariMails?__ariMails():[]}catch(e){}try{if(window.__tdMails)r=r.concat(__tdMails())}catch(e){}return r};
 function ariSync(){MAILS=[...ariMx(),...MAILS.filter(m=>!String(m.id).startsWith('ari_'))];mailBtn()}

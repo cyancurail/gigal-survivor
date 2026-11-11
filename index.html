@@ -6881,7 +6881,7 @@ const wrap=()=>{const T=window.TD;if(!T||T.__lk)return setTimeout(wrap,500);T.__
 (()=>{'use strict';
 const W=450,H=800,SLOTX=[57,141,225,309,393];
 const arcY=x=>653+59*((x-225)/225)**2,LINE=653,SLOTY=692;const slotY=i=>arcY(SLOTX[i])+38;
-const WAVES=21,BOSSW=[7,14,21],WDUR=25,BDUR=40;/* 11-07: 34·50초 → 25·40초 (몬스터가 쌓이게) */
+const WAVES=21,BOSSW=[7,14,21],WDUR=22,BDUR=40;/* 11-07: 34·50초 → 25·40초 (몬스터가 쌓이게) */
 /* 스테이지 23개: 보통 10 · 어려움 10 · 헬 3 (사용자 승인 2026-11-05). mix = 나오는 종류(1·5·9·13웨이브부터 하나씩), rot = 웨이브마다 그중 3종씩 교대, mut = 귀염 변이체 확률 */
 const ALL9=['n','f','t','r','p','d','a','s','e'];
 /* 60스테이지 (11-07 2단계): 보통 20·어려움 20·헬 20. 체력 B안: 땡땡 환산 n=2s−1, n≤41이면 1+0.0034(n−1)^2.38, 이후 스테이지당 +2.63.
@@ -7035,7 +7035,7 @@ function elemHit(e,dd){const m=CURM;if(!m||!m.el||e.dead)return;const k=ELM[m.id
   else if(k==='독'){e.po=Math.min(8,(e.po||0)+1);e.pod=Math.max(e.pod||0,dd*.1);e.poT=3}
   else if(k==='전하'){e.c10=(e.c10||0)+1;if(e.c10>=10){e.c10=0;aoe(e.x,e.y,T.sq.some(q=>q.id==='승태민'&&aw(q))?100:50,dd*5);T.fx.push({k:'ring',x:e.x,y:e.y,r:50,t:.35,col:'#9fd6ff'})}}
   CURM=m}
-const gmX=m=>{const L=m.lv.reduce((a,b)=>a+b,0),g=GROW[m.id]||0;return g===0?1+.17*L:g===1?.8*(1+.14*L)*(L>=6?1.5:1):.6*(1+.12*L)*(L>=6?1.6:1)*(L>=9?2:1)};const FIRE=.6,DMGC=1.35,ESPD=.156;/* 11-08 사용자: +20% *//* 11-07 사용자: 이동속도 지금의 20% (.65→.13) *//* 사용자 피드백(11-06): 연사·몬스터 속도 낮춤 */
+const gmX=m=>{const L=m.lv.reduce((a,b)=>a+b,0),g=GROW[m.id]||0;return g===0?1+.17*L:g===1?.8*(1+.14*L)*(L>=6?1.5:1):.6*(1+.12*L)*(L>=6?1.6:1)*(L>=9?2:1)};const FIRE=.6,DMGC=1.35,ESPD=.187/* 11-11 사용자: 졸리다는 말이 많아 몬스터 이동 +20% (쿨타임도 +20% 빠르게) */;/* 11-08 사용자: +20% *//* 11-07 사용자: 이동속도 지금의 20% (.65→.13) *//* 사용자 피드백(11-06): 연사·몬스터 속도 낮춤 */
 /* 쿨타임 층(사용자 11-06: 기본형 최소 3초). [지금 실제 쿨(FIRE 반영), 목표 쿨] → 무기 시간 배율 CDK = 지금/목표, 피해는 1/CDK로 보정(화력 유지) */
 const CDT={'박준형':[1.58,3],'영규형':[.83,3],'김세진':[1.5,3],'재건':[1.17,3],'박준영':[1.33,3],
   '조혁래':[3.17,6],'승태민':[2.33,6],'임재영':[2.5,6],'박민규':[2.67,6],'박계원':[2.67,6],'송기호':[3.67,6],
@@ -7056,7 +7056,7 @@ function stApply(r){hkRun(r);const td=TDS(),s=stSum(td.sl||0);r.hp=r.hpMax=V2?ln
 const WLMAX=40,wlOf=id=>Math.max(1,(TDS().wl||{})[id]||1);
 const /* 11-11 사용자: 강화 레벨당 +3% → +6% (쁘니 피드백: 세지는 티) */wlMul=id=>{const l=wlOf(id);return(1+.06*(l-1))*(l>=10?1.1:1)*(l>=30?1.1:1)*(l>=40?1.1:1)}/* 11-08 사용자 A안: 레벨당 +10%, 특성 +10% */;
 /* 11-08 사용자: 강화 칩은 무기마다 따로, Lv6까지는 싸고(3~7) Lv7부터 15%씩 비싸짐 — 각성(Lv34)까지 가는 길을 어렵게 */
-/* 11-09 사용자: Lv30까지 골드 약 6.5만 (예전 1.3만, ×5) — 이미 올린 Lv는 그대로 */const wlCost=l=>({c:l<6?2+l:Math.round(10*Math.pow(1.15,l-6)),g:150*l});
+/* 11-09 사용자: Lv30까지 골드 약 6.5만 (예전 1.3만, ×5) — 이미 올린 Lv는 그대로 */const wlCost=l=>({c:l<6?2+l:Math.round(10*Math.pow(1.15,l-6)),g:50*l});/* 11-11 사용자: 강화 골드 1/3 (150→50) */
 const WLT=[[10,'피해 +10%'],[20,'시작 무기로 고르면 랭크1 카드 1장을 받고 시작'],[30,'피해 +10%'],[40,'💜 희귀 카드 확률 2배 + 피해 +10%']];
 const lvSum=m=>m.lv.reduce((a,b)=>a+b,0);
 const ORDER=[2,1,3,0,4];/* 리더는 가운데 칸 */
@@ -7115,7 +7115,7 @@ function planWave(w){if(T.tut)return tutPlan(w);const q=[],boss=BOSSW.includes(w
   for(let i=0;i<n-nP;i++)q.push({at:(i+Math.random())/(n-nP)*dur*.92,k:rk()})
   if(V2&&!T.lab&&!boss&&!T.tut&&ELW.includes(w)){const kk=ks.filter(k=>k!=='e'&&k!=='r');q.push({at:dur*.45,k:kk.includes('t')?'t':kk[0]||'n',g:1})}
   if(V2&&!T.lab&&!T.tut&&!boss&&dI>=1&&w>=3){const kk=ks.filter(k=>k!=='r'&&k!=='e'),ne=w<8?2:Math.random()<.5?2:3;for(let j=0;j<ne;j++)q.push({at:dur*(.2+.55*j/(ne-1)+rnd(-.04,.04)),k:kk.includes('t')?'t':kk[0]||'n',el:1})}
-  T.wxp=q.reduce((a,o)=>a+(ETY[o.k]?ETY[o.k].xp:0),0)*T.cntX/MCNT;if(V2&&!T.lab)T.need=Math.max(4,(w===1?.35:PKF)*T.wxp);/* 11-07: 레벨업은 한 판 20번, 웨이브마다 1번까지 — 이번 웨이브 몬스터 경험치의 PKF만큼 잡으면 1번 */
+  T.wxp=q.reduce((a,o)=>a+(ETY[o.k]?ETY[o.k].xp:0),0)*T.cntX/MCNT;if(V2&&!T.lab){T.need=Math.max(4,(w===1?.35:PKF)*T.wxp);if(w===1)T.need0=T.need;else if(T.picks===0&&T.need0)T.need=Math.min(T.need,T.need0)}/* 11-11 버그: 첫 레벨업 전엔 요구량이 웨이브마다 올라가지 않게 *//* 11-07: 레벨업은 한 판 20번, 웨이브마다 1번까지 — 이번 웨이브 몬스터 경험치의 PKF만큼 잡으면 1번 */
   if(boss)q.push({at:1,k:'b'});q.sort((a,b)=>a.at-b.at);if(w===1&&V2)q.slice(0,3).forEach((o,i)=>{o.at=i*.4;o.y0=170+Math.random()*70});/* 11-07: 첫 웨이브 3마리는 화면 안에서 시작 */if(V2&&!T.lab&&!T.tut){const S2=SOF(T.stg),ii=+S2.id.split('-')[1],sw=q.reduce((a,o)=>a+(o.warn||o.g||o.k==='b'||!ETY[o.k]?0:ETY[o.k].hp*(o.el?ELX:1)),0);T.whu=sw?wTot(S2.d,ii,w)/sw/(1+1.5*(S2.mut||0)*Math.min(1,w/8)):0}T.spawnQ=q;T.wt=0;T.wdur=dur}
 function spawn(k,x0,y0,mu,gd,el){if(V2&&k==='sm'&&T.en.length>160)return;const w=T.wave,S=SOF(T.stg),bt=k==='b'?S.mix[0]:null,y=bt?ETY[bt]:ETY[k],hp=(k==='b'?waveHp(w)*(w>=21?BOSSF:w>=14?400:70):waveHp(w)*y.hp*MHP*(k==='sm'?1:(T.cntH||1)))*(1+(S.hpm-1)*(.15+.85*Math.pow(w/WAVES,1.3)))/(V2&&S.hdv||1);
   const e={id:T.eid++,k,s:y.s,x:x0!=null?cl(x0+rnd(-14,14),16,W-16):rnd(30,W-30),y:y0!=null?y0+rnd(-8,8):-20,r:y.r,spd:y.spd*(1+w*.012),hp,max:hp,dmg:y.dmg,xp:y.xp,xk:k==='b'?1:(T.cntX||1),col:y.col,boss:!!y.boss,elite:!!y.elite,arm:y.arm||1,
@@ -7331,11 +7331,11 @@ function botPick(L){const n=T.sq.length,lowHp=T.hp<T.hpMax*.45,FO=window.__botFo
   for(const c of L){let v=1;if(FO){/* 측정용: 무기 1개 몰아주기 봇 */v=c.k==='new'?(n<1?9:-9):c.k==='wc'&&T.sq[0]&&c.id===T.sq[0].id?8+Math.random():c.k==='heal'?(lowHp?9:.3):1;if(v>bs){bs=v;best=c}continue}if(c.k==='new')v=window.__botTeam?(window.__botTeam.includes(c.id)?9:-9):window.__botMax&&n>=window.__botMax?-9:window.__botMax?9:n<2?9:n<3?6:n<4?3.5:.8;else if(c.k==='combo')v=8;else if(c.k==='heal')v=lowHp?9:.3;else if(c.k==='max'||c.k==='shield')v=lowHp?4:.5;
     else if(c.k==='wc'){const m=T.sq.find(q=>q.id===c.id),main=T.sq.indexOf(m)<2;v=c.c==='u4'?9:c.rare?7:c.c==='fam'?6.5:c.c==='d'?5:c.c==='f'?4.5:c.c==='n'?4:w2Trade(c.id,c.c)?2.5:3.5;if(main)v+=1.5}
     v+=Math.random()*1.5;if(v>bs){bs=v;best=c}}return best}
-function openCards(src){if(!T.tutL&&!T.tut&&!T.lab)T.lvcN=(T.lvc||0)+1;let L=T.tutL||offers(3);const noRR=true;/* 11-11 사용자: 다시 뽑기 삭제 */if(!T.tutL&&!T.tut&&!T.lab)T.lvc=(T.lvc||0)+1;T.tutL=null;if(!L.length){T.cardsLeft=0;return}T.paused=true;
+function openCards(src){if(!T.tutL&&!T.tut&&!T.lab)T.lvcN=(T.lvc||0)+1;let L=T.tutL||offers(3);const noRR=false;/* 11-11 사용자: 레벨업마다 다시 뽑기 1회 */let rr1=1;if(!T.tutL&&!T.tut&&!T.lab)T.lvc=(T.lvc||0)+1;T.tutL=null;if(!L.length){T.cardsLeft=0;return}T.paused=true;
   if(T.bot){apply(window.__botRand?pick(L):botPick(L));T.paused=false;evoNext();return}
   /* 11-08 사용자: 레벨업 리롤 한 판 5번 */
-  if(T.rr==null)T.rr=RRMAX;const box=ov.querySelector('.tdCards');const show=()=>{box.innerHTML=`<h3>${T.newOnly&&!src?'🆕 새 대원을 불러요':src||'카드를 골라요'}</h3><div class="tdCL">${L.map((c,i)=>`<button type="button" data-i="${i}"${c.rare?' class="w2R"':''}>${cardHTML(c)}</button>`).join('')}</div>${noRR?'':`<button type="button" class="tdRR"${T.rr>0?'':' disabled'}>🎲 다시 뽑기 · ${T.rr}/${RRMAX}</button>`}`};show();box.hidden=false;
-  box.onclick=e=>{if(e.target.closest('.tdRR')){if(T.rr<=0)return;const N=offers(3);if(!N.length)return;T.rr--;L=N;snd('click');show();return}const b=e.target.closest('button[data-i]');if(!b)return;snd('click');if(T.tut)ptrOff();apply(L[+b.dataset.i]);box.hidden=true;T.paused=false;evoNext()}}
+  const box=ov.querySelector('.tdCards');const show=()=>{box.innerHTML=`<h3>${T.newOnly&&!src?'🆕 새 대원을 불러요':src||'카드를 골라요'}</h3><div class="tdCL">${L.map((c,i)=>`<button type="button" data-i="${i}"${c.rare?' class="w2R"':''}>${cardHTML(c)}</button>`).join('')}</div>${noRR?'':`<button type="button" class="tdRR"${rr1>0?'':' disabled'}>🎲 다시 뽑기 · ${rr1}/1</button>`}`};show();box.hidden=false;
+  box.onclick=e=>{if(e.target.closest('.tdRR')){if(rr1<=0)return;const N=offers(3);if(!N.length)return;rr1--;L=N;snd('click');show();return}const b=e.target.closest('button[data-i]');if(!b)return;snd('click');if(T.tut)ptrOff();apply(L[+b.dataset.i]);box.hidden=true;T.paused=false;evoNext()}}
 function evoNext(){if(!T||!T.evoQ.length)return;const q=T.evoQ.shift(),D=(EVD[q.m.id]||[])[q.st-1];if(!D){evoNext();return}
   if(T.bot){q.m.ev[q.st-1]=q.st===3&&(q.m.up||0)>=5&&Math.random()<.4?'C':Math.random()<.5?'A':'B';evoNext();return}
   const DD=q.st===3&&(q.m.up||0)>=5&&EVC[q.m.id]?[...D,EVC[q.m.id]]:D;
@@ -7415,7 +7415,7 @@ function update(dt){if(!T||T.paused||T.over)return;T.t+=dt;if(T.lab)labTick(dt);
   if(T.wave>=WAVES&&!T.spawnQ.length&&!T.en.length){finish(true);return}
   if(V2&&!T.lab&&(T.ll||0)>=20){T.iwT=(T.iwT==null?0:T.iwT)-dt;if(T.iwT<=0&&T.en.some(e=>!e.dead&&e.y>440)){T.iwT=45;for(const e of T.en)if(!e.dead&&e.y>380)frz(e,2.5);T.fx.push({k:'flash',t:.35,col:'#bfefff'});banner('🧊 마음의 선 · 얼음 벽');snd('glass')}}
   if(V2&&!T.lab&&!T.bot)tutTick();
-  if(V2&&!T.lab){if(T.picks>=PKMAX)T.en_=0;else{const xpOk=T.picks-(T.bpk||0)<T.wave;if(T.en_>=T.need&&xpOk){T.en_-=T.need;T.en_=Math.min(T.en_,T.need*.5);T.picks++;openCards()}else if(!xpOk)T.en_=Math.min(T.en_,T.need)}
+  if(V2&&!T.lab){if(T.picks===0&&T.wave===1&&!T.paused&&!T.over)T.en_+=dt*T.need/16;/* 11-11 버그: 웨이브1은 못 잡아도 16초면 첫 레벨업 */if(T.picks>=PKMAX)T.en_=0;else{const xpOk=T.picks-(T.bpk||0)<T.wave;if(T.en_>=T.need&&xpOk){T.en_-=T.need;T.en_=Math.min(T.en_,T.need*.5);T.picks++;openCards()}else if(!xpOk)T.en_=Math.min(T.en_,T.need)}
     if(T.goldPick&&!T.paused&&!T.over){T.goldPick--;openFlip()}
     if(T.bossPick&&!T.paused&&!T.over){T.bossPick=0;if(T.picks<PKMAX){T.picks++;T.bpk=(T.bpk||0)+1;openCards('🎁 보스 보상 · 카드를 골라요')}}}
   else if(T.en_>=T.need){T.en_-=T.need;T.picks++;T.need=8+1.3*(T.picks+1);openCards()}}
@@ -7704,7 +7704,7 @@ const enR=m=>T.en.filter(e=>inRg(m,e));
 function hpAll(){let b=null;for(const e of T.en){if(e.dead||e.y<=10)continue;if(!b||e.hp>b.hp)b=e}return b}
 function nearR(m,x,y){let b=null,bd=1e18;for(const e of T.en){if(!inRg(m,e))continue;const d=(e.x-x)**2+(e.y-y)**2;if(d<bd){bd=d;b=e}}return b}
 function densestR(m){const L=enR(m);let best=null,bs=-1;for(const a of L){let k=0;for(const b of L)if((a.x-b.x)**2+(a.y-b.y)**2<4900)k++;k+=a.y/400;if(k>bs){bs=k;best=a}}return best}
-function w2Tick(m,dt,x,Y){const F=W2T[m.id];m.wx=x;m.wy=Y-22;if(F){const t0=m.t;const tb=m.t;F(m,dt/Math.max(.3,1-.05*cc(m,'f'))*w2Spd(m)/(AU('재건')?.95:1),x,Y-22);/* 11-09 사용자: 무기 하나로는 공격이 이어지지 않게 — 발사 뒤 쉬는 시간 ×1.4 (대기 재시도 .2·.3은 그대로) */if(m.t>t0+.01&&m.t>.35)m.t*=W2CDK;if(m.t>tb+.01&&m.t>.35)m.atkT=T.t+.4}}
+function w2Tick(m,dt,x,Y){const F=W2T[m.id];m.wx=x;m.wy=Y-22;if(F){const t0=m.t;const tb=m.t;F(m,dt*1.2/Math.max(.3,1-.05*cc(m,'f'))*w2Spd(m)/(AU('재건')?.95:1),x,Y-22);/* 11-09 사용자: 무기 하나로는 공격이 이어지지 않게 — 발사 뒤 쉬는 시간 ×1.4 (대기 재시도 .2·.3은 그대로) */if(m.t>t0+.01&&m.t>.35)m.t*=W2CDK;if(m.t>tb+.01&&m.t>.35)m.atkT=T.t+.4}}
 const W2T={
  '재건'(m,dt,x,Y){m.t-=dt;if(m.t>0)return;const e=nearR(m,x,Y);if(!e){m.t=.2;return}m.t=cc(m,'c2')?.75:1.5;const z7=cc(m,'u7'),n=z7?1:1+cc(m,'n'),d=18*w2Dm(m)*(z7?2.2:w2Np(m))*(cc(m,'c2')?.6:1),aw=cc(m,'u4');
    m.chg=(m.chg||0);if(FXV===2&&!T.bot)f2({k:'arc',x,y:Y-6,R:16,a:Math.atan2(e.y-Y,e.x-x),col:w2Col(m),T:.14});for(let i=0;i<3;i++)setTimeout0(i*.12,()=>{for(let k=0;k<n;k++){const a=Math.atan2(e.y-Y,e.x-x),bk=k*16;/* 11-08 사용자: 탄 추가는 부채꼴 말고 일렬로(같은 방향, 앞뒤로 줄지어) */const dbl=m.chg>=10;if(dbl)m.chg=0;else if(cc(m,'u3'))m.chg++;
@@ -8482,8 +8482,8 @@ function draw(){const g=ctx;g.setTransform(sc*dpr,0,0,sc*dpr,0,EX*sc*dpr);
   if(bannerT>0){g.globalAlpha=Math.min(1,bannerT*2);g.fillStyle='#000a';g.fillRect(0,300,W,44);g.fillStyle='#fff';g.font='bold 18px sans-serif';g.fillText(bannerV,W/2,328);g.globalAlpha=1}}
 /* 11-10 사용자: 신화 스킨(공격 프레임 2·3)이 있으면 쏠 때 공격 모션 */function atkSpr(id){try{const fz=id==='쥬은'||(SAVE.fancy||{})[id];if(!fz)return null;const ms=mskCur(id);if(!ms&&!(id!=='쥬은'&&MSK_IMG[id+'|0']))return null;return mskFrame(id,ms||0,2+(Math.floor(T.t*6)&1))}catch(e){return null}}
 function drawM(m,x,y,a){const g=ctx;const c=(V2&&m.atkT>T.t&&atkSpr(m.id))||spr(m.id,Math.floor((T.t*6)%4));if(a)g.globalAlpha=a;
-  if(c){g.imageSmoothingEnabled=false;const s=56,h=s*(c.height/c.width);g.drawImage(c,x-s/2,y-h/2-4,s,h)}else{g.font='28px serif';g.textAlign='center';g.fillText(CICON[m.id],x,y)}
-  g.fillStyle='#000b';g.fillRect(x-30,y+19,60,13);g.fillStyle='#fff';g.font='bold 10px sans-serif';g.textAlign='center';g.fillText(V2?`${nick(m.id)} ${w2Done(m)&&!T.lab?'👑':'Lv'+w2Lv(m)}${cc(m,'u4')?' ★':''}`:`${nick(m.id)} Lv${lvSum(m)}${m.ev?' '+m.ev.filter(Boolean).join(''):''}${m.el?' '+ELM[m.id][0]:''}`,x,y+29);g.globalAlpha=1}
+  if(c){g.imageSmoothingEnabled=false;const s=76,h=s*(c.height/c.width);g.drawImage(c,x-s/2,y-h/2-8,s,h)}else{g.font='28px serif';g.textAlign='center';g.fillText(CICON[m.id],x,y)}
+  g.fillStyle='#000b';g.fillRect(x-34,y+24,68,15);g.fillStyle='#fff';g.font='bold 11px sans-serif';g.textAlign='center';g.fillText(V2?`${nick(m.id)} ${w2Done(m)&&!T.lab?'👑':'Lv'+w2Lv(m)}${cc(m,'u4')?' ★':''}`:`${nick(m.id)} Lv${lvSum(m)}${m.ev?' '+m.ev.filter(Boolean).join(''):''}${m.el?' '+ELM[m.id][0]:''}`,x,y+35);g.globalAlpha=1}
 
 /* ---- 로딩: 카메라가 위에서 아래로 훑고, 문구가 사선으로 날아와요 ---- */
 const KKI=['오늘도 예쁘게, 선은 넘지 마요','무너지는 건 화장뿐이야','마음의 선은 우리가 그어요','눈물은 아껴, 련들아','지켜줄게, 대신 예쁘게','사랑은 끝나도 선은 남아요','언니들 출근했어요'];
@@ -9041,9 +9041,10 @@ window.TPASS={TP,live:tpLive,lv:tpLv,s:tpS,amt:tpAmt,pick:tpPick,un:()=>w2Un(),n
   ms:()=>{const M=tpMs();return M?{dl:M.dl.map(q=>Object.assign({n:TPD[q.k].n,g:TPD[q.k].g,x:TP.MXD},q)),wl:M.wl.map(q=>Object.assign({n:TPW[q.k].n,g:TPW[q.k].g,x:TP.MXW},q))}:{dl:[],wl:[]}},
   msCanN(){if(!tpLive())return 0;const M=tpMs();if(!M)return 0;return [...M.dl,...M.wl].filter(q=>!q.got&&q.v>=(TPD[q.k]||TPW[q.k]).g).length},
   msClaim(k,wk){const M=tpMs(),q=(wk?M.wl:M.dl).find(x=>x.k===k),D=wk?TPW[k]:TPD[k];if(!q||q.got||q.v<D.g)return 0;q.got=1;const x=tpAdd(wk?TP.MXW:TP.MXD);try{persist()}catch(e){}return x}};
-window.__tdMails=()=>{const r=tdRefund();if(!r||!r.rows.length)return[];return[{id:'ari_td_rf1',from:'아리아드네',title:'🛗 궤도 엘레베이터 수리 보상',
+function tdRefund2(){if(typeof SAVE==='undefined'||!SAVE||!SAVE.td)return null;const t=SAVE.td;if(t.rf2)return t.rf2;const wl=t.wl||{};let g=0;const rows=[];for(const id in wl){const L=Math.min(WLMAX,wl[id]||1);if(L<=1||!W2N[id])continue;let x=0;for(let l=1;l<L;l++)x+=100*l;g+=x;rows.push([id,L,x])}t.rf2={at:Date.now(),g,rows};try{persist()}catch(e){}return t.rf2}
+window.__tdMails=()=>{const out=[];const r=tdRefund();const r2=tdRefund2();if(r2&&r2.g>0)out.push({id:'ari_td_rf2',from:'아리아드네',title:'💰 강화 골드 가격 인하 환급',body:'무기 강화 골드가 1/3로 내려갔어요, 언니. 이미 쓴 만큼 차액을 돌려드려요.\n'+r2.rows.map(([id,L,x])=>`${W2N[id][0]}(${nick(id)}) Lv${L} · 🪙${x.toLocaleString()}`).join('\n'),g:r2.g,at:r2.at,exp:r2.at+30*864e5});if(!r||!r.rows.length)return out;out.push({id:'ari_td_rf1',from:'아리아드네',title:'🛗 궤도 엘레베이터 수리 보상',
   body:'수리하면서 대원들 공격 로직을 새로 짰어요. 그래서 무기 강화를 모두 Lv1로 돌려놨어요, 언니. 쓴 재료는 한 톨도 안 빼고 돌려드려요.\n'+r.rows.map(([id,L,c])=>`${W2N[id][0]}(${nick(id)}) Lv${L} → Lv1 · 💠${c}`).join('\n'),
-  g:r.g,cd:r.cd,at:r.at,exp:r.at+30*864e5}]};
+  g:r.g,cd:r.cd,at:r.at,exp:r.at+30*864e5});return out};
 window.TD={__t:{planWave:w=>planWave(w),spawn:(...a)=>spawn(...a),offers:n=>w2Offers(n),card:c=>w2Card(c),cc:(m,k)=>cc(m,k)},cbKeys:()=>W2CB.map(c=>c.k),cbFxTest:(k,x,y)=>CBFX[k]&&CBFX[k]({x,y,r:14}),dumpK:()=>{const o={};for(const id in W2K){o[id]={name:W2N[id][0],nick:nick(id),keys:Object.keys(W2K[id]).map(k=>[k,W2K[id][k][0],W2K[id][k][1],w2Rk(id,k)[0],w2Rk(id,k)[1],w2Pre(id,k)||'',w2UL(id,k)]),tr:W2TR[id]||[]}}return o},ul:id=>w2ULm(id),ari:k=>ari(k,{force:1}),w2Lv:m=>w2Lv(m),w2Dm:m=>w2Dm(m),cards(){openCards()},open,close,enter,lab(){labApply()},get run(){return T},get bgm(){return bgCur},start(stg,ld){build();T=newRun(stg||'1-1',ld||TDS().un[0]||'박준형');return T},
   sim(sec,o){o=o||{};if(!T)this.start(o.stg,o.ld);T.bot=!o.human;const dt=1/30;let n=Math.round(sec/dt);while(n--&&!T.over){if(T.paused)T.paused=false;update(dt)}return{wave:T.wave,hp:Math.round(T.hp),kills:T.kills,picks:T.picks,sq:T.sq.map(m=>nick(m.id)+lvSum(m)),over:T.over,res:T.result}}};
 })();

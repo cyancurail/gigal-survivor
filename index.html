@@ -7327,10 +7327,10 @@ function botPick(L){const n=T.sq.length,lowHp=T.hp<T.hpMax*.45,FO=window.__botFo
   for(const c of L){let v=1;if(FO){/* 측정용: 무기 1개 몰아주기 봇 */v=c.k==='new'?(n<1?9:-9):c.k==='wc'&&T.sq[0]&&c.id===T.sq[0].id?8+Math.random():c.k==='heal'?(lowHp?9:.3):1;if(v>bs){bs=v;best=c}continue}if(c.k==='new')v=window.__botTeam?(window.__botTeam.includes(c.id)?9:-9):window.__botMax&&n>=window.__botMax?-9:window.__botMax?9:n<2?9:n<3?6:n<4?3.5:.8;else if(c.k==='combo')v=8;else if(c.k==='heal')v=lowHp?9:.3;else if(c.k==='max'||c.k==='shield')v=lowHp?4:.5;
     else if(c.k==='wc'){const m=T.sq.find(q=>q.id===c.id),main=T.sq.indexOf(m)<2;v=c.c==='u4'?9:c.rare?7:c.c==='fam'?6.5:c.c==='d'?5:c.c==='f'?4.5:c.c==='n'?4:w2Trade(c.id,c.c)?2.5:3.5;if(main)v+=1.5}
     v+=Math.random()*1.5;if(v>bs){bs=v;best=c}}return best}
-function openCards(src){let L=T.tutL||offers(3);const noRR=!!T.tutL||T.tut||T.lab;T.tutL=null;if(!L.length){T.cardsLeft=0;return}T.paused=true;
+function openCards(src){if(!T.tutL&&!T.tut&&!T.lab)T.lvcN=(T.lvc||0)+1;let L=T.tutL||offers(3);const noRR=true;/* 11-11 사용자: 다시 뽑기 삭제 */if(!T.tutL&&!T.tut&&!T.lab)T.lvc=(T.lvc||0)+1;T.tutL=null;if(!L.length){T.cardsLeft=0;return}T.paused=true;
   if(T.bot){apply(window.__botRand?pick(L):botPick(L));T.paused=false;evoNext();return}
   /* 11-08 사용자: 레벨업 리롤 한 판 5번 */
-  if(T.rr==null)T.rr=RRMAX;const box=ov.querySelector('.tdCards');const show=()=>{box.innerHTML=`<h3>${src||'카드를 골라요'}</h3><div class="tdCL">${L.map((c,i)=>`<button type="button" data-i="${i}"${c.rare?' class="w2R"':''}>${cardHTML(c)}</button>`).join('')}</div>${noRR?'':`<button type="button" class="tdRR"${T.rr>0?'':' disabled'}>🎲 다시 뽑기 · ${T.rr}/${RRMAX}</button>`}`};show();box.hidden=false;
+  if(T.rr==null)T.rr=RRMAX;const box=ov.querySelector('.tdCards');const show=()=>{box.innerHTML=`<h3>${T.newOnly&&!src?'🆕 새 대원을 불러요':src||'카드를 골라요'}</h3><div class="tdCL">${L.map((c,i)=>`<button type="button" data-i="${i}"${c.rare?' class="w2R"':''}>${cardHTML(c)}</button>`).join('')}</div>${noRR?'':`<button type="button" class="tdRR"${T.rr>0?'':' disabled'}>🎲 다시 뽑기 · ${T.rr}/${RRMAX}</button>`}`};show();box.hidden=false;
   box.onclick=e=>{if(e.target.closest('.tdRR')){if(T.rr<=0)return;const N=offers(3);if(!N.length)return;T.rr--;L=N;snd('click');show();return}const b=e.target.closest('button[data-i]');if(!b)return;snd('click');if(T.tut)ptrOff();apply(L[+b.dataset.i]);box.hidden=true;T.paused=false;evoNext()}}
 function evoNext(){if(!T||!T.evoQ.length)return;const q=T.evoQ.shift(),D=(EVD[q.m.id]||[])[q.st-1];if(!D){evoNext();return}
   if(T.bot){q.m.ev[q.st-1]=q.st===3&&(q.m.up||0)>=5&&Math.random()<.4?'C':Math.random()<.5?'A':'B';evoNext();return}
@@ -7628,7 +7628,7 @@ const w2Un=()=>W2U.filter(([id,l])=>l<=cmLv()).map(([id])=>id);
 /* 11-09 사용자 승인: 배치 특성 — 대원이 전장에 서면 그 판 동안 모든 대원에게(고정 수치, 강화와 무관) */
 const W2AU={'재건':'모든 대원 공격 간격 −5%','박준형':'모든 대원 공격력 +3%','송기호':'방어 관통 +10%','박계원':'적 이동 속도 −4%','김세진':'정예·보스에게 피해 +12%, 정예·보스 이동 속도 −10%','승태민':'적 속성 저항 −15%','창환이형':'치명타 확률 +3%','박민규':'빙결·감속 지속 +10%','진형우':'모든 공격 5% 확률 점화, 점화 피해 +15%','박준영':'중독 피해 +10%','하도':'적 방어력 −10%','영규형':'공격 범위 +5%','조혁래':'💚 치유 무수리 회복량 −30%, 🧱 장벽 체력 −20%','임재영':'마음의 선이 받는 피해 −5%','쥬은':'레벨업 경험치 +5%'};
 const AU=id=>!!(V2&&T&&T.au&&T.au.has(id));
-/* 11-10 사용자: 각성 카드를 고르거나 판 안 카드 12장을 받으면 그 대원은 👑 완성 — 더는 그 대원 카드가 안 뜸(조합 카드는 계속) */const w2Cap=()=>window.__cap||15,w2Aw=m=>!T.lab&&w2E(m.id,'u4')&&wlOf(m.id)>=w2UL(m.id,'u4'),w2Done=m=>!!m&&(cc(m,'u4')>0||w2Lv(m)-1>=w2Cap()+(w2Aw(m)?1:0));/* 11-10 사용자: 카드 15장 제한(11-11 사용자, 예전 10장), 각성이 열려 있으면 16번째는 각성 카드만 */
+/* 11-10 사용자: 각성 카드를 고르거나 판 안 카드 12장을 받으면 그 대원은 👑 완성 — 더는 그 대원 카드가 안 뜸(조합 카드는 계속) *//* 11-11 사용자: 카드 개수 제한(👑 완성) 삭제 */const w2Cap=()=>1e9,w2Aw=m=>false,w2Done=m=>false;/* 11-10 사용자: 카드 15장 제한(11-11 사용자, 예전 10장), 각성이 열려 있으면 16번째는 각성 카드만 */
 const w2Lv=m=>1+Object.values(m.c||{}).reduce((a,b)=>a+b,0);
 const cc=(m,k)=>(m.c&&m.c[k])||0;
 const mkW=id=>({id,c:{},lv:[0,0,0,0,0],ev:[],t:.3,up:0,f:[]});
@@ -8284,6 +8284,7 @@ window.F3D={
   Object.assign(W2D,{'재건':'위로 탄환 3연발','승태민':'적 머리 위로 낙뢰','박계원':'적 무리에 3초 감속 역장','박민규':'무리에 얼음 폭발','조혁래':'1초 차지 후 일직선 관통 샷','쥬은':'4초 동안 적을 끌어당기는 역장','박준영':'말벌 3기가 날아가 3번 쏘고 사라져요'})})();
 /* ---- 레벨업 카드 ---- */
 function w2Offers(n){const L=[],un=w2Un().filter(id=>W2I.has(id)&&!T.sq.some(m=>m.id===id));
+  /* 11-11 사용자: 레벨업 3번마다 「새 대원만」 고르는 카드(대원 3명 배치 전까지) */if(!T.lab&&!T.tut&&T.sq.length<3&&un.length&&T.lvcN&&T.lvcN%3===0){const P=un.slice().sort(()=>Math.random()-.5).slice(0,n).map(id=>({k:'new',id,w:1}));if(P.length>=Math.min(n,un.length)){T.newOnly=1;return P}}T.newOnly=0;
   if(T.sq.length<5)for(const id of un)L.push({k:'new',id,w:T.sq.length<3?2.2:1.2});
   for(const m of T.sq){const C=W2C[m.id];if(!C||(!T.lab&&w2Done(m)))continue;const atCap=!T.lab&&w2Lv(m)-1>=w2Cap();if(atCap){if(!cc(m,'u4')&&w2Aw(m))L.push({k:'wc',id:m.id,c:'u4',rare:1,rk:3,w:3});continue}const lv=w2Lv(m),rk=lv>=11?3:lv>=6?2:1;/* 11-08: 카드 5장→2랭크, 10장→3랭크 */for(const k of w2Keys(m.id)){if(cc(m,k)>=w2Max(k,m.id))continue;if(!T.lab&&!W2BASE.includes(k)&&wlOf(m.id)<w2UL(m.id,k))continue;if(!w2ReqOk(m,k))continue;const [r,rare]=w2Rk(m.id,k);if(r>rk)continue;
     if(k==='n'&&cc(m,'u7')&&(m.id==='재건'))continue;if(k==='r'&&cc(m,'c2')&&m.id==='승태민')continue;if(k==='c2'&&m.id==='승태민'&&cc(m,'r'))continue;if(k==='u7'&&m.id==='재건'&&cc(m,'n'))continue;

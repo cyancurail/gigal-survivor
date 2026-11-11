@@ -154,9 +154,11 @@ function graves(si,seed){const S=STG[si],gr=[];if(!S.graves)return gr;const r=rn
   while(gr.length<S.graves&&n++<300){const l=Math.floor(r()*5),c=4+Math.floor(r()*5);if(!gr.some(q=>q.l===l&&q.c===c)&&gr.filter(q=>q.l===l).length<2)gr.push({l,c})}return gr}
 /* ---------- 레이아웃 ---------- */
 let W=0,H=0,vert=true,cs=60,bx=0,by=0,UI=[];
-function layout(){W=window.innerWidth;H=window.innerHeight;vert=H>W*1.05;
+/* 폰 세로로 들고 있어도 「가로로 보기」(SV.rot)면 캔버스를 90° 돌려 가로 화면으로 그린다 (화면 회전 잠금·카톡 브라우저용) */
+let ROT=false;function layout(){const iw=window.innerWidth,ih=window.innerHeight;ROT=!!SV.rot&&ih>iw;W=ROT?ih:iw;H=ROT?iw:ih;vert=H>W*1.05;
   DPR=Math.min(2,window.devicePixelRatio||1,Math.max(.75,Math.sqrt(2.1e6/(W*H))));
-  if(cv){cv.width=Math.round(W*DPR);cv.height=Math.round(H*DPR);cv.style.width=W+'px';cv.style.height=H+'px'}
+  if(cv){cv.width=Math.round(W*DPR);cv.height=Math.round(H*DPR);cv.style.width=W+'px';cv.style.height=H+'px';
+    cv.style.position='absolute';cv.style.top='0';cv.style.left=ROT?iw+'px':'0';cv.style.transformOrigin='0 0';cv.style.transform=ROT?'rotate(90deg)':'none'}
   if(vert){const top=64,bar=Math.min(112,Math.max(88,H*.12));cs=Math.min((W-14)/5,(H-top-bar-16)/10.25);bx=(W-5*cs)/2;by=H-bar-12-.5*cs-9*cs}
   else{const top=Math.min(104,Math.max(78,H*.16));const av=H-top-8;cs=Math.min((W-20)/10.4,av/5.05);bx=(W-9*cs)/2+.15*cs;by=top+(av-5*cs)/2}}
 function S(l,p){return vert?[bx+(l+.5)*cs,by+(9-p)*cs]:[bx+p*cs,by+(l+.5)*cs]}
@@ -391,7 +393,7 @@ function cardFace(k,x,y,cw,ch,sel){const d=U[k];g.save();rr(x+3,y+3,cw-6,ch-24,8
 function hud(){g.textBaseline='middle';
   const[tx,ty]=thPos();g.fillStyle='rgba(20,10,40,.78)';rr(tx-24,ty-19,92,38,19);g.fill();g.strokeStyle='rgba(160,236,255,.6)';g.lineWidth=1.5;g.stroke();yarn(tx-4,ty,11,1,T.t);g.fillStyle='#fff';g.font="800 18px 'Noto Sans KR',sans-serif";g.textAlign='left';g.fillText(T.th,tx+14,ty+1);
   const bs=36,rx=W-10-bs;/* 세로 화면: 빼기(✂️)는 위쪽 버튼 → 카드 칸이 넓어짐 */
-  const vl=tx+72,vr=rx-2*(bs+6)-8,pw=vert?Math.min(150,vr-vl-8):Math.min(220,W*.22),px=vert?(vl+vr)/2-pw/2:W-pw-112,py=vert?24:22;const k=Math.min(1,T.t/T.lastT);
+  const vl=tx+72,vr=rx-2*(bs+6)-8,lch=Math.min(88,Math.max(68,H*.14)),hl=118+(T.deck.length+1)*(lch*.76+5)+8,hr=rx-bs-16,pw=vert?Math.min(150,vr-vl-8):Math.max(70,Math.min(220,hr-hl)),px=vert?(vl+vr)/2-pw/2:hr-pw,py=vert?24:22;const k=Math.min(1,T.t/T.lastT);
   g.fillStyle='rgba(0,0,0,.5)';rr(px,py,pw,10,5);g.fill();g.fillStyle='#ff9fd0';rr(px,py,Math.max(10,pw*k),10,5);g.fill();
   for(const w of T.wv)if(w.flag){const fx=px+pw*Math.min(1,w.t/T.lastT);g.font='13px sans-serif';g.textAlign='center';g.fillText('🚩',fx,py-3)}
   g.font="700 11px 'Noto Sans KR',sans-serif";g.fillStyle='#ffe6f4';g.textAlign='center';g.fillText(`${sid(T.si)} ${STG[T.si].name}`,px+pw/2,py+22);
@@ -400,7 +402,7 @@ function hud(){g.textBaseline='middle';
   if(vert)bb('shovel',rx-2*(bs+6),'✂️',()=>{if(T.st!=='play')return;T.sel=null;T.shovel=!T.shovel;snd('sel')},T.shovel);
   const n=T.deck.length+(vert?0:1);let cw,ch,cx,cy,gap=5;
   if(vert){ch=Math.min(100,Math.max(80,H*.11));cw=Math.min(72,(W-16-gap*(n-1))/n);cx=(W-(cw*n+gap*(n-1)))/2;cy=H-ch-8}
-  else{ch=Math.min(88,Math.max(68,H*.14));cw=ch*.76;cx=140;cy=8}
+  else{ch=Math.min(88,Math.max(68,H*.14));cw=ch*.76;cx=118;cy=8}
   T.cards.forEach((c,i)=>{const d=U[c.k],x=cx+i*(cw+gap),y=cy,can=T.th>=d.cost&&c.cd<=0,sel=T.sel===c.k;
     g.save();g.fillStyle=sel?'#ffe1f1':'#2a1838';rr(x,y,cw,ch,10);g.fill();g.lineWidth=sel?3:1.5;g.strokeStyle=sel?'#ff6fb1':'rgba(255,214,234,.55)';g.stroke();
     cardFace(c.k,x,y,cw,ch,sel);g.fillStyle=sel?'#5a1a40':'#fff';g.font=`800 ${cw<60?11:13}px 'Noto Sans KR',sans-serif`;g.textAlign='center';g.fillText('🧵'+d.cost,x+cw/2,y+ch-11);
@@ -425,6 +427,7 @@ let MCH=-1;function mapScr(){const w=Math.min(W-20,460),x=(W-w)/2;let y=18;g.tex
   if(MCH>0)pbtn('chp',W/2-w/2,y+28,40,32,'◀',false,()=>{MCH--;snd('sel')});const nextOpen=MCH<CHS.length-1&&SV.cl>=base+10;
   if(MCH<CHS.length-1)pbtn('chn',W/2+w/2-40,y+28,40,32,'▶',false,()=>{MCH++;snd('sel')},!nextOpen);
   pbtn('mx',W-52,10,42,36,'✕',false,()=>GD.close());
+  if(canRot())pbtn('rot',W-52-104,10,96,36,ROT?'📱 세로로':'📱 가로로',false,toggleRot);
   if(SV.dev||window.GD_DEV)pbtn('dv',10,10,92,36,SV.cl>=STG.length?'🧪 처음부터':'🧪 전부 열기',false,()=>{SV.cl=SV.cl>=STG.length?0:STG.length;save()});
   const own=owned(SV.cl);g.fillStyle='#ddd';g.font="600 12px 'Noto Sans KR',sans-serif";g.fillText(`합류한 대원 ${own.length}명 · 데려갈 수 있는 대원 ${deckMax(base)}명`,W/2,y+70);
   const cols=vert?2:5,gap=10,bw=(w-gap*(cols-1))/cols,bh=vert?Math.min(72,(H-200)/5-gap):Math.min(96,(H-210)/2-gap);y+=90;
@@ -465,11 +468,13 @@ function endBox(){const w=Math.min(W-24,360),h=200;const[x,y]=panel(w,h);const w
   g.fillStyle='#ddd';g.font="600 13px 'Noto Sans KR',sans-serif";g.fillText(`버틴 시간 ${Math.floor(T.t/60)}:${String(Math.floor(T.t%60)).padStart(2,'0')} · 무수리 ${T.kills}마리`,x+w/2,y+76);
   if(win)pbtn('next',x+20,y+h-64,w-40,44,RES&&RES.gift?'새 대원 만나기':'정원 지도로',true,()=>{if(RES&&RES.gift){SCR='gift'}else{SCR='map';T=null;MCH=-1}});
   else{pbtn('again',x+20,y+h-64,(w-50)/2,44,'다시 하기',true,()=>start(T.si,T.deck));pbtn('out',x+30+(w-50)/2,y+h-64,(w-50)/2,44,'지도로',false,()=>{SCR='map';T=null;MCH=-1})}}
-function pauseBox(){const w=Math.min(W-24,300),h=220;const[x,y]=panel(w,h);g.textAlign='center';g.fillStyle='#fff';g.font="900 20px 'Noto Sans KR',sans-serif";g.fillText('일시정지',x+w/2,y+34);
+function pauseBox(){const cr=canRot(),w=Math.min(W-24,300),h=cr?268:220;const[x,y]=panel(w,h);if(cr)pbtn('prot',x+30,y+208,w-60,40,ROT?'📱 세로로 보기':'📱 가로로 보기',false,toggleRot);g.textAlign='center';g.fillStyle='#fff';g.font="900 20px 'Noto Sans KR',sans-serif";g.fillText('일시정지',x+w/2,y+34);
   pbtn('resume',x+30,y+64,w-60,40,'계속하기',true,()=>{T.st='play'});pbtn('retry',x+30,y+112,w-60,40,'처음부터',false,()=>start(T.si,T.deck));pbtn('quit',x+30,y+160,w-60,40,'지도로',false,()=>{SCR='map';T=null;MCH=-1})}
 
 /* ---------- 입력 ---------- */
-function pt(e){const r=cv.getBoundingClientRect();return[e.clientX-r.left,e.clientY-r.top]}
+function pt(e){if(ROT)return[e.clientY,window.innerWidth-e.clientX];const r=cv.getBoundingClientRect();return[e.clientX-r.left,e.clientY-r.top]}
+function canRot(){return window.innerHeight>window.innerWidth||ROT}
+function toggleRot(){SV.rot=SV.rot?0:1;save();layout();snd('sel')}
 function down(e){e.preventDefault();const[x,y]=pt(e);
   const top=UI.filter(b=>b.top);const list=top.length?top:UI;
   for(const b of list)if(x>=b.x&&x<=b.x+b.w&&y>=b.y&&y<=b.y+b.h){b.fn();return}

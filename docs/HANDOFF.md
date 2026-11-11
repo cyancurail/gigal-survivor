@@ -436,7 +436,7 @@
 - 리롤: 레벨업(카드 열릴 때)마다 1회(`rr1`), 예전 판당 `T.rr` 제거.
 - sw VERSION v217. 패치내역(기본 문구) 「⚡ 게임 속도·대원 크기 개선, 강화 골드 인하(환급 우편), 레벨업 리롤 1회」.
 
-## (준비 중, 미배포) 🌷 마음의 정원 본편 연결 — 브랜치 `garden-v1` (11-12)
+## V218 (11-12) — 🌷 마음의 정원 오픈 (브랜치 `garden-v1` → main)
 - 기획·밸런스 전체: 프로젝트 문서 `claude/기갈서바이버_미니게임_마음의정원_기획.md`. 게임 코드는 `garden/garden.js`(독립 IIFE `window.GD`).
 - 로비: `lobbyBtn()`에서 `#lbGd`(🌷 마음의 정원)를 `#lbGo` 왼쪽에 넣고 `#lbMp`(친구와 함께하기)는 `hidden`(기능은 그대로).
 - 연결 스크립트(맨 끝): `window.GD_HOST`{load/save=`SAVE.gd`, gold, lobby(`SAVE.lbOwn`), bgm(`window.__gdOn={m}`), vol}, `window.gdOpen()`. `syncLobby()`가 `SAVE.gd.cl`로 로비 보상을 다시 채움(코드 불러오기 대비, 🧪 전부 열기 `dv`면 안 줌).
@@ -444,4 +444,4 @@
 - 배경음: SND `tick()`에 `window.__gdOn` 분기 — 'lobby'=로비 곡(옷장 선택곡), 1장 field/hell, 2장 sbField/sbHell, 3장 jangsu/jangsu_hell mp3, 'none'=영상. 9·10단계는 그 맵의 헬 곡.
 - 장면: 첫 입장 오프닝 영상 `garden/op.mp4`(사용자 영상 960px 재압축 1MB, sw 캐시 안 함) → 아리아드네 대사(`op_ari.jpg`), 3장 처음 = `ch3_tomato.jpg`, 3-10 첫 클리어 = `end_ari.jpg`(영상 마지막 장면). 지도 🎬로 다시 보기.
 - 저장 코드 **SC_VER 27**: 맨 끝 정원 블록(scVar cl · 플래그 op|c3|end · scVar 개수 · 스테이지별 횟수). v26 이하 코드는 정원 없음으로 읽힘(확인함).
-- sw ASSETS에 `./garden/garden.js` 추가(VERSION은 패치 때 올림). 패치 때: main 최신과 합치기 → VERSION·패치내역 → 푸시.
+- sw ASSETS에 `./garden/garden.js` 추가, VERSION v218. 패치내역(사용자 문구) 「🌷 마음의 정원 오픈」.

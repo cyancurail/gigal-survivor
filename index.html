@@ -3996,6 +3996,12 @@ const SND=(()=>{
   function tick(){ // decide track every frame
     if(!AC)return;if(AC.state!=='running'){return}
     if(window.__tdOn){if(cur)cur=null;lowA(false);lbStop();return} // 디펜스 모드는 자체 BGM (서바이버 로비 음악도 끔)
+    /* 🌷 마음의 정원 (11-12): 지도·덱·장면 = 로비 곡, 게임 = 장마다 본편 맵 곡(1장 기본·2장 상봉·3장 장수, 9·10단계는 그 맵의 헬 곡), 영상 = 무음 */
+    if(window.__gdOn){const m=window.__gdOn.m;lowA(false);if(Math.abs(1-duck)>.01){duck=1;MG.gain.setTargetAtTime(SAVE.snd.m?.32*VOL('m'):0,AC.currentTime,.08)}
+      if(m==='lobby'){lbLoad();if(LB.buf){if(!LB.src)lbStart();else LB.g.gain.setTargetAtTime(lbVol(),AC.currentTime,.08)}if(cur)cur=null;mbStop();return}
+      lbStop();if(m==='none'){if(cur)cur=null;mbStop();return}
+      if(m==='jangsu'||m==='jangsu_hell'){if(mbPlay(m)){if(cur)cur=null;return}music(m==='jangsu'?'field':'hell');return}
+      mbStop();if(T[m])music(m);return}
     let w;const vid=!$('#ultvid').hidden,cin=!$('#cine').hidden;
     if(vid)w=null;else if(G&&G.running){const bs=G.enemies.some(e=>e.boss);w=G.escOpen?'clear':G.hell?(bs?'hellboss':(G.map==='sangbong'&&!G.tw?'sbHell':'hell')):bs?'boss':(G.map==='sangbong'?'sbField':'field')}else w=cin?null:'title';
     if(cin&&G&&G.running)w=cur; // 게임 중 필살기 연출은 음악 유지
@@ -4023,7 +4029,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)r
 
 /* ================= 저장 코드 (기기 간 이동) =================
    ※ POOL/ACH/AXN/WFX 순서가 코드 해석 순서예요. 새 항목은 반드시 "끝에" 추가하세요. */
-const SC_VER=26;/* v26: POOL 끝 짱재 카드 2종 (v25 코드 = POOL.slice(0,POOL_V23)) *//* v23: 맨 끝 세인트썸띵 블록 / v25: POOL 끝 카드 시리즈 2 (v22~24 코드 = POOL.slice(0,POOL_V22)) */
+const SC_VER=27;/* v27: 맨 끝 🌷 마음의 정원 블록(진행·장면 플래그·스테이지별 클리어 횟수) *//* v26: POOL 끝 짱재 카드 2종 (v25 코드 = POOL.slice(0,POOL_V23)) *//* v23: 맨 끝 세인트썸띵 블록 / v25: POOL 끝 카드 시리즈 2 (v22~24 코드 = POOL.slice(0,POOL_V22)) */
 function scBits(list,has){const out=[];for(let i=0;i<list.length;i+=8){let b=0;for(let j=0;j<8&&i+j<list.length;j++)if(has(list[i+j],i+j))b|=1<<j;out.push(b)}return out}
 function scUnbits(bytes,pos,list,set){for(let i=0;i<list.length;i++){if(bytes[pos+(i>>3)]>>(i&7)&1)set(list[i],i)}return pos+Math.ceil(list.length/8)}
 function scVar(out,n){n=Math.max(0,Math.floor(n||0));do{let b=n&127;n=Math.floor(n/128);if(n)b|=128;out.push(b)}while(n)}
@@ -4046,6 +4052,7 @@ function exportCode(){
   {const L=CHAR.map(c=>c.id);scVar(o,L.length);o.push(...scBits(L,id=>stuSum(id)>0));for(const id of L)if(stuSum(id)>0)o.push(...stuOf(id))}
   {const X=CHX();scVar(o,X.length);for(const c of X){const id=c.id;o.push((SAVE.fancy[id]?1:0)|(SAVE.ult[id]?2:0)|(SAVE.cine[id]?4:0)|((SAVE.tallOff||{})[id]?8:0)|(sbU(id)>=1?16:0)|(sbU(id)>=2?32:0));o.push(Math.min(255,Math.floor((SAVE.best[id]||0)/10)),Math.min(255,Math.floor(((SAVE.bestH||{})[id]||0)/10)));const s=SAVE.skin[id],i=s?POOL.findIndex(p=>p.id===s):-1;scVar(o,i+1)}}
   {const K=SN.SNK;scVar(o,K.length);for(const k of K){const a=SN.cnt(k);for(const n of a)scVar(o,n)}const E=(SAVE.saintEq||[]);for(let i=0;i<3;i++){const j=E[i]?K.indexOf(E[i]):-1;o.push(j+1)}o.push(SAVE.neckEq?K.indexOf(SAVE.neckEq)+1:0)}
+  {const D=SAVE.gd||{},N=D.n||{},cl=Math.min(255,D.cl|0);scVar(o,cl);o.push((D.op?1:0)|(D.c3?2:0)|(D.end?4:0));let m=0;for(const k in N)if(N[k]>0)m=Math.max(m,+k+1);m=Math.min(m,255);scVar(o,m);for(let i=0;i<m;i++)scVar(o,Math.min(9999,N[i]|0))}
   const h=scHash(o);o.push(h&255,h>>8&255);
   const m=scMask(o);let s='';for(const b of m)s+=String.fromCharCode(b);
   return 'GIGAL-'+btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
@@ -4069,6 +4076,7 @@ function parseCode(code){
     if(ver>=12){const n=scRVar(body,st),A=CHAR.map(c=>c.id);if(n>A.length)return null;const L=A.slice(0,n),F=[];st.p=scUnbits(body,st.p,L,id=>F.push(id));S.stu={};for(const id of F){const a=[];for(let i=0;i<STU.length;i++){const v=body[st.p++];if(v===undefined||v>STU_MAX)return null;a.push(v)}S.stu[id]=a}}
     if(ver>=13){const n=scRVar(body,st),X=CHX();if(n>X.length)return null;S.sbU=S.sbU||{};for(const c of X.slice(0,n)){const id=c.id,fl=body[st.p++],b1=body[st.p++],b2=body[st.p++];if(b2===undefined)return null;if(fl&1)S.fancy[id]=true;if(fl&2)S.ult[id]=true;if(fl&4)S.cine[id]=true;if(fl&8)S.tallOff[id]=true;if(fl&32)S.sbU[id]=2;else if(fl&16)S.sbU[id]=1;if(b1)S.best[id]=b1*10;if(b2)S.bestH[id]=b2*10;const v=scRVar(body,st);if(v&&POOL[v-1]&&['color','swim','hanbok','wed','god'].includes(POOL[v-1].kind))S.skin[id]=POOL[v-1].id}}
     if(ver>=23){const K=SN.SNK,n=scRVar(body,st);if(n>K.length)return null;S.saint={};for(let i=0;i<n;i++){const a=[];for(let j=0;j<5;j++)a.push(scRVar(body,st));if(a.some(x=>x>0))S.saint[K[i]]=a}S.saintEq=[];for(let i=0;i<3;i++){const v=body[st.p++];if(v===undefined)return null;S.saintEq.push(v&&K[v-1]?K[v-1]:null)}if(ver>=24){const v=body[st.p++];if(v===undefined)return null;S.neckEq=v&&K[v-1]?K[v-1]:null}}
+    if(ver>=27){const cl=scRVar(body,st),f=body[st.p++];if(f===undefined)return null;const m=scRVar(body,st);if(m>255)return null;const n={};for(let i=0;i<m;i++){const v=scRVar(body,st);if(v)n[i]=v}S.gd={cl,n,seen:{},deck:null};if(f&1)S.gd.op=1;if(f&2)S.gd.c3=1;if(f&4)S.gd.end=1}
     if(st.p!==body.length||body.slice(1).some(b=>b===undefined))return null;
     Object.keys(S.inv).forEach(k=>{const it=PBY[k];if(it&&it.kind==='wfx'&&!it.hw&&S.wfx[it.wk]!==false)S.wfx[it.wk]=true});
     return S}catch(e){return null}
@@ -5809,7 +5817,7 @@ let run=false,raf=0,last=0,W=0,H=0,DPR=1;
 try{const sid=localStorage.getItem('gs_sel');const i=CHAR.findIndex(c=>c.id===sid);if(i>=0&&(!CHAR[i].ju||juUnl('emerald')))selI=i}catch(e){}
 const remember=()=>{try{localStorage.setItem('gs_sel',CHAR[selI].id)}catch(e){}};
 // ---- 배경: 제미나이 그림이 오면 fx/lobby_*.png 로 교체 (없으면 코드로 그린 임시 배경) ----
-const LBM={base:{n:'🌙 기본 밤하늘'},festa:{n:'🏮 시즌2 축제의 밤거리',gy:.745},spirit:{n:'🍄 정령의 숲',gy:.745},jeonju:{n:'🌕 전주의 숲',gy:.74},princess:{n:'👑 공주님 꿈깨세요',gy:.8},aegis:{n:'🛰️ 아이기스 지휘본부',gy:.79},grave:{n:'🕯️ 영혼이 쉬는 곳',gy:.79},beauty:{n:'🪽 아름다움의 신전',gy:.8},light:{n:'🕊️ 빛의 길을 따라 저에게로',gy:.8},faith:{n:'🌈 믿음의 흔적',gy:.82},farm:{n:'🍅 토마토 농장',gy:.79},lily:{n:'🌸 은방울꽃의 궁전',gy:.8}};
+const LBM={base:{n:'🌙 기본 밤하늘'},festa:{n:'🏮 시즌2 축제의 밤거리',gy:.745},spirit:{n:'🍄 정령의 숲',gy:.745},jeonju:{n:'🌕 전주의 숲',gy:.74},princess:{n:'👑 공주님 꿈깨세요',gy:.8},aegis:{n:'🛰️ 아이기스 지휘본부',gy:.79},grave:{n:'🕯️ 영혼이 쉬는 곳',gy:.79},beauty:{n:'🪽 아름다움의 신전',gy:.8},light:{n:'🕊️ 빛의 길을 따라 저에게로',gy:.8},faith:{n:'🌈 믿음의 흔적',gy:.82},farm:{n:'🍅 토마토 농장',gy:.79},lily:{n:'🌸 은방울꽃의 궁전',gy:.8},/* 11-12 마음의 정원 보상 */wizard:{n:'❄️ 마법사의 고향',gy:.78},adventure:{n:'🌸 모험의 시작',gy:.75},carnival:{n:'🎆 화려한 축제',gy:.8},cafe:{n:'🌹 카페 드 점례',gy:.79},fairy:{n:'🧚 요정의 고향',gy:.81}};
 window.LBM=LBM;const lbOwn=k=>k==='base'||!!window.__devAll||!!(SAVE.lbOwn||{})[k];window.lbOwn=lbOwn;
 const lbKey=()=>{const k=SAVE.lobbyMap;return LBM[k]&&lbOwn(k)?k:'base'};
 const BG={};function bgImg(){const k=lbKey();if(k==='base')return null;if(!BG[k]){const im=new Image();im.src='fx/lobby_'+k+'.jpg';BG[k]=im}const im=BG[k];return im.complete&&im.naturalWidth?im:null}
@@ -5929,7 +5937,7 @@ const _rc=renderCloset;renderCloset=function(){const lob=CLO.tab==='lobby';if(lo
   if(!lob)return;tabs.querySelectorAll('button').forEach(b=>{if(b!==tb)b.setAttribute('aria-pressed','false')});
   const host=tabs.parentElement;while(tabs.nextSibling)host.removeChild(tabs.nextSibling);
   const bg=SAVE.lobbyMap&&lbOwn(SAVE.lobbyMap)?SAVE.lobbyMap:'base',pc=petCur();
-  const d=document.createElement('div');d.innerHTML=`<div class="lbPv"><canvas id="lbPvC"></canvas><span class="lbPvN">👀 미리보기 · ${esc(LBM[bg].n)}</span></div><p class="clonote">로비 배경과 펫은 어떤 캐릭터로 놀든 함께해요. 시즌 패스·업적에서 얻을 수 있어요.</p>
+  const d=document.createElement('div');d.innerHTML=`<div class="lbPv"><canvas id="lbPvC"></canvas><span class="lbPvN">👀 미리보기 · ${esc(LBM[bg].n)}</span></div><p class="clonote">로비 배경과 펫은 어떤 캐릭터로 놀든 함께해요. 시즌 패스·업적·🌷 마음의 정원에서 얻을 수 있어요.</p>
    <div class="clowrow"><span class="wn">🖼️ 로비 배경</span><span class="wb">${Object.keys(LBM).map(k=>lbOwn(k)?`<button type="button" class="wfxb clb" data-lbm="${k}" aria-pressed="${bg===k}">${esc(LBM[k].n)}</button>`:`<button type="button" class="wfxb" disabled>🔒 ???</button>`).join('')}</span></div>
    <div class="clowrow"><span class="wn">🎵 로비 배경음</span><span class="wb">${Object.keys(LBGM).map(k=>k==='base'||(SAVE.bgmOwn||{})[k]||window.__devAll?`<button type="button" class="wfxb clm" data-lbg="${k}" aria-pressed="${(SAVE.lbBgm||'base')===k}">${esc(LBGM[k].n)}</button>`:`<button type="button" class="wfxb" disabled>🔒 ???</button>`).join('')}</span><span class="c">로비에서 흘러나와요 · 🛡️ 폴라리스 패스 보상</span></div>
    <div class="clowrow"><span class="wn">🐾 펫</span><span class="wb"><button type="button" class="wfxb clp" data-pet="" aria-pressed="${!pc}">없음</button>${Object.keys(PETS).map(k=>petOwn(k)?`<button type="button" class="wfxb clp" data-pet="${k}" aria-pressed="${pc===k}"><canvas width="40" height="34" data-pp="${k}" style="vertical-align:middle;margin-right:4px"></canvas>${esc(PETS[k].n)}</button>`:`<button type="button" class="wfxb" disabled>🔒 ???</button>`).join('')}</span><span class="c">로비에서는 따라다니고, 게임에서는 경험치 보석을 주워 와요</span></div>
@@ -8548,7 +8556,8 @@ function css(){if(document.getElementById('tdCss'))return;const st=document.crea
 #tdOv .lbRes{display:flex;gap:6px}#tdOv .lbRes span{background:rgba(20,10,26,.8);border:1.5px solid rgba(159,232,255,.5);border-radius:999px;padding:4px 10px;font-weight:800;font-size:13px}
 /* 서바이버 로비: 출격 작게, 버튼 이름, 오른쪽 위 아이콘 작게 + 접기 */
 #lbGoRow{gap:6px!important;flex-wrap:nowrap}#lbGo{min-width:0!important;padding:8px 16px!important;font-size:15px!important;white-space:nowrap}
-#lbMp,#lbTd{padding:7px 9px!important;gap:4px!important;white-space:nowrap}#lbMp span,#lbTd span{font-size:11px!important}
+#lbMp,#lbTd,#lbGd{padding:7px 9px!important;gap:4px!important;white-space:nowrap}#lbMp span,#lbTd span,#lbGd span{font-size:11px!important}#lbMp[hidden]{display:none!important}
+#lbGd{display:flex;align-items:center;gap:6px;padding:8px 12px;border-radius:999px;border:2px solid rgba(190,255,214,.75);background:rgba(16,40,30,.88);color:#fff;font:800 12px/1.15 'Noto Sans KR',sans-serif}#lbGd span{font-size:11.5px}
 #lbIcons{grid-template-columns:repeat(4,46px)!important;gap:6px!important}#lbIcons button{width:46px!important;height:46px!important;border-radius:12px!important;font-size:9px!important}#lbIcons button i{font-size:17px!important}
 #lbIcons .dot{top:-3px!important;right:-3px!important;min-width:15px!important;height:15px!important;line-height:15px!important;font-size:9.5px!important}
 #lbIcons.fold button:not(#lbIcT){display:none!important}#lbIcT{border-color:rgba(255,232,150,.7)!important}
@@ -9006,6 +9015,8 @@ function leave(){bgm(null);const ig=window.irisGo;if(typeof ig==='function')ig(c
 function close(){cancelAnimationFrame(raf);raf=0;T=null;LD=null;LOB=null;bgm(null);window.__tdOn=0;document.body.classList.remove('tdOn');if(ov){ov.hidden=true;ov.querySelectorAll('.tdPanel').forEach(p=>p.hidden=true)}}
 /* 로비 버튼 (조무룩 계정 또는 localStorage gs_tddev=1 에서만) */
 function lobbyBtn(){const row=document.getElementById('lbGoRow');const mp=document.getElementById('lbMp');if(mp&&!mp.dataset.tdl){mp.dataset.tdl=1;mp.innerHTML='👥<span>친구와 함께하기</span>'}
+  /* 11-12 사용자: [친구와 함께하기]는 숨기고, [출격] 왼쪽에 🌷 마음의 정원 */if(mp)mp.hidden=true;
+  if(row&&!document.getElementById('lbGd')){const go=document.getElementById('lbGo');const b=document.createElement('button');b.type='button';b.id='lbGd';b.innerHTML='🌷<span>마음의 정원</span>';b.addEventListener('click',e=>{e.stopPropagation();try{window.gdOpen&&gdOpen()}catch(x){console.warn(x)}});if(go)row.insertBefore(b,go);else row.prepend(b)}
   const ic=document.getElementById('lbIcons');if(ic&&!document.getElementById('lbIcT')){const t=document.createElement('button');t.type='button';t.id='lbIcT';t.innerHTML='<i>☰</i>메뉴<span class="dot tdd" hidden>!</span>';ic.prepend(t);let f=false;try{f=localStorage.getItem('gs_lbic')==='0'}catch(e){}ic.classList.toggle('fold',f);
     t.addEventListener('click',e=>{e.stopPropagation();snd('click');const v=!ic.classList.contains('fold');ic.classList.toggle('fold',v);try{localStorage.setItem('gs_lbic',v?'0':'1')}catch(x){}})}
   if(ic){const d=document.querySelector('#lbIcT .tdd');if(d)d.hidden=!(ic.classList.contains('fold')&&[...ic.querySelectorAll('button[data-lb] .dot')].some(x=>getComputedStyle(x).display!=='none'))}
@@ -9627,6 +9638,23 @@ function info(k){close();const d=D[k],L=lv(k),a=cnt(k),E=eqKeys(),M=d.g==='M',on
 function open(){build();hideAll();close();const sec=document.getElementById('saint');sec.hidden=false;sec.scrollTop=0;render();img('saint/bg.webp');img('saint/neck_bg.webp');{const k=neckKey();if(k)img('saint/nk_'+k+'.webp')}}
 
 window.SN={D,SNK,lv,cnt,add,merge,refresh,eqKeys,neckKey,gachaN,regRoll,regAsk,c:cv,v:cv,mm,rm,dmg,rev,ultM,gacha,gdesc,drawPrev,open,render,tick,init};
+})();
+</script>
+<script src="garden/garden.js"></script>
+<script>
+/* ===== 🌷 마음의 정원 연결 (11-12) — 진행은 SAVE.gd(저장 코드 v27), 보상 골드·로비 꾸미기는 본편으로 ===== */
+(function(){
+const LOBR={9:'wizard',14:'adventure',19:'carnival',24:'cafe',29:'fairy'};
+function syncLobby(){try{const D=SAVE.gd;if(!D||D.dv)return;/* 🧪 전부 열기로 연 건 로비 보상 안 줌 */let ch=false;SAVE.lbOwn=SAVE.lbOwn||{};for(const i in LOBR)if((D.cl|0)>+i&&!SAVE.lbOwn[LOBR[i]]){SAVE.lbOwn[LOBR[i]]=1;ch=true}if(ch)persist()}catch(e){}}
+window.GD_HOST={
+  load:()=>{syncLobby();return SAVE.gd||null},
+  save:o=>{SAVE.gd=o;persist()},
+  gold:n=>{SAVE.gold=(SAVE.gold||0)+n;persist()},
+  lobby:k=>{SAVE.lbOwn=SAVE.lbOwn||{};SAVE.lbOwn[k]=1;persist()},
+  bgm:m=>{window.__gdOn=m==='off'?null:{m}},
+  vol:()=>SAVE.snd&&SAVE.snd.m?Math.min(1,.8*VOL('m')):0};
+window.gdOpen=function(){try{SND.p('click')}catch(e){}window.__gdOn={m:'lobby'};GD.open({onClose:()=>{window.__gdOn=null;syncLobby();try{window.lobbyScreen&&lobbyScreen()}catch(e){}}})};
+syncLobby();
 })();
 </script>
 </body></html>

@@ -116,6 +116,7 @@ CH3.stages.forEach((S,i)=>{S.n=11+Math.floor(i*.4);S.g0=20-i*.2;S.g1=14-i*.2;S.b
 const CHS=[CH1,CH2,CH3],STG=CHS.reduce((a,c)=>a.concat(c.stages.map((st,i)=>Object.assign(st,{ch:c,ci:i}))),[]);
 const sid=gi=>`${CHS.indexOf(STG[gi].ch)+1}-${STG[gi].ci+1}`;
 const START=['sun','pea'];const deckMax=gi=>gi>=20?8:gi>=10?7:6;let DECK_MAX=6;
+const WALK=3;
 const ECOST={mu:1,flag:1,cone:2,pole:2,bucket:4,paper:2,screen:3,foot:4,ball:2,cata:4,tom:1,dig:3,pogo:3,jack:3,ladder:3,beetle:4,garg:8};
 function rng(s){s=s%2147483647;if(s<=0)s+=2147483646;return()=>(s=(s*16807)%2147483647)/2147483647}
 function hand1(seed){const r=rng(seed||7),W=[];let last=-1;
@@ -160,7 +161,7 @@ let ROT=false;function layout(){const iw=window.innerWidth,ih=window.innerHeight
   if(cv){cv.width=Math.round(W*DPR);cv.height=Math.round(H*DPR);cv.style.width=W+'px';cv.style.height=H+'px';
     cv.style.position='absolute';cv.style.top='0';cv.style.left=ROT?iw+'px':'0';cv.style.transformOrigin='0 0';cv.style.transform=ROT?'rotate(90deg)':'none'}
   if(vert){const top=64,bar=Math.min(112,Math.max(88,H*.12));cs=Math.min((W-14)/5,(H-top-bar-16)/10.25);bx=(W-5*cs)/2;by=H-bar-12-.5*cs-9*cs}
-  else{const top=Math.min(104,Math.max(78,H*.16));const av=H-top-8;cs=Math.min((W-20)/10.4,av/5.05);bx=(W-9*cs)/2+.15*cs;by=top+(av-5*cs)/2}}
+  else{const top=Math.min(104,Math.max(78,H*.16));const av=H-top-8;cs=Math.min((W-8)/10.7,av/5.05);bx=.62*cs+4;by=top+(av-5*cs)/2}}
 function S(l,p){return vert?[bx+(l+.5)*cs,by+(9-p)*cs]:[bx+p*cs,by+(l+.5)*cs]}
 function cellAt(x,y){let l,p;if(vert){l=Math.floor((x-bx)/cs);p=9-(y-by)/cs}else{l=Math.floor((y-by)/cs);p=(x-bx)/cs}
   const c=Math.floor(p);return(l>=0&&l<5&&c>=0&&c<9)?{l,c}:null}
@@ -205,10 +206,13 @@ function ahead(l,from,to,air){let best=null;for(const e of T.ens){if(e.die||e.l!
 function step(dt){const t0=T.t;T.t+=dt;
   for(const c of T.cards)if(c.cd>0)c.cd=Math.max(0,c.cd-dt);
   // 웨이브
-  while(T.wi<T.wv.length&&T.wv[T.wi].t<=T.t){const w=T.wv[T.wi++];
+  /* 무수리는 오른쪽 길(배치 불가 구역)에서 미리 걸어 들어온다: 9.6칸 도착 시각은 그대로(밸런스 동일), WALK칸 앞에서 일찍 출발 */
+  for(let i=T.wi;i<T.wv.length;i++){const w=T.wv[i];if(w.t-25>T.t)break;if(w.done)continue;
+    if(w.k){const d=E[w.k],lead=WALK/(d.dig?d.spd0:d.spd);if(T.t>=w.t-lead){w.done=1;spawn(w.k,w.l,9.6+WALK);if(T.si===0)once('e1','o','어머, 무수리가 와요! 태태영님을 그 줄에 심어서 하트를 쏘세요.',4)}}}
+  while(T.wi<T.wv.length&&(T.wv[T.wi].done||T.wv[T.wi].t<=T.t)){const w=T.wv[T.wi++];if(w.done)continue;w.done=1;
     if(w.flag){if(w.fin)for(const q of T.graves)if(!q.bust)spawn(T.r()<.3?'cone':'tom',q.l,q.c+.5);if(w.fin&&T.graves.some(q=>!q.bust))once('gv2','o','토마토 덤불에서 무수리가 기어 나와요! 덤불은 K1 언니가 치워 줘요.',3.5);
       T.banner={tx:w.fin?'마지막 무수리 무리예요!':'대규모 무수리가 몰려와요!',t:0};snd('flag');say('o',w.fin?'마지막 무리예요. 실 끝 꽉 잡아요!':'대규모 무수리예요! 언니, 화장 고치고 집중해요.',3.5)}
-    else{spawn(w.k,w.l);if(T.si===0)once('e1','o','어머, 왔어요! 태태영님을 그 줄에 심어서 하트를 쏘세요.',4)}}
+    else{spawn(w.k,w.l,9.6+WALK)}}
   // 하늘 실타래
   T.sky-=dt;if(T.sky<=0){T.sky=7+((T.t*7.3)%1)*2;dropThread(.4+((T.t*3.1)%1)*4.2,1.2+((T.t*5.7)%1)*7,25,false);if(T.t>4&&T.si===0)once('s1','n','하늘색 실타래가 보이면 톡 눌러서 모아요.',3.5)}
   // 대원
@@ -218,9 +222,9 @@ function step(dt){const t0=T.t;T.t+=dt;
         if(tg){u.t=d.shoot.every;u.at=.35;for(const l of LS)for(let i=0;i<d.shoot.n;i++)T.pr.push({l,l0:u.l,p:u.c+.75,p0:u.c+.75,dmg:d.shoot.dmg,sp:6.2,a:0,k:d.shoot.k,slow:d.shoot.slow||0,air:d.shoot.air||0,R:R+.1,wait:i*.18});if(!T.headless&&Math.random()<.5)snd('shoot')}else u.t=.1}}
     if(d.fume){u.t-=dt;if(u.t<=0){const tg=ahead(u.l,u.c+.2,u.c+.5+d.fume.range);if(tg){u.t=d.fume.every;u.at=.4;u.beam=.35;for(const e of T.ens)if(!e.die&&!e.fly&&e.l===u.l&&e.p>=u.c+.2&&e.p<=u.c+.5+d.fume.range)hurtE(e,d.fume.dmg,'fume');if(!T.headless&&Math.random()<.5)snd('shoot')}else u.t=.1}if(u.beam>0)u.beam-=dt}
     if(d.lob){u.t-=dt;if(u.t<=0){const tg=ahead(u.l,u.c+.2,9.75);if(tg){u.t=d.lob.every;u.at=.4;T.lob.push({l:u.l,p0:u.c+.6,tg,p1:tg.p,t:0,T:.8,dmg:d.lob.dmg,k:d.lob.k,o:d.lob})}else u.t=.1}}
-    if(d.jala){u.t-=dt;u.at=1;if(u.t<=0){u.dead=1;for(const e of T.ens)if(!e.die&&e.l===u.l&&!e.fly)hurtE(e,d.jala.dmg,'fire');T.shake=8;T.flash=.15;snd('boom');T.fire.push({l:u.l,t:0});for(let p=0;p<10;p+=.7)burst(u.l,p,'#ff9a3c',3,1.2)}}
+    if(d.jala){u.t-=dt;u.at=1;if(u.t<=0){u.dead=1;for(const e of T.ens)if(!e.die&&e.l===u.l&&!e.fly&&e.p<9.9)hurtE(e,d.jala.dmg,'fire');T.shake=8;T.flash=.15;snd('boom');T.fire.push({l:u.l,t:0});for(let p=0;p<10;p+=.7)burst(u.l,p,'#ff9a3c',3,1.2)}}
     if(d.spike){u.t-=dt;if(u.t<=0){u.t=d.spike.every;for(const e of T.ens)if(!e.die&&!e.fly&&!e.under&&e.l===u.l&&Math.abs(e.p-(u.c+.5))<.6){hurtE(e,d.spike.dmg,'spike');u.at=.3}}}
-    if(d.blow){u.t-=dt;u.at=1;if(u.t<=0){u.dead=1;let n=0;for(const e of T.ens)if(!e.die&&e.fly){e.die=.001;e.blown=1;T.kills++;n++}T.wind=1;snd('sweep');if(n)once('bl','w','후우— 풍선은 저 멀리 날아갔어요. 💨',2.5)}}
+    if(d.blow){u.t-=dt;u.at=1;if(u.t<=0){u.dead=1;let n=0;for(const e of T.ens)if(!e.die&&e.fly&&e.p<9.9){e.die=.001;e.blown=1;T.kills++;n++}T.wind=1;snd('sweep');if(n)once('bl','w','후우— 풍선은 저 멀리 날아갔어요. 💨',2.5)}}
     if(d.split){u.t-=dt;if(u.t<=0){const f=ahead(u.l,u.c+.2,9.75);let b=null;for(const e of T.ens){if(e.die||e.l!==u.l||e.under||e.fly||e.jump>0||e.p>u.c+.3||e.p<-.3)continue;if(!b||e.p>b.p)b=e}
         if(f||b){u.t=d.split.every;u.at=.35;if(f)T.pr.push({l:u.l,p:u.c+.75,p0:u.c+.75,dmg:d.split.dmg,sp:6.2,a:0,k:'heart',dir:1,R:9.1,wait:0});if(b)for(let i=0;i<2;i++)T.pr.push({l:u.l,p:u.c+.25,p0:u.c+.25,dmg:d.split.dmg,sp:6.2,a:0,k:'heart',dir:-1,R:9.1,wait:i*.18});if(!T.headless&&Math.random()<.5)snd('shoot')}else u.t=.1}}
     if(d.mag){u.t-=dt;if(u.t<=0){let best=null,bd=1e9;for(const e of T.ens){if(e.die||!hasMetal(e)||e.p>9.7||Math.abs(e.l-u.l)>d.mag.rl)continue;const dd=Math.abs(e.p-(u.c+.5));if(dd>d.mag.rp)continue;const sc=dd+Math.abs(e.l-u.l)*.5;if(sc<bd){bd=sc;best=e}}
@@ -313,6 +317,12 @@ let FPAT=null,FPK='';function board(){const ch=STG[T.si].ch;const F=ch.floor||['
     if(h%5===0&&!ch.warm){g.globalAlpha=.1;g.fillStyle='#9fb4ff';g.fillRect(x-cs*.2,y-cs*.1,cs*.2,cs*.14)}
     if(h%3===0){g.globalAlpha=.25+.35*Math.abs(Math.sin(t*1.5+h));g.fillStyle=ch.warm?(h&1?'#fff2b0':'#e0ffc0'):h&1?'#cfe0ff':'#ffd6f5';g.fillRect(x+((h>>4)%30-15)/40*cs,y+((h>>9)%30-15)/40*cs,2,2)}}
   g.globalAlpha=1;g.strokeStyle='rgba(160,180,255,.12)';g.lineWidth=1;for(let l=0;l<=5;l++){const[a1,b1]=S(l-.5+.0,0);}
+  /* 오른쪽(세로 화면은 위쪽) 「무수리 길」: 대원은 못 심고, 걸어오는 무수리를 미리 보는 곳 */
+  {const ex=vert?[bx,50,5*cs,by-50]:[bx+9*cs,by,W-bx-9*cs,5*cs];
+   if(ex[2]>2&&ex[3]>2){g.save();g.translate(bx,by);g.fillStyle=ch.floorImg&&FPAT?FPAT:F[0];g.fillRect(ex[0]-bx,ex[1]-by,ex[2],ex[3]);g.restore();
+    const gr=vert?g.createLinearGradient(0,by,0,ex[1]):g.createLinearGradient(ex[0],0,W,0);gr.addColorStop(0,'rgba(10,5,24,.38)');gr.addColorStop(1,'rgba(10,5,24,.72)');g.fillStyle=gr;g.fillRect(...ex);
+    g.strokeStyle='rgba(255,255,255,.06)';g.lineWidth=1;for(let l=1;l<5;l++){g.beginPath();if(vert){g.moveTo(bx+l*cs,ex[1]);g.lineTo(bx+l*cs,by)}else{g.moveTo(ex[0],by+l*cs);g.lineTo(W,by+l*cs)}g.stroke()}
+    g.save();g.setLineDash([7,6]);g.strokeStyle='rgba(255,190,230,.55)';g.lineWidth=2;g.beginPath();if(vert){g.moveTo(bx,by);g.lineTo(bx+5*cs,by)}else{g.moveTo(ex[0],by);g.lineTo(ex[0],by+5*cs)}g.stroke();g.restore()}}
   const[ax,ay]=S(0,0),[bx2,by2]=S(4,0);const ext=cs*.5;g.strokeStyle='rgba(150,230,255,.85)';g.lineWidth=3;g.shadowColor='#8fe6ff';g.shadowBlur=12;g.beginPath();
   if(vert){g.moveTo(ax-ext,ay);g.lineTo(bx2+ext,by2)}else{g.moveTo(ax,ay-ext);g.lineTo(bx2,by2+ext)}g.stroke();g.shadowBlur=0}
 function draw(){g.setTransform(DPR,0,0,DPR,0,0);UI=[];sky();
@@ -323,7 +333,7 @@ function draw(){g.setTransform(DPR,0,0,DPR,0,0);UI=[];sky();
     if(ln.sw){const[x0,y0]=S(l,-.4),[x1,y1]=S(l,ln.sw.p);g.save();g.strokeStyle='#bff6ff';g.lineWidth=cs*.06;g.shadowColor='#7fe0ff';g.shadowBlur=18;g.beginPath();g.moveTo(x0,y0);g.lineTo(x1,y1);g.stroke();g.restore();yarn(x1,y1,cs*.24,1,t*3)}}
   const L=[];
   for(const u of T.units){const[x,y]=S(u.l,u.c+.5);L.push({y:y+cs*.4,k:0,o:u,x})}
-  for(const e of T.ens){if(e.p>10.2)continue;const[x,y]=S(e.lv,e.p);L.push({y:y+cs*.3,k:1,o:e,x})}
+  for(const e of T.ens){if(e.p>9.6+WALK+.5)continue;const[x,y]=S(e.lv,e.p);L.push({y:y+cs*.3,k:1,o:e,x})}
   for(const q of T.graves){const[x,y]=S(q.l,q.c+.5);L.push({y:y+cs*.38,k:3,o:q,x})}
   if(T.hover&&T.sel&&!T.units.some(u=>u.l===T.hover.l&&u.c===T.hover.c)){const[x,y]=S(T.hover.l,T.hover.c+.5);L.push({y:y+cs*.4,k:2,x,o:T.sel})}
   L.sort((a,b)=>a.y-b.y);const UD=vert?1.42:1.2;
@@ -365,7 +375,7 @@ function drawUnit(it,UD,t){const u=it.o,d=U[u.k],im=img(d.img);let fi=u.at>0?2+(
   if(d.mine&&u.t>0){const w=cs*.5;g.fillStyle='rgba(0,0,0,.5)';g.fillRect(it.x-w/2,it.y+cs*.04,w,3);g.fillStyle='#e8c98a';g.fillRect(it.x-w/2,it.y+cs*.04,w*(1-u.t/d.mine.arm),3)}
   else if(d.mine){g.globalAlpha=.6+.4*Math.sin(t*6);g.fillStyle='#ffe9a8';g.beginPath();g.arc(it.x,it.y-cs*.95,cs*.05,0,6.29);g.fill();g.globalAlpha=1}
   if(u.hp<u.max){const w=cs*.6,r=Math.max(0,u.hp/u.max);g.fillStyle='rgba(0,0,0,.5)';g.fillRect(it.x-w/2,it.y+cs*.04,w,4);g.fillStyle=r>.5?'#7dff9a':r>.25?'#ffd36b':'#ff6b6b';g.fillRect(it.x-w/2,it.y+cs*.04,w*r,4)}}
-function drawEnemy(it,t){const e=it.o,d=E[e.k],im=img(d.img);if(!ok(im))return;const a=e.die?Math.max(0,1-e.die/.6):1;const w=cs*d.sz,h=w*im.naturalHeight/im.naturalWidth;
+function drawEnemy(it,t){const e=it.o,d=E[e.k],im=img(d.img);if(!ok(im))return;const a=(e.die?Math.max(0,1-e.die/.6):1)*Math.min(1,Math.max(0,(9.6+WALK-e.p)/.7));const w=cs*d.sz,h=w*im.naturalHeight/im.naturalWidth;
   if(e.under){g.save();g.fillStyle='rgba(70,45,25,.85)';g.beginPath();g.ellipse(it.x,it.y-cs*.02,cs*.3,cs*.12,0,Math.PI,0);g.fill();g.fillStyle='rgba(150,110,70,.9)';for(let i=0;i<3;i++){const ox=Math.sin(e.bob*2+i*2)*cs*.18;g.beginPath();g.arc(it.x+ox,it.y-cs*(.08+.05*Math.abs(Math.sin(e.bob*3+i))),cs*.04,0,6.29);g.fill()}g.restore();return}
   let by3=it.y-Math.abs(Math.sin(e.bob))*cs*(e.eat?.03:.06);if(e.jump>0){by3-=Math.sin((1-e.jump/.75)*Math.PI)*cs*1.1}
   if(e.stick&&!e.eat&&!e.frz&&!e.stun)by3-=Math.abs(Math.sin(e.bob*.9))*cs*.22;

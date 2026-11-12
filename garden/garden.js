@@ -391,8 +391,12 @@ let FPAT=null,FPK='';function board(){const ch=STG[T.si].vis||STG[T.si].ch;const
     g.save();g.setLineDash([7,6]);g.strokeStyle='rgba(255,190,230,.55)';g.lineWidth=2;g.beginPath();if(vert){g.moveTo(bx,by);g.lineTo(bx+5*cs,by)}else{g.moveTo(ex[0],by);g.lineTo(ex[0],by+5*cs)}g.stroke();g.restore()}}
   const[ax,ay]=S(0,0),[bx2,by2]=S(4,0);const ext=cs*.5;g.strokeStyle='rgba(150,230,255,.85)';g.lineWidth=3;g.shadowColor='#8fe6ff';g.shadowBlur=12;g.beginPath();
   if(vert){g.moveTo(ax-ext,ay);g.lineTo(bx2+ext,by2)}else{g.moveTo(ax,ay-ext);g.lineTo(bx2,by2+ext)}g.stroke();g.shadowBlur=0}
+/* ---------- 🖼️ 정원 UI 그림 (11-12 사용자 그림) ---------- */
+const UIM={map:i=>`garden/ui/map${i+1}.jpg`,title:i=>`garden/ui/title${i+1}.jpg`,deck:'garden/ui/deck.jpg',logo:'garden/ui/logo.png',win:'garden/ui/ari_win.png',lose:'garden/ui/ari_lose.png',pot:i=>`garden/ui/pot${i}.png`};
+function cover(p,dim,zoom){const im=img(p);if(!ok(im))return false;const s=Math.max(W/im.naturalWidth,H/im.naturalHeight)*(zoom||1),iw=im.naturalWidth*s,ih=im.naturalHeight*s;g.drawImage(im,(W-iw)/2,(H-ih)/2,iw,ih);if(dim){g.fillStyle=`rgba(10,4,24,${dim})`;g.fillRect(0,0,W,H)}return true}
+function pic(p,x,y,h,a){const im=img(p);if(!ok(im))return 0;const w=h*im.naturalWidth/im.naturalHeight;g.save();g.globalAlpha=a==null?1:a;g.drawImage(im,x-w/2,y-h,w,h);g.restore();return w}
 function draw(){g.setTransform(DPR,0,0,DPR,0,0);UI=[];sky();
-  if(SCR==='map'){mapScr();return}if(SCR==='deck'){deckScr();return}if(SCR==='gift'){giftScr();return}if(SCR==='lobby'){lobbyScr();return}if(SCR==='scene'){sceneScr();return}
+  if(SCR==='map'){cover(UIM.map(Math.max(0,MCH)),.18);mapScr();return}if(SCR==='deck'){cover(UIM.deck,.45);deckScr();return}if(SCR==='gift'){giftScr();return}if(SCR==='lobby'){lobbyScr();return}if(SCR==='scene'){sceneScr();return}if(SCR==='tcard'){tcardScr();return}
   const t=T.t;const sh=T.shake>0?(Math.random()-.5)*T.shake:0;g.save();g.translate(sh,sh*.5);board();if(STG[T.si].hard){g.fillStyle=`rgba(90,0,50,${.13+.04*Math.sin(t*1.3)})`;g.fillRect(0,0,W,H)}
   if(T.hover&&(T.sel||T.shovel)){const[x,y]=S(T.hover.l,T.hover.c+.5);g.fillStyle=T.shovel?'rgba(255,120,120,.25)':'rgba(255,255,255,.16)';g.fillRect(x-cs/2,y-cs/2,cs,cs)}
   for(let l=0;l<5;l++){const ln=T.lanes[l];if(ln.spool){const[x,y]=S(l,-.33);yarn(x,y,cs*.17,.95,t+l)}
@@ -528,26 +532,27 @@ function pbtn(id,x,y,w,h,lab,main,fn,off){g.fillStyle=off?'rgba(255,255,255,.06)
 /* --- 화면: 스테이지 지도 --- */
 let MCH=-1;function mapScr(){const w=Math.min(W-20,460),x=(W-w)/2;let y=18;g.textAlign='center';g.textBaseline='middle';
   if(MCH<0)MCH=Math.min(CHS.length-1,Math.floor(Math.min(SV.cl,STG.length-1)/10));const ch=CHS[MCH],base=MCH*10;
-  g.fillStyle='#ffd1ea';g.font="900 22px 'Noto Sans KR',sans-serif";g.fillText('🌷 마음의 정원',W/2,y+16);g.fillStyle='#cfe8ff';g.font="700 14px 'Noto Sans KR',sans-serif";g.fillText(ch.name,W/2,y+44);
+  {g.font="900 22px 'Noto Sans KR',sans-serif";const tw=g.measureText('마음의 정원').width;pic(UIM.logo,W/2-tw/2-20,y+34,40);g.lineWidth=4;g.strokeStyle='rgba(30,8,40,.85)';g.strokeText('마음의 정원',W/2+8,y+16);g.fillStyle='#ffd1ea';g.fillText('마음의 정원',W/2+8,y+16)}
+  g.font="700 14px 'Noto Sans KR',sans-serif";g.lineWidth=3;g.strokeStyle='rgba(20,6,30,.85)';g.strokeText(ch.name,W/2,y+44);g.fillStyle='#cfe8ff';g.fillText(ch.name,W/2,y+44);
   if(MCH>0)pbtn('chp',W/2-w/2,y+28,40,32,'◀',false,()=>{MCH--;snd('sel')});const nextOpen=MCH<CHS.length-1&&SV.cl>=base+10;
   if(MCH<CHS.length-1)pbtn('chn',W/2+w/2-40,y+28,40,32,'▶',false,()=>{MCH++;snd('sel')},!nextOpen);
   pbtn('mx',W-52,10,42,36,'✕',false,()=>GD.close());
   const lx0=(SV.dev||window.GD_DEV)?108:10;pbtn('opv',lx0,10,44,36,'🎬',false,()=>{snd('sel');opening()});
   if(canRot())pbtn('rot',W-52-52,10,44,36,'🔄',false,toggleRot);
   if(SV.dev||window.GD_DEV)pbtn('dv',10,10,92,36,SV.cl>=STG.length?'🧪 처음부터':'🧪 전부 열기',false,()=>{if(SV.cl>=STG.length){SV.cl=0;delete SV.dv}else{SV.cl=STG.length;SV.dv=1}save()});
-  const own=owned(SV.cl);g.fillStyle='#ddd';g.font="600 12px 'Noto Sans KR',sans-serif";g.fillText(`합류한 대원 ${own.length}명 · 데려갈 수 있는 대원 ${deckMax(base)}명`,W/2,y+70);
+  const own=owned(SV.cl);g.fillStyle='#eee';g.font="600 12px 'Noto Sans KR',sans-serif";g.lineWidth=3;g.strokeStyle='rgba(20,6,30,.8)';g.strokeText(`합류한 대원 ${own.length}명 · 데려갈 수 있는 대원 ${deckMax(base)}명`,W/2,y+70);g.fillText(`합류한 대원 ${own.length}명 · 데려갈 수 있는 대원 ${deckMax(base)}명`,W/2,y+70);
   const cols=vert?2:5,gap=10,bw=(w-gap*(cols-1))/cols,bh=vert?Math.min(72,(H-200)/5-gap):Math.min(96,(H-210)/2-gap);y+=90;
   ch.stages.forEach((st,ii)=>{const i=base+ii,cx=x+(ii%cols)*(bw+gap),cy=y+Math.floor(ii/cols)*(bh+gap);const open=i<=SV.cl,clr=i<SV.cl;
-    g.fillStyle=!open?'rgba(255,255,255,.05)':clr?'rgba(120,200,255,.18)':'rgba(255,120,190,.28)';rr(cx,cy,bw,bh,14);g.fill();g.strokeStyle=open&&!clr?'#ff8fc8':'rgba(255,214,234,.35)';g.lineWidth=open&&!clr?2.5:1.2;g.stroke();
+    g.fillStyle=!open?'rgba(14,8,28,.72)':clr?'rgba(16,30,60,.74)':'rgba(70,16,60,.8)';rr(cx,cy,bw,bh,14);g.fill();g.strokeStyle=open&&!clr?'#ff8fc8':'rgba(255,214,234,.35)';g.lineWidth=open&&!clr?2.5:1.2;g.stroke();
     g.textAlign='left';g.fillStyle=open?'#fff':'#777';g.font="900 16px 'Noto Sans KR',sans-serif";const nar=bw<150;g.fillText(sid(i),cx+12,cy+bh*(nar?.24:.34));g.font="600 12px 'Noto Sans KR',sans-serif";g.fillText(open?st.name:'???',cx+12,cy+bh*(nar?.52:.68));
-    g.textAlign='right';g.font=(bw<150?'16px':'20px')+' sans-serif';g.fillText(clr?'✅':open?'▶':'🔒',cx+bw-8,cy+(bw<150?bh*.26:bh/2));
+    {const nar=bw<150,ph=nar?Math.min(bh*.42,34):Math.min(bh*.62,46),pk=clr?0:!open?2:(LOBR[i]?3:1);const bob=!clr&&open?Math.sin(performance.now()/300)*2:0;pic(UIM.pot(pk),cx+bw-8-ph*.4,cy+(nar?ph+4:bh/2+ph/2)+bob,ph,open?1:.75)}
     if(open){const rw=reward(i,SV.n[i]||0),nar=bw<150;g.textAlign='left';g.font="900 16px 'Noto Sans KR',sans-serif";const sw=g.measureText(sid(i)).width;g.font="800 10.5px 'Noto Sans KR',sans-serif";g.fillStyle=rw.lb?'#9fe8ff':'#ffe08a';g.fillText(rw.lb?'🖼️ 로비':`🪙${rw.g.toLocaleString()}`,nar?cx+12:cx+18+sw,nar?cy+bh*.8:cy+bh*.34+1)}
-    if(st.gift&&!clr&&open){const im=img(U[st.gift].img),sl=white(im,'#0a0614');if(sl){g.save();g.globalAlpha=.85;{const nar=bw<150,sz=nar?Math.min(bh*.5,bw*.42):Math.min(bh-8,bw*.5);g.drawImage(sl,0,0,im.naturalHeight,im.naturalHeight,nar?cx+bw-sz-4:cx+bw-30-sz,nar?cy+bh-sz-4:cy+(bh-sz)/2,sz,sz)}g.restore()}}
+    if(st.gift&&!clr&&open){const im=img(U[st.gift].img),sl=white(im,'#0a0614');if(sl){g.save();g.globalAlpha=.85;{const nar=bw<150,sz=nar?Math.min(bh*.5,bw*.42):Math.min(bh-8,bw*.5);g.drawImage(sl,0,0,im.naturalHeight,im.naturalHeight,nar?cx+bw-sz-4:cx+bw-58-sz,nar?cy+bh-sz-4:cy+(bh-sz)/2,sz,sz)}g.restore()}}
     if(open)btn('st'+i,cx,cy,bw,bh,()=>goStage(i),1)});
   ariMini(SV.cl>=STG.length?'어려움까지 전부 지켰어요! 언니는 진짜 정원의 수호자예요. ✨':MCH>=3&&SV.cl===MCH*10?'어려움 정원이에요. 같은 곳인데 훨씬 독해요. 새 대원들을 잘 써 봐요. 💜':SV.cl===20&&MCH===2?'장수 토마토 밭이에요. 토마토 덤불에서 무수리가 기어 나와요. 🍅':SV.cl===0?'어머, 언니. 정원에 무수리가 와요. 1-1부터 같이 막아 봐요.':SV.cl===10&&MCH===1?'상봉 네온 정원이에요. 여기 무수리들은 좀 더 영악해요. 💅':'다음 스테이지에 새 대원이 기다리고 있어요. 💅')}
 function ariMini(tx){const w=Math.min(W-20,460),x=(W-w)/2,y=H-84;g.fillStyle='rgba(28,14,48,.92)';rr(x,y,w,70,14);g.fill();g.strokeStyle='rgba(160,236,255,.6)';g.lineWidth=1.2;g.stroke();const im=img(FACE.w);if(ok(im)){g.save();rr(x+8,y+7,56,56,10);g.clip();g.drawImage(im,x+8,y+7,56,56);g.restore()}
   g.textAlign='left';g.textBaseline='top';g.fillStyle='#9fe8ff';g.font="800 11px 'Noto Sans KR',sans-serif";g.fillText('아리아드네',x+74,y+9);g.fillStyle='#fff';g.font="600 13px 'Noto Sans KR',sans-serif";wrap(tx,w-86).slice(0,2).forEach((l,i)=>g.fillText(l,x+74,y+27+i*18));g.textBaseline='middle'}
-function goStage(i){if(i>=20&&!SV.c3){SV.c3=1;save();scene('c3',()=>goStage(i));return}snd('sel');DECK_MAX=deckMax(i);const own=owned(SV.cl);let deck=(SV.deck||[]).filter(k=>own.includes(k));
+function goStage(i){{const c=CHS.indexOf(STG[i].ch);SV.tc=SV.tc||{};if(STG[i].ci===0&&!SV.tc[c]){SV.tc[c]=1;save();TC={c,t:0,then:()=>goStage(i)};SCR='tcard';bgm('lobby');return}}if(i>=20&&!SV.c3){SV.c3=1;save();scene('c3',()=>goStage(i));return}snd('sel');DECK_MAX=deckMax(i);const own=owned(SV.cl);let deck=(SV.deck||[]).filter(k=>own.includes(k));
   if(own.length<=DECK_MAX){start(i,own);return}
   if(!deck.length)deck=own.slice(0,DECK_MAX);PICK=deck.slice(0,DECK_MAX);PV=null;DSX=0;T={si:i,pick:1};SCR='deck'}
 function start(i,deck){SV.deck=deck.slice();save();newGame(i,deck,(Date.now()%9973)+1);SCR='play';last=0;bgm(stageBgm(i))}
@@ -620,6 +625,14 @@ let VID=null;function playOp(then){bgm('none');const box=document.createElement(
   const done=()=>{if(!VID)return;VID=null;try{v.pause()}catch(e){}box.remove();then&&then()};v.onended=done;v.onerror=done;sk.onclick=e=>{e.stopPropagation();done()};box.onclick=()=>{if(v.paused)v.play().catch(()=>{})};
   box.appendChild(v);box.appendChild(sk);ov.appendChild(box);VID={box,v};v.play().catch(()=>{v.muted=true;v.play().catch(done)})}
 function opening(back){playOp(()=>scene('op',()=>{if(!SV.op){SV.op=1;save()}SCR='map';MCH=-1;bgm('lobby');if(back)back()}))}
+/* --- 장 표지 (각 장 첫 스테이지에 처음 들어갈 때) --- */
+let TC=null;function tcardScr(){TC.t+=1/60;g.fillStyle='#000';g.fillRect(0,0,W,H);const a=Math.min(1,TC.t*1.5);g.save();g.globalAlpha=a;cover(UIM.title(TC.c),0,1+.04*Math.min(1,TC.t/6));g.restore();
+  const gr=g.createLinearGradient(0,0,0,H*.4);gr.addColorStop(0,'rgba(10,4,24,.75)');gr.addColorStop(1,'rgba(10,4,24,0)');g.fillStyle=gr;g.fillRect(0,0,W,H*.4);
+  const ch=CHS[TC.c],m=/^(\d+장) · (.*)$/.exec(ch.name)||[0,'',ch.name];const k=Math.min(1,Math.max(0,(TC.t-.4)*1.6));g.save();g.globalAlpha=k;g.textAlign='center';g.textBaseline='middle';
+  g.font=`800 ${Math.round(Math.min(18,W*.045))}px 'Noto Sans KR',sans-serif`;g.fillStyle='#ffd1ea';g.fillText(m[1],W/2,H*.1);
+  g.font=`900 ${Math.round(Math.min(36,W*.08))}px 'Noto Sans KR',sans-serif`;g.lineWidth=6;g.strokeStyle='rgba(20,6,30,.85)';g.strokeText(m[2],W/2,H*.1+Math.min(40,W*.09));g.fillStyle='#fff';g.fillText(m[2],W/2,H*.1+Math.min(40,W*.09));
+  g.font="700 12px 'Noto Sans KR',sans-serif";g.fillStyle=`rgba(255,255,255,${.5+.4*Math.abs(Math.sin(TC.t*3))})`;g.fillText('눌러서 시작 ▶',W/2,H-28);g.restore();
+  UI.push({id:'tc',top:1,x:0,y:0,w:W,h:H,fn:()=>{if(TC.t<.6)return;const th=TC.then;TC=null;th&&th()}})}
 /* --- 화면: 새 대원 합류 --- */
 function giftScr(){const k=RES.gift,d=U[k];const w=Math.min(W-24,380),h=Math.min(H-40,460);const[x,y]=panel(w,h,false);const t=performance.now()/1000;g.textAlign='center';g.textBaseline='middle';
   g.fillStyle='#ffd1ea';g.font="900 20px 'Noto Sans KR',sans-serif";g.fillText('✨ 새 대원 합류!',x+w/2,y+32);
@@ -629,7 +642,7 @@ function giftScr(){const k=RES.gift,d=U[k];const w=Math.min(W-24,380),h=Math.min
   g.fillStyle='#ddd';g.font="600 12.5px 'Noto Sans KR',sans-serif";wrap(d.desc,w-40).forEach((l,i)=>g.fillText(l,x+w/2,y+h-64+i*17));
   pbtn('gok',x+w/2-80,y+h-34-8,160,38,'좋아요',true,nextQ)}
 function nextQ(){const k=RES&&RES.q&&RES.q.shift();if(k==='end')scene('end',nextQ);else if(k==='lobby')SCR='lobby';else if(k==='gift')SCR='gift';else{SCR='map';T=null;MCH=-1;bgm('lobby')}}
-function endBox(){const w=Math.min(W-24,360),h=T.st==='win'?236:200;const[x,y]=panel(w,h);const win=T.st==='win';g.textAlign='center';g.textBaseline='middle';
+function endBox(){const w=Math.min(W-24,360),h=T.st==='win'?236:200;const[x,y]=panel(w,h);{const ah=Math.min(y+30,H*.34,210);if(ah>70)pic(T.st==='win'?UIM.win:UIM.lose,x+w/2,y+26,ah)}const win=T.st==='win';g.textAlign='center';g.textBaseline='middle';
   g.fillStyle=win?'#ffd1ea':'#ffb3b3';g.font="900 22px 'Noto Sans KR',sans-serif";g.fillText(win?'🌷 정원을 지켰어요!':'💔 마음의 선이 뚫렸어요',x+w/2,y+38);
   g.fillStyle='#ddd';g.font="600 13px 'Noto Sans KR',sans-serif";g.fillText(`버틴 시간 ${Math.floor(T.t/60)}:${String(Math.floor(T.t%60)).padStart(2,'0')} · 무수리 ${T.kills}마리`,x+w/2,y+70);
   if(win&&RES&&RES.rw){const rw=RES.rw;g.fillStyle='rgba(255,214,234,.12)';rr(x+20,y+86,w-40,40,12);g.fill();g.fillStyle=rw.lb?'#9fe8ff':'#ffe08a';g.font="900 16px 'Noto Sans KR',sans-serif";

@@ -25,8 +25,8 @@ const U={
   snow:{n:'밍키',sk:'슬리피카드',img:'garden/sk/mk_sleepy.png',cost:175,cd:7.5,hp:300,role:'💤 졸음 구름',desc:'맞은 무수리가 10초 동안 졸려서 느려져요.',shoot:{every:1.4,dmg:20,n:1,k:'ice',slow:10}},
   chomp:{n:'K1',sk:'허그카드',img:'garden/sk/k1_hug.png',cost:150,cd:7.5,hp:300,role:'🧸 꼬옥 껴안기',desc:'바로 앞 무수리를 꼭 껴안아 데려가고, 한참 토닥여요. (거대 수박은 너무 커서 못 안아요)',chomp:{range:1.4,chew:42}},
   rep:{n:'태태영',sk:'체리건2',img:'garden/sk/tt_cherrygun2.png',cost:200,cd:7.5,hp:300,role:'💗💗 두 발 사격',desc:'하트를 두 발씩 쏴요.',shoot:{every:1.4,dmg:20,n:2,k:'heart'}},
-  puff:{n:'K1',sk:'쏭카드',img:'msk2/cd12.png',cost:0,cd:7.5,hp:300,role:'🎵 공짜 노래',desc:'공짜! 대신 3칸 앞까지만 닿아요.',shoot:{every:1.4,dmg:20,n:1,k:'note',range:3}},
-  sshroom:{n:'맘터',sk:'스타카드',img:'garden/sk/mt_star.png',cost:25,cd:7.5,hp:300,role:'⭐ 별가루 실타래',desc:'싸요. 처음엔 조금, 2분 뒤 별이 자라면 보통만큼 짜요.',prod:{first:5,every:20,amt:15,grow:120,amt2:25}},
+  puff:{n:'K1',sk:'쏭카드',img:'msk2/cd12.png',cost:0,cd:7.5,hp:300,life:30,max:4,role:'🎵 공짜 노래',desc:'공짜! 3칸 앞까지만 닿고, 노래는 30초면 끝나요. 한 번에 4명까지.',shoot:{every:1.4,dmg:20,n:1,k:'note',range:3}},
+  sshroom:{n:'맘터',sk:'스타카드',img:'garden/sk/mt_star.png',cost:25,cd:7.5,hp:300,role:'⭐ 별가루 실타래',desc:'싸요. 처음엔 조금, 1분 뒤 별이 자라면 맘터 코지보다 많이(30) 짜요.',prod:{first:5,every:20,amt:15,grow:60,amt2:30}},
   squash:{n:'람쥐',sk:'점프카드',img:'garden/sk/rj_jump.png',cost:50,cd:30,cd0:20,hp:300,role:'💥 점프 착지',desc:'가까이 온 무수리에게 뛰어올라 짓눌러요. (1회용)',squash:{range:1.15,dmg:1800}},
   /* --- 2장 상봉 --- */
   fume:{n:'쁘니',sk:'네온카드',img:'garden/sk/pn_neon.png',cost:75,cd:7.5,hp:300,role:'💗 네온 찌르기',desc:'앞 4칸을 꿰뚫어요. 방충망도 그냥 통과해요.',fume:{every:1.4,dmg:20,range:4}},
@@ -101,6 +101,8 @@ const CH2={name:'2장 · 상봉 네온 정원',floorImg:'garden/bg/sb_floor.png'
 ]};
 CH2.stages.forEach((S,i)=>{S.n=11+Math.floor(i*.4);S.g0=20-i*.2;S.g1=14-i*.2;S.b0=1.1+.03*i;S.bg=.16+.01*i});
 Object.assign(CH2.stages[9],{n:13,b0:1.15,bg:.2,g0:20,g1:13});
+/* 11-12 맘터 피드백: 기본 빌드(맘터+태태영)만으로도 깨지던 것 → 무수리 예산 1장 1-3부터 ×1.15 · 2장 ×1.2 (3장은 아래), 각 장 끝 스테이지는 원래대로 */
+[[1,1,1.15,1.15,1.15,1.15,1.15,1.15,1,1],[1.2,1.2,1.2,1.2,1.2,1.15,1.05,1,1.05,1],[1.45,1.25,1.4,1.35,1.3,1.1,1.15,1.1,1.05,1]].forEach((B,h)=>[CH1,CH2,null][h]&&[CH1,CH2][h].stages.forEach((S,i)=>S.bm=B[i]));
 /* ---------- 3장 · 장수 토마토 밭 (흙 바닥 · 토마토 덤불 = 무덤) ---------- */
 const CH3={name:'3장 · 장수 토마토 밭',floorImg:'farm/floor.jpg',tint:'rgba(0,0,0,.10)',line:'rgba(255,230,170,.10)',warm:1,stages:[
   {name:'토마토 덤불',   pool:{tom:3,cone:2},                     graves:3,gift:'gbust'},
@@ -114,7 +116,7 @@ const CH3={name:'3장 · 장수 토마토 밭',floorImg:'farm/floor.jpg',tint:'r
   {name:'거대 수박',     pool:{tom:2,cone:2,beetle:1,ladder:1,garg:1},graves:5,gift:'rock'},
   {name:'장수의 끝',     pool:{tom:2,cone:2,beetle:1,pogo:1,jack:1,ladder:1,dig:1,garg:1},graves:6,flags:3,gift:'wmel'}
 ]};
-CH3.stages.forEach((S,i)=>{S.n=11+Math.floor(i*.4);S.g0=20-i*.2;S.g1=14-i*.2;S.b0=1.15+.02*i;S.bg=.15+.006*i});
+CH3.stages.forEach((S,i)=>{S.bm=[1.45,1.25,1.4,1.35,1.3,1.1,1.15,1.1,1.05,1][i];S.n=11+Math.floor(i*.4);S.g0=20-i*.2;S.g1=14-i*.2;S.b0=1.15+.02*i;S.bg=.15+.006*i});
 const CHS=[CH1,CH2,CH3],STG=CHS.reduce((a,c)=>a.concat(c.stages.map((st,i)=>Object.assign(st,{ch:c,ci:i}))),[]);
 const sid=gi=>`${CHS.indexOf(STG[gi].ch)+1}-${STG[gi].ci+1}`;
 const START=['sun','pea'];const deckMax=gi=>gi>=20?8:gi>=10?7:6;let DECK_MAX=6;
@@ -134,7 +136,7 @@ function genWaves(si,seed){const S=STG[si];if(S.hand)return hand1(seed);const r=
   const pick=(bud)=>{for(let k=0;k<20;k++){let x=r()*tot;for(const kk of keys){x-=S.pool[kk];if(x<=0){if(ECOST[kk]<=bud+.01)return kk;break}}}return 'mu'};
   const nf=S.flags||2,flagAt=new Set();for(let i=1;i<=nf;i++)flagAt.add(Math.round(S.n*i/nf)-1);
   let t=20,last=-1;const lane=()=>{let l;do{l=Math.floor(r()*5)}while(l===last&&r()<.6);last=l;return l};
-  for(let i=0;i<S.n;i++){const k=i/(S.n-1);let bud=S.b0+S.bg*i;const fl=flagAt.has(i);
+  for(let i=0;i<S.n;i++){const k=i/(S.n-1);let bud=(S.b0+S.bg*i)*(window.GD_BM?window.GD_BM(S):(S.bm||1));const fl=flagAt.has(i);
     if(fl){bud*=2.6;W.push({t,flag:1,fin:i===S.n-1?1:0});W.push({t,k:'flag',l:lane()})}
     let b=bud,dt=0;while(b>=.99){const e=pick(b);b-=ECOST[e];W.push({t:t+dt,k:e,l:lane()});dt+=fl?.55:(r()*.8)}
     t+=S.g0+(S.g1-S.g0)*k+(fl?6:0)}
@@ -204,12 +206,13 @@ function once(k,f,tx,dur){if(T.said[k])return;T.said[k]=1;say(f,tx,dur)}
 function plant(k,l,c){const d=U[k],cd=T.cards.find(x=>x.k===k);if(!cd||cd.cd>0||T.th<d.cost)return false;
   const gv=T.graves.find(q=>q.l===l&&q.c===c);if(d.gbust?(!gv||gv.bust):gv)return false;
   const old=T.units.find(u=>u.l===l&&u.c===c);if(d.up?(!old||old.k!==d.up):old)return false;
+  if(d.max&&T.units.filter(u=>u.k===k).length>=d.max){if(!T.headless)once('mx'+k,'n',`${d.n} ${d.sk}는 한 번에 ${d.max}명까지예요. 노래가 끝나면 다시 불러요.`,3);return false}
   T.th-=d.cost;cd.cd=d.cd;if(old)T.units=T.units.filter(v=>v!==old);const u={k,l,c,hp:d.hp,max:d.hp,t:0,at:0,fl:0,pop:.25,age:0};
   if(d.gbust){u.t=d.gbust.t;gv.bust=1}if(d.mag)u.t=1;if(d.split)u.t=.6;if(d.ice)u.t=d.ice.t;if(d.lives)u.lives=d.lives;if(old&&old.ladder)u.ladder=1;
   if(d.prod)u.t=d.prod.first;if(d.shoot||d.fume)u.t=.6;if(d.lob)u.t=1;if(d.bomb)u.t=d.bomb.t;if(d.jala)u.t=d.jala.t;if(d.blow)u.t=d.blow.t;if(d.mine)u.t=d.mine.arm;if(d.spike)u.t=d.spike.every;
   T.units.push(u);T.planted++;snd('plant');
   if(k==='sun')once('w1','w','맘터 언니가 자리 잡았어요. 이제 실타래가 짜일 거예요.',3.5);return true}
-function dropThread(lf,p,amt,from){T.thr.push({lf,p,amt,f:from?0:1,pop:from?.5:0,life:from?9:8,t:0,col:0})}
+function dropThread(lf,p,amt,from){T.thr.push({lf,p,amt,f:from?0:1,pop:from?.7:0,life:from?10:8,t:0,col:0,own:from?1:0});if(from&&!T.headless){sfx(Math.round(lf-.15),p-.25,'stars',{w:1.2,dy:.6});snd('pop')}}
 function collect(th){if(th.col)return;th.col=1;th.ct=0;T.th+=th.amt;snd('col');once('c1','w','그거예요. 실타래는 우리 재산이에요.',2.6)}
 function spawn(k,l,p){const d=E[k];T.ens.push({k,l,lv:l,p:p==null?9.6:p,dir:-1,hp:d.hp,max:d.hp,sh:d.shield||0,shMax:d.shield||0,fly:d.fly?1:0,ammo:d.cata?d.cata.ammo:0,ct:d.cata?1.5:0,fl:0,bob:Math.random()*6,eat:null,die:0,slow:0,jump:0,jumped:0,
     mh:d.metal>1?d.metal:0,under:d.dig?1:0,stick:d.pogo?1:0,box:d.jack?1:0,lad:d.ladder?1:0,frz:0,stun:0,jt:null,threw:0,smash:0,gb:0});
@@ -242,6 +245,7 @@ function step(dt){const t0=T.t;T.t+=dt;
   T.sky-=dt;if(T.sky<=0){T.sky=7+((T.t*7.3)%1)*2;dropThread(.4+((T.t*3.1)%1)*4.2,1.2+((T.t*5.7)%1)*7,25,false);if(T.t>4&&T.si===0)once('s1','n','하늘색 실타래가 보이면 톡 눌러서 모아요.',3.5)}
   // 대원
   for(const u of T.units){const d=U[u.k];u.fl=Math.max(0,u.fl-dt);u.pop=Math.max(0,u.pop-dt);u.at=Math.max(0,u.at-dt);u.age+=dt;
+    if(d.life&&u.age>=d.life){u.dead=1;burst(u.l,u.c+.5,'#d9c2ff',8);sfx(u.l,u.c+.5,'mana',{w:1,dy:.45});continue}
     if(d.prod){u.t-=dt;if(u.t<=0){u.t=d.prod.every;u.at=.5;const amt=d.prod.grow&&u.age<d.prod.grow?d.prod.amt:(d.prod.amt2||d.prod.amt);dropThread(u.l+.15,u.c+.75,amt,true)}}
     if(d.shoot){u.t-=dt;if(u.t<=0){const R=d.shoot.range||9;const LS=d.shoot.lanes?[u.l-1,u.l,u.l+1].filter(x=>x>=0&&x<5):[u.l];const tg=LS.some(l=>ahead(l,u.c+.2,Math.min(9.75,u.c+.5+R),d.shoot.air));
         if(tg){u.t=d.shoot.every;u.at=.35;for(const l of LS)for(let i=0;i<d.shoot.n;i++)T.pr.push({l,l0:u.l,p:u.c+.75,p0:u.c+.75,dmg:d.shoot.dmg,sp:6.2,a:0,k:d.shoot.k,slow:d.shoot.slow||0,air:d.shoot.air||0,R:R+.1,wait:i*.18});if(!T.headless&&Math.random()<.5)snd('shoot')}else u.t=.1}}
@@ -389,7 +393,11 @@ function draw(){g.setTransform(DPR,0,0,DPR,0,0);UI=[];sky();
   for(const th of T.thr){let[x,y]=S(th.lf,th.p);if(th.f>0)y-=th.f*cs*3.2;if(th.pop>0)y-=Math.sin((1-th.pop/.5)*Math.PI)*cs*.6;
     let a=1;if(!th.col&&th.f<=0&&th.life<2)a=.4+.6*Math.abs(Math.sin(th.t*6));
     if(th.col){const k=Math.min(1,th.ct/.45);const[tx,ty]=thPos();x+=(tx-x)*k;y+=(ty-y)*k;a=1-k*.3}
-    th.sx=x;th.sy=y;yarn(x,y,cs*(th.amt<25?.16:.21),a,th.t)}
+    th.sx=x;th.sy=y;
+    if(th.own&&!th.col){g.save();const pr=(th.t*1.6)%1;g.globalAlpha=a*(1-pr)*.8;g.strokeStyle='#ffd86b';g.lineWidth=Math.max(2,cs*.05);g.beginPath();g.arc(x,y,cs*(.22+.3*pr),0,6.29);g.stroke();
+      const gl=g.createRadialGradient(x,y,cs*.05,x,y,cs*.42);gl.addColorStop(0,'rgba(255,230,140,.55)');gl.addColorStop(1,'rgba(255,200,80,0)');g.globalAlpha=a;g.fillStyle=gl;g.beginPath();g.arc(x,y,cs*.42,0,6.29);g.fill();g.restore()}
+    yarn(x,y,cs*(th.own?.26:th.amt<25?.16:.21),a,th.t);
+    if(th.own&&!th.col&&th.t<1.6){g.save();g.globalAlpha=Math.min(1,(1.6-th.t)*1.5);g.font=`900 ${Math.round(cs*.24)}px 'Noto Sans KR',sans-serif`;g.textAlign='center';g.textBaseline='middle';g.lineWidth=4;g.strokeStyle='#5a3a00';const ty2=y-cs*.42-th.t*cs*.25;g.strokeText('+'+th.amt,x,ty2);g.fillStyle='#ffe08a';g.fillText('+'+th.amt,x,ty2);g.restore()}}
   g.restore();
   if(T.flash>0){g.fillStyle=`rgba(255,220,240,${T.flash*1.6})`;g.fillRect(0,0,W,H)}
   hud();
@@ -409,6 +417,7 @@ function drawUnit(it,UD,t){const u=it.o,d=U[u.k],im=img(d.img);let fi=u.at>0?2+(
   if(d.chomp&&u.chew>0){g.fillStyle='#fff';g.font=`800 ${Math.round(cs*.18)}px 'Noto Sans KR',sans-serif`;g.textAlign='center';g.fillText('토닥토닥…',it.x,it.y-cs*1.15);const w=cs*.6;g.fillStyle='rgba(0,0,0,.5)';g.fillRect(it.x-w/2,it.y-cs*1.05,w,3);g.fillStyle='#ffd36b';g.fillRect(it.x-w/2,it.y-cs*1.05,w*(1-u.chew/d.chomp.chew),3)}
   if(d.mine&&u.t>0){const w=cs*.5;g.fillStyle='rgba(0,0,0,.5)';g.fillRect(it.x-w/2,it.y+cs*.04,w,3);g.fillStyle='#e8c98a';g.fillRect(it.x-w/2,it.y+cs*.04,w*(1-u.t/d.mine.arm),3)}
   else if(d.mine){g.globalAlpha=.6+.4*Math.sin(t*6);g.fillStyle='#ffe9a8';g.beginPath();g.arc(it.x,it.y-cs*.95,cs*.05,0,6.29);g.fill();g.globalAlpha=1}
+  if(d.life){const w=cs*.5,r=Math.max(0,1-u.age/d.life);g.fillStyle='rgba(0,0,0,.45)';g.fillRect(it.x-w/2,it.y+cs*.1,w,3);g.fillStyle='#d9c2ff';g.fillRect(it.x-w/2,it.y+cs*.1,w*r,3)}
   if(u.hp<u.max){const w=cs*.6,r=Math.max(0,u.hp/u.max);g.fillStyle='rgba(0,0,0,.5)';g.fillRect(it.x-w/2,it.y+cs*.04,w,4);g.fillStyle=r>.5?'#7dff9a':r>.25?'#ffd36b':'#ff6b6b';g.fillRect(it.x-w/2,it.y+cs*.04,w*r,4)}}
 function drawEnemy(it,t){const e=it.o,d=E[e.k],im=img(d.img);if(!ok(im))return;const a=(e.die?Math.max(0,1-e.die/.6):1)*Math.min(1,Math.max(0,(9.6+WALK-e.p)/.7));const w=cs*d.sz,h=w*im.naturalHeight/im.naturalWidth;
   if(e.under){g.save();g.translate(it.x,it.y);const mw=cs*.36,mh=cs*.2;const gr=g.createLinearGradient(0,-mh,0,0);gr.addColorStop(0,'#8a6238');gr.addColorStop(1,'#4e3419');g.fillStyle=gr;g.beginPath();g.moveTo(-mw,0);g.quadraticCurveTo(-mw*.5,-mh*1.2,0,-mh);g.quadraticCurveTo(mw*.5,-mh*1.2,mw,0);g.closePath();g.fill();
@@ -459,7 +468,7 @@ function hud(){g.textBaseline='middle';
   else{ch=Math.min(88,Math.max(68,H*.14));cw=ch*.76;cx=118;cy=8}
   T.cards.forEach((c,i)=>{const d=U[c.k],x=cx+i*(cw+gap),y=cy,can=T.th>=d.cost&&c.cd<=0,sel=T.sel===c.k;
     g.save();g.fillStyle=sel?'#ffe1f1':'#2a1838';rr(x,y,cw,ch,10);g.fill();g.lineWidth=sel?3:1.5;g.strokeStyle=sel?'#ff6fb1':'rgba(255,214,234,.55)';g.stroke();
-    cardFace(c.k,x,y,cw,ch,sel);g.fillStyle=sel?'#5a1a40':'#fff';g.font=`800 ${cw<60?11:13}px 'Noto Sans KR',sans-serif`;g.textAlign='center';g.fillText('🧵'+d.cost,x+cw/2,y+ch-11);
+    cardFace(c.k,x,y,cw,ch,sel);g.fillStyle=sel?'#5a1a40':'#fff';g.font=`800 ${cw<60?11:13}px 'Noto Sans KR',sans-serif`;g.textAlign='center';g.fillText(d.max?`🧵${d.cost} ${T.units.filter(u=>u.k===c.k).length}/${d.max}`:'🧵'+d.cost,x+cw/2,y+ch-11);
     if(!can){g.fillStyle='rgba(10,0,20,.55)';rr(x,y,cw,ch,10);g.fill()}
     if(c.cd>0){const r=c.cd/d.cd;g.fillStyle='rgba(0,0,0,.45)';g.fillRect(x,y,cw,ch*r);g.fillStyle='#fff';g.font="700 12px sans-serif";g.fillText(Math.ceil(c.cd)+'s',x+cw/2,y+ch/2)}
     g.restore();btn('card'+i,x,y,cw,ch,()=>{if(T.st!=='play')return;if(!can){snd('no');return}T.shovel=false;T.sel=sel?null:c.k;snd('sel')})});
@@ -597,7 +606,7 @@ function down(e){e.preventDefault();const[x,y]=pt(e);
   if(SCR==='deck'){const st=UI.find(b=>b.id==='strip');if(st&&x>=st.x&&x<=st.x+st.w&&y>=st.y&&y<=st.y+st.h){DRAG={x0:x,y0:y,s0:DSX,mv:0,pid:e.pointerId};try{cv.setPointerCapture(e.pointerId)}catch(_){}return}}
   for(const b of list)if(x>=b.x&&x<=b.x+b.w&&y>=b.y&&y<=b.y+b.h){b.fn();return}
   if(SCR!=='play'||!T||T.st!=='play')return;
-  let best=null,bd=cs*.62;for(const th of T.thr){if(th.col||th.sx==null)continue;const d=Math.hypot(th.sx-x,th.sy-y);if(d<bd){bd=d;best=th}}
+  let best=null,bd=cs*.8;for(const th of T.thr){if(th.col||th.sx==null)continue;const d=Math.hypot(th.sx-x,th.sy-y);if(d<bd){bd=d;best=th}}
   if(best){collect(best);return}
   const c=cellAt(x,y);if(!c)return;
   if(T.shovel){const u=T.units.find(u=>u.l===c.l&&u.c===c.c);if(u){T.units=T.units.filter(v=>v!==u);T.th+=Math.floor(U[u.k].cost/2);burst(u.l,u.c+.5,'#ffffff',8);snd('sel')}T.shovel=false;return}
@@ -623,6 +632,8 @@ GD.close=function(quiet){if(VID){try{VID.v.pause()}catch(e){}VID=null}bgm('off')
 /* ---------- 테스트: 봇 ----------
    'pro' 정석 / 'newbie' 느리고 대충(방패·폭탄 안 씀) / 'spam' 사격수만 */
 function botDeck(si,strat){const own=owned(si),mx=deckMax(si);if(strat==='spam')return own.includes('rep')?['rep','pea']:['pea'];
+  if(strat==='free')return['sun','pea','rep','puff','cherry'].filter(k=>own.includes(k));
+  if(strat==='basic')return['sun','pea','rep','cherry'].filter(k=>own.includes(k));
   const P=STG[si].pool||{mu:1};const has=k=>!!P[k];
   const pref=['sun','pea'];if(own.includes('rep'))pref.push('rep');
   pref.push(own.includes('tall')?'tall':'wall','cherry');
@@ -667,6 +678,10 @@ GD.sim=function(si,sec,strat,seed){const saveT=T;DECK_MAX=deckMax(si);const deck
       for(const l of L){const e=thr(l).find(e=>e.p>6&&e.p<8.5&&!e.fly);if(e)P('mine',l,7)}}
     else if(strat==='newbie'){const th=l=>thr(l).length>0;const ys=l=>T.units.some(u=>u.l===l&&U[u.k].shoot);
       const l=[0,1,2,3,4].find(l=>th(l)&&!ys(l));if(l!=null)P(has('rep')&&r()<.4?'rep':'pea',l,Math.floor(r()*5));else if(r()<.45)P('sun',Math.floor(r()*5),Math.floor(r()*3));else P('pea',Math.floor(r()*5),Math.floor(r()*6))}
+    else if(strat==='free'||strat==='basic'){/* 맘터 피드백(11-12): 맘터 한 줄 + 태태영 한 줄 + 나머지 쏭카드 도배 */
+      for(let l=0;l<5;l++)if(free(l,0))P('sun',l,0);for(let l=0;l<5;l++)if(free(l,1))P(T.th>=300&&has('rep')?'rep':'pea',l,1);
+      for(let l=0;l<5;l++){const near=thr(l).filter(e=>e.p<3&&!e.fly);if(near.length>=3||hp(l)>1200&&near.length)P('cherry',l,Math.max(0,Math.round(near[0].p-.5)))}
+      pf:for(const l of [2,1,3,0,4])for(const c of [5,6,4,7,3,2,8])if(free(l,c)&&P('puff',l,c))break pf}
     else if(strat==='spam'){for(let l=0;l<5;l++)for(let c=0;c<9;c++)if(free(l,c)&&(P(T.deck[0],l,c)||P('pea',l,c)))break}}
   const res={si,st:T.st,t:+T.t.toFixed(1),kills:T.kills,planted:T.planted,spools:T.lanes.filter(l=>!l.spool).length,en:T.wv.filter(w=>w.k).length,th:T.th,deck:T.deck.join(','),
     board:[0,1,2,3,4].map(l=>T.units.filter(u=>u.l===l).sort((a,b)=>a.c-b.c).map(u=>u.k+u.c).join(' ')+' | '+T.ens.filter(e=>e.l===l&&!e.die).map(e=>e.k+e.p.toFixed(1)).join(' '))};T=saveT;return res};

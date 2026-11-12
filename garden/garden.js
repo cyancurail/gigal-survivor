@@ -127,12 +127,16 @@ const CH3={name:'3장 · 장수 토마토 밭',floorImg:'farm/floor.jpg',tint:'r
   {name:'장수의 끝',     pool:{tom:2,cone:2,beetle:1,pogo:1,jack:1,ladder:1,dig:1,garg:1},graves:6,flags:3,gift:'wmel'}
 ]};
 CH3.stages.forEach((S,i)=>{S.bm=[1.45,1.25,1.4,1.35,1.3,1.1,1.15,1.1,1.05,1][i];S.n=11+Math.floor(i*.4);S.g0=20-i*.2;S.g1=14-i*.2;S.b0=1.15+.02*i;S.bg=.15+.006*i});
-/* ---------- 4장 · 악몽의 정원 (11-12 사용자: 1·2·3장의 순수 어려움 버전 + 남은 9종 합류) ----------
-   1~3장 스테이지를 그대로 가져와(바닥·무수리 구성·덤불) 무수리 체력 ×hpm, 무리 예산 ×bm. */
-const H4=[[CH1,5,'잠 못 드는 밤','coward'],[CH1,8,'별가루 폭풍','twin'],[CH1,9,'무너지는 밤하늘','pump'],[CH2,2,'찢어진 방충망','gloom'],[CH2,6,'풍선 폭풍','star'],[CH2,9,'네온 정전','hypno'],[CH3,2,'뒤에서 오는 것','mari'],[CH3,5,'사다리 행렬','doom'],[CH3,8,'거대 수박 떼','mirror'],[CH3,9,'악몽의 끝',null]];
-const H4M=[[1.15,1.2],[1.15,1.2],[1,1.1],[1.15,1.2],[1.15,1.2],[1.1,1.15],[1,1.1],[1,1.1],[1,1.1],[1,1.15]];
-const CH4={name:'4장 · 악몽의 정원',hard:1,stages:H4.map(([C,i,name,gift],j)=>{const S=C.stages[i];return{name,gift,vis:C,hard:1,src:i,pool:Object.assign({},S.pool),graves:S.graves,flags:S.flags,n:S.n+1,g0:S.g0,g1:S.g1,b0:S.b0,bg:S.bg,bm:(S.bm||1)*H4M[j][0],hpm:H4M[j][1]}})};
-const CHS=[CH1,CH2,CH3,CH4],STG=CHS.reduce((a,c)=>a.concat(c.stages.map((st,i)=>Object.assign(st,{ch:c,ci:i}))),[]);
+/* ---------- 4·5·6장 = 1·2·3장의 어려움 버전 (11-12 사용자) ----------
+   같은 스테이지(바닥·곡·무수리 구성·덤불)를 그대로 쓰고 무수리 체력 ×hpm, 무리 예산 ×bm(+1웨이브).
+   매칭표 남은 9종은 각 장 3·6·9스테이지에서 합류. 장 끝(9·10)은 원래 장도 어려워서 강화 폭을 줄임. */
+const HG=[['coward','twin','pump'],['gloom','star','hypno'],['mari','doom','mirror']];
+const HS=[[],[4,7],[1,6,7]];/* 봇이 한 판도 못 깬 스테이지는 강화 폭을 줄임 */
+const HN=['어려움 · 밤하늘 정원','어려움 · 상봉 네온 정원','어려움 · 장수 토마토 밭'];
+const mkHard=(C,h)=>({name:`${h+4}장 · ${HN[h]}`,hard:1,vis:C,stages:C.stages.map((S,i)=>{const end=i>=8||(HS[h]||[]).includes(i);return{name:S.name,gift:i===2?HG[h][0]:i===5?HG[h][1]:i===8?HG[h][2]:null,vis:C,hard:1,src:i,hand:0,
+  pool:S.hand?{mu:3,cone:1}:Object.assign({},S.pool),graves:S.graves,flags:S.flags,n:(S.n||10)+1,g0:S.g0||20,g1:S.g1||14,b0:S.b0||1,bg:S.bg||.15,bm:(S.bm||1)*(end?1:1.15),hpm:end?1.1:1.2}})});
+const CH4=mkHard(CH1,0),CH5=mkHard(CH2,1),CH6=mkHard(CH3,2);
+const CHS=[CH1,CH2,CH3,CH4,CH5,CH6],STG=CHS.reduce((a,c)=>a.concat(c.stages.map((st,i)=>Object.assign(st,{ch:c,ci:i}))),[]);
 const sid=gi=>`${CHS.indexOf(STG[gi].ch)+1}-${STG[gi].ci+1}`;
 const START=['sun','pea'];const deckMax=gi=>gi>=20?8:gi>=10?7:6;/* 4장도 8칸 */let DECK_MAX=6;
 const WALK=3;
@@ -540,7 +544,7 @@ let MCH=-1;function mapScr(){const w=Math.min(W-20,460),x=(W-w)/2;let y=18;g.tex
     if(open){const rw=reward(i,SV.n[i]||0),nar=bw<150;g.textAlign='left';g.font="900 16px 'Noto Sans KR',sans-serif";const sw=g.measureText(sid(i)).width;g.font="800 10.5px 'Noto Sans KR',sans-serif";g.fillStyle=rw.lb?'#9fe8ff':'#ffe08a';g.fillText(rw.lb?'🖼️ 로비':`🪙${rw.g.toLocaleString()}`,nar?cx+12:cx+18+sw,nar?cy+bh*.8:cy+bh*.34+1)}
     if(st.gift&&!clr&&open){const im=img(U[st.gift].img),sl=white(im,'#0a0614');if(sl){g.save();g.globalAlpha=.85;{const nar=bw<150,sz=nar?Math.min(bh*.5,bw*.42):Math.min(bh-8,bw*.5);g.drawImage(sl,0,0,im.naturalHeight,im.naturalHeight,nar?cx+bw-sz-4:cx+bw-30-sz,nar?cy+bh-sz-4:cy+(bh-sz)/2,sz,sz)}g.restore()}}
     if(open)btn('st'+i,cx,cy,bw,bh,()=>goStage(i),1)});
-  ariMini(SV.cl>=STG.length?'악몽의 정원까지 다 지켰어요! 언니는 진짜 정원의 수호자예요. ✨':SV.cl>=30&&MCH===3?'여긴 악몽의 정원이에요. 같은 곳인데 훨씬 독해요. 새 대원들을 잘 써 봐요. 💜':SV.cl===20&&MCH===2?'장수 토마토 밭이에요. 토마토 덤불에서 무수리가 기어 나와요. 🍅':SV.cl===0?'어머, 언니. 정원에 무수리가 와요. 1-1부터 같이 막아 봐요.':SV.cl===10&&MCH===1?'상봉 네온 정원이에요. 여기 무수리들은 좀 더 영악해요. 💅':'다음 스테이지에 새 대원이 기다리고 있어요. 💅')}
+  ariMini(SV.cl>=STG.length?'어려움까지 전부 지켰어요! 언니는 진짜 정원의 수호자예요. ✨':MCH>=3&&SV.cl===MCH*10?'어려움 정원이에요. 같은 곳인데 훨씬 독해요. 새 대원들을 잘 써 봐요. 💜':SV.cl===20&&MCH===2?'장수 토마토 밭이에요. 토마토 덤불에서 무수리가 기어 나와요. 🍅':SV.cl===0?'어머, 언니. 정원에 무수리가 와요. 1-1부터 같이 막아 봐요.':SV.cl===10&&MCH===1?'상봉 네온 정원이에요. 여기 무수리들은 좀 더 영악해요. 💅':'다음 스테이지에 새 대원이 기다리고 있어요. 💅')}
 function ariMini(tx){const w=Math.min(W-20,460),x=(W-w)/2,y=H-84;g.fillStyle='rgba(28,14,48,.92)';rr(x,y,w,70,14);g.fill();g.strokeStyle='rgba(160,236,255,.6)';g.lineWidth=1.2;g.stroke();const im=img(FACE.w);if(ok(im)){g.save();rr(x+8,y+7,56,56,10);g.clip();g.drawImage(im,x+8,y+7,56,56);g.restore()}
   g.textAlign='left';g.textBaseline='top';g.fillStyle='#9fe8ff';g.font="800 11px 'Noto Sans KR',sans-serif";g.fillText('아리아드네',x+74,y+9);g.fillStyle='#fff';g.font="600 13px 'Noto Sans KR',sans-serif";wrap(tx,w-86).slice(0,2).forEach((l,i)=>g.fillText(l,x+74,y+27+i*18));g.textBaseline='middle'}
 function goStage(i){if(i>=20&&!SV.c3){SV.c3=1;save();scene('c3',()=>goStage(i));return}snd('sel');DECK_MAX=deckMax(i);const own=owned(SV.cl);let deck=(SV.deck||[]).filter(k=>own.includes(k));

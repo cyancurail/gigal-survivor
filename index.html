@@ -1149,7 +1149,7 @@ function fmTick7(dt){if(G.bot&&!G.fmL)return;fmCannonTick(dt);fmDroneTick(dt);fm
 function fmStraw(x,y,n,ring){const p=G.p,lv=fmLv(),src={x,y,dmg:(9+em()*.8)*(lv===2?1.4:1)},a0=Math.atan2(p.y-y,p.x-x);for(let i=0;i<n;i++){const a=ring?a0+i*6.283/n:a0+(i-(n-1)/2)*.22;ebShot(src,a,ring?130:160,5,1,'#f0c860')}if(!G.bot){sparks(x,y,10,['#f0c860','#8a5a2a'],120,.35,2);SND.p('paper')}}
 // 쫓아오는 착한 토마토: 플레이어에게 달려와 닿으면 체력 8% 회복(+ 원래 구조 보상)
 function fmFolTick(dt){if(G.arena)return;const p=G.p,F=G.fmF||(G.fmF=[]);G.fmFoT=(G.fmFoT===undefined?25:G.fmFoT)-dt;
-  if(G.fmFoT<=0){G.fmFoT=fmLv()===2?30:fmLv()?35:40;if(F.length<2){const a=rnd(0,6.283),r=Math.max(VW,VH)*.5;F.push({x:p.x+Math.cos(a)*r,y:p.y+Math.sin(a)*r,life:30,ph:rnd(0,6)});if(!G.bot)toast('🍅 착한 토마토가 달려와요!','닿으면 체력이 회복돼요')}}
+  if(G.fmFoT<=0){G.fmFoT=fmLv()===2?30:fmLv()?35:40;if(F.length<2){const a=rnd(0,6.283),r=Math.max(VW,VH)*.5,q1=G.map==='mg'?spawnPos():[p.x+Math.cos(a)*r,p.y+Math.sin(a)*r];F.push({x:q1[0],y:q1[1],life:30,ph:rnd(0,6)});if(!G.bot)toast('🍅 착한 토마토가 달려와요!','닿으면 체력이 회복돼요')}}
   for(let i=F.length-1;i>=0;i--){const a=F[i];a.life-=dt;const dx=p.x-a.x,dy=p.y-a.y,d=Math.hypot(dx,dy)||1;a.x+=dx/d*95*dt;a.y+=dy/d*95*dt;a.fl=dx<0;
     if(d<28){F.splice(i,1);const hv=Math.round(G.S.maxHp*.08);healP(hv,'fm');fmRescue({x:a.x,y:a.y,fol:1});if(!G.bot){G.texts.push({x:p.x,y:p.y-46,v:'언니! +'+hv,life:1,col:'#ff9ab8'});SND.p('heal')}continue}
     if(a.life<=0)F.splice(i,1)}}
@@ -1181,7 +1181,7 @@ const FM_SUP={
  '임재영'(){for(const [i,q] of fmTargets(16,360).entries())fmProj(q.x+rnd(-30,30),q.y+rnd(-30,30),i*.08,'#ff9a5a',6,64,{spr:'stars',s:.9,m:1.3})}};
 const FM_SUPN={'재건':'기갈탄','박준형':'샤넬 미사일','송기호':'디올 레이저','박계원':'마계의 나비','김세진':'오라클 위성 시스템','승태민':'고전압 제네레이터','창환이형':'네온 레이저','박민규':'크리오테라피','진형우':'에스테틱 드론','박준영':'팅커벨','하도':'애널라이징포','영규형':'윈드 위스퍼','조혁래':'디바인 레일건','임재영':'셀레스티얼 레인'};
 function fmSupport(){const ks=Object.keys(FM_SUP),k=pick(ks),N=[FM_SUPN[k]];G.fmSpD=fmSupD();FM_SUP[k]();G.fmHush=G.t+3.6;if(!G.bot){toast('📡 아이기스 지휘본부 지원!',`각성 「${N?N[0]:k}」 1회 발동`,true);SND.p('radio');G.shk=Math.max(G.shk||0,.15)}}
-function fmRadioTick(dt){if(!G.hell||G.arena||em()<1.5)return;G.fmRaT=(G.fmRaT===undefined?70:G.fmRaT)-dt;if(G.fmRaT>0)return;G.fmRaT=rnd(100,140);if(G.pickups.some(k=>k.k==='fmradio'))return;const p=G.p,a=rnd(0,6.283),r=rnd(220,360);G.pickups.push({x:p.x+Math.cos(a)*r,y:p.y+Math.sin(a)*r*.7,k:'fmradio'});G.fmHush=G.t+3.6;if(!G.bot)toast('📡 통신기가 떨어졌어요!','주우면 아이기스 지휘본부에 지원을 요청해요')}
+function fmRadioTick(dt){if(!G.hell||G.arena||em()<1.5)return;G.fmRaT=(G.fmRaT===undefined?70:G.fmRaT)-dt;if(G.fmRaT>0)return;G.fmRaT=rnd(100,140);if(G.pickups.some(k=>k.k==='fmradio'))return;const p=G.p,a=rnd(0,6.283),r=rnd(220,360);{const rx=p.x+Math.cos(a)*r;let ry=p.y+Math.sin(a)*r*.7;if(G.mgB)ry=Math.max(mgTop(rx)+50,Math.min(mgBot(rx)-50,ry));G.pickups.push({x:rx,y:ry,k:'fmradio'})}G.fmHush=G.t+3.6;if(!G.bot)toast('📡 통신기가 떨어졌어요!','주우면 아이기스 지휘본부에 지원을 요청해요')}
 function fmSupTick(dt){const p=G.p,S=G.fmSp;
   if(G.fmFx)for(let i=G.fmFx.length-1;i>=0;i--){const f=G.fmFx[i],M=FM_FXM[f.k];f.t+=dt;if(!M||f.t*M[4]>=M[2])G.fmFx.splice(i,1)}
   if(!S||!S.length)return;
@@ -1938,7 +1938,7 @@ function mgDie(e){if(e.type==='mg_jelly'&&!e.boss&&!e.elite&&G.enemies.length<52
 function mgStar(){let r=.15;const a=Math.min(G.fmDs||0,r);G.fmDs=(G.fmDs||0)-a;r-=a;G.fmD0=Math.max(0,(G.fmD0||0)-r);if(!G.bot){SND.p('gem');toast('🌟 별조각','어둠이 걷혀요');sparks(G.p.x,G.p.y-20,24,['#ffe98a','#ffffff','#8ac8ff'],220,.6,3)}}
 // 별빛 비콘: 1000px 칸마다 하나(위치는 칸 좌표로 고정). 곁에 서면 어둠이 초당 3% 걷힘. 장수 횃불 목록(G.fmTL)을 그대로 씀
 function mgBeacons(){if(!fmLv()||!G.mgB){G.fmTL=null;return}const p=G.p,B=G.mgB,C=900,cx=Math.floor(p.x/C),k=''+cx;if(G.mgBk===k&&G.fmTL)return;G.mgBk=k;const L=[];
-  for(let i=-2;i<=2;i++){const a=cx+i,h=Math.sin(a*127.1+311.7)*43758.5453,f=h-Math.floor(h),h2=Math.sin(a*269.5+183.3)*43758.5453,f2=h2-Math.floor(h2);L.push({x:(a+.2+f*.6)*C,y:B.t+90+f2*(B.b-B.t-180),lit:1,ph:f*6})}G.fmTL=L}
+  for(let i=-2;i<=2;i++){const a=cx+i,h=Math.sin(a*127.1+311.7)*43758.5453,f=h-Math.floor(h),h2=Math.sin(a*269.5+183.3)*43758.5453,f2=h2-Math.floor(h2);const bx=(a+.2+f*.6)*C;L.push({x:bx,y:B.t+90+f2*(B.b-B.t-180),lit:1,ph:f*6});if(mgTheme(mgZone(bx))===4){const A=mgAlc(mgZone(bx)),qx=bx+C*.5;if(A&&qx>A.a+80&&qx<A.b-80){const ey=A.sd?B.b+30+f*(A.D-90):B.t-A.D+60+f*(A.D-90);L.push({x:qx,y:ey,lit:1,ph:f2*6})}else L.push({x:qx,y:B.t+90+f*(B.b-B.t-180),lit:1,ph:f2*6})}}G.fmTL=L}
 /* ---- 마계인천 ②단계: 중간보스 3종 패턴 (11-14) — 모든 공격 예고 0.8~1.2초, 체력 50% 아래 분노 ---- */
 ENT.mg_turret={hp:10,spd:0,dmg:6,xp:2,r:14,name:'위성 포탑'};
 function mgSeg(px,py,x,y,a,L){const ux=Math.cos(a),uy=Math.sin(a),t=Math.max(0,Math.min(L,(px-x)*ux+(py-y)*uy));return Math.hypot(px-(x+ux*t),py-(y+uy*t))}
@@ -2008,7 +2008,7 @@ function mgFxDraw(){const p=G.p;
       for(let i=0;i<6;i++){const a=G.t*4+i*1.047,r=40+((G.t*160+i*50)%260);ctx.globalAlpha=.7;ctx.fillStyle=i%2?'#ffe14d':'#c9a8ff';ctx.fillRect(e.x+Math.cos(a)*r-2,e.y+Math.sin(a)*r-2,4,4)}ctx.restore()}}}
 function mgTurretDraw(e){const pp=e.pop>0?1-e.pop/.35:1;ctx.save();ctx.translate(e.x,e.y);ctx.scale(pp,pp);ctx.fillStyle='#3a4050';ctx.fillRect(-12,4,24,8);ctx.fillStyle='#9aa8b8';ctx.beginPath();ctx.arc(0,0,13,0,7);ctx.fill();ctx.fillStyle='#e0ecf8';ctx.beginPath();ctx.arc(-4,-4,4,0,7);ctx.fill();const w=e.mgTs<.4?1:.6;ctx.fillStyle=`rgba(255,58,90,${w})`;ctx.beginPath();ctx.arc(0,0,6,0,7);ctx.fill();if(e.flash>0){ctx.globalAlpha=.6;ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(0,0,13,0,7);ctx.fill()}ctx.restore();e.hb=16}
 S2D.mg_turret=mgTurretDraw;
-function mgTick(dt){if(!G.mgB){mgBandInit();if(!window.__mgReg){window.__mgReg=1;fmReg()}}mgBandTick(dt);mgFrame();mgBeacons();fmDarkTick(dt);mgBossTick(dt);fmDroneTick(dt);fmShipTick(dt);mgFx(dt)}
+function mgTick(dt){if(!G.mgB){mgBandInit();if(!window.__mgReg){window.__mgReg=1;fmReg();const ai=new Image();ai.src='farm/m_ally.png';FM.img.m_ally=ai}}mgBandTick(dt);mgFrame();mgBeacons();fmDarkTick(dt);mgBossTick(dt);fmDroneTick(dt);fmShipTick(dt);fmFolTick(dt);fmRadioTick(dt);fmSupTick(dt);mgFx(dt)}
 /* ---- 마계인천 도심 바닥 · 잔해 (11-14) ----
    바닥: 512px 칸. 3칸마다 가로·세로 도로(가운데 노란 겹선 · 흰 점선 차선), 교차로엔 횡단보도, 나머지는 주차장/공터(금 사이로 보랏빛).
    칸 그림은 256px로 한 번 그려 캐시(픽셀 느낌으로 2배 확대).
@@ -2033,55 +2033,108 @@ function mgCell(cx,cy){const key=cx+','+cy;let c=MGF.get(key);if(c)return c;if(M
   if(mgH(cx,cy,7)<.4){const x=40+mgH(cx,cy,8)*(N-80),y=40+mgH(cx,cy,11)*(N-80);g.fillStyle='#3a3a44';g.beginPath();g.arc(x,y,9,0,7);g.fill();g.strokeStyle='#15141a';g.lineWidth=1;for(let i=-6;i<=6;i+=3){g.beginPath();g.moveTo(x-7,y+i);g.lineTo(x+7,y+i);g.stroke()}}
   for(let j=0;j<3;j++){if(mgH(cx,cy,20+j)>.55)continue;let x=mgH(cx,cy,21+j)*N,y=mgH(cx,cy,22+j)*N;g.strokeStyle='#0c0b10';g.lineWidth=2;g.beginPath();g.moveTo(x,y);for(let s=0;s<6;s++){x+=(mgH(cx,cy,30+j*9+s)-.5)*40;y+=(mgH(cy,cx,30+j*9+s)-.5)*40;g.lineTo(x,y)}g.stroke();g.globalAlpha=.35;g.strokeStyle='#a050ff';g.lineWidth=1;g.stroke();g.globalAlpha=1}
   MGF.set(key,c);return c}
-/* ---- 마계인천 가로 띠 (11-14) ----
-   위아래가 막힌 가로 전용 맵(뱀서 도서관 맵처럼). 띠 높이 = 화면 높이 × 1.5(최소 860). 위·아래는 폐허 빌딩 벽, 군데군데 골목 틈(통과 불가 · 몬스터만 거기서 나옴).
-   벽 = 칸(MGW)마다 빌딩 한 채. 칸 사이에 hash로 골목 틈(MGGW). 이동 제한은 매 프레임 clamp. */
-const MGW=460,MGGW=140,MGFH=560,MG_WALLS=['bld1','bld2'];
+/* ---- 마계인천 가로 띠 + 구간 (11-14) ----
+   위아래가 막힌 가로 전용 맵. 띠 높이 = 화면 높이 × 1.5(최소 860). 가로로 끝없이 이어지는 구간(MGZ=4800px) 5종:
+   0 상가 거리 · 1 항구(건물 사이를 컨테이너로 연결) · 2 고속도로(방음벽 · 고가 기둥) · 3 아파트 단지 · 4 공원(잔디 + 위/아래 한쪽이 움푹 파임).
+   구간 종류는 해시로 정해지고 연속 반복은 막음. 벽 = 구간·쪽(위/아래)마다 조각(건물·컨테이너·방음벽·나무)을 이어 붙임. 조각 사이 골목 틈(MGGW)은 몬스터가 나오는 곳.
+   이동 제한: 위치별 위/아래 경계(mgTop/mgBot) 안에서만 — 공원 움푹 공간 옆면은 좌우도 막음(mgFix). */
+const MGZ=4800,MGGW=140,MGPD=470;
+const MG_AS={arc:1.39,cn:.98,bld1:.94,bld2:.83,pk:.99,sky:.51,apt:.91,port:1,ct1:1.37,ct2:1.06,ct3:1.4,br1:1.07,br2:1.08,pil:.94,tr1:1.03,tr2:1.05,bu:1.25,lp:.69};
+const mgZone=x=>Math.floor((x+MGZ/2)/MGZ);
+function mgZH(z,k){return mgH(z,k,201)}
+function mgPure(z){if(z===0)return 0;const r=mgZH(z,0);return r<.2?4:Math.min(3,Math.floor((r-.2)/.8*4))}
+const MGTH=new Map();
+function mgTheme(z){let v=MGTH.get(z);if(v!==undefined)return v;
+  const st=z>=0?1:-1;let a=z;const L=[];while(!MGTH.has(a)&&a!==0){L.push(a);a-=st}
+  if(!MGTH.has(0))MGTH.set(0,mgPure(0));
+  let prev=MGTH.get(a);for(let i=L.length-1;i>=0;i--){const q=L[i];let t=mgPure(q);if(t===prev)t=(t+1+((mgZH(q,5)*3)|0))%5;MGTH.set(q,t);prev=t}
+  return MGTH.get(z)}
+const MGAL=new Map();
+function mgAlc(z){let v=MGAL.get(z);if(v!==undefined)return v;v=null;if(mgTheme(z)===4){const zs=z*MGZ-MGZ/2;v={a:zs+1000,b:zs+MGZ-1000,sd:mgZH(z,1)<.5?0:1,D:MGPD,zs,ze:zs+MGZ}}MGAL.set(z,v);return v}
 function mgBandInit(){const h=Math.max(430,Math.round((VH||800)*.75));G.mgB={t:-h,b:h}}
-function mgGapAt(sd,c){return mgH(c,sd+7,91)<.42}
-function mgGapX(c){return(c+1)*MGW}
-function mgBandTick(dt){const B=G.mgB;if(!B)return;const p=G.p;p.y=Math.max(B.t+16,Math.min(B.b-10,p.y));
+function mgTop(x){let t=G.mgB.t;const A=mgAlc(mgZone(x));if(A&&A.sd===0&&x>=A.a&&x<=A.b)t-=A.D;return t}
+function mgBot(x){let t=G.mgB.b;const A=mgAlc(mgZone(x));if(A&&A.sd===1&&x>=A.a&&x<=A.b)t+=A.D;return t}
+function mgOK(x,y,rt,rb){return y>=mgTop(x)+rt&&y<=mgBot(x)-rb}
+// 경계 안으로: 먼저 이전 유효 x로 되돌리고(옆면 막기 · 벽 따라 미끄러짐), 그래도 안 되면 y를 눌러 넣음
+function mgFix(o,rt,rb){if(mgOK(o.x,o.y,rt,rb)){o.mx=o.x;return}
+  if(o.mx!==undefined&&mgOK(o.mx,o.y,rt,rb))o.x=o.mx;
+  if(!mgOK(o.x,o.y,rt,rb)){o.y=Math.max(mgTop(o.x)+rt,Math.min(mgBot(o.x)-rb,o.y))}
+  o.mx=o.x}
+function mgBandTick(dt){const B=G.mgB;if(!B)return;const p=G.p;mgFix(p,16,10);
   for(const e of G.enemies){if(e.dead)continue;const r=Math.min(e.r,40)*.5;
-    if(e.mgEm){if(e.y>B.t+r+6&&e.y<B.b-r-6)e.mgEm=0;else continue}
-    if(e.y<B.t+r)e.y=B.t+r;else if(e.y>B.b-r)e.y=B.b-r}
-  if(G.eb.length)G.eb=G.eb.filter(b=>b.y>B.t&&b.y<B.b);
-  if(G.mgM)for(const m of G.mgM)m.y=Math.max(B.t+10,Math.min(B.b-10,m.y))}
+    if(e.mgEm){if(e.y>mgTop(e.x)+r+6&&e.y<mgBot(e.x)-r-6)e.mgEm=0;else continue}
+    mgFix(e,r,r)}
+  if(G.eb.length)G.eb=G.eb.filter(b=>b.y>mgTop(b.x)&&b.y<mgBot(b.x));
+  if(G.fmF)for(const a of G.fmF)a.y=Math.max(mgTop(a.x)+10,Math.min(mgBot(a.x)-10,a.y));
+  if(G.mgM)for(const m of G.mgM)m.y=Math.max(mgTop(m.x)+10,Math.min(mgBot(m.x)-10,m.y))}
+// 벽 조각: [이름, 높이 최소, 최대, 가중치]
+const MG_PK={
+ 0:[['arc',330,400,3],['cn',330,400,2.2],['bld1',360,440,1.6],['bld2',360,440,1.6],['pk',330,390,1],['sky',540,620,.6]],
+ 3:[['apt',420,520,3.5],['sky',540,620,1.5],['pk',340,420,1.5],['cn',340,420,1.4],['bld2',380,460,1.6]],
+ 4:[['tr1',330,420,3],['tr2',330,420,3],['bu',140,190,2.5],['lp',300,350,1.2]]};
+const MG_GP=[.38,.15,.1,.3,.1];
+function mgWpick(L,r){let t=0;for(const q of L)t+=q[3];r*=t;for(const q of L){r-=q[3];if(r<=0)return q}return L[0]}
+function mgPieces(z,sd){const key=z*2+sd;let L=MGPCH.get(key);if(L)return L;if(MGPCH.size>40)MGPCH.delete(MGPCH.keys().next().value);
+  L=[];const th=mgTheme(z),zs=z*MGZ-MGZ/2,ze=zs+MGZ,k0=z*2+sd;let x=zs,i=0,prev='',ci=0;const R=k=>mgH(k0,i,300+k);
+  while(x<ze&&i<90){let n,h,chain=0,ov=-6;
+    if(th===1){const wasC=/^ct/.test(prev);if(wasC&&R(0)<.62){n=['ct1','ct2','ct1','ct2','ct3'][(R(1)*5)|0];h=200+R(2)*50;chain=1}else if(wasC||!prev){n=['port','bld1','bld2','port'][(R(1)*4)|0];h=(n==='port'?430:370)+R(2)*60}else{n=['ct1','ct2','ct1','ct2','ct3'][(R(1)*5)|0];h=200+R(2)*50;chain=1}ov=chain?-10:-6}
+    else if(th===2){ci++;if(ci%5===0){n='pil';h=400+R(2)*40}else{n=R(1)<.5?'br1':'br2';h=250+R(2)*40}chain=1;ov=-8}
+    else{const q=mgWpick(MG_PK[th],R(1));n=q[0];h=q[1]+R(2)*(q[2]-q[1]);ov=th===4?-34:-6}
+    const w=h*MG_AS[n],gp=!chain&&R(3)<MG_GP[th],o={x,w,h,n,fl:R(4)<.5,g:gp};L.push(o);prev=n;x+=w+(gp?MGGW:ov);i++}
+  MGPCH.set(key,L);return L}
+const MGPCH=new Map();
+function mgGapList(x0,x1){const out=[],z0=mgZone(x0)-1,z1=mgZone(x1)+1;for(let z=z0;z<=z1;z++)for(let sd=0;sd<2;sd++)for(const o of mgPieces(z,sd))if(o.g){const gx=o.x+o.w+MGGW/2;if(gx>=x0&&gx<=x1)out.push({x:gx,sd})}return out}
 // 40%: 화면 근처 골목 틈에서 튀어나옴(위·아래 모두) · 아니면 화면 밖 좌우
 function mgSpawnPos(){const p=G.p,B=G.mgB;if(!B){const q=spawnPos();return[q[0],q[1],0]}
-  if(Math.random()<.4){const L=[],c0=Math.floor((p.x-VW/2-260)/MGW),c1=Math.floor((p.x+VW/2+260)/MGW);for(let c=c0;c<=c1;c++)for(let sd=0;sd<2;sd++)if(mgGapAt(sd,c))L.push([mgGapX(c),sd]);
-    if(L.length){const[gx,sd]=pick(L);return[gx+rnd(-45,45),sd?B.b+18:B.t-18,1]}}
+  if(Math.random()<.4){const L=mgGapList(p.x-VW/2-260,p.x+VW/2+260);
+    if(L.length){const g=pick(L);return[g.x+rnd(-45,45),g.sd?mgBot(g.x)+18:mgTop(g.x)-18,1]}}
   const q=spawnPos();return[q[0],q[1],0]}
 // 유성 떼 러시: 한쪽 끝에서 세로로 줄지어 몰려옴
 function mgRush(n,m){const p=G.p,B=G.mgB;if(!B)return;const dir=Math.random()<.5?-1:1;if(!G.bot)toast('☄️ 유성 떼 러시!',dir<0?'◀ 왼쪽에서 몰려와요':'오른쪽에서 몰려와요 ▶',true);
   for(let i=0;i<n;i++)mkEnemy('mg_fly',p.x+dir*(VW/2+50+(i%4)*38),B.t+30+(i+Math.random())/n*(B.b-B.t-60),{spd:80,dmg:ENT.bell.dmg*(1+m*.08)})}
-function mgWallImg(sd,c){const L=MG_WALLS.map(n=>[n,mgPImg(n)]).filter(q=>q[1]);if(!L.length)return null;return L[Math.min(L.length-1,mgH(c,sd+3,95)*L.length|0)][1]}
-function mgWalls(){const B=G.mgB;if(!B)return;const p=G.p,x0=p.x-VW/2-MGW,x1=p.x+VW/2+MGW,sm=ctx.imageSmoothingEnabled;
-  ctx.fillStyle='#0a0612';ctx.fillRect(x0,B.t-VH-80,x1-x0,VH+80);ctx.fillRect(x0,B.b,x1-x0,VH+80);
-  const c0=Math.floor(x0/MGW)-1,c1=Math.floor(x1/MGW)+1;
-  for(let sd=0;sd<2;sd++){const ey=sd?B.b:B.t,dy=sd?1:-1;
-    for(let c=c0;c<=c1;c++){if(mgGapAt(sd,c)){const gx=mgGapX(c),g=ctx.createLinearGradient(0,ey,0,ey+dy*MGFH);g.addColorStop(0,'rgba(70,24,110,.55)');g.addColorStop(.35,'rgba(18,8,30,.95)');g.addColorStop(1,'#05030a');ctx.fillStyle=g;ctx.fillRect(gx-MGGW/2,sd?ey:ey-MGFH,MGGW,MGFH)}}
-    ctx.imageSmoothingEnabled=true;
-    for(let c=c0;c<=c1;c++){const gl=mgGapAt(sd,c-1),gr=mgGapAt(sd,c),L=c*MGW+(gl?MGGW/2:0)-12,R=(c+1)*MGW-(gr?MGGW/2:0)+12,w=R-L,cx=(L+R)/2,im=mgWallImg(sd,c),fl=mgH(c,sd,96)<.5;
-      if(im){const dw=w*(1.02+mgH(c,sd,97)*.14),dh=im.height*dw/im.width;ctx.save();ctx.translate(cx,0);if(fl)ctx.scale(-1,1);ctx.drawImage(im,-dw/2,sd?ey-6:ey+8-dh,dw,dh);ctx.restore()}
-      else{const h=330+mgH(c,sd,98)*160;ctx.fillStyle='#1a1030';ctx.fillRect(L,sd?ey:ey-h,w,h);ctx.fillStyle='#2a1850';ctx.fillRect(L,sd?ey:ey-h,w,6);ctx.fillStyle='#ffd34d';for(let yy=0;yy<h-30;yy+=44)for(let xx=18;xx<w-18;xx+=44)if(mgH(c+xx,yy,99)<.18)ctx.fillRect(L+xx,(sd?ey+14:ey-h+14)+yy,10,16)}}
-    ctx.imageSmoothingEnabled=sm;
-    const g2=ctx.createLinearGradient(0,ey,0,ey-dy*90);g2.addColorStop(0,'rgba(8,4,16,.65)');g2.addColorStop(1,'rgba(8,4,16,0)');ctx.fillStyle=g2;ctx.fillRect(x0,sd?ey-90:ey,x1-x0,90)}}
+// x 구간을 (alcove 경계로) 쪼갠 [x0,x1,edge] 목록
+function mgSpans(x0,x1,sd){const out=[];let cur=x0;const z0=mgZone(x0),z1=mgZone(x1),G0=sd?G.mgB.b:G.mgB.t;
+  for(let z=z0;z<=z1;z++){const A=mgAlc(z);if(!A||A.sd!==sd||A.b<x0||A.a>x1)continue;if(A.a>cur)out.push([cur,A.a,G0]);const a=Math.max(A.a,x0),b=Math.min(A.b,x1);out.push([a,b,G0+(sd?A.D:-A.D)]);cur=b}
+  if(cur<x1)out.push([cur,x1,G0]);return out}
+function mgEdge(x,sd){return sd?mgBot(x):mgTop(x)}
+function mgWalls(){const B=G.mgB;if(!B)return;const p=G.p,x0=p.x-VW/2-700,x1=p.x+VW/2+700,sm=ctx.imageSmoothingEnabled;
+  for(let sd=0;sd<2;sd++){for(const [a,b,e] of mgSpans(x0,x1,sd)){ctx.fillStyle='#0a0612';ctx.fillRect(a,sd?e:e-VH-80,b-a,VH+80)}
+    // 일반 구간의 파인 공간 옆: 어두운 벽(경계 사이)
+    for(let z=mgZone(x0);z<=mgZone(x1);z++){const A=mgAlc(z);if(!A||A.sd!==sd)continue;const g0=sd?B.b:B.t;ctx.fillStyle='#0a0612';ctx.fillRect(A.a-6,sd?g0:g0-A.D,12,A.D);ctx.fillRect(A.b-6,sd?g0:g0-A.D,12,A.D)}}
+  ctx.imageSmoothingEnabled=true;
+  for(let z=mgZone(x0)-1;z<=mgZone(x1)+1;z++){const th=mgTheme(z);
+    for(let sd=0;sd<2;sd++){const dy=sd?1:-1;const PL=mgPieces(z,sd);
+      for(const o of PL){if(o.g){const gx=o.x+o.w+MGGW/2;if(gx>x0&&gx<x1){const ey=mgEdge(gx,sd),g=ctx.createLinearGradient(0,ey,0,ey+dy*560);g.addColorStop(0,'rgba(70,24,110,.55)');g.addColorStop(.35,'rgba(18,8,30,.95)');g.addColorStop(1,'#05030a');ctx.fillStyle=g;ctx.fillRect(gx-MGGW/2,sd?ey:ey-560,MGGW,560)}}}
+      for(const o of PL){if(o.x+o.w<x0||o.x>x1)continue;const im=mgPImg(o.n),cx=o.x+o.w/2,ey=mgEdge(cx,sd);
+        if(im){ctx.save();ctx.translate(cx,0);if(o.fl)ctx.scale(-1,1);ctx.drawImage(im,-o.w/2,sd?ey-6:ey+8-o.h,o.w,o.h);ctx.restore()}
+        else{ctx.fillStyle='#1a1030';ctx.fillRect(o.x,sd?ey:ey-o.h,o.w,o.h);ctx.fillStyle='#2a1850';ctx.fillRect(o.x,sd?ey:ey-o.h,o.w,6)}}}
+    const A=mgAlc(z);if(A){const bi=mgPImg('bu'),g0=A.sd?B.b:B.t,e=A.sd?g0+A.D:g0-A.D;// 파인 공간 옆면: 덤불 기둥
+      if(bi)for(const xx of [A.a,A.b])for(let yy=Math.min(g0,e);yy<=Math.max(g0,e);yy+=70){const w=bi.width*.8,h=bi.height*.8;ctx.drawImage(bi,xx-w/2,yy-h+12,w,h)}}}
+  ctx.imageSmoothingEnabled=sm;
+  for(let sd=0;sd<2;sd++){for(const [a,b,e] of mgSpans(x0,x1,sd)){const dy=sd?1:-1,g2=ctx.createLinearGradient(0,e,0,e-dy*90);g2.addColorStop(0,'rgba(8,4,16,.65)');g2.addColorStop(1,'rgba(8,4,16,0)');ctx.fillStyle=g2;ctx.fillRect(a,sd?e-90:e,b-a,90)}}}
+// 공원 잔디 바닥
+const MGGI={im:null,pat:null,k:0};
+function mgGrassPat(){if(!MGGI.im){const im=new Image();im.src='mg/grass.jpg';MGGI.im=im}const im=MGGI.im;if(!im.complete||!im.width)return null;const sk=Z*(typeof DPR==='number'?DPR:1);if(MGGI.pat&&MGGI.k===sk)return MGGI.pat;
+  const W=Math.round(512*sk),c=document.createElement('canvas');c.width=c.height=W;const g=c.getContext('2d');g.imageSmoothingEnabled=false;g.drawImage(im,0,0,W,W);const P=ctx.createPattern(c,'repeat');try{P.setTransform(new DOMMatrix().scale(1/sk))}catch(e){}MGGI.pat=P;MGGI.k=sk;return P}
+function mgGrassDraw(){const p=G.p,x0=p.x-VW/2-4,x1=p.x+VW/2+4;for(let z=mgZone(x0);z<=mgZone(x1);z++){if(mgTheme(z)!==4)continue;const zs=z*MGZ-MGZ/2,a=Math.max(x0,zs+700),b=Math.min(x1,zs+MGZ-700);if(b<=a)continue;
+    const P=mgGrassPat();if(!P)continue;ctx.fillStyle=P;ctx.fillRect(a,p.y-VH/2-4,b-a,VH+8);ctx.fillStyle='#16101c';if(zs+700>=x0)ctx.fillRect(zs+700-8,p.y-VH/2-4,8,VH+8);if(zs+MGZ-700<=x1)ctx.fillRect(zs+MGZ-700,p.y-VH/2-4,8,VH+8)}}
 // 바닥 그림(mg/floor.png, 힉스필드 이음매 없는 아스팔트)이 있으면 그걸 깔고, 없으면 코드로 그린 칸
 const MGFI={im:null,pat:null,k:0};
 function mgFloorImg(){if(!MGFI.im){const im=new Image();im.src='mg/floor.png';MGFI.im=im}const im=MGFI.im;if(!im.complete||!im.width)return null;const sk=Z*(typeof DPR==='number'?DPR:1);if(MGFI.pat&&MGFI.k===sk)return MGFI.pat;
   const W=Math.round(640*sk),c=document.createElement('canvas');c.width=c.height=W;const g=c.getContext('2d');g.imageSmoothingEnabled=false;g.drawImage(im,0,0,W,W);const P=ctx.createPattern(c,'repeat');try{P.setTransform(new DOMMatrix().scale(1/sk))}catch(e){}MGFI.pat=P;MGFI.k=sk;return P}
-function mgFloor(){const p=G.p,P=mgFloorImg();if(P){ctx.save();ctx.translate(innerWidth/2,innerHeight/2);ctx.scale(Z,Z);ctx.translate(-p.x,-p.y);ctx.fillStyle=P;ctx.fillRect(p.x-VW/2-4,p.y-VH/2-4,VW+8,VH+8);ctx.restore();ctx.fillStyle=`rgba(20,6,40,${G.hell?.22:G.hard?.12:.04})`;ctx.fillRect(0,0,innerWidth,innerHeight);return true}
+function mgFloor(){const p=G.p,P=mgFloorImg();if(P){ctx.save();ctx.translate(innerWidth/2,innerHeight/2);ctx.scale(Z,Z);ctx.translate(-p.x,-p.y);ctx.fillStyle=P;ctx.fillRect(p.x-VW/2-4,p.y-VH/2-4,VW+8,VH+8);if(G.mgB)mgGrassDraw();ctx.restore();ctx.fillStyle=`rgba(20,6,40,${G.hell?.22:G.hard?.12:.04})`;ctx.fillRect(0,0,innerWidth,innerHeight);return true}
   ctx.save();ctx.translate(innerWidth/2,innerHeight/2);ctx.scale(Z,Z);ctx.translate(-p.x,-p.y);ctx.imageSmoothingEnabled=false;
   const x0=Math.floor((p.x-VW/2)/MGC),x1=Math.floor((p.x+VW/2)/MGC),y0=Math.floor((p.y-VH/2)/MGC),y1=Math.floor((p.y+VH/2)/MGC);
   for(let cy=y0;cy<=y1;cy++)for(let cx=x0;cx<=x1;cx++)ctx.drawImage(mgCell(cx,cy),cx*MGC,cy*MGC,MGC+.5,MGC+.5);
   ctx.restore();ctx.fillStyle=`rgba(20,6,40,${G.hell?.22:G.hard?.12:.04})`;ctx.fillRect(0,0,innerWidth,innerHeight);return true}
 // 잔해 · 건물: 그림 크기 배율 s, 막히는 발판(그림 폭 대비 hw, 높이 대비 hh)
-const MG_PR={bus:{s:.75,hw:.36,hh:.22},light:{s:.7,hw:.3,hh:.2},car:{s:.72,hw:.4,hh:.3},rubble:{s:.75,hw:.4,hh:.3},bld1:{s:1,hw:.36,hh:.3,big:1},bld2:{s:1,hw:.38,hh:.3,big:1}};
+const MG_PR={bus:{s:.75,hw:.36,hh:.22},light:{s:.7,hw:.3,hh:.2},car:{s:.72,hw:.4,hh:.3},rubble:{s:.75,hw:.4,hh:.3},bld1:{s:1,hw:.36,hh:.3,big:1},bld2:{s:1,hw:.38,hh:.3,big:1},ct3:{s:.8,hw:.42,hh:.3},br1:{s:.9,hw:.45,hh:.18},pil:{s:.9,hw:.3,hh:.2,big:1},port:{s:.9,hw:.4,hh:.28,big:1},cn:{s:.85,hw:.36,hh:.3,big:1},pk:{s:.85,hw:.38,hh:.28,big:1},tr1:{s:.8,hw:.12,hh:.1},tr2:{s:.8,hw:.12,hh:.1},bu:{s:1,hw:.35,hh:.25},bn:{s:.9,hw:.4,hh:.25},lp:{s:.8,hw:.12,hh:.08},fo:{s:.9,hw:.4,hh:.28,big:1}};
 const MG_PI={};function mgPImg(t){if(!(t in MG_PI)){const im=new Image();im.onerror=()=>{MG_PI[t]=null};im.src='mg/p_'+t+'.png';MG_PI[t]=im}const im=MG_PI[t];return im&&im.complete&&im.width?im:null}
 const MGPC=700,MGPK=new Map();
 function mgPChunk(cx,cy){const key=cx+','+cy;let L=MGPK.get(key);if(L)return L;L=[];if(MGPK.size>80)MGPK.delete(MGPK.keys().next().value);
-  const big=mgH(cx,cy,61)<.14,n=big?1:(mgH(cx,cy,60)*2.4|0);
-  for(let i=0;i<n;i++){const T=big?pick2(['bld1','bld2'],mgH(cx,cy,62)):pick2(['bus','light','car','rubble','rubble','car'],mgH(cx,cy,63+i));
+  const th=mgTheme(mgZone((cx+.5)*MGPC)),big=mgH(cx,cy,61)<.14,n=big?1:(mgH(cx,cy,60)*2.4|0);
+  const BG=[['bld1','bld2','cn','pk'],['port','cn'],['pil'],['bld1','bld2','cn','pk'],['fo']][th],SM=[['bus','light','car','rubble','rubble','car'],['ct3','rubble','light','car','ct3'],['car','rubble','light','bus','br1','br1'],['bus','light','car','rubble','rubble','car'],['tr1','tr2','bu','bu','bn','lp','tr1','tr2']][th];
+  for(let i=0;i<n;i++){const T=big?pick2(BG,mgH(cx,cy,62)):pick2(SM,mgH(cx,cy,63+i));
     const x=(cx+.2+mgH(cx,cy,64+i)*.6)*MGPC,y=(cy+.25+mgH(cx,cy,65+i)*.6)*MGPC;
     if(x*x+y*y<380*380)continue;
     const bc=Math.floor(x/1000),br=Math.floor(y/1000),fb=mgH(bc,br,0),f2=mgH(bc,br,1);
@@ -2091,7 +2144,7 @@ function mgPChunk(cx,cy){const key=cx+','+cy;let L=MGPK.get(key);if(L)return L;L
 function pick2(a,f){return a[Math.min(a.length-1,f*a.length|0)]}
 function mgFrame(){const p=G.p,A=G.arena,mx=VW*.62+260,my=VH*.62+360,L=[],B=[];
   const c0=Math.floor((p.x-mx)/MGPC),c1=Math.floor((p.x+mx)/MGPC),r0=Math.floor((p.y-my)/MGPC),r1=Math.floor((p.y+my)/MGPC);
-  for(let cy=r0;cy<=r1;cy++)for(let cx=c0;cx<=c1;cx++)for(const o of mgPChunk(cx,cy)){const im=mgPImg(o.t);if(!im)continue;if(G.mgB&&(o.y<G.mgB.t+70||o.y>G.mgB.b-24))continue;const P=MG_PR[o.t],w=im.width*P.s,h=im.height*P.s;
+  for(let cy=r0;cy<=r1;cy++)for(let cx=c0;cx<=c1;cx++)for(const o of mgPChunk(cx,cy)){const im=mgPImg(o.t);if(!im)continue;if(G.mgB&&(o.y<mgTop(o.x)+70||o.y>mgBot(o.x)-24))continue;const P=MG_PR[o.t],w=im.width*P.s,h=im.height*P.s;
     if(A&&Math.abs(o.x-A.x)<A.hw+w/2+40&&Math.abs(o.y-A.y)<A.hh+h+40)continue;
     o.w=w;o.h=h;L.push(o);B.push({L:o.x-w*P.hw,R:o.x+w*P.hw,T:o.y-h*P.hh,B:o.y})}
   L.sort((a,b)=>a.y-b.y);G.mgPL=L;G.sbL=B;sbPush(p,0,12,9);for(const k of G.pickups)sbPush(k,0,0,12)}
@@ -3549,7 +3602,7 @@ function draw(){
   }
   gf(false);
   };dW();
-  if(G.sbL&&G.map==='sangbong')sbDraw(0);else if(G.map==='farm'){fmDraw(0);fmAllyDraw();fmFolDraw()}else if(G.map==='mg')mgDraw(0);
+  if(G.sbL&&G.map==='sangbong')sbDraw(0);else if(G.map==='farm'){fmDraw(0);fmAllyDraw();fmFolDraw()}else if(G.map==='mg'){mgDraw(0);fmFolDraw()}
   // enemies
   for(const e of G.enemies){
     if(S2D[e.type]&&!(e.frog>0))S2D[e.type](e);else{const tpl=e.frog>0?(HW('fairy')?'mummy':'frog'):(e.tpl||e.type);const img=ecanvas(tpl,e.flash>0?'rgba(255,255,255,.8)':null);
@@ -3630,7 +3683,7 @@ function draw(){
     ctx.globalAlpha=Math.min(1,sy.life*4);ctx.fillStyle=lv===3?'#ff2a4a':lv===2?'#ffe14d':'#fff';ctx.strokeStyle='#1a1020';ctx.lineWidth=2;ctx.beginPath();ctx.roundRect(bx,by,bw,bh,9);ctx.moveTo(p.x-5,by+bh);ctx.lineTo(p.x,by+bh+6);ctx.lineTo(p.x+5,by+bh);ctx.fill();ctx.stroke();
     ctx.fillStyle=lv===3?'#fff':'#1a1020';const tb=ctx.textBaseline;ctx.textBaseline='middle';ctx.fillText(sy.v,p.x,by+bh/2+1);ctx.textBaseline=tb;ctx.globalAlpha=1}
   if(mpDraw)mpDraw();
-  if(G.sbL&&G.map==='sangbong')sbDraw(1);else if(G.map==='farm'){fmDraw(1);fmBurstDraw();fmEvDraw();fmDarkDraw();fmAllyGlow();fmHuntLight();fmSkyDraw();fmSupDraw()}else if(G.map==='mg'){mgProps(1);fmDarkDraw();fmSkyDraw();mgFxDraw();mgDraw(1)}
+  if(G.sbL&&G.map==='sangbong')sbDraw(1);else if(G.map==='farm'){fmDraw(1);fmBurstDraw();fmEvDraw();fmDarkDraw();fmAllyGlow();fmHuntLight();fmSkyDraw();fmSupDraw()}else if(G.map==='mg'){mgProps(1);fmDarkDraw();fmSkyDraw();fmSupDraw();mgFxDraw();mgDraw(1)}
   // texts
   for(const t of G.texts){ctx.globalAlpha=Math.min(1,t.life*3);ctx.font=t.big?'900 22px "Black Han Sans",sans-serif':(t.crit?'900 14px':'700 11px')+' sans-serif';ctx.lineWidth=3;ctx.strokeStyle='#000';ctx.strokeText(t.v,t.x,t.y);ctx.fillStyle=t.col||(t.crit?'#ffd34d':'#fff');ctx.fillText(t.v,t.x,t.y);ctx.globalAlpha=1}
   try{prPost()}catch(_){}

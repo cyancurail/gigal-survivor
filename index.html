@@ -2008,7 +2008,7 @@ function mgFxDraw(){const p=G.p;
       for(let i=0;i<6;i++){const a=G.t*4+i*1.047,r=40+((G.t*160+i*50)%260);ctx.globalAlpha=.7;ctx.fillStyle=i%2?'#ffe14d':'#c9a8ff';ctx.fillRect(e.x+Math.cos(a)*r-2,e.y+Math.sin(a)*r-2,4,4)}ctx.restore()}}}
 function mgTurretDraw(e){const pp=e.pop>0?1-e.pop/.35:1;ctx.save();ctx.translate(e.x,e.y);ctx.scale(pp,pp);ctx.fillStyle='#3a4050';ctx.fillRect(-12,4,24,8);ctx.fillStyle='#9aa8b8';ctx.beginPath();ctx.arc(0,0,13,0,7);ctx.fill();ctx.fillStyle='#e0ecf8';ctx.beginPath();ctx.arc(-4,-4,4,0,7);ctx.fill();const w=e.mgTs<.4?1:.6;ctx.fillStyle=`rgba(255,58,90,${w})`;ctx.beginPath();ctx.arc(0,0,6,0,7);ctx.fill();if(e.flash>0){ctx.globalAlpha=.6;ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(0,0,13,0,7);ctx.fill()}ctx.restore();e.hb=16}
 S2D.mg_turret=mgTurretDraw;
-function mgTick(dt){if(!G.mgB){mgBandInit();if(!window.__mgReg){window.__mgReg=1;fmReg();const ai=new Image();ai.src='farm/m_ally.png';FM.img.m_ally=ai}}mgBandTick(dt);mgFrame();mgBeacons();fmDarkTick(dt);mgBossTick(dt);fmDroneTick(dt);fmShipTick(dt);fmFolTick(dt);fmRadioTick(dt);fmSupTick(dt);mgFx(dt)}
+function mgTick(dt){if(!G.mgB){mgBandInit();if(!window.__mgReg){window.__mgReg=1;fmReg();const ai=new Image();ai.src='farm/m_ally.png';FM.img.m_ally=ai}}mgBandTick(dt);mgTrapTick(dt);mgFrame();mgBeacons();fmDarkTick(dt);mgBossTick(dt);fmDroneTick(dt);fmShipTick(dt);fmFolTick(dt);fmRadioTick(dt);fmSupTick(dt);mgFx(dt)}
 /* ---- 마계인천 도심 바닥 · 잔해 (11-14) ----
    바닥: 512px 칸. 3칸마다 가로·세로 도로(가운데 노란 겹선 · 흰 점선 차선), 교차로엔 횡단보도, 나머지는 주차장/공터(금 사이로 보랏빛).
    칸 그림은 256px로 한 번 그려 캐시(픽셀 느낌으로 2배 확대).
@@ -2060,6 +2060,25 @@ function mgFix(o,rt,rb){if(mgOK(o.x,o.y,rt,rb)){o.mx=o.x;return}
   if(o.mx!==undefined&&mgOK(o.mx,o.y,rt,rb))o.x=o.mx;
   if(!mgOK(o.x,o.y,rt,rb)){o.y=Math.max(mgTop(o.x)+rt,Math.min(mgBot(o.x)-rb,o.y))}
   o.mx=o.x}
+/* ---- 공원 함정(11-15): 일부 공원은 깊이 들어가면 입구가 컨테이너로 닫히고, 몬스터를 모두 물리쳐야 열려요 ---- */
+function mgTrapSet(z){return z>0&&!!mgAlc(z)&&mgH(z,3,91)<(G.hell?.5:.38)}
+function mgTrapTick(dt){const B=G.mgB,p=G.p;if(!B)return;let T=G.mgT;
+  if(!T){if(G.arena||G.t<150)return;const z=mgZone(p.x),A=mgAlc(z),D=G.mgTD||(G.mgTD={});if(!A||D[z]||!mgTrapSet(z))return;
+    const dep=A.sd?p.y-B.b:B.t-p.y;if(p.x>A.a+260&&p.x<A.b-260&&dep>A.D*.55){G.mgT=T={z,A,t:0,b:0};D[z]=1;if(!G.bot){toast('🚧 입구가 닫혔어요!','몬스터를 모두 물리치면 열려요',true);SND.p('boom');G.shk=Math.max(G.shk||0,.25)}}return}
+  const A=T.A;T.t+=dt;
+  if(G.arena){G.mgT=null;return}
+  const sp=()=>{const n=G.hell?18:13;for(let i=0;i<n;i++){let x,y,k=0;do{x=rnd(A.a+120,A.b-120);y=A.sd?rnd(B.b+170,B.b+A.D-70):rnd(B.t-A.D+70,B.t-170)}while(Math.hypot(x-p.x,y-p.y)<300&&++k<8);
+      const e=mkEnemy(i%4===3?pick(['mg_eye','mg_medusa']):pick(['mg_egg','mg_fly','mg_jelly']),x,y);e.mgTrap=1}};
+  const AT=[.8,9,17];if(T.b<3&&T.t>=AT[T.b]){T.b++;sp();if(!G.bot&&T.b>1)toast('🚧 더 몰려와요!',T.b+'/3 파도')}
+  p.y=A.sd?Math.max(p.y,B.b+150):Math.min(p.y,B.t-150);
+  for(const e of G.enemies){if(e.dead||e.mgTrap||e.x<A.a||e.x>A.b)continue;if(A.sd?e.y>B.b-4:e.y<B.t+4){if(A.sd?e.y<B.b+170:e.y>B.t-170)e.y=A.sd?B.b-8:B.t+8}}
+  if(T.b>=3&&T.t>10&&!G.enemies.some(e=>!e.dead&&e.mgTrap)){G.mgT=null;const cx=(A.a+A.b)/2,cy=A.sd?B.b+A.D*.55:B.t-A.D*.55;
+    G.pickups.push({x:cx,y:cy,k:'fmradio'});const F=G.fmF||(G.fmF=[]);for(let i=0;i<2;i++)F.push({x:cx+(i?60:-60),y:cy+30,life:40,ph:rnd(0,6)});
+    for(let i=0;i<12;i++)G.gems.push({x:cx+rnd(-90,90),y:cy+rnd(-60,60),v:Math.max(2,Math.round(G.next*.035)),big:1});
+    if(!G.bot){toast('🎉 입구가 열렸어요!','통신기와 토마토가 떨어졌어요',true);SND.p('heal')}}}
+function mgTrapDraw(){const T=G.mgT;if(!T)return;const A=T.A,B=G.mgB,k=Math.min(1,T.t/.5),sm=ctx.imageSmoothingEnabled;ctx.imageSmoothingEnabled=true;ctx.globalAlpha=k;
+  const yy=A.sd?B.b+150:B.t+8;let x=A.a-10,j=0;while(x<A.b+10){const n=['ct1','ct2','ct3'][(mgH(T.z,j,95)*3)|0],im=mgPImg(n);if(!im){x+=160;j++;continue}const h=150,w=h*MG_AS[n];ctx.save();ctx.translate(x+w/2,0);if(j&1)ctx.scale(-1,1);ctx.drawImage(im,-w/2,yy-h,w,h);ctx.restore();x+=w-14;j++}
+  ctx.globalAlpha=1;ctx.imageSmoothingEnabled=sm}
 function mgBandTick(dt){const B=G.mgB;if(!B)return;const p=G.p;mgFix(p,16,10);
   for(const e of G.enemies){if(e.dead)continue;const r=Math.min(e.r,40)*.5;
     if(e.mgEm){if(e.y>mgTop(e.x)+r+6&&e.y<mgBot(e.x)-r-6)e.mgEm=0;else continue}
@@ -2164,7 +2183,7 @@ function mgProps(front){const L=G.mgPL;if(!L)return;const fy=G.p.y+12,sm=ctx.ima
   ctx.imageSmoothingEnabled=sm;if(window.__fmBox&&front){ctx.strokeStyle='#ff2a2a';ctx.lineWidth=1;for(const b of G.sbL)ctx.strokeRect(b.L,b.T,b.R-b.L,b.B-b.T)}}
 
 function mgDraw(front){const TL=G.fmTL,p=G.p;
-  if(!front){mgWalls();mgProps(0);if(TL)for(const t of TL){if(Math.abs(t.x-p.x)>VW/2+240||Math.abs(t.y-p.y)>VH/2+240)continue;const pu=.5+.5*Math.sin(G.t*3+t.ph);
+  if(!front){mgWalls();mgTrapDraw();mgProps(0);if(TL)for(const t of TL){if(Math.abs(t.x-p.x)>VW/2+240||Math.abs(t.y-p.y)>VH/2+240)continue;const pu=.5+.5*Math.sin(G.t*3+t.ph);
       ctx.globalAlpha=.10+.06*pu;ctx.fillStyle='#8ac8ff';ctx.beginPath();ctx.ellipse(t.x,t.y-80,fmTR(),fmTR(),0,0,7);ctx.fill();ctx.globalAlpha=1;
       ctx.fillStyle='#1a1430';ctx.fillRect(t.x-9,t.y-6,18,8);ctx.fillStyle='#3a3060';ctx.fillRect(t.x-3,t.y-72,6,68);ctx.fillStyle='#6a5aa0';ctx.fillRect(t.x-1,t.y-72,2,68);
       ctx.fillStyle='#bfe8ff';ctx.beginPath();ctx.arc(t.x,t.y-80,9+pu*2,0,7);ctx.fill();ctx.fillStyle='#ffffff';ctx.beginPath();ctx.arc(t.x-2,t.y-82,4,0,7);ctx.fill()}
@@ -3412,7 +3431,7 @@ function spawnTick(dt){
   const m=em(),hs=G.hard?HARD.spawn:1,target=Math.min((15+m*11)*hs,340*hs);
   G.spawnAcc+=dt*Math.min(52,2+m*2)*hs*(G.map==='farm'&&G.hard?.24:1);
   if(G.arena){G.spawnAcc=0;arenaTick(dt);return}/* 11-14 사용자: 마계인천도 결계 안 잡몹 없음 */
-  while(G.spawnAcc>=1){G.spawnAcc--;if(G.enemies.length<target){const [x,y]=spawnPos();if(G.map==='farm'){if(!(G.fmSil>0))fmSpawnOne(x,y)}else if(G.map==='mg'){const q=mgSpawnPos();mgSpawnOne(q[0],q[1],q[2])}else mkEnemy(G.hell&&Math.random()<.15?pick(G.map==='sangbong'?['sb_lamp','sb_germ','sb_trash']:['queen','kisoo']):pick(phaseTypes()),x,y)}}
+  while(G.spawnAcc>=1){G.spawnAcc--;if(G.enemies.length<target){const [x,y]=spawnPos();if(G.map==='farm'){if(!(G.fmSil>0))fmSpawnOne(x,y)}else if(G.map==='mg'){if(!G.mgT){const q=mgSpawnPos();mgSpawnOne(q[0],q[1],q[2])}}else mkEnemy(G.hell&&Math.random()<.15?pick(G.map==='sangbong'?['sb_lamp','sb_germ','sb_trash']:['queen','kisoo']):pick(phaseTypes()),x,y)}}
   if(G.map!=='farm'&&G.swarms.length&&G.t>=G.swarms[0]){G.swarms.shift();if(G.map==='mg')mgRush(Math.round(20+m*2.2),m);else toast('알림 폭탄 러시!','📢 단톡방이 터진다');const n=G.map==='mg'?0:Math.round(20+m*2.2),gap=rnd(0,Math.PI*2);for(let i=0;i<n;i++){const a=gap+.6+i/n*(Math.PI*2-1.2);mkEnemy(G.map==='sangbong'?'sb_soju':G.map==='mg'?'mg_fly':'bell',G.p.x+Math.cos(a)*(VW*.62),G.p.y+Math.sin(a)*(VH*.62),{spd:80,dmg:ENT.bell.dmg*(1+m*.08)})}}
   G.eliteT-=dt;if(G.eliteT<=0){G.eliteT=(G.hard?HARD.elite:45)*(G.map==='farm'&&G.hard?2:1)/* 11-09: 장수 어려움·헬은 엘리트 대신 이벤트 상자 */;const [x,y]=spawnPos();const FMe=G.map==='farm',tp=FMe?fmEliteT():pick(phaseTypes());const el=mkEnemy(tp,x,y,{elite:1,r:ENT[tp].r*1.7,hpMul:7,xp:12,spd:ENT[tp].spd*.75,dmg:ENT[tp].dmg*1.1*(1+m*.1),name:'엘리트 '+ENT[tp].name});if(FMe)el.esz=1.7}
   if(G.tw){if(!G.arena&&G.t>=G.twNext){const k=G.twK++,b0=GB()[k%4],mul=Math.pow(1.5,Math.floor(k/4));G.twNext+=180;arenaStart(Object.assign({},b0,{hp:b0.hp*mul,dmg:b0.dmg*(1+.25*Math.floor(k/4))}))}return}

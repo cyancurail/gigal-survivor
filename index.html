@@ -2030,7 +2030,12 @@ function mgCell(cx,cy){const key=cx+','+cy;let c=MGF.get(key);if(c)return c;if(M
   if(mgH(cx,cy,7)<.4){const x=40+mgH(cx,cy,8)*(N-80),y=40+mgH(cx,cy,11)*(N-80);g.fillStyle='#3a3a44';g.beginPath();g.arc(x,y,9,0,7);g.fill();g.strokeStyle='#15141a';g.lineWidth=1;for(let i=-6;i<=6;i+=3){g.beginPath();g.moveTo(x-7,y+i);g.lineTo(x+7,y+i);g.stroke()}}
   for(let j=0;j<3;j++){if(mgH(cx,cy,20+j)>.55)continue;let x=mgH(cx,cy,21+j)*N,y=mgH(cx,cy,22+j)*N;g.strokeStyle='#0c0b10';g.lineWidth=2;g.beginPath();g.moveTo(x,y);for(let s=0;s<6;s++){x+=(mgH(cx,cy,30+j*9+s)-.5)*40;y+=(mgH(cy,cx,30+j*9+s)-.5)*40;g.lineTo(x,y)}g.stroke();g.globalAlpha=.35;g.strokeStyle='#a050ff';g.lineWidth=1;g.stroke();g.globalAlpha=1}
   MGF.set(key,c);return c}
-function mgFloor(){const p=G.p;ctx.save();ctx.translate(innerWidth/2,innerHeight/2);ctx.scale(Z,Z);ctx.translate(-p.x,-p.y);ctx.imageSmoothingEnabled=false;
+// 바닥 그림(mg/floor.png, 힉스필드 이음매 없는 아스팔트)이 있으면 그걸 깔고, 없으면 코드로 그린 칸
+const MGFI={im:null,pat:null,k:0};
+function mgFloorImg(){if(!MGFI.im){const im=new Image();im.src='mg/floor.png';MGFI.im=im}const im=MGFI.im;if(!im.complete||!im.width)return null;const sk=Z*(typeof DPR==='number'?DPR:1);if(MGFI.pat&&MGFI.k===sk)return MGFI.pat;
+  const W=Math.round(640*sk),c=document.createElement('canvas');c.width=c.height=W;const g=c.getContext('2d');g.imageSmoothingEnabled=false;g.drawImage(im,0,0,W,W);const P=ctx.createPattern(c,'repeat');try{P.setTransform(new DOMMatrix().scale(1/sk))}catch(e){}MGFI.pat=P;MGFI.k=sk;return P}
+function mgFloor(){const p=G.p,P=mgFloorImg();if(P){ctx.save();ctx.translate(innerWidth/2,innerHeight/2);ctx.scale(Z,Z);ctx.translate(-p.x,-p.y);ctx.fillStyle=P;ctx.fillRect(p.x-VW/2-4,p.y-VH/2-4,VW+8,VH+8);ctx.restore();ctx.fillStyle=`rgba(20,6,40,${G.hell?.22:G.hard?.12:.04})`;ctx.fillRect(0,0,innerWidth,innerHeight);return true}
+  ctx.save();ctx.translate(innerWidth/2,innerHeight/2);ctx.scale(Z,Z);ctx.translate(-p.x,-p.y);ctx.imageSmoothingEnabled=false;
   const x0=Math.floor((p.x-VW/2)/MGC),x1=Math.floor((p.x+VW/2)/MGC),y0=Math.floor((p.y-VH/2)/MGC),y1=Math.floor((p.y+VH/2)/MGC);
   for(let cy=y0;cy<=y1;cy++)for(let cx=x0;cx<=x1;cx++)ctx.drawImage(mgCell(cx,cy),cx*MGC,cy*MGC,MGC+.5,MGC+.5);
   ctx.restore();ctx.fillStyle=`rgba(20,6,40,${G.hell?.22:G.hard?.12:.04})`;ctx.fillRect(0,0,innerWidth,innerHeight);return true}

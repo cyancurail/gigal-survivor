@@ -5616,6 +5616,7 @@ function loop(now){
   if(G){draw();hudT+=dt;if(hudT>.1&&G.running){hudT=0;hudTick()}}
 }
 requestAnimationFrame(t=>{last=t;loop(t)});
+try{if(!SAVE.fmU&&SAVE.ach&&(SAVE.ach.hellboss||SAVE.hellC&&Object.keys(SAVE.hellC).length)){SAVE.fmU=1;persist()}}catch(e){}/* 11-15 소급: 헬 보스 클리어 기록이 있으면 장수 해금 */
 try{if(SAVE.fmU&&sbAllHell(0))persist()}catch(e){}
 try{if(acctSync()||!SAVE._as){SAVE._as=1;persist()}}catch(e){}
 titleScreen();

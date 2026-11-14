@@ -2038,7 +2038,7 @@ function mgCell(cx,cy){const key=cx+','+cy;let c=MGF.get(key);if(c)return c;if(M
    0 상가 거리 · 1 항구(건물 사이를 컨테이너로 연결) · 2 고속도로(방음벽 · 고가 기둥) · 3 아파트 단지 · 4 공원(잔디 + 위/아래 한쪽이 움푹 파임).
    구간 종류는 해시로 정해지고 연속 반복은 막음. 벽 = 구간·쪽(위/아래)마다 조각(건물·컨테이너·방음벽·나무)을 이어 붙임. 조각 사이 골목 틈(MGGW)은 몬스터가 나오는 곳.
    이동 제한: 위치별 위/아래 경계(mgTop/mgBot) 안에서만 — 공원 움푹 공간 옆면은 좌우도 막음(mgFix). */
-const MGZ=4800,MGGW=140,MGPD=470;
+const MGZ=4800,MGGW=140,MGPD=700;
 const MG_AS={arc:1.39,cn:.98,bld1:.94,bld2:.83,pk:.99,sky:.51,apt:.91,port:1,ct1:1.37,ct2:1.06,ct3:1.4,br1:1.07,br2:1.08,pil:.94,tr1:1.03,tr2:1.05,bu:1.25,lp:.69};
 const mgZone=x=>Math.floor((x+MGZ/2)/MGZ);
 function mgZH(z,k){return mgH(z,k,201)}
@@ -2075,12 +2075,13 @@ const MG_PK={
 const MG_GP=[.38,.15,.1,.3,.1];
 function mgWpick(L,r){let t=0;for(const q of L)t+=q[3];r*=t;for(const q of L){r-=q[3];if(r<=0)return q}return L[0]}
 function mgPieces(z,sd){const key=z*2+sd;let L=MGPCH.get(key);if(L)return L;if(MGPCH.size>40)MGPCH.delete(MGPCH.keys().next().value);
-  L=[];const th=mgTheme(z),zs=z*MGZ-MGZ/2,ze=zs+MGZ,k0=z*2+sd;let x=zs,i=0,prev='',ci=0;const R=k=>mgH(k0,i,300+k);
-  while(x<ze&&i<90){let n,h,chain=0,ov=-6;
-    if(th===1){const wasC=/^ct/.test(prev);if(wasC&&R(0)<.62){n=['ct1','ct2','ct1','ct2','ct3'][(R(1)*5)|0];h=200+R(2)*50;chain=1}else if(wasC||!prev){n=['port','bld1','bld2','port'][(R(1)*4)|0];h=(n==='port'?430:370)+R(2)*60}else{n=['ct1','ct2','ct1','ct2','ct3'][(R(1)*5)|0];h=200+R(2)*50;chain=1}ov=chain?-10:-6}
-    else if(th===2){ci++;if(ci%5===0){n='pil';h=400+R(2)*40}else{n=R(1)<.5?'br1':'br2';h=250+R(2)*40}chain=1;ov=-8}
-    else{const q=mgWpick(MG_PK[th],R(1));n=q[0];h=q[1]+R(2)*(q[2]-q[1]);ov=th===4?-34:-6}
-    const w=h*MG_AS[n],gp=!chain&&R(3)<MG_GP[th],o={x,w,h,n,fl:R(4)<.5,g:gp};L.push(o);prev=n;x+=w+(gp?MGGW:ov);i++}
+  L=[];const th=mgTheme(z),Ac=th===4?mgAlc(z):null,zs=z*MGZ-MGZ/2,ze=zs+MGZ,k0=z*2+sd;let x=zs,i=0,prev='',ci=0,tr=0;const R=k=>mgH(k0,i,300+k);
+  while(x<ze&&i<90){let n,h,chain=0,ov=-6,t=th;if(th===4)t=(Ac&&Ac.sd===sd&&x>=Ac.a&&x<Ac.b)?4:0;
+    if(t===1){const wasC=/^ct/.test(prev);if(wasC&&R(0)<.62){n=['ct1','ct2','ct1','ct2','ct3'][(R(1)*5)|0];h=200+R(2)*50;chain=1}else if(wasC||!prev){n=['port','bld1','bld2','port'][(R(1)*4)|0];h=(n==='port'?430:370)+R(2)*60}else{n=['ct1','ct2','ct1','ct2','ct3'][(R(1)*5)|0];h=200+R(2)*50;chain=1}ov=chain?-10:-6}
+    else if(t===2){ci++;if(ci%5===0){n='pil';h=400+R(2)*40}else{n=R(1)<.5?'br1':'br2';h=250+R(2)*40}chain=1;ov=-8}
+    else{const q=mgWpick(MG_PK[t],R(1));n=q[0];h=q[1]+R(2)*(q[2]-q[1]);ov=t===4?-34:-6}
+    const w=h*MG_AS[n];if(th===4&&t===0&&Ac&&Ac.sd===sd&&x<Ac.a&&x+w>Ac.a-4){if(++tr<4){i++;continue}x=Ac.a;tr=0;continue}tr=0;
+    const gp=!chain&&R(3)<MG_GP[t]&&!(th===4&&t===0&&Ac&&Ac.sd===sd&&x+w+MGGW>Ac.a-4&&x<Ac.a),o={x,w,h,n,fl:R(4)<.5,g:gp};L.push(o);prev=n;x+=w+(gp?MGGW:ov);i++}
   MGPCH.set(key,L);return L}
 const MGPCH=new Map();
 function mgGapList(x0,x1){const out=[],z0=mgZone(x0)-1,z1=mgZone(x1)+1;for(let z=z0;z<=z1;z++)for(let sd=0;sd<2;sd++)for(const o of mgPieces(z,sd))if(o.g){const gx=o.x+o.w+MGGW/2;if(gx>=x0&&gx<=x1)out.push({x:gx,sd})}return out}
@@ -2098,26 +2099,26 @@ function mgSpans(x0,x1,sd){const out=[];let cur=x0;const z0=mgZone(x0),z1=mgZone
   if(cur<x1)out.push([cur,x1,G0]);return out}
 function mgEdge(x,sd){return sd?mgBot(x):mgTop(x)}
 function mgWalls(){const B=G.mgB;if(!B)return;const p=G.p,x0=p.x-VW/2-700,x1=p.x+VW/2+700,sm=ctx.imageSmoothingEnabled;
-  for(let sd=0;sd<2;sd++){for(const [a,b,e] of mgSpans(x0,x1,sd)){ctx.fillStyle='#0a0612';ctx.fillRect(a,sd?e:e-VH-80,b-a,VH+80)}
+  for(let sd=0;sd<2;sd++){const GL=mgGapList(x0,x1).filter(g=>g.sd===sd).map(g=>g.x).sort((u,v)=>u-v);ctx.fillStyle='#0a0612';
+    for(const [a,b,e] of mgSpans(x0,x1,sd)){let cur=a;const F=(l,r)=>{if(r>l)ctx.fillRect(l,sd?e:e-VH-80,r-l,VH+80)};for(const gx of GL){const l=gx-MGGW/2,r=gx+MGGW/2;if(r<=cur||l>=b)continue;F(cur,Math.min(l,b));cur=Math.max(cur,r)}if(cur<b)F(cur,b)}
     // 일반 구간의 파인 공간 옆: 어두운 벽(경계 사이)
-    for(let z=mgZone(x0);z<=mgZone(x1);z++){const A=mgAlc(z);if(!A||A.sd!==sd)continue;const g0=sd?B.b:B.t;ctx.fillStyle='#0a0612';ctx.fillRect(A.a-6,sd?g0:g0-A.D,12,A.D);ctx.fillRect(A.b-6,sd?g0:g0-A.D,12,A.D)}}
+    for(let z=mgZone(x0);z<=mgZone(x1);z++){const A=mgAlc(z);if(!A||A.sd!==sd)continue;const g0=sd?B.b:B.t;}}
   ctx.imageSmoothingEnabled=true;
   for(let z=mgZone(x0)-1;z<=mgZone(x1)+1;z++){const th=mgTheme(z);
     for(let sd=0;sd<2;sd++){const dy=sd?1:-1;const PL=mgPieces(z,sd);
-      for(const o of PL){if(o.g){const gx=o.x+o.w+MGGW/2;if(gx>x0&&gx<x1){const ey=mgEdge(gx,sd),g=ctx.createLinearGradient(0,ey,0,ey+dy*560);g.addColorStop(0,'rgba(70,24,110,.55)');g.addColorStop(.35,'rgba(18,8,30,.95)');g.addColorStop(1,'#05030a');ctx.fillStyle=g;ctx.fillRect(gx-MGGW/2,sd?ey:ey-560,MGGW,560)}}}
-      for(const o of PL){if(o.x+o.w<x0||o.x>x1)continue;const im=mgPImg(o.n),cx=o.x+o.w/2,ey=mgEdge(cx,sd);
+            for(const o of PL){if(o.x+o.w<x0||o.x>x1)continue;const im=mgPImg(o.n),cx=o.x+o.w/2,ey=mgEdge(cx,sd);
         if(im){ctx.save();ctx.translate(cx,0);if(o.fl)ctx.scale(-1,1);ctx.drawImage(im,-o.w/2,sd?ey-6:ey+8-o.h,o.w,o.h);ctx.restore()}
         else{ctx.fillStyle='#1a1030';ctx.fillRect(o.x,sd?ey:ey-o.h,o.w,o.h);ctx.fillStyle='#2a1850';ctx.fillRect(o.x,sd?ey:ey-o.h,o.w,6)}}}
-    const A=mgAlc(z);if(A){const bi=mgPImg('bu'),g0=A.sd?B.b:B.t,e=A.sd?g0+A.D:g0-A.D;// 파인 공간 옆면: 덤불 기둥
-      if(bi)for(const xx of [A.a,A.b])for(let yy=Math.min(g0,e);yy<=Math.max(g0,e);yy+=70){const w=bi.width*.8,h=bi.height*.8;ctx.drawImage(bi,xx-w/2,yy-h+12,w,h)}}}
+    const A=mgAlc(z);if(A){const g0=A.sd?B.b:B.t,e=A.sd?g0+A.D:g0-A.D,y0=Math.min(g0,e),y1=Math.max(g0,e);// 공원 양옆 벽(벽돌 담)
+      for(const xx of [A.a-54,A.b]){ctx.fillStyle='#2a2036';ctx.fillRect(xx,y0-2,54,y1-y0+4);ctx.fillStyle='#46385a';ctx.fillRect(xx,y0-2,54,5);ctx.fillStyle='#161020';ctx.fillRect(xx+(xx<A.a?48:0),y0-2,6,y1-y0+4);ctx.fillStyle='rgba(0,0,0,.28)';for(let yy=y0+30;yy<y1;yy+=34)ctx.fillRect(xx,yy,54,2)}}}
   ctx.imageSmoothingEnabled=sm;
   for(let sd=0;sd<2;sd++){for(const [a,b,e] of mgSpans(x0,x1,sd)){const dy=sd?1:-1,g2=ctx.createLinearGradient(0,e,0,e-dy*90);g2.addColorStop(0,'rgba(8,4,16,.65)');g2.addColorStop(1,'rgba(8,4,16,0)');ctx.fillStyle=g2;ctx.fillRect(a,sd?e-90:e,b-a,90)}}}
 // 공원 잔디 바닥
 const MGGI={im:null,pat:null,k:0};
 function mgGrassPat(){if(!MGGI.im){const im=new Image();im.src='mg/grass.jpg';MGGI.im=im}const im=MGGI.im;if(!im.complete||!im.width)return null;const sk=Z*(typeof DPR==='number'?DPR:1);if(MGGI.pat&&MGGI.k===sk)return MGGI.pat;
   const W=Math.round(512*sk),c=document.createElement('canvas');c.width=c.height=W;const g=c.getContext('2d');g.imageSmoothingEnabled=false;g.drawImage(im,0,0,W,W);const P=ctx.createPattern(c,'repeat');try{P.setTransform(new DOMMatrix().scale(1/sk))}catch(e){}MGGI.pat=P;MGGI.k=sk;return P}
-function mgGrassDraw(){const p=G.p,x0=p.x-VW/2-4,x1=p.x+VW/2+4;for(let z=mgZone(x0);z<=mgZone(x1);z++){if(mgTheme(z)!==4)continue;const zs=z*MGZ-MGZ/2,a=Math.max(x0,zs+700),b=Math.min(x1,zs+MGZ-700);if(b<=a)continue;
-    const P=mgGrassPat();if(!P)continue;ctx.fillStyle=P;ctx.fillRect(a,p.y-VH/2-4,b-a,VH+8);ctx.fillStyle='#16101c';if(zs+700>=x0)ctx.fillRect(zs+700-8,p.y-VH/2-4,8,VH+8);if(zs+MGZ-700<=x1)ctx.fillRect(zs+MGZ-700,p.y-VH/2-4,8,VH+8)}}
+function mgGrassDraw(){const p=G.p,B=G.mgB,x0=p.x-VW/2-4,x1=p.x+VW/2+4;if(!B)return;for(let z=mgZone(x0);z<=mgZone(x1);z++){const A=mgAlc(z);if(!A)continue;const a=Math.max(x0,A.a),b=Math.min(x1,A.b);if(b<=a)continue;
+    const P=mgGrassPat();if(!P)continue;ctx.fillStyle=P;ctx.fillRect(a,A.sd?B.b:B.t-A.D,b-a,A.D)}}
 // 바닥 그림(mg/floor.png, 힉스필드 이음매 없는 아스팔트)이 있으면 그걸 깔고, 없으면 코드로 그린 칸
 const MGFI={im:null,pat:null,k:0};
 function mgFloorImg(){if(!MGFI.im){const im=new Image();im.src='mg/floor.png';MGFI.im=im}const im=MGFI.im;if(!im.complete||!im.width)return null;const sk=Z*(typeof DPR==='number'?DPR:1);if(MGFI.pat&&MGFI.k===sk)return MGFI.pat;
@@ -2132,10 +2133,11 @@ const MG_PR={bus:{s:.75,hw:.36,hh:.22},light:{s:.7,hw:.3,hh:.2},car:{s:.72,hw:.4
 const MG_PI={};function mgPImg(t){if(!(t in MG_PI)){const im=new Image();im.onerror=()=>{MG_PI[t]=null};im.src='mg/p_'+t+'.png';MG_PI[t]=im}const im=MG_PI[t];return im&&im.complete&&im.width?im:null}
 const MGPC=700,MGPK=new Map();
 function mgPChunk(cx,cy){const key=cx+','+cy;let L=MGPK.get(key);if(L)return L;L=[];if(MGPK.size>80)MGPK.delete(MGPK.keys().next().value);
-  const th=mgTheme(mgZone((cx+.5)*MGPC)),big=mgH(cx,cy,61)<.14,n=big?1:(mgH(cx,cy,60)*2.4|0);
-  const BG=[['bld1','bld2','cn','pk'],['port','cn'],['pil'],['bld1','bld2','cn','pk'],['fo']][th],SM=[['bus','light','car','rubble','rubble','car'],['ct3','rubble','light','car','ct3'],['car','rubble','light','bus','br1','br1'],['bus','light','car','rubble','rubble','car'],['tr1','tr2','bu','bu','bn','lp','tr1','tr2']][th];
-  for(let i=0;i<n;i++){const T=big?pick2(BG,mgH(cx,cy,62)):pick2(SM,mgH(cx,cy,63+i));
-    const x=(cx+.2+mgH(cx,cy,64+i)*.6)*MGPC,y=(cy+.25+mgH(cx,cy,65+i)*.6)*MGPC;
+  const th=mgTheme(mgZone((cx+.5)*MGPC)),B=G.mgB;let big=mgH(cx,cy,61)<.14,n=big?1:(mgH(cx,cy,60)*2.4|0);
+  const BGS=[['bld1','bld2','cn','pk'],['port','cn'],['pil'],['bld1','bld2','cn','pk'],['fo']],SMS=[['bus','light','car','rubble','rubble','car'],['ct3','rubble','light','car','ct3'],['car','rubble','light','bus','br1','br1'],['bus','light','car','rubble','rubble','car'],['tr1','tr2','bu','bu','bn','lp','tr1','tr2']];
+  const PA=th===4&&B?mgAlc(mgZone((cx+.5)*MGPC)):null,pk=(x,y)=>PA&&x>PA.a+90&&x<PA.b-90&&(PA.sd===0?y<B.t-40:y>B.b+40);
+  if(PA&&cx*MGPC<PA.b&&(cx+1)*MGPC>PA.a&&(PA.sd===0?cy*MGPC<B.t&&(cy+1)*MGPC>B.t-PA.D:(cy+1)*MGPC>B.b&&cy*MGPC<B.b+PA.D)){n=2+(mgH(cx,cy,67)*2.4|0);big=mgH(cx,cy,61)<.1}
+  for(let i=0;i<n;i++){const x=(cx+.2+mgH(cx,cy,64+i)*.6)*MGPC,y=(cy+.25+mgH(cx,cy,65+i)*.6)*MGPC,tk=th===4?(pk(x,y)?4:0):th,BG=BGS[tk],SM=SMS[tk],T=big?pick2(BG,mgH(cx,cy,62)):pick2(SM,mgH(cx,cy,63+i));
     if(x*x+y*y<380*380)continue;
     const bc=Math.floor(x/1000),br=Math.floor(y/1000),fb=mgH(bc,br,0),f2=mgH(bc,br,1);
     {const a=bc,b=br,h=Math.sin(a*127.1+b*311.7)*43758.5453,f=h-Math.floor(h),h2=Math.sin(a*269.5+b*183.3)*43758.5453,g2=h2-Math.floor(h2),tx=(a+.2+f*.6)*1000,ty=(b+.2+g2*.6)*1000;if(Math.hypot(tx-x,ty-y)<(big?340:220))continue}

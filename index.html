@@ -7548,13 +7548,13 @@ Object.assign(WP,{nike:{name:'카르페 녹템',icon:'🥂',evo:'headset',evoNam
    ③ 충전 → 천둥 박수: 번개·단비 초과 회복으로 충전, 가득 차면 공중에 떠오르며 주변 폭발
    ④ 피날레 「벼락」 60초: 하늘이 닫히고 폭우 → 마녀가 떠오름 → 화면 끝까지 뻗는 번개 나무 → 대벼락 → 구름이 갈라지고 햇살·무지개. 화면 글자 없음.
    이펙트: pixelfx(MIT) lightning-strike·thunderclap·tornado·storm-cloud·zap-hit·charge-up (fx/fq_*.png). */
-const FQC={DM:2.6,LS:1.3,CH:.6,TW:.45,HL:.55,TC:6,FIN:60,PH:12};
-const FQI={};[['ls','fq_ls.png'],['tc','fq_tc.png'],['tw','fq_tw.png'],['cl','fq_cl.png'],['zp','fq_zp.png'],['cu','fq_cu.png']].forEach(([k,f])=>{const im=new Image();im.src='fx/'+f;FQI[k]=im});
+const FQC={DM:2.2,LS:1.3,CH:.6,TW:.22,HL:.55,IC:.4,TC:6,FIN:60,PH:12};
+const FQI={};[['ls','fq_ls.png'],['tc','fq_tc.png'],['tw','fq_tw.png'],['cl','fq_cl.png'],['zp','fq_zp.png'],['cu','fq_cu.png'],['ic','fq_ic.png'],['st','fq_st.webp']].forEach(([k,f])=>{const im=new Image();im.src='fx/'+f;FQI[k]=im});
 // [가로,세로,열,원점x,원점y,fps,프레임수]
-const FQP={ls:[240,264,8,120,228,14,26],tc:[288,156,8,144,124,13,24],tw:[196,168,8,98,152,12,24],cl:[168,176,8,84,164,12,36],zp:[144,112,6,76,56,14,12],cu:[272,184,8,124,148,12,33]};
+const FQP={ls:[240,264,8,120,228,14,26],tc:[288,156,8,144,124,13,24],tw:[196,168,8,98,152,12,24],cl:[168,176,8,84,164,12,36],zp:[144,112,6,76,56,14,12],cu:[272,184,8,124,148,12,33],ic:[152,120,8,76,100,12.3,32]};
 function fqSp(k,i,x,y,sc,al,bl){const im=FQI[k],q=FQP[k];if(!dsOk(im))return;i=Math.max(0,Math.min(q[6]-1,i|0));const cx=(i%q[2])*q[0],cy=Math.floor(i/q[2])*q[1];ctx.save();ctx.translate(Math.round(x),Math.round(y));if(bl)ctx.globalCompositeOperation=bl;ctx.globalAlpha=al===undefined?1:al;ctx.imageSmoothingEnabled=false;ctx.drawImage(im,cx,cy,q[0],q[1],-q[3]*sc,-q[4]*sc,q[0]*sc,q[1]*sc);ctx.restore()}
 const fqB=()=>(10+3*8)*G.S.might*FQC.DM;
-function fqIni(w){const st=w.st;if(st.i)return st;st.i=1;st.ph=0;st.pt=0;st.bo=[];st.fx=[];st.tw=[];st.hl=[];st.rd=[];st.sp=[];st.sk=.3;st.ch=0;st.lev=0;st.ft=FQC.FIN;st.fin=null;st.ht=0;st.wt=0;return st}
+function fqIni(w){const st=w.st;if(st.i)return st;st.i=1;st.ph=0;st.pt=0;st.bo=[];st.fx=[];st.tw=[];st.hl=[];st.rd=[];st.sp=[];st.sk=.3;st.ch=0;st.lev=0;st.ft=FQC.FIN;st.fin=null;st.ht=0;st.wt=0;st.bq=[];st.sf=0;st.ic=[];return st}
 function fqFx(st,k,x,y,sc,o){if(G.bot)return;st.fx.push(Object.assign({k,x,y,sc:sc||1,t:0},o||{}))}
 // 지그재그 번개 (중점 변위)
 function fqPts(x1,y1,x2,y2,dsp){let P=[[x1,y1],[x2,y2]];let d=dsp||Math.hypot(x2-x1,y2-y1)*.22;for(let k=0;k<5;k++){const N=[P[0]];for(let i=0;i<P.length-1;i++){const a=P[i],b=P[i+1],mx=(a[0]+b[0])/2,my=(a[1]+b[1])/2,dx=b[0]-a[0],dy=b[1]-a[1],l=Math.hypot(dx,dy)||1,o=rnd(-d,d);N.push([mx-dy/l*o,my+dx/l*o],b)}P=N;d*=.52}return P}
@@ -7571,35 +7571,38 @@ function fqStrike(st,x,y,vis,mul,e0){const B=fqB(),R=55*Math.sqrt(G.S.area),S=G.
 function fqPick(vis){if(!vis.length)return null;let best=null,bn=-1;for(let k=0;k<4;k++){const e=pick(vis);let c=0;for(const o of vis)if((o.x-e.x)**2+(o.y-e.y)**2<100*100)c++;if(c>bn){bn=c;best=e}}return best}
 // ---- 기후 ----
 function fqPhase(st,ph){st.ph=ph;st.pt=0;const p=G.p;
-  if(ph===1){st.tw=[];for(let i=0;i<3;i++){const a=i/3*6.283+rnd(-.3,.3);st.tw.push({x:p.x+Math.cos(a)*170,y:p.y+Math.sin(a)*120,t:rnd(0,2),dt:0,bt:rnd(.4,1.2),tg:null,rt:0})}if(!G.bot)SND.p('whoosh')}
-  if(ph!==1)st.tw=[];if(ph===2&&!G.bot)SND.p('whoosh');if(ph===0&&!G.bot)SND.p('rain')}
+  if(ph===1){st.tw=[];for(let i=0;i<7;i++){const a=i/7*6.283+rnd(-.2,.2),rr=i%2?250:150;st.tw.push({x:p.x+Math.cos(a)*rr,y:p.y+Math.sin(a)*rr*.7,t:rnd(0,2),dt:0,bt:rnd(.4,1.2),tg:null,rt:0})}if(!G.bot)SND.p('whoosh')}
+  if(ph!==1)st.tw=[];if(ph!==2)st.ic=[];if(ph===2&&!G.bot)SND.p('whoosh');if(ph===0&&!G.bot)SND.p('rain')}
 function fqTwTick(st,dt,vis){const B=fqB(),R=130*Math.sqrt(G.S.area),p=G.p;
   for(const q of st.tw){q.t+=dt;q.rt-=dt;if(q.rt<=0||!q.tg||q.tg.dead){q.rt=1.5;q.tg=fqPick(vis)}
     const tx=q.tg?q.tg.x:p.x+Math.cos(q.t)*150,ty=q.tg?q.tg.y:p.y+Math.sin(q.t)*110,dx=tx-q.x,dy=ty-q.y,l=Math.hypot(dx,dy)||1;q.x+=dx/l*Math.min(l,95*dt);q.y+=dy/l*Math.min(l,95*dt);
     q.x=Math.max(p.x-VW/2+30,Math.min(p.x+VW/2-30,q.x));q.y=Math.max(p.y-VH/2+60,Math.min(p.y+VH/2-10,q.y));
     for(const e of vis){if(e.dead||e.boss)continue;const ex=q.x-e.x,ey=q.y-e.y,d=Math.hypot(ex,ey);if(d<R&&d>8){const s=110*dt*(1-d/R*.5);e.x+=ex/d*s+(-ey/d)*s*.6;e.y+=ey/d*s+(ex/d)*s*.6}}
     q.dt-=dt;if(q.dt<=0){q.dt=.25;for(const e of vis)if(!e.dead&&(e.x-q.x)**2+(e.y-q.y)**2<(62+e.r)**2)hurt(e,B*FQC.TW,'fulmine',{kb:0})}
-    q.bt-=dt;if(q.bt<=0){q.bt=rnd(.9,1.4);fqStrike(st,q.x+rnd(-20,20),q.y-10,vis,.6)}}}
-function fqHailTick(st,dt,vis){const p=G.p,B=fqB();st.ht-=dt;while(st.ht<=0){st.ht+=.055/(G.S.amount*.15+1);const e=vis.length&&Math.random()<.75?pick(vis):null;const tx=e?e.x+rnd(-12,12):p.x+rnd(-VW/2,VW/2),ty=e?e.y+rnd(-12,12):p.y+rnd(-VH/2,VH/2);const T=rnd(.32,.45);st.hl.push({x0:tx-260,y0:ty-420,tx,ty,t:0,T,r:rnd(6,10)})}
+    q.bt-=dt;if(q.bt<=0){q.bt=rnd(1.6,2.6);if(Math.random()<.35){const n=3+(Math.random()*3|0);for(let k=0;k<n;k++)st.bq.push({t:k*rnd(.07,.13),x:q.x+rnd(-40,40),y:q.y+rnd(-30,20)});}else fqStrike(st,q.x+rnd(-20,20),q.y-10,vis,.6)}}}
+function fqBurstTick(st,dt,vis){if(!st.bq.length)return;for(const b of st.bq){b.t-=dt;if(b.t<=0&&!b.d){b.d=1;fqStrike(st,b.x,b.y,vis,.75);st.sf=Math.max(st.sf,.22);if(!G.bot)G.shk=Math.max(G.shk||0,.18)}}st.bq=st.bq.filter(b=>!b.d)}
+function fqHailTick(st,dt,vis){const p=G.p,B=fqB();st.it=(st.it||0)-dt;while(st.it<=0){st.it+=.05/(G.S.amount*.15+1);const e=vis.length&&Math.random()<.8?pick(vis):null;st.ic.push({x:e?e.x+rnd(-14,14):p.x+rnd(-VW/2,VW/2),y:e?e.y+rnd(-10,10):p.y+rnd(-VH/2,VH/2),t:0,sc:rnd(.75,1.05),d:0})}
+  for(const c of st.ic){c.t+=dt;if(!c.d&&c.t>=.85){c.d=1;for(const e of vis)if(!e.dead&&(e.x-c.x)**2+(e.y-c.y)**2<(42*c.sc+e.r)**2){hurt(e,B*FQC.IC,'fulmine',{kb:0});e.slow=Math.max(e.slow||0,.45)}}}st.ic=st.ic.filter(c=>c.t<2.5);
+  st.ht-=dt;while(st.ht<=0){st.ht+=.16/(G.S.amount*.15+1);const e=vis.length&&Math.random()<.75?pick(vis):null;const tx=e?e.x+rnd(-12,12):p.x+rnd(-VW/2,VW/2),ty=e?e.y+rnd(-12,12):p.y+rnd(-VH/2,VH/2);const T=rnd(.32,.45);st.hl.push({x0:tx-260,y0:ty-420,tx,ty,t:0,T,r:rnd(6,10)})}
   for(const h of st.hl){h.t+=dt;if(h.t>=h.T&&!h.done){h.done=1;for(const e of vis)if(!e.dead&&(e.x-h.tx)**2+(e.y-h.ty)**2<(34+e.r)**2){hurt(e,B*FQC.HL,'fulmine',{kb:e.boss?0:8});e.slow=Math.max(e.slow||0,.4)}
       if(!G.bot&&st.sp.length<400)for(let i=0;i<4;i++)st.sp.push({x:h.tx,y:h.ty,vx:rnd(-90,90),vy:-rnd(40,120),t:0,L:rnd(.25,.45),c:pick(['#e8f6ff','#bfe6ff','#ffffff']),g:1})}}
   st.hl=st.hl.filter(h=>h.t<h.T+.05);
   // 강풍: 적을 바람 방향으로 살짝 밀어요
   for(const e of vis)if(!e.boss&&!e.dead){e.x+=55*dt;e.y+=24*dt}}
 // ---- 피날레 「벼락」 ----
-function fqTree(){const p=G.p,X0=p.x-VW/2,Y0=p.y-VH/2,seg=[];
-  function grow(x,y,a,len,dep,o0){let cx=x,cy=y;const n=Math.max(3,Math.round(len/26));for(let i=0;i<n;i++){const na=a+rnd(-.45,.45),nx=cx+Math.cos(na)*len/n,ny=cy+Math.sin(na)*len/n,o=o0+(i/n)*(.55/(dep+1));seg.push([cx,cy,nx,ny,dep,o]);
-      if(dep<3&&Math.random()<(dep===0?.32:dep===1?.2:.12))grow(nx,ny,na+(Math.random()<.5?-1:1)*rnd(.5,1.2),len*rnd(.45,.7),dep+1,o);cx=nx;cy=ny}}
-  grow(p.x+rnd(-30,30),Y0-20,Math.PI/2,VH*.75,0,0);
-  for(let k=0;k<2;k++)grow(k<1?X0-10:X0+VW+10,Y0+rnd(.08,.35)*VH,k<1?rnd(.15,.5):Math.PI-rnd(.15,.5),VW*.55,1,.2+k*.08);return seg}
-function fqFinStart(st){st.fin={t:0,tk:[],fl:0,tr:null,bt:0};if(!G.bot)SND.p('boss')}
+function fqTree(){const p=G.p,X0=p.x-VW/2,Y0=p.y-VH/2,seg=[];let lim=0;
+  function grow(x,y,a,len,dep,o0){if(seg.length>=lim)return;let cx=x,cy=y;const n=Math.max(3,Math.round(len/26));for(let i=0;i<n;i++){const na=a+rnd(-.45,.45),nx=cx+Math.cos(na)*len/n,ny=cy+Math.sin(na)*len/n,o=o0+(i/n)*(.55/(dep+1));seg.push([cx,cy,nx,ny,dep,o]);
+      if(dep<4&&Math.random()<(dep===0?.55:.38))grow(nx,ny,na+(Math.random()<.5?-1:1)*rnd(.5,1.2),len*rnd(.45,.7),dep+1,o);cx=nx;cy=ny}}
+  lim=110;grow(p.x+rnd(-30,30),Y0-20,Math.PI/2,VH*.75,0,0);
+  for(let k=0;k<6;k++){lim=seg.length+85;grow(k<3?X0-10:X0+VW+10,Y0+rnd(.05,.6)*VH,k<3?rnd(-.2,.6):Math.PI-rnd(-.2,.6),VW*.65,1,.1+k*.05)}for(let k=0;k<2;k++){lim=seg.length+95;grow(X0+rnd(.15,.85)*VW,Y0-20,Math.PI/2+rnd(-.4,.4),VH*.9,0,.05+k*.1)}return seg}
+function fqFinStart(st){st.fin={t:0,tk:[],fl:0,tr:null,bt:0};st.tw=[];st.ic=[];st.hl=[];if(!G.bot)SND.p('boss')}
 function fqFinTick(st,dt,vis){const F=st.fin,T=F.t+=dt,B=fqB(),p=G.p;if(F.fl>0)F.fl-=dt;
   if(T<6.6)for(const e of vis)e.slow=Math.max(e.slow||0,.45);
-  if(T>2.2&&T<4.4){F.bt-=dt;if(F.bt<=0){F.bt=rnd(.12,.3)*(1-(T-2.2)/3);const e=vis.length?pick(vis):null;fqStrike(st,e?e.x:p.x+rnd(-300,300),e?e.y:p.y+rnd(-200,200),vis,.5)}}
+  if(T>2.2&&T<4.4){F.bt-=dt;if(F.bt<=0){if(Math.random()<.25)F.fl=Math.max(F.fl,.25);F.bt=rnd(.12,.3)*(1-(T-2.2)/3);const e=vis.length?pick(vis):null;fqStrike(st,e?e.x:p.x+rnd(-300,300),e?e.y:p.y+rnd(-200,200),vis,.5)}}
   if(!F.tr&&T>=4.2){F.tr=G.bot?[]:fqTree();F.t0=T;if(!G.bot){SND.p('thunder');G.shk=Math.max(G.shk||0,.4)}}
-  [[4.7,11],[5.4,11],[6.1,11],[6.7,30]].forEach(([tt,m],i)=>{if(!F.tk[i]&&T>=tt){F.tk[i]=1;const d=B*m;for(const e of dmVis(60))hurt(e,e.boss?d*.6:d,'fulmine',{kb:i===3?14:4});F.fl=i===3?.5:.18;
+  [[4.7,11],[5.4,11],[6.1,11],[6.7,30]].forEach(([tt,m],i)=>{if(!F.tk[i]&&T>=tt){F.tk[i]=1;const d=B*m;for(const e of dmVis(60))hurt(e,e.boss?d*.6:d,'fulmine',{kb:i===3?14:4});F.fl=i===3?.6:.35;
     if(i===3){if(G.eb)for(const b of G.eb)b.life=0;if(!G.bot){SND.p('ult');G.shk=Math.max(G.shk||0,.7)}}else if(!G.bot)SND.p('zap')}});
-  if(T>10.5){st.fin=null}}
+  if(T>12.6){st.fin=null;fqPhase(st,0)}}
 // ---- 틱 ----
 function fqTick(w,dt){const st=fqIni(w),S=G.S,p=G.p,vis=dmVis();
   if(!st.fin){st.pt+=dt;if(st.pt>=FQC.PH)fqPhase(st,(st.ph+1)%3)}
@@ -7611,6 +7614,7 @@ function fqTick(w,dt){const st=fqIni(w),S=G.S,p=G.p,vis=dmVis();
     else if(st.ph===1)fqTwTick(st,dt,vis);
     else fqHailTick(st,dt,vis)}
   else fqFinTick(st,dt,vis);
+  fqBurstTick(st,dt,vis);if(st.sf>0)st.sf-=dt;
   // 천둥 박수
   if(st.ch>=100&&!st.fin){st.ch=0;st.lev=2.2;const R=190*Math.sqrt(S.area),B=fqB();for(const e of vis)if(!e.dead&&(e.x-p.x)**2+(e.y-p.y)**2<(R+e.r)**2){hurt(e,B*FQC.TC,'fulmine',{kb:e.boss?0:22});e.fqW=G.t+2}
     fqFx(st,'tc',p.x,p.y+6,1.35,{bl:'lighter'});if(!G.bot){for(let k=0;k<6;k++){const a=k/6*6.283;fqBolt(st,p.x,p.y-10,p.x+Math.cos(a)*R,p.y+Math.sin(a)*R*.7,2,.3)}SND.p('thunder');G.shk=Math.max(G.shk||0,.3)}}
@@ -7619,7 +7623,7 @@ function fqTick(w,dt){const st=fqIni(w),S=G.S,p=G.p,vis=dmVis();
   if(!G.bot){for(const b of st.bo)b.t+=dt;st.bo=st.bo.filter(b=>b.t<b.L);for(const f of st.fx)f.t+=dt;st.fx=st.fx.filter(f=>f.t<FQP[f.k][6]/FQP[f.k][5]);
     for(const q of st.sp){q.t+=dt;q.x+=q.vx*dt;q.y+=q.vy*dt;if(q.g)q.vy+=420*dt}st.sp=st.sp.filter(q=>q.t<q.L);
     // 빗줄기 (화면 기준 좌표)
-    const heavy=st.fin?Math.min(1,st.fin.t/2)*(st.fin.t<7?1:Math.max(0,1-(st.fin.t-7)/1.5)):0,want=st.ph===0&&!st.fin?140:st.ph===2&&!st.fin?40:Math.round(260*heavy);
+    const heavy=st.fin?Math.min(1,st.fin.t/2)*(st.fin.t<8?1:Math.max(0,1-(st.fin.t-8)/2.5)):0,want=st.ph===0&&!st.fin?140:st.ph===2&&!st.fin?40:Math.round(260*heavy);
     while(st.rd.length<want)st.rd.push({x:rnd(-VW/2,VW/2+120),y:rnd(-VH/2,VH/2),v:rnd(620,900),l:rnd(10,22)});if(st.rd.length>want)st.rd.length=want;
     for(const r of st.rd){r.y+=r.v*dt;r.x-=r.v*.22*dt;if(r.y>VH/2+20){r.y=-VH/2-20;r.x=rnd(-VW/2,VW/2+120)}}}}
 WU.fulmine=fqTick;
@@ -7628,24 +7632,29 @@ function fqBoltDraw(P,w,a,col){ctx.beginPath();ctx.moveTo(P[0][0],P[0][1]);for(l
 function fqTint(st){const p=G.p,X0=p.x-VW/2,Y0=p.y-VH/2,u=Math.min(1,st.pt/1.2),cols=['rgba(10,16,48,.32)','rgba(30,40,46,.2)','rgba(150,200,240,.13)'];if(st.fin)return;ctx.save();ctx.globalAlpha=u;ctx.fillStyle=cols[st.ph];ctx.fillRect(X0,Y0,VW,VH);ctx.restore();
   if(st.ph===0){const n=Math.ceil(VW/150)+1;for(let i=0;i<n;i++){const fi=Math.floor(G.t*12+i*5)%36;fqSp('cl',fi,X0+i*150+40*Math.sin(G.t*.4+i),Y0+92,1.15,.9*u)}}}
 function fqRainDraw(st,col){const p=G.p;if(!st.rd.length)return;ctx.save();ctx.strokeStyle=col||'rgba(170,200,255,.55)';ctx.lineWidth=1.2;ctx.beginPath();for(const r of st.rd){const x=p.x+r.x,y=p.y+r.y;ctx.moveTo(x,y);ctx.lineTo(x+r.l*.22,y-r.l)}ctx.stroke();ctx.restore()}
-function fqFinBg(st,F){const p=G.p,T=F.t,X0=p.x-VW/2,Y0=p.y-VH/2,dk=Math.min(1,T/2.2)*(T<6.8?1:Math.max(0,1-(T-6.8)/1.4));ctx.save();
-  const g=ctx.createLinearGradient(0,Y0,0,Y0+VH);g.addColorStop(0,'rgba(4,6,20,.92)');g.addColorStop(1,'rgba(14,18,46,.78)');ctx.globalAlpha=dk;ctx.fillStyle=g;ctx.fillRect(X0,Y0,VW,VH);ctx.restore();
-  if(dk>0){const n=Math.ceil(VW/130)+1;for(let i=0;i<n;i++){const fi=Math.floor(G.t*12+i*7)%36;fqSp('cl',fi,X0+i*130,Y0+70+12*Math.sin(G.t+i),1.4,dk)}}
-  // 구름이 갈라지고 햇살·무지개
-  if(T>6.8){const u=Math.min(1,(T-6.8)/1.2)*Math.max(0,Math.min(1,(10.5-T)/1.2));ctx.save();ctx.globalCompositeOperation='lighter';
-    for(let i=0;i<7;i++){const a=-.55+i*.18+Math.sin(G.t*.5+i)*.03,cx=p.x+(i-3)*30;ctx.globalAlpha=u*.16;const gr=ctx.createLinearGradient(cx,Y0,cx+Math.sin(a)*VH,Y0+VH);gr.addColorStop(0,'rgba(255,248,220,1)');gr.addColorStop(1,'rgba(255,240,200,0)');ctx.fillStyle=gr;ctx.beginPath();ctx.moveTo(cx-14,Y0);ctx.lineTo(cx+14,Y0);ctx.lineTo(cx+Math.sin(a)*VH+90,Y0+VH);ctx.lineTo(cx+Math.sin(a)*VH-90,Y0+VH);ctx.closePath();ctx.fill()}
-    const RC=['#ff5a5a','#ff9a3a','#ffe14a','#5adc6a','#4ab0ff','#5a6aff','#b06aff'],R0=Math.min(VW,VH)*.62,grow=Math.min(1,(T-7)/1.4);ctx.globalAlpha=u*.42;ctx.lineWidth=Math.max(5,R0*.035);
-    for(let i=0;i<7;i++){ctx.strokeStyle=RC[i];ctx.beginPath();ctx.arc(p.x,p.y+VH*.42,R0-i*ctx.lineWidth,Math.PI,Math.PI+Math.PI*grow);ctx.stroke()}ctx.restore()}}
+let FQCV=null;
+function fqFinBg(st,F){const p=G.p,T=F.t,X0=p.x-VW/2,Y0=p.y-VH/2,dk=Math.min(1,T/1.8);
+  // 폭풍(pixelfx storm)을 화면 가득, 끝에는 위쪽 가운데부터 부채꼴로 걷혀요
+  const im=FQI.st;if(dsOk(im)&&dk>0){if(!FQCV)FQCV=document.createElement('canvas');const cw=Math.ceil(VW/2),chh=Math.ceil(VH/2);if(FQCV.width!==cw||FQCV.height!==chh){FQCV.width=cw;FQCV.height=chh}const c2=FQCV.getContext('2d');
+    c2.globalCompositeOperation='source-over';c2.globalAlpha=1;c2.clearRect(0,0,cw,chh);c2.imageSmoothingEnabled=false;const fi=Math.floor(G.t*6)%60;c2.drawImage(im,(fi%10)*160,Math.floor(fi/10)*90,160,90,0,0,cw,chh);
+    c2.fillStyle='rgba(4,6,22,.5)';c2.fillRect(0,0,cw,chh);
+    if(T>7.8){const u=Math.min(1,(T-7.8)/3.6),e=1-Math.pow(1-u,2),cx=cw/2,cy=-chh*.08,R=chh*(.3+e*1.8),ha=.1+e*1.15;c2.globalCompositeOperation='destination-out';const g=c2.createRadialGradient(cx,cy,R*.15,cx,cy,R);g.addColorStop(0,'rgba(0,0,0,1)');g.addColorStop(.7,'rgba(0,0,0,.85)');g.addColorStop(1,'rgba(0,0,0,0)');c2.fillStyle=g;c2.beginPath();c2.moveTo(cx,cy);c2.arc(cx,cy,R,Math.PI/2-ha,Math.PI/2+ha);c2.closePath();c2.fill()}
+    const out=T>11?Math.max(0,1-(T-11)/1.5):1;ctx.save();ctx.globalAlpha=.92*dk*out;ctx.imageSmoothingEnabled=false;ctx.drawImage(FQCV,X0,Y0,VW,VH);ctx.restore()}
+  // 갠 하늘: 부채꼴 햇살 그라데이션
+  if(T>7.8){const u=Math.min(1,(T-7.8)/3.6),e=1-Math.pow(1-u,2),fade=T>11.2?Math.max(0,1-(T-11.2)/1.4):1,cx=p.x,cy=Y0-VH*.08,R=VH*(.3+e*1.8),ha=.1+e*1.15;ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=.5*fade;
+    const g=ctx.createRadialGradient(cx,cy,0,cx,cy,R);g.addColorStop(0,'rgba(255,250,225,.95)');g.addColorStop(.35,'rgba(255,236,190,.45)');g.addColorStop(1,'rgba(200,225,255,0)');ctx.fillStyle=g;ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,R,Math.PI/2-ha,Math.PI/2+ha);ctx.closePath();ctx.fill();
+    ctx.globalAlpha=.06*fade;for(let i=-3;i<=3;i++){const a=Math.PI/2+i*ha/3.6+Math.sin(G.t*.6+i)*.02,R2=R*.85;const rg=ctx.createRadialGradient(cx,cy,0,cx,cy,R2);rg.addColorStop(0,'rgba(255,246,215,1)');rg.addColorStop(1,'rgba(255,246,215,0)');ctx.fillStyle=rg;ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+Math.cos(a-.018)*R2,cy+Math.sin(a-.018)*R2);ctx.lineTo(cx+Math.cos(a+.018)*R2,cy+Math.sin(a+.018)*R2);ctx.closePath();ctx.fill()}ctx.restore()}}
 function fqFinFg(st,F){const p=G.p,T=F.t,X0=p.x-VW/2,Y0=p.y-VH/2;
   if(T>2.2&&T<7){const u=Math.min(1,(T-2.2)/.8);ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=u*.55;const g=ctx.createRadialGradient(p.x,p.y-20,4,p.x,p.y-20,130);g.addColorStop(0,'rgba(200,225,255,1)');g.addColorStop(1,'rgba(80,120,255,0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(p.x,p.y-20,130,0,6.283);ctx.fill();ctx.restore();fqSp('cu',Math.floor(G.t*12)%33,p.x,p.y,1.6,u,'lighter')}
-  if(F.tr){const pr=(T-F.t0)/1.9,fl=T<6.9?.75+.25*Math.random():Math.max(0,1-(T-6.9)/.8);if(fl>0){ctx.save();ctx.globalCompositeOperation='lighter';ctx.lineCap='round';
-    for(const s of F.tr){if(s[5]>pr)continue;const w=Math.max(1,4.5-s[4]*1.3)*(T>6.6&&T<7?1.6:1);ctx.strokeStyle=`rgba(120,170,255,${fl*.4})`;ctx.lineWidth=w*4;ctx.beginPath();ctx.moveTo(s[0],s[1]);ctx.lineTo(s[2],s[3]);ctx.stroke();ctx.strokeStyle=`rgba(240,248,255,${fl})`;ctx.lineWidth=w;ctx.stroke()}ctx.restore()}}
-  if(F.fl>0){ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=Math.min(1,F.fl/.3)*.5;ctx.fillStyle='#dfeaff';ctx.fillRect(X0,Y0,VW,VH);ctx.restore()}}
+  if(F.tr){const pr=(T-F.t0)/1.7,fl=T<7.2?.75+.25*Math.random():Math.max(0,1-(T-7.2)/1);if(fl>0){ctx.save();ctx.globalCompositeOperation='lighter';ctx.lineCap='round';
+    for(let d=0;d<5;d++){ctx.beginPath();let any=0;for(const s of F.tr){if(s[4]!==d||s[5]>pr)continue;any=1;ctx.moveTo(s[0],s[1]);ctx.lineTo(s[2],s[3])}if(!any)continue;const w=Math.max(1,4.5-d*1.1)*(T>6.6&&T<7?1.6:1);ctx.strokeStyle=`rgba(120,170,255,${fl*.4})`;ctx.lineWidth=w*4;ctx.stroke();ctx.strokeStyle=`rgba(240,248,255,${fl})`;ctx.lineWidth=w;ctx.stroke()}ctx.restore()}}
+  const wo=T>5.4&&T<8.4?(T<6.75?(T-5.4)/1.35:Math.max(0,1-(T-6.75)/1.5)):0;const fl=Math.max(F.fl>0?Math.min(1,F.fl/.3)*.8:0,wo);if(fl>0){ctx.save();ctx.globalAlpha=Math.min(.94,fl*.94);ctx.fillStyle='#f6f9ff';ctx.fillRect(X0,Y0,VW,VH);ctx.restore()}}
 function fqDraw(w){if(G.bot)return;const st=w.st;if(!st.i)return;const p=G.p,X0=p.x-VW/2,Y0=p.y-VH/2;
   if(st.fin)fqFinBg(st,st.fin);else fqTint(st);
   for(const q of st.tw){const fi=Math.floor((G.t+q.t)*12)%24;fqSp('tw',fi,q.x,q.y+20,1.35,.95)}
   for(const f of st.fx){const q=FQP[f.k];fqSp(f.k,Math.floor(f.t*q[5]),f.x,f.y,f.sc,1,f.bl||'lighter')}
   ctx.save();ctx.globalCompositeOperation='lighter';ctx.lineCap='round';ctx.lineJoin='round';for(const b of st.bo){const a=(1-b.t/b.L)*(.7+.3*Math.random());fqBoltDraw(b.P,b.w,a,b.col);for(const P of b.br)fqBoltDraw(P,b.w*.5,a*.8,b.col)}ctx.restore();
+  for(const c of st.ic)fqSp('ic',Math.floor(c.t*12.3),c.x,c.y,c.sc,1,'source-over');
   // 우박
   if(st.hl.length){ctx.save();for(const h of st.hl){const u=Math.min(1,h.t/h.T),x=h.x0+(h.tx-h.x0)*u,y=h.y0+(h.ty-h.y0)*u;ctx.strokeStyle='rgba(200,235,255,.35)';ctx.lineWidth=h.r*.8;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x-(h.tx-h.x0)*.06,y-(h.ty-h.y0)*.06);ctx.stroke();ctx.fillStyle='#5a8ab8';ctx.beginPath();ctx.arc(x+1,y+1,h.r/2+1,0,6.283);ctx.fill();ctx.fillStyle='#eaf8ff';ctx.beginPath();ctx.arc(x,y,h.r/2,0,6.283);ctx.fill();ctx.fillStyle='#ffffff';ctx.fillRect(Math.round(x-h.r/4),Math.round(y-h.r/4),2,2)}ctx.restore()}
   if(!st.fin&&st.ph===2){ctx.save();ctx.strokeStyle='rgba(230,245,255,.22)';ctx.lineWidth=1.5;ctx.beginPath();for(let i=0;i<14;i++){const yy=Y0+((i*97+G.t*40)%VH),xx=X0+((i*173+G.t*620)%(VW+300))-150;ctx.moveTo(xx,yy);ctx.quadraticCurveTo(xx+60,yy-6,xx+140,yy+4)}ctx.stroke();ctx.restore()}
@@ -7655,6 +7664,7 @@ function fqDraw(w){if(G.bot)return;const st=w.st;if(!st.i)return;const p=G.p,X0=
   const ch=Math.min(1,st.ch/100);if(ch>.05||st.lev>0){ctx.save();ctx.globalCompositeOperation='lighter';const lv=st.lev>0?Math.min(1,st.lev/.5):0,r=26+ch*14+lv*30;ctx.globalAlpha=.18+ch*.25+lv*.4;const g=ctx.createRadialGradient(p.x,p.y-14,2,p.x,p.y-14,r);g.addColorStop(0,'rgba(210,230,255,.9)');g.addColorStop(1,'rgba(90,130,255,0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(p.x,p.y-14,r,0,6.283);ctx.fill();ctx.restore();
     if(Math.random()<ch*.5+lv){const a=rnd(0,6.283),rr=rnd(14,30);fqBolt(st,p.x+Math.cos(a)*6,p.y-16+Math.sin(a)*6,p.x+Math.cos(a)*rr,p.y-16+Math.sin(a)*rr,.8,.08,'170,210,255')}
     if(st.lev>0)fqSp('cu',Math.floor(G.t*12)%33,p.x,p.y,1.1,lv*.8,'lighter')}
+  if(st.sf>0){ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=Math.min(1,st.sf/.22)*.45;ctx.fillStyle='#dfe8ff';ctx.fillRect(X0,Y0,VW,VH);ctx.restore()}
   if(st.fin)fqFinFg(st,st.fin)}
 HX.push({k:'fulmine',a:'bolt',b:'rain',it:'rejuran',q:'하늘도 반할만큼 아름다운 당신, 보이시나요?',lore:'폭풍이 지나간 자리에, 홀로 남은 아름다운 당신을 위하여',col:'#9fc8ff',sub:'⚡ SYSTEM OVERLOAD + 🌧️ 뇌우 + 💆 리쥬란'});
 Object.assign(WP,{fulmine:{name:'콜포 디 풀미네',icon:'⛈️',evo:'rejuran',evoName:'콜포 디 풀미네',hid:1,d:'폭풍이 지나간 자리에, 홀로 남은 아름다운 당신을 위하여',ed:'폭풍이 지나간 자리에, 홀로 남은 아름다운 당신을 위하여',extra:1}});

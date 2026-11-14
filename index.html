@@ -3788,7 +3788,7 @@ const ACH_HX=[
  {id:'hx_chron',hx:'chron',n:'동시성의 상대성',c:'크로니클 아츠 무기 중 1종 제작',r:'👑 잔느 신화 스킨 「로즈 그리고 너」',inv:'mx:송기호|10'},
  {id:'hx_doom',hx:'doom',n:'그녀에게는 우리가 있으니',c:'둠스데이 제작',r:'👑 밍키 신화 스킨 「더 커맨더」',inv:'mx:박민규|10'},
  {id:'hx_dimsw',hx:'dimsw',n:'귀신 베는 차원검',c:'워 비 샹샹중 퍄오량 제작',r:'👑 짱재 신화 스킨 「검성」',inv:'mx:재건|10'},
- {id:'hx_nike',hx:'nike',n:'잭팟이 터지는 밤',c:'카르페 녹템 제작',r:'👑 영애 신화 스킨 「니케」',inv:'mx:영규형|10'},
+ {id:'hx_nike',hx:'nike',n:'베니 비디 비키',c:'카르페 녹템 제작',r:'👑 영애 신화 스킨 「니케」',inv:'mx:영규형|10'},
 ];
 const ACH_HX_ON=true;if(ACH_HX_ON)ACH.push(...ACH_HX);
 /* 11-08 밤: 장수 업적 — 저장 코드 순서 때문에 반드시 맨 끝에 */
@@ -7407,7 +7407,7 @@ function dsFinFg(F){const p=G.p,T=F.t,X0=p.x-VW/2,Y0=p.y-VH/2;
    ③ 동시접속 피버: 머리 위 슬롯머신이 돌아 체리(연사 2배)·벨(금빛 불꽃놀이)·BAR(구슬 폭포)
    ④ 피날레 「잭팟」(7-7-7): 거대 슬롯 → 구슬 분수·금화 비·불꽃놀이·꽃가루 → 월계관 승리 섬광. 화면 글자 없음.
    이펙트: pixelfx(MIT) firework-burst·crit-hit·confetti·sunburst를 금빛 팔레트로 구움(fx/nk_*.png). */
-const NKC={DM:3.6,BD:.33,CT:.5,JP:.45,BN:4,TO:2.2,FIN:60};
+const NKC={DM:3.6,BD:.33,CT:.5,JP:.65,BN:4,TO:1.6,FIN:60};
 const NKI={};[['fw','nk_fw.png'],['ch','nk_ch.png'],['cf','nk_cf.png'],['sb','nk_sb.png']].forEach(([k,f])=>{const im=new Image();im.src='fx/'+f;NKI[k]=im});
 // [가로,세로,열,원점x,원점y,fps,프레임수]
 const NKP={fw:[240,248,8,120,100,12,32],ch:[216,136,6,84,106,14,12],cf:[200,140,7,100,126,12,42],sb:[128,128,8,64,64,12,16]};
@@ -7448,7 +7448,7 @@ const NKS=['cherry','bell','bar','seven'];
 function nkSlotStart(st,force){const r=force?'seven':pick(['cherry','bell','bar']);st.sl={t:0,r,rs:[0,1,2].map(()=>Math.floor(rnd(0,4))),big:!!force};if(!G.bot)SND.p('shuffle')}
 function nkSlotTick(st,dt,vis){const s=st.sl;s.t+=dt;if(s.big)return;if(s.t>=1.25&&!s.done){s.done=1;const k=s.r,p=G.p;const B=nkB();for(const e of vis)hurt(e,B*NKC.JP,'nike',{kb:0});if(!G.bot)for(let i=0;i<34;i++)G.fx.push({x:p.x+rnd(-VW/2,VW/2),y:p.y-VH/2,vx:rnd(-20,20),vy:rnd(150,300),life:rnd(1,1.8),c:pick(['#ffd34d','#fff0a0','#f0b424']),s:4,coin:1});
     if(k==='cherry'){st.fv={k,t:5};nkSpark(st,p.x,p.y-60,16,140,.8);if(!G.bot)SND.p('lvl')}
-    else if(k==='bell'){st.fv={k,t:.1};const tg=vis.length?vis.slice().sort(()=>Math.random()-.5).slice(0,3):[];for(let i=0;i<3;i++){const e=tg[i];nkFW(st,e?e.x:p.x+rnd(-200,200),e?e.y:p.y+rnd(-150,150),.35+i*.25,1)}if(!G.bot)SND.p('heart')}
+    else if(k==='bell'){st.fv={k,t:.1};const tg=vis.length?vis.slice().sort(()=>Math.random()-.5).slice(0,10):[];for(let i=0;i<10;i++){const e=tg[i];nkFW(st,e?e.x:p.x+rnd(-VW*.4,VW*.4),e?e.y:p.y+rnd(-VH*.4,VH*.4),.3+i*.16,1)}if(!G.bot)SND.p('heart')}
     else if(k==='bar'){st.fv={k,t:3};if(!G.bot)SND.p('coin')}}
   if(s.t>1.9)st.sl=null}
 function nkFW(st,x,y,dl,dm){st.fw=st.fw||[];st.fw.push({x,y,t:-dl,hit:0,dm:dm||0})}
@@ -7471,8 +7471,8 @@ function nkFinTick(st,dt,vis){const F=st.fin,T=F.t+=dt,B=nkB(),p=G.p,X0=p.x-VW/2
 function nkTick(w,dt){const st=nkIni(w),S=G.S,p=G.p,vis=dmVis();G.nkN=Math.max(0,(G.nkN||0)-25*dt);
   if(st.fv){st.fv.t-=dt;if(st.fv.k==='bar'){st.fall-=dt;while(st.fall<=0){st.fall+=.07;const b=nkBall(st,p.x-VW/2+rnd(.05,.95)*VW,p.y-VH/2+6,Math.PI/2+rnd(-.5,.5),{bn:2,rb:1,life:2.2});if(b&&vis.length)nkRetarget(b,vis,null)}}if(st.fv.t<=0)st.fv=null}
   if(!st.fin){st.ft-=dt;if(st.ft<=0){st.ft=.75*S.cd/(st.fv&&st.fv.k==='cherry'?2:1);nkVolley(st,vis)}
-    st.tt-=dt;if(st.tt<=0){st.tt=4.6*S.cd;nkToast(st,vis)}
-    st.fnt-=dt;st.st-=dt;if(!st.sl&&st.st<=0){st.st=10*S.cd;if(st.fnt<=0&&vis.length){st.fnt=NKC.FIN;nkFinStart(st)}else nkSlotStart(st)}}
+    st.tt-=dt;if(st.tt<=0){st.tt=2.4*S.cd;nkToast(st,vis)}
+    st.fnt-=dt;st.st-=dt;if(!st.sl&&st.st<=0){st.st=15*S.cd;if(st.fnt<=0&&vis.length){st.fnt=NKC.FIN;nkFinStart(st)}else nkSlotStart(st)}}
   for(const g of st.gl){g.t+=dt;if(!g.done&&g.t>=g.L){g.done=1;nkClink(st,g.tx,g.ty,vis)}}st.gl=st.gl.filter(g=>g.t<g.L+.35);
   if(st.sl)nkSlotTick(st,dt,vis);nkBallTick(st,dt,vis);nkFwTick(st,dt,vis);
   if(st.fin)nkFinTick(st,dt,vis);

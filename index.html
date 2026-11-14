@@ -1946,11 +1946,26 @@ function mgFx(dt){const p=G.p;
     if(b.warn>0){b.warn-=dt;if(b.fol&&b.warn>b.lk)b.a=Math.atan2(p.y-b.y,p.x-b.x);if(b.warn<=0&&!G.bot)SND.p(b.w>40?'boom':'whoosh');continue}
     b.on-=dt;b.a+=b.rot*dt;b.cd-=dt;if(b.cd<=0&&mgSeg(p.x,p.y,b.x,b.y,b.a,b.L)<b.w/2+9){b.cd=.5;rangedHit(b.dmg,null)}}
     G.mgL=G.mgL.filter(b=>b.warn>0||b.on>0)}
-  if(G.mgM){for(const m of G.mgM){m.t-=dt;if(m.t<=0&&!m.done){m.done=1;if(Math.hypot(p.x-m.x,p.y-m.y)<m.r+9)hitP(m.dmg);if(!G.bot){sparks(m.x,m.y,22,['#ff9a3d','#ffd34d','#7a3a1a'],220,.5,3);pring(m.x,m.y,m.r,'#ff9a3d',20,.35);G.shk=Math.max(G.shk||0,.15)}}}G.mgM=G.mgM.filter(m=>!m.done)}}
+  if(G.mgM){for(const m of G.mgM){m.t-=dt;if(m.t<=0&&!m.done){m.done=1;if(Math.hypot(p.x-m.x,p.y-m.y)<m.r+9)hitP(m.dmg);if(!G.bot){const C=m.cr?['#ff5ab8','#ffc0e4','#ffffff']:['#ff9a3d','#ffd34d','#7a3a1a'];sparks(m.x,m.y,m.cr?12:22,C,220,.5,3);pring(m.x,m.y,m.r,C[0],m.cr?12:20,.35);G.shk=Math.max(G.shk||0,.15)}}}G.mgM=G.mgM.filter(m=>!m.done)}}
+/* ---- 마계인천 ③단계: 브리트니 (11-14) — 1막 입장 / 2막 쇼타임(70%) / 3막 앙코르(40%) · 75·50·25%에 부하 소환 ---- */
+function mgBriTick(e,dt,lv,aim){const p=G.p,A=G.arena,h=e.hp/e.max;
+  const act=h>.7?1:h>.4?2:3;if(act>(e.mgAct||1)){e.mgAct=act;if(!G.bot){toast(act===2?'👑 2막 · 쇼타임!':'👑 3막 · 앙코르!',act===2?'브리트니가 무대를 넓혀요':'브리트니가 쉬지 않아요',true);G.rflash=.5;SND.p('boss')}if(act===2&&lv===2)e.mn=3}
+  const k=act===3?.7:1;
+  e.mk=e.mk||0;const TH=[.75,.5,.25];if(e.mk<3&&h<TH[e.mk]){const B=MG_BOSSES[e.mk],a=rnd(0,6.283),x=A?A.x+Math.cos(a)*A.hw*.6:e.x+Math.cos(a)*200,y=A?A.y+Math.sin(a)*A.hh*.6:e.y+Math.sin(a)*160;
+    mkEnemy(B.type,x,y,{elite:1,mgMini:1,r:B.r,hp:B.hp*.3,max:B.hp*.3,spd:B.spd,dmg:B.dmg*.8,xp:B.xp*.5,name:B.name});e.mk++;if(!G.bot){toast(`👑 「${B.name}, 무대로!」`,'브리트니가 부하를 불렀어요',true);sparks(x,y-40,40,['#ff5ab8','#ffd34d','#ffffff'],240,.6,3);pring(x,y,70,'#ff5ab8',22,.5)}}
+  let busy=0;
+  if(e.mgSp){const S=e.mgSp;S.t-=dt;S.g-=dt;if(S.g<=0){S.g=.25;S.o+=.3;const n=lv===2?7:5;for(let i=0;i<n;i++)ebShot(e,S.o+i*6.283/n,105,8,.6,'#ff7ad9')}if(S.t<=0)e.mgSp=null}
+  if(e.mgSw){const W=e.mgSw;W.t-=dt;busy=1;if(W.t<=0){e.mgSw=null;const dx=p.x-e.x,dy=p.y-e.y,d=Math.hypot(dx,dy);let da=Math.atan2(dy,dx)-W.a;while(da>Math.PI)da-=6.283;while(da<-Math.PI)da+=6.283;if(d<229&&Math.abs(da)<1.05)hitP(e.dmg*.8);if(!G.bot){for(let i=0;i<24;i++){const a=W.a-1.05+2.1*i/23,r=rnd(80,220);px(e.x+Math.cos(a)*r,e.y+Math.sin(a)*r,Math.cos(a)*120,Math.sin(a)*120,.4,pick(['#ff5ab8','#c070ff','#ffffff']),3,1,2)}SND.p('whoosh');G.shk=Math.max(G.shk||0,.15)}}}
+  e.mq1=(e.mq1===undefined?3:e.mq1)-dt;if(e.mq1<=0&&!e.mgSp){e.mq1=7*k;e.mgSp={t:2.4,g:0,o:rnd(0,6.283)}}
+  e.mq2=(e.mq2===undefined?5:e.mq2)-dt;if(e.mq2<=0){e.mq2=8*k;const X=Math.random()<.5,o=X?.785:0,M=G.mgM||(G.mgM=[]);M.push({x:p.x,y:p.y,t:.9,T:.9,r:34,dmg:e.dmg*.7,cr:1});for(let j=0;j<4;j++){const a=o+j*1.5708;for(let i=1;i<=5;i++)M.push({x:p.x+Math.cos(a)*i*70,y:p.y+Math.sin(a)*i*70,t:.9+i*.12,T:.9+i*.12,r:34,dmg:e.dmg*.7,cr:1})}if(act===3&&!e.mgSw)e.mq3=Math.min(e.mq3||9,1.4)}
+  if(act>=2){e.mq3=(e.mq3===undefined?2:e.mq3)-dt;if(e.mq3<=0&&!e.mgSw){e.mq3=6*k;e.mgSw={a:aim,t:1}}}
+  if(lv===2&&act>=2){e.mn=(e.mn||30)-dt;if(e.mn<=0){e.mn=30;G.mgNt=10;if(A){const C=[[-1,-1],[1,-1],[1,1],[-1,1]].sort(()=>Math.random()-.5).slice(0,2);for(const [sx,sy] of C)G.pickups.push({x:A.x+sx*A.hw*.78,y:A.y+sy*A.hh*.78,k:'mgstar'})}if(!G.bot){toast('🌙 브리트니의 밤','어둠이 차올라요 · 결계 모서리의 🌟 별조각을 주우세요',true);SND.p('whoosh')}}}
+  if(G.mgNt>0){G.mgNt-=dt;G.fmD0=Math.min(.95,(G.fmD0||0)+.025*dt)}
+  return busy}
 function mgBossTick(dt){const p=G.p,lv=fmLv();
   for(const e of G.enemies){if(e.dead)continue;
     if(e.type==='mg_turret'){e.mgTs=(e.mgTs===undefined?rnd(.8,1.6):e.mgTs)-dt;if(e.mgTs<=0){e.mgTs=2;ebShot(e,Math.atan2(p.y-e.y,p.x-e.x),150,5,.6,'#ff5a7a')}continue}
-    if(!e.boss||!/^mg_b[123]$/.test(e.type))continue;
+    if(!(e.boss||e.mgMini)||!/^mg_b[1234]$/.test(e.type))continue;
     const dx=p.x-e.x,dy=p.y-e.y,d=Math.hypot(dx,dy)||1,aim=Math.atan2(dy,dx),rg=e.hp<e.max*.5,k=rg?.75:1;
     if(e.mgSpB===undefined)e.mgSpB=e.spd;
     if(rg&&!e.mgRg){e.mgRg=1;if(!G.bot){toast(`${e.name}${(e.name.charCodeAt(e.name.length-1)-44032)%28?'이':'가'} 화났어요!`,'',true);G.rflash=.5}}
@@ -1968,6 +1983,7 @@ function mgBossTick(dt){const p=G.p,lv=fmLv();
       e.mq1=(e.mq1===undefined?6:e.mq1)-dt;if(e.mq1<=0&&!e.mgSp){e.mq1=12*(rg?.85:1);e.mgB={t:2.5};if(!G.bot){toast('🌀 블랙홀!','바깥쪽으로 걸어서 버텨요');SND.p('whoosh')}}
       e.mq2=(e.mq2===undefined?3:e.mq2)-dt;if(e.mq2<=0&&!e.mgB){e.mq2=7*k;e.mgSp={t:2.4,g:0,o:rnd(0,6.283)}}
       e.mq3=(e.mq3===undefined?4.5:e.mq3)-dt;if(e.mq3<=0&&!e.mgB){e.mq3=5*(rg?.7:1);const n=rg?3:2,o=rnd(0,3.14);for(let i=0;i<n;i++){const a=o+i*3.1416/n;mgBeam({x:p.x-Math.cos(a)*350,y:p.y-Math.sin(a)*350,a,L:700,w:46,warn:1,on:.25,dmg:e.dmg*.8,src:e,cl:'#c070ff'})}}}
+    else if(e.type==='mg_b4')busy=mgBriTick(e,dt,lv,aim);
     else if(e.type==='mg_b3'){ // 레이저 위성: 회전 레이저 · 포탑 · 조준 사격
       if(e.mgRl>0){e.mgRl-=dt;busy=1}
       e.mq1=(e.mq1===undefined?5:e.mq1)-dt;if(e.mq1<=0&&!(e.mgRl>0)){e.mq1=13*(rg?.77:1);const n=lv===2?3:2,o=rnd(0,6.283),dir=Math.random()<.5?-1:1;e.mgRl=5;for(let i=0;i<n;i++)mgBeam({x:e.x,y:e.y-20,at:1,a:o+i*6.283/n,L:900,w:30,warn:1,on:4,rot:.7*dir,dmg:e.dmg*.6,src:e,cl:'#ff3a5a'})}
@@ -1977,12 +1993,13 @@ function mgBossTick(dt){const p=G.p,lv=fmLv();
 // 결계 안에서도 잡몹이 계속 들어옴(근접 3종만) — 물량 맵이니까
 function mgArenaSpawn(dt){const A=G.arena;if(!A)return;G.mgAA=(G.mgAA||0)+dt*(G.hell?6:G.hard?4:3);while(G.mgAA>=1){G.mgAA--;if(G.enemies.length>=90)continue;const [x,y]=arenaPt(A,Math.random()*4);mkEnemy(pick(['mg_egg','mg_fly','mg_jelly']),x,y)}}
 function mgFxDraw(){const p=G.p;
-  if(G.mgM)for(const m of G.mgM){const f=1-m.t/m.T;ctx.save();ctx.globalAlpha=.25+.25*f;ctx.fillStyle='#ff5a2a';ctx.beginPath();ctx.ellipse(m.x,m.y,m.r,m.r*.6,0,0,7);ctx.fill();ctx.globalAlpha=.9;ctx.strokeStyle='#ffd34d';ctx.lineWidth=2;ctx.setLineDash([6,5]);ctx.beginPath();ctx.ellipse(m.x,m.y,m.r,m.r*.6,0,0,7);ctx.stroke();ctx.setLineDash([]);
+  if(G.mgM)for(const m of G.mgM){const f=Math.max(0,1-m.t/Math.min(m.T,.9));if(m.cr){ctx.save();ctx.globalAlpha=.2+.3*f;ctx.fillStyle='#ff5ab8';ctx.beginPath();ctx.ellipse(m.x,m.y,m.r,m.r*.6,0,0,7);ctx.fill();ctx.globalAlpha=.9;ctx.strokeStyle='#ffc0e4';ctx.lineWidth=2;ctx.setLineDash([5,4]);ctx.beginPath();ctx.ellipse(m.x,m.y,m.r,m.r*.6,0,0,7);ctx.stroke();ctx.setLineDash([]);const hh=(1-f)*380;ctx.globalAlpha=f;ctx.fillStyle='#ff8ad0';ctx.beginPath();ctx.moveTo(m.x,m.y-hh-22);ctx.lineTo(m.x+8,m.y-hh);ctx.lineTo(m.x,m.y-hh+10);ctx.lineTo(m.x-8,m.y-hh);ctx.closePath();ctx.fill();ctx.fillStyle='#ffffff';ctx.fillRect(m.x-2,m.y-hh-14,3,8);ctx.restore();continue}ctx.save();ctx.globalAlpha=.25+.25*f;ctx.fillStyle='#ff5a2a';ctx.beginPath();ctx.ellipse(m.x,m.y,m.r,m.r*.6,0,0,7);ctx.fill();ctx.globalAlpha=.9;ctx.strokeStyle='#ffd34d';ctx.lineWidth=2;ctx.setLineDash([6,5]);ctx.beginPath();ctx.ellipse(m.x,m.y,m.r,m.r*.6,0,0,7);ctx.stroke();ctx.setLineDash([]);
     const h=(1-f)*420;ctx.globalAlpha=f;ctx.fillStyle='#7a3a1a';ctx.beginPath();ctx.arc(m.x+h*.35,m.y-h,10+f*6,0,7);ctx.fill();ctx.fillStyle='#ff9a3d';ctx.beginPath();ctx.arc(m.x+h*.35-3,m.y-h-3,5+f*3,0,7);ctx.fill();ctx.restore()}
   if(G.mgL)for(const b of G.mgL){const ex=b.x+Math.cos(b.a)*b.L,ey=b.y+Math.sin(b.a)*b.L;ctx.save();ctx.lineCap='round';
     if(b.warn>0){const lk=!b.fol||b.warn<=b.lk;ctx.globalAlpha=lk?.6+.3*Math.sin(G.t*40):.35;ctx.strokeStyle=b.cl;ctx.lineWidth=lk?3:2;ctx.setLineDash([10,6]);ctx.beginPath();ctx.moveTo(b.x,b.y);ctx.lineTo(ex,ey);ctx.stroke();ctx.setLineDash([]);ctx.globalAlpha=.12;ctx.lineWidth=b.w;ctx.beginPath();ctx.moveTo(b.x,b.y);ctx.lineTo(ex,ey);ctx.stroke()}
     else{ctx.globalCompositeOperation='lighter';ctx.globalAlpha=.55;ctx.strokeStyle=b.cl;ctx.lineWidth=b.w*(1+.1*Math.sin(G.t*50));ctx.beginPath();ctx.moveTo(b.x,b.y);ctx.lineTo(ex,ey);ctx.stroke();ctx.globalAlpha=.9;ctx.strokeStyle='#ffffff';ctx.lineWidth=b.w*.3;ctx.beginPath();ctx.moveTo(b.x,b.y);ctx.lineTo(ex,ey);ctx.stroke()}ctx.restore()}
-  for(const e of G.enemies){if(e.dead||!e.boss)continue;
+  for(const e of G.enemies){if(e.dead||!(e.boss||e.mgMini))continue;
+    if(e.mgSw){const W=e.mgSw;ctx.save();ctx.globalAlpha=.18+.22*(1-W.t)+.1*Math.sin(G.t*30);ctx.fillStyle='#ff3a6a';ctx.beginPath();ctx.moveTo(e.x,e.y);ctx.arc(e.x,e.y,220,W.a-1.05,W.a+1.05);ctx.closePath();ctx.fill();ctx.globalAlpha=.8;ctx.strokeStyle='#ff9ad5';ctx.lineWidth=2;ctx.setLineDash([8,5]);ctx.stroke();ctx.restore()}
     if(e.mgC&&e.mgC.w>0){const ex=e.x+Math.cos(e.mgC.a)*420,ey=e.y+Math.sin(e.mgC.a)*420;ctx.save();ctx.globalAlpha=.55+.35*Math.sin(G.t*40);ctx.strokeStyle='#ff3a3a';ctx.lineWidth=4;ctx.setLineDash([10,5]);ctx.beginPath();ctx.moveTo(e.x,e.y);ctx.lineTo(ex,ey);ctx.stroke();ctx.restore()}
     if(e.mgB){const f=e.mgB.t/2.5;ctx.save();ctx.globalAlpha=.6;ctx.strokeStyle='#a070ff';ctx.lineWidth=3;ctx.setLineDash([8,6]);ctx.beginPath();ctx.arc(e.x,e.y,139,0,7);ctx.stroke();ctx.setLineDash([]);ctx.globalAlpha=.18+.2*(1-f);ctx.fillStyle='#1a0030';ctx.beginPath();ctx.arc(e.x,e.y,139,0,7);ctx.fill();
       for(let i=0;i<6;i++){const a=G.t*4+i*1.047,r=40+((G.t*160+i*50)%260);ctx.globalAlpha=.7;ctx.fillStyle=i%2?'#ffe14d':'#c9a8ff';ctx.fillRect(e.x+Math.cos(a)*r-2,e.y+Math.sin(a)*r-2,4,4)}ctx.restore()}}}
@@ -2297,7 +2314,7 @@ function nammiWave(tg){const p=tg||G.p,side=Math.random()*4|0,hw=VW/2+40,hh=VH/2
 function hellEvent(k){G.hev={k,t:k==='nammi'?9:25,el:0,w:[{at:.8},{at:3.4},{at:6}],side:Math.random()<.5?-1:1};if(k==='kick'&&G.weapons.length)G.sealed=pick(G.weapons);G.hban={t:4.5,title:HEV[k][0],sub:HEV[k][1]+(k==='kick'&&G.sealed?' (🔒 '+WP[G.sealed.k].name+')':'')};if(!G.bot)SND.p('boss')}
 function ebShot(e,a,v,r,dm,c,life){G.eb.push({x:e.x,y:e.y,vx:Math.cos(a)*v,vy:Math.sin(a)*v,r,dmg:e.dmg*dm,life:life||6,c,src:e})}
 function bossTick(dt){const wN=!G.hard;if(wN&&!(G.witch&&!G.witch.dead))return;const p=G.p,H=G.hell,FIN=GB()[GB().length-1].name;
-  for(const e of G.enemies){if(!e.boss||e.dead||(wN&&e.tpl!=='witch')||e.plF>G.t||e.fmInv>0||e.chBe>G.t||e.type==='fm_b_queen'||/^mg_b[123]$/.test(e.type))continue;/* 11-14: 마계인천 중간보스는 고유 패턴만 */const fin=e.name===FIN,aim=Math.atan2(p.y-e.y,p.x-e.x),rg=e.rage2;
+  for(const e of G.enemies){if(!e.boss||e.dead||(wN&&e.tpl!=='witch')||e.plF>G.t||e.fmInv>0||e.chBe>G.t||e.type==='fm_b_queen'||/^mg_b[1234]$/.test(e.type))continue;/* 11-14: 마계인천 중간보스는 고유 패턴만 */const fin=e.name===FIN,aim=Math.atan2(p.y-e.y,p.x-e.x),rg=e.rage2;
     // ring
     e.rg=(e.rg===undefined?3:e.rg)-dt;if(e.rg<=0){e.rg=H?(rg?2.5:4):(rg?3.2:5);const n=H?(rg?22:16):(rg?15:11),o=rnd(0,6.28);for(let i=0;i<n;i++)ebShot(e,o+i*6.283/n,H?130:105,6,H?.6:.45,H?'#ff4a6a':'#ff9ad5')}
     // aimed fan

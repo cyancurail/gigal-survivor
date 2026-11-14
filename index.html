@@ -3741,8 +3741,8 @@ const POOL_V25=POOL.length;[['박민규',10,'더 커맨더','msk2/hx_doom.png']]
 const POOL_V26=POOL.length;[['재건',10,'검성','msk2/hx_dimsw.png']].forEach(([id,sl,n,f])=>{const o={id,s:sl,n,pid:'mx:'+id+'|'+sl,f};MSK2L.push(o);MSK2B[id+'|'+sl]=o;const c=CHAR.find(q=>q.id===id);POOL.push({id:o.pid,tier:'M',kind:'mskin',owner:id,s:sl,nog:1,n:`${c?c.nick:id} · ${n}`})});
 /* 11-14 카르페 녹템 업적 보상 신화 스킨 「니케」 (영애, 뽑기 제외 nog; 사용자 제공 시트) */
 const POOL_V27=POOL.length;[['영규형',10,'니케','msk2/hx_nike.png']].forEach(([id,sl,n,f])=>{const o={id,s:sl,n,pid:'mx:'+id+'|'+sl,f};MSK2L.push(o);MSK2B[id+'|'+sl]=o;const c=CHAR.find(q=>q.id===id);POOL.push({id:o.pid,tier:'M',kind:'mskin',owner:id,s:sl,nog:1,n:`${c?c.nick:id} · ${n}`})});
-/* 11-14 콜포 디 풀미네 업적 보상 신화 스킨 「아스트라페」 (람쥐, 뽑기 제외 nog; 사용자 제공 시트) */
-const POOL_V28=POOL.length;[['승태민',11,'아스트라페','msk2/hx_fulmine.png']].forEach(([id,sl,n,f])=>{const o={id,s:sl,n,pid:'mx:'+id+'|'+sl,f};MSK2L.push(o);MSK2B[id+'|'+sl]=o;const c=CHAR.find(q=>q.id===id);POOL.push({id:o.pid,tier:'M',kind:'mskin',owner:id,s:sl,nog:1,n:`${c?c.nick:id} · ${n}`})});
+/* 11-14 콜포 디 풀미네 업적 보상 신화 스킨 「아스트라페 아크」·「아스트라페 스톰」 둘 다 (람쥐, 뽑기 제외 nog; 사용자 제공 시트) */
+const POOL_V28=POOL.length;[['승태민',11,'아스트라페 아크','msk2/hx_fulmine.png'],['승태민',12,'아스트라페 스톰','msk2/hx_fulmine2.png']].forEach(([id,sl,n,f])=>{const o={id,s:sl,n,pid:'mx:'+id+'|'+sl,f};MSK2L.push(o);MSK2B[id+'|'+sl]=o;const c=CHAR.find(q=>q.id===id);POOL.push({id:o.pid,tier:'M',kind:'mskin',owner:id,s:sl,nog:1,n:`${c?c.nick:id} · ${n}`})});
 {const t=POOL.find(p=>p.id==='ms:임재영');if(t){t.vid='ult3/taetae.mp4';t.role='intro';t.vn='태태영 Ⅲ'}}
 const PBY={};POOL.forEach(p=>PBY[p.id]=p);
 const TIERN={C:'일반',R:'희귀',L:'전설',M:'신화'},TIERC={C:'#e8e8f0',R:'#ffd34d',L:'#ff7ac8',M:'#fff3b0'};
@@ -3791,7 +3791,7 @@ const ACH_HX=[
  {id:'hx_doom',hx:'doom',n:'그녀에게는 우리가 있으니',c:'둠스데이 제작',r:'👑 밍키 신화 스킨 「더 커맨더」',inv:'mx:박민규|10'},
  {id:'hx_dimsw',hx:'dimsw',n:'귀신 베는 차원검',c:'워 비 샹샹중 퍄오량 제작',r:'👑 짱재 신화 스킨 「검성」',inv:'mx:재건|10'},
  {id:'hx_nike',hx:'nike',n:'베니 비디 비키',c:'카르페 녹템 제작',r:'👑 영애 신화 스킨 「니케」',inv:'mx:영규형|10'},
- {id:'hx_fulmine',hx:'fulmine',n:'폭풍의 여신',c:'콜포 디 풀미네 제작',r:'👑 람쥐 신화 스킨 「아스트라페」',inv:'mx:승태민|11'},
+ {id:'hx_fulmine',hx:'fulmine',n:'폭풍의 여신',c:'콜포 디 풀미네 제작',r:'👑 람쥐 신화 스킨 「아스트라페 아크」 + 「아스트라페 스톰」',inv:'mx:승태민|11',inv2:'mx:승태민|12'},
 ];
 const ACH_HX_ON=true;if(ACH_HX_ON)ACH.push(...ACH_HX);
 /* 11-08 밤: 장수 업적 — 저장 코드 순서 때문에 반드시 맨 끝에 */
@@ -4046,7 +4046,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)r
 
 /* ================= 저장 코드 (기기 간 이동) =================
    ※ POOL/ACH/AXN/WFX 순서가 코드 해석 순서예요. 새 항목은 반드시 "끝에" 추가하세요. */
-const SC_VER=32;/* v32: POOL 끝 콜포 디 풀미네 스킨 「아스트라페」 (v31 코드 = POOL.slice(0,POOL_V28)). */ /* v31: POOL 끝 카르페 녹템 스킨 「니케」 (v30 코드 = POOL.slice(0,POOL_V27)). */ /* v30: POOL 끝 워 비 샹샹중 퍄오량 스킨 「검성」 (v29 코드 = POOL.slice(0,POOL_V26)). v29: POOL 끝 둠스데이 스킨 「더 커맨더」 (v28 코드 = POOL.slice(0,POOL_V25)) *//* v28: POOL 끝 크로니클 아츠 스킨 「로즈 그리고 너」 (v26·27 코드 = POOL.slice(0,POOL_V24)) *//* v27: 맨 끝 🌷 마음의 정원 블록(진행·장면 플래그·스테이지별 클리어 횟수) *//* v26: POOL 끝 짱재 카드 2종 (v25 코드 = POOL.slice(0,POOL_V23)) *//* v23: 맨 끝 세인트썸띵 블록 / v25: POOL 끝 카드 시리즈 2 (v22~24 코드 = POOL.slice(0,POOL_V22)) */
+const SC_VER=32;/* v32: POOL 끝 콜포 디 풀미네 스킨 「아스트라페 아크」·「아스트라페 스톰」 (v31 코드 = POOL.slice(0,POOL_V28)). */ /* v31: POOL 끝 카르페 녹템 스킨 「니케」 (v30 코드 = POOL.slice(0,POOL_V27)). */ /* v30: POOL 끝 워 비 샹샹중 퍄오량 스킨 「검성」 (v29 코드 = POOL.slice(0,POOL_V26)). v29: POOL 끝 둠스데이 스킨 「더 커맨더」 (v28 코드 = POOL.slice(0,POOL_V25)) *//* v28: POOL 끝 크로니클 아츠 스킨 「로즈 그리고 너」 (v26·27 코드 = POOL.slice(0,POOL_V24)) *//* v27: 맨 끝 🌷 마음의 정원 블록(진행·장면 플래그·스테이지별 클리어 횟수) *//* v26: POOL 끝 짱재 카드 2종 (v25 코드 = POOL.slice(0,POOL_V23)) *//* v23: 맨 끝 세인트썸띵 블록 / v25: POOL 끝 카드 시리즈 2 (v22~24 코드 = POOL.slice(0,POOL_V22)) */
 function scBits(list,has){const out=[];for(let i=0;i<list.length;i+=8){let b=0;for(let j=0;j<8&&i+j<list.length;j++)if(has(list[i+j],i+j))b|=1<<j;out.push(b)}return out}
 function scUnbits(bytes,pos,list,set){for(let i=0;i<list.length;i++){if(bytes[pos+(i>>3)]>>(i&7)&1)set(list[i],i)}return pos+Math.ceil(list.length/8)}
 function scVar(out,n){n=Math.max(0,Math.floor(n||0));do{let b=n&127;n=Math.floor(n/128);if(n)b|=128;out.push(b)}while(n)}
@@ -7590,11 +7590,11 @@ function fqHailTick(st,dt,vis){const p=G.p,B=fqB();st.it=(st.it||0)-dt;while(st.
   // 강풍: 적을 바람 방향으로 살짝 밀어요
   for(const e of vis)if(!e.boss&&!e.dead){e.x+=55*dt;e.y+=24*dt}}
 // ---- 피날레 「벼락」 ----
-function fqTree(){const p=G.p,X0=p.x-VW/2,Y0=p.y-VH/2,seg=[];let lim=0;
-  function grow(x,y,a,len,dep,o0){if(seg.length>=lim)return;let cx=x,cy=y;const n=Math.max(3,Math.round(len/26));for(let i=0;i<n;i++){const na=a+rnd(-.45,.45),nx=cx+Math.cos(na)*len/n,ny=cy+Math.sin(na)*len/n,o=o0+(i/n)*(.55/(dep+1));seg.push([cx,cy,nx,ny,dep,o]);
-      if(dep<4&&Math.random()<(dep===0?.55:.38))grow(nx,ny,na+(Math.random()<.5?-1:1)*rnd(.5,1.2),len*rnd(.45,.7),dep+1,o);cx=nx;cy=ny}}
-  lim=110;grow(p.x+rnd(-30,30),Y0-20,Math.PI/2,VH*.75,0,0);
-  for(let k=0;k<6;k++){lim=seg.length+85;grow(k<3?X0-10:X0+VW+10,Y0+rnd(.05,.6)*VH,k<3?rnd(-.2,.6):Math.PI-rnd(-.2,.6),VW*.65,1,.1+k*.05)}for(let k=0;k<2;k++){lim=seg.length+95;grow(X0+rnd(.15,.85)*VW,Y0-20,Math.PI/2+rnd(-.4,.4),VH*.9,0,.05+k*.1)}return seg}
+function fqTree(){const p=G.p,seg=[],cx=p.x,cy=p.y-14,RR=Math.hypot(VW,VH)*.58;let lim=0;
+  // 캐릭터를 중심으로 40갈래로 퍼져 나가는 번개
+  function grow(x,y,a,len,dep,o0){if(seg.length>=lim)return;let px=x,py=y;const n=Math.max(3,Math.round(len/24));for(let i=0;i<n;i++){const na=a+rnd(-.38,.38),nx=px+Math.cos(na)*len/n,ny=py+Math.sin(na)*len/n,o=o0+(i/n)*(.62/(dep+1));seg.push([px,py,nx,ny,Math.min(4,dep),o]);
+      if(dep<3&&Math.random()<(dep===0?.3:.18))grow(nx,ny,na+(Math.random()<.5?-1:1)*rnd(.35,.9),len*rnd(.3,.5),dep+1,o);px=nx;py=ny}}
+  for(let k=0;k<40;k++){lim=seg.length+26;grow(cx,cy,k/40*6.283+rnd(-.06,.06),RR*rnd(.75,1.05),k%5===0?0:1,0)}return seg}
 function fqFinStart(st){st.fin={t:0,tk:[],fl:0,tr:null,bt:0};st.tw=[];st.ic=[];st.hl=[];if(!G.bot)SND.p('boss')}
 function fqFinTick(st,dt,vis){const F=st.fin,T=F.t+=dt,B=fqB(),p=G.p;if(F.fl>0)F.fl-=dt;
   if(T<6.6)for(const e of vis)e.slow=Math.max(e.slow||0,.45);
@@ -7602,7 +7602,7 @@ function fqFinTick(st,dt,vis){const F=st.fin,T=F.t+=dt,B=fqB(),p=G.p;if(F.fl>0)F
   if(!F.tr&&T>=4.2){F.tr=G.bot?[]:fqTree();F.t0=T;if(!G.bot){SND.p('thunder');G.shk=Math.max(G.shk||0,.4)}}
   [[4.7,11],[5.4,11],[6.1,11],[6.7,30]].forEach(([tt,m],i)=>{if(!F.tk[i]&&T>=tt){F.tk[i]=1;const d=B*m;for(const e of dmVis(60))hurt(e,e.boss?d*.6:d,'fulmine',{kb:i===3?14:4});F.fl=i===3?.6:.35;
     if(i===3){if(G.eb)for(const b of G.eb)b.life=0;if(!G.bot){SND.p('ult');G.shk=Math.max(G.shk||0,.7)}}else if(!G.bot)SND.p('zap')}});
-  if(T>12.6){st.fin=null;fqPhase(st,0)}}
+  if(T>11.2){st.fin=null;fqPhase(st,0)}}
 // ---- 틱 ----
 function fqTick(w,dt){const st=fqIni(w),S=G.S,p=G.p,vis=dmVis();
   if(!st.fin){st.pt+=dt;if(st.pt>=FQC.PH)fqPhase(st,(st.ph+1)%3)}
@@ -7623,7 +7623,7 @@ function fqTick(w,dt){const st=fqIni(w),S=G.S,p=G.p,vis=dmVis();
   if(!G.bot){for(const b of st.bo)b.t+=dt;st.bo=st.bo.filter(b=>b.t<b.L);for(const f of st.fx)f.t+=dt;st.fx=st.fx.filter(f=>f.t<FQP[f.k][6]/FQP[f.k][5]);
     for(const q of st.sp){q.t+=dt;q.x+=q.vx*dt;q.y+=q.vy*dt;if(q.g)q.vy+=420*dt}st.sp=st.sp.filter(q=>q.t<q.L);
     // 빗줄기 (화면 기준 좌표)
-    const heavy=st.fin?Math.min(1,st.fin.t/2)*(st.fin.t<8?1:Math.max(0,1-(st.fin.t-8)/2.5)):0,want=st.ph===0&&!st.fin?140:st.ph===2&&!st.fin?40:Math.round(260*heavy);
+    const heavy=st.fin?Math.min(1,st.fin.t/2)*(st.fin.t<8?1:Math.max(0,1-(st.fin.t-8)/1.7)):0,want=st.ph===0&&!st.fin?140:st.ph===2&&!st.fin?40:Math.round(260*heavy);
     while(st.rd.length<want)st.rd.push({x:rnd(-VW/2,VW/2+120),y:rnd(-VH/2,VH/2),v:rnd(620,900),l:rnd(10,22)});if(st.rd.length>want)st.rd.length=want;
     for(const r of st.rd){r.y+=r.v*dt;r.x-=r.v*.22*dt;if(r.y>VH/2+20){r.y=-VH/2-20;r.x=rnd(-VW/2,VW/2+120)}}}}
 WU.fulmine=fqTick;
@@ -7638,10 +7638,10 @@ function fqFinBg(st,F){const p=G.p,T=F.t,X0=p.x-VW/2,Y0=p.y-VH/2,dk=Math.min(1,T
   const im=FQI.st;if(dsOk(im)&&dk>0){if(!FQCV)FQCV=document.createElement('canvas');const cw=Math.ceil(VW/2),chh=Math.ceil(VH/2);if(FQCV.width!==cw||FQCV.height!==chh){FQCV.width=cw;FQCV.height=chh}const c2=FQCV.getContext('2d');
     c2.globalCompositeOperation='source-over';c2.globalAlpha=1;c2.clearRect(0,0,cw,chh);c2.imageSmoothingEnabled=false;const fi=Math.floor(G.t*6)%60;c2.drawImage(im,(fi%10)*160,Math.floor(fi/10)*90,160,90,0,0,cw,chh);
     c2.fillStyle='rgba(4,6,22,.5)';c2.fillRect(0,0,cw,chh);
-    if(T>7.8){const u=Math.min(1,(T-7.8)/3.6),e=1-Math.pow(1-u,2),cx=cw/2,cy=-chh*.08,R=chh*(.3+e*1.8),ha=.1+e*1.15;c2.globalCompositeOperation='destination-out';const g=c2.createRadialGradient(cx,cy,R*.15,cx,cy,R);g.addColorStop(0,'rgba(0,0,0,1)');g.addColorStop(.7,'rgba(0,0,0,.85)');g.addColorStop(1,'rgba(0,0,0,0)');c2.fillStyle=g;c2.beginPath();c2.moveTo(cx,cy);c2.arc(cx,cy,R,Math.PI/2-ha,Math.PI/2+ha);c2.closePath();c2.fill()}
-    const out=T>11?Math.max(0,1-(T-11)/1.5):1;ctx.save();ctx.globalAlpha=.92*dk*out;ctx.imageSmoothingEnabled=false;ctx.drawImage(FQCV,X0,Y0,VW,VH);ctx.restore()}
+    if(T>7.8){const u=Math.min(1,(T-7.8)/2.4),e=1-Math.pow(1-u,2),cx=cw/2,cy=-chh*.08,R=chh*(.3+e*1.8),ha=.1+e*1.15;c2.globalCompositeOperation='destination-out';const g=c2.createRadialGradient(cx,cy,R*.15,cx,cy,R);g.addColorStop(0,'rgba(0,0,0,1)');g.addColorStop(.7,'rgba(0,0,0,.85)');g.addColorStop(1,'rgba(0,0,0,0)');c2.fillStyle=g;c2.beginPath();c2.moveTo(cx,cy);c2.arc(cx,cy,R,Math.PI/2-ha,Math.PI/2+ha);c2.closePath();c2.fill()}
+    const out=T>10?Math.max(0,1-(T-10)/1):1;ctx.save();ctx.globalAlpha=.92*dk*out;ctx.imageSmoothingEnabled=false;ctx.drawImage(FQCV,X0,Y0,VW,VH);ctx.restore()}
   // 갠 하늘: 부채꼴 햇살 그라데이션
-  if(T>7.8){const u=Math.min(1,(T-7.8)/3.6),e=1-Math.pow(1-u,2),fade=T>11.2?Math.max(0,1-(T-11.2)/1.4):1,cx=p.x,cy=Y0-VH*.08,R=VH*(.3+e*1.8),ha=.1+e*1.15;ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=.5*fade;
+  if(T>7.8){const u=Math.min(1,(T-7.8)/2.4),e=1-Math.pow(1-u,2),fade=T>10.2?Math.max(0,1-(T-10.2)/.9):1,cx=p.x,cy=Y0-VH*.08,R=VH*(.3+e*1.8),ha=.1+e*1.15;ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=.5*fade;
     const g=ctx.createRadialGradient(cx,cy,0,cx,cy,R);g.addColorStop(0,'rgba(255,250,225,.95)');g.addColorStop(.35,'rgba(255,236,190,.45)');g.addColorStop(1,'rgba(200,225,255,0)');ctx.fillStyle=g;ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,R,Math.PI/2-ha,Math.PI/2+ha);ctx.closePath();ctx.fill();
     ctx.globalAlpha=.06*fade;for(let i=-3;i<=3;i++){const a=Math.PI/2+i*ha/3.6+Math.sin(G.t*.6+i)*.02,R2=R*.85;const rg=ctx.createRadialGradient(cx,cy,0,cx,cy,R2);rg.addColorStop(0,'rgba(255,246,215,1)');rg.addColorStop(1,'rgba(255,246,215,0)');ctx.fillStyle=rg;ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+Math.cos(a-.018)*R2,cy+Math.sin(a-.018)*R2);ctx.lineTo(cx+Math.cos(a+.018)*R2,cy+Math.sin(a+.018)*R2);ctx.closePath();ctx.fill()}ctx.restore()}}
 function fqFinFg(st,F){const p=G.p,T=F.t,X0=p.x-VW/2,Y0=p.y-VH/2;

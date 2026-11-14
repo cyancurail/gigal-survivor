@@ -2110,7 +2110,10 @@ function mgWalls(){const B=G.mgB;if(!B)return;const p=G.p,x0=p.x-VW/2-700,x1=p.x
         if(im){ctx.save();ctx.translate(cx,0);if(o.fl)ctx.scale(-1,1);ctx.drawImage(im,-o.w/2,sd?ey-6:ey+8-o.h,o.w,o.h);ctx.restore()}
         else{ctx.fillStyle='#1a1030';ctx.fillRect(o.x,sd?ey:ey-o.h,o.w,o.h);ctx.fillStyle='#2a1850';ctx.fillRect(o.x,sd?ey:ey-o.h,o.w,6)}}}
     const A=mgAlc(z);if(A){const g0=A.sd?B.b:B.t,e=A.sd?g0+A.D:g0-A.D,y0=Math.min(g0,e),y1=Math.max(g0,e);// 공원 양옆 벽(벽돌 담)
-      for(const xx of [A.a-54,A.b]){ctx.fillStyle='#2a2036';ctx.fillRect(xx,y0-2,54,y1-y0+4);ctx.fillStyle='#46385a';ctx.fillRect(xx,y0-2,54,5);ctx.fillStyle='#161020';ctx.fillRect(xx+(xx<A.a?48:0),y0-2,6,y1-y0+4);ctx.fillStyle='rgba(0,0,0,.28)';for(let yy=y0+30;yy<y1;yy+=34)ctx.fillRect(xx,yy,54,2)}}}
+      for(const xx of [A.a-54,A.b]){ctx.fillStyle='#2a2036';ctx.fillRect(xx,y0-2,54,y1-y0+4);ctx.fillStyle='#46385a';ctx.fillRect(xx,y0-2,5,y1-y0+4)}
+      ctx.imageSmoothingEnabled=true;// 벽 바깥쪽: 컨테이너 줄 · 안쪽 가장자리: 덤불
+      for(const [k,xx] of [[0,A.a-100],[1,A.b+100]])for(let j=0,yy=y0+110;yy<=y1+14;j++,yy+=112){const n=['ct1','ct2','ct3'][(mgH(z,j+k*11,77)*3)|0],im=mgPImg(n);if(!im)continue;const h=150,w=h*MG_AS[n];ctx.save();ctx.translate(xx,0);if((j+k)&1)ctx.scale(-1,1);ctx.drawImage(im,-w/2,yy-h,w,h);ctx.restore()}
+      const bi=mgPImg('bu');if(bi)for(const xx of [A.a+4,A.b-4])for(let yy=y0+30;yy<=y1+30;yy+=78){const w=bi.width*.75,h=bi.height*.75;ctx.drawImage(bi,xx-w/2,yy-h+12,w,h)}}}
   ctx.imageSmoothingEnabled=sm;
   for(let sd=0;sd<2;sd++){for(const [a,b,e] of mgSpans(x0,x1,sd)){const dy=sd?1:-1,g2=ctx.createLinearGradient(0,e,0,e-dy*90);g2.addColorStop(0,'rgba(8,4,16,.65)');g2.addColorStop(1,'rgba(8,4,16,0)');ctx.fillStyle=g2;ctx.fillRect(a,sd?e-90:e,b-a,90)}}}
 // 공원 잔디 바닥
@@ -2144,11 +2147,15 @@ function mgPChunk(cx,cy){const key=cx+','+cy;let L=MGPK.get(key);if(L)return L;L
     L.push({t:T,x:Math.round(x),y:Math.round(y),fl:mgH(cx,cy,66+i)<.5})}
   MGPK.set(key,L);return L}
 function pick2(a,f){return a[Math.min(a.length-1,f*a.length|0)]}
+const MGLP=new Map();
+function mgParkLamps(z){let v=MGLP.get(z);if(v)return v;v=[];const A=mgAlc(z),B=G.mgB;if(A&&B){const n=5,w=A.b-A.a-300;for(let k=0;k<n;k++){const x=A.a+150+w*(k+.15+mgH(z,k,81)*.7)/n,f=mgH(z,k,82),y=A.sd?B.b+90+(A.D-190)*f:B.t-90-(A.D-190)*f;v.push({t:'lp',x:Math.round(x),y:Math.round(y),fl:0})}}MGLP.set(z,v);return v}
 function mgFrame(){const p=G.p,A=G.arena,mx=VW*.62+260,my=VH*.62+360,L=[],B=[];
   const c0=Math.floor((p.x-mx)/MGPC),c1=Math.floor((p.x+mx)/MGPC),r0=Math.floor((p.y-my)/MGPC),r1=Math.floor((p.y+my)/MGPC);
   for(let cy=r0;cy<=r1;cy++)for(let cx=c0;cx<=c1;cx++)for(const o of mgPChunk(cx,cy)){const im=mgPImg(o.t);if(!im)continue;if(G.mgB&&(o.y<mgTop(o.x)+70||o.y>mgBot(o.x)-24))continue;const P=MG_PR[o.t],w=im.width*P.s,h=im.height*P.s;
     if(A&&Math.abs(o.x-A.x)<A.hw+w/2+40&&Math.abs(o.y-A.y)<A.hh+h+40)continue;
     o.w=w;o.h=h;L.push(o);B.push({L:o.x-w*P.hw,R:o.x+w*P.hw,T:o.y-h*P.hh,B:o.y})}
+  if(G.mgB){const lim=mx+240;for(let z=mgZone(p.x-lim);z<=mgZone(p.x+lim);z++)for(const o of mgParkLamps(z)){if(Math.abs(o.x-p.x)>lim||Math.abs(o.y-p.y)>my+200)continue;const im=mgPImg(o.t);if(!im)continue;const P=MG_PR[o.t],w=im.width*P.s,h=im.height*P.s;
+      if(A&&Math.abs(o.x-A.x)<A.hw+w/2+40&&Math.abs(o.y-A.y)<A.hh+h+40)continue;o.w=w;o.h=h;L.push(o);B.push({L:o.x-w*P.hw,R:o.x+w*P.hw,T:o.y-h*P.hh,B:o.y})}}
   L.sort((a,b)=>a.y-b.y);G.mgPL=L;G.sbL=B;sbPush(p,0,12,9);for(const k of G.pickups)sbPush(k,0,0,12)}
 function mgProps(front){const L=G.mgPL;if(!L)return;const fy=G.p.y+12,sm=ctx.imageSmoothingEnabled;ctx.imageSmoothingEnabled=true;
   for(const o of L){if((o.y>fy)!==!!front)continue;const im=mgPImg(o.t);if(!im)continue;if(Math.abs(o.x-G.p.x)>VW/2+o.w||Math.abs(o.y-G.p.y)>VH/2+o.h)continue;

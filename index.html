@@ -1436,6 +1436,7 @@ function kill(e,key){if(e.hunt)return;if(G.map==='farm'&&e.type&&e.type.slice(0,
   else if(!G.bot){const pal=epal(e.tpl||e.type);chunks(e.x,e.y,e.boss?160:e.elite?40:8,pal,e.boss?300:130);sparks(e.x,e.y,e.boss?160:e.elite?36:4,[KC[key]||'#fff','#ffffff'],e.boss?420:190,.5);
     if(e.boss){pring(e.x,e.y,240,['#ffd34d','#ff5fb8','#7fd8ff'],160,.7);pring(e.x,e.y,130,'#ffffff',90,.5)}else if(e.elite)pring(e.x,e.y,90,'#ffd34d',40,.4)}
   if(e.conf>0&&e.cb&&(G.cbN||0)<60){G.cbN=(G.cbN||0)+1;const ex=e.x,ey=e.y,sw=W('soju'),sl=sw?sw.lvl:8;setTimeoutG(()=>{const R=70*G.S.area;for(const o of G.enemies)if(!o.boss&&!o.dead&&(o.x-ex)**2+(o.y-ey)**2<R*R){o.conf=Math.max(o.conf||0,2.5);o.cb=1}boom(ex,ey,R,(20+6*sl)*G.S.might,'#7dffb0','soju');if(!G.bot&&G.texts.length<70&&Math.random()<.4)G.texts.push({x:ex,y:ey-16,v:pick(['퍽!','펑!','꽐라!','원샷!']),life:.45,col:'#7dffb0'})},rnd(.08,.12))}
+  if(e.nkT>G.t&&(G.nkN||0)<60){G.nkN=(G.nkN||0)+1;const ex=e.x,ey=e.y;setTimeoutG(()=>{const R=80*Math.sqrt(G.S.area);for(const o of G.enemies)if(!o.dead&&(o.x-ex)**2+(o.y-ey)**2<R*R){if(!o.boss)o.conf=Math.max(o.conf||0,2.5);o.nkT=Math.max(o.nkT||0,G.t+2.5)}boom(ex,ey,R,nkB()*NKC.CT,'#ffd34d','nike');const w=W('nike');if(w&&w.st.i){nkFx(w.st,'ch',ex,ey,.7,{bl:'lighter'});nkSpark(w.st,ex,ey-6,8,150,.6)}if(!G.bot&&G.texts.length<70&&Math.random()<.35)G.texts.push({x:ex,y:ey-16,v:pick(['짠!','건배!','원샷!','잭팟!']),life:.45,col:'#ffd34d'})},rnd(.08,.12))}
   if(G.kills>=30000)achGet('kill10k');
   if(e.boss&&!G.tw&&e.name===GB()[GB().length-1].name){achGet(G.hard?'hfinal':'nfinal');if(G.hell&&!G.bot){achGet('hellboss');SAVE.hellC=SAVE.hellC||{};SAVE.hellC[G.id]=1;persist()}if(!G.cleared){G.cleared=true;if(G.bot)G.endless=true;else G.escPending=1.5}}
   if(e.boss){G.bossKills=(G.bossKills||0)+1;toast('🎤 무대를 뒤집어 놓으셨다!',`${e.name} 격파 · 보스 상자 드롭`);}
@@ -3738,7 +3739,7 @@ const POOL_V24=POOL.length;[['송기호',10,'로즈 그리고 너','msk2/hx_chro
 const POOL_V25=POOL.length;[['박민규',10,'더 커맨더','msk2/hx_doom.png']].forEach(([id,sl,n,f])=>{const o={id,s:sl,n,pid:'mx:'+id+'|'+sl,f};MSK2L.push(o);MSK2B[id+'|'+sl]=o;const c=CHAR.find(q=>q.id===id);POOL.push({id:o.pid,tier:'M',kind:'mskin',owner:id,s:sl,nog:1,n:`${c?c.nick:id} · ${n}`})});
 /* 11-14 워 비 샹샹중 퍄오량 업적 보상 신화 스킨 「검성」 (짱재, 뽑기 제외 nog; 그림 = 사용자 제공 검성 시트) */
 const POOL_V26=POOL.length;[['재건',10,'검성','msk2/hx_dimsw.png']].forEach(([id,sl,n,f])=>{const o={id,s:sl,n,pid:'mx:'+id+'|'+sl,f};MSK2L.push(o);MSK2B[id+'|'+sl]=o;const c=CHAR.find(q=>q.id===id);POOL.push({id:o.pid,tier:'M',kind:'mskin',owner:id,s:sl,nog:1,n:`${c?c.nick:id} · ${n}`})});
-/* 11-14 수 르 퐁 미라보 쿨 라 센 업적 보상 신화 스킨 「니케」 (영애, 뽑기 제외 nog; 사용자 제공 시트) */
+/* 11-14 카르페 녹템 업적 보상 신화 스킨 「니케」 (영애, 뽑기 제외 nog; 사용자 제공 시트) */
 const POOL_V27=POOL.length;[['영규형',10,'니케','msk2/hx_nike.png']].forEach(([id,sl,n,f])=>{const o={id,s:sl,n,pid:'mx:'+id+'|'+sl,f};MSK2L.push(o);MSK2B[id+'|'+sl]=o;const c=CHAR.find(q=>q.id===id);POOL.push({id:o.pid,tier:'M',kind:'mskin',owner:id,s:sl,nog:1,n:`${c?c.nick:id} · ${n}`})});
 {const t=POOL.find(p=>p.id==='ms:임재영');if(t){t.vid='ult3/taetae.mp4';t.role='intro';t.vn='태태영 Ⅲ'}}
 const PBY={};POOL.forEach(p=>PBY[p.id]=p);
@@ -3787,7 +3788,7 @@ const ACH_HX=[
  {id:'hx_chron',hx:'chron',n:'동시성의 상대성',c:'크로니클 아츠 무기 중 1종 제작',r:'👑 잔느 신화 스킨 「로즈 그리고 너」',inv:'mx:송기호|10'},
  {id:'hx_doom',hx:'doom',n:'그녀에게는 우리가 있으니',c:'둠스데이 제작',r:'👑 밍키 신화 스킨 「더 커맨더」',inv:'mx:박민규|10'},
  {id:'hx_dimsw',hx:'dimsw',n:'귀신 베는 차원검',c:'워 비 샹샹중 퍄오량 제작',r:'👑 짱재 신화 스킨 「검성」',inv:'mx:재건|10'},
- {id:'hx_nike',hx:'nike',n:'잭팟이 터지는 밤',c:'수 르 퐁 미라보 쿨 라 센 제작',r:'👑 영애 신화 스킨 「니케」',inv:'mx:영규형|10'},
+ {id:'hx_nike',hx:'nike',n:'잭팟이 터지는 밤',c:'카르페 녹템 제작',r:'👑 영애 신화 스킨 「니케」',inv:'mx:영규형|10'},
 ];
 const ACH_HX_ON=true;if(ACH_HX_ON)ACH.push(...ACH_HX);
 /* 11-08 밤: 장수 업적 — 저장 코드 순서 때문에 반드시 맨 끝에 */
@@ -4042,7 +4043,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)r
 
 /* ================= 저장 코드 (기기 간 이동) =================
    ※ POOL/ACH/AXN/WFX 순서가 코드 해석 순서예요. 새 항목은 반드시 "끝에" 추가하세요. */
-const SC_VER=31;/* v31: POOL 끝 수 르 퐁 미라보 쿨 라 센 스킨 「니케」 (v30 코드 = POOL.slice(0,POOL_V27)). */ /* v30: POOL 끝 워 비 샹샹중 퍄오량 스킨 「검성」 (v29 코드 = POOL.slice(0,POOL_V26)). v29: POOL 끝 둠스데이 스킨 「더 커맨더」 (v28 코드 = POOL.slice(0,POOL_V25)) *//* v28: POOL 끝 크로니클 아츠 스킨 「로즈 그리고 너」 (v26·27 코드 = POOL.slice(0,POOL_V24)) *//* v27: 맨 끝 🌷 마음의 정원 블록(진행·장면 플래그·스테이지별 클리어 횟수) *//* v26: POOL 끝 짱재 카드 2종 (v25 코드 = POOL.slice(0,POOL_V23)) *//* v23: 맨 끝 세인트썸띵 블록 / v25: POOL 끝 카드 시리즈 2 (v22~24 코드 = POOL.slice(0,POOL_V22)) */
+const SC_VER=31;/* v31: POOL 끝 카르페 녹템 스킨 「니케」 (v30 코드 = POOL.slice(0,POOL_V27)). */ /* v30: POOL 끝 워 비 샹샹중 퍄오량 스킨 「검성」 (v29 코드 = POOL.slice(0,POOL_V26)). v29: POOL 끝 둠스데이 스킨 「더 커맨더」 (v28 코드 = POOL.slice(0,POOL_V25)) *//* v28: POOL 끝 크로니클 아츠 스킨 「로즈 그리고 너」 (v26·27 코드 = POOL.slice(0,POOL_V24)) *//* v27: 맨 끝 🌷 마음의 정원 블록(진행·장면 플래그·스테이지별 클리어 횟수) *//* v26: POOL 끝 짱재 카드 2종 (v25 코드 = POOL.slice(0,POOL_V23)) *//* v23: 맨 끝 세인트썸띵 블록 / v25: POOL 끝 카드 시리즈 2 (v22~24 코드 = POOL.slice(0,POOL_V22)) */
 function scBits(list,has){const out=[];for(let i=0;i<list.length;i+=8){let b=0;for(let j=0;j<8&&i+j<list.length;j++)if(has(list[i+j],i+j))b|=1<<j;out.push(b)}return out}
 function scUnbits(bytes,pos,list,set){for(let i=0;i<list.length;i++){if(bytes[pos+(i>>3)]>>(i&7)&1)set(list[i],i)}return pos+Math.ceil(list.length/8)}
 function scVar(out,n){n=Math.max(0,Math.floor(n||0));do{let b=n&127;n=Math.floor(n/128);if(n)b|=128;out.push(b)}while(n)}
@@ -7399,14 +7400,14 @@ function dsFinBg(F){const p=G.p,T=F.t,t=G.t,X0=p.x-VW/2,Y0=p.y-VH/2,c=dsFinC(),k
     const ry=c.y-c.H*.2+Math.sin(t*1.5+2)*6;ctx.translate(Math.round(X0+VW+hw-u*(hw*.8)),0);ctx.scale(-1,1);ctx.drawImage(hn,0,Math.round(ry),hw*.82,hh*.82);ctx.restore()}}
 function dsFinFg(F){const p=G.p,T=F.t,X0=p.x-VW/2,Y0=p.y-VH/2;
   for(const tt of[3.0,4.1,5.2]){const v=T-tt,L=tt>5?.6:.28;if(v>=0&&v<L){ctx.save();ctx.globalAlpha=(1-v/L)*(tt>5?1:.4);ctx.fillStyle='#eefaff';ctx.fillRect(X0,Y0,VW,VH);ctx.restore()}}}
-/* ===== 수 르 퐁 미라보 쿨 라 센 (V229) — 🎰 大当り 잭팟★ + 🍶 폭탄주★ + 🎧 동시접속 헤드셋 =====
+/* ===== 카르페 녹템 (V229) — 🎰 大当り 잭팟★ + 🍶 폭탄주★ + 🎧 동시접속 헤드셋 =====
    컨셉(사용자 11-14): 카지노에서 술 마시며 즐겁게 노는 승리의 여신 「니케」. 황금빛 파티클 + 파칭코 구슬이 화려하게 튕기는 경쾌한 무기.
    ① 골든 러시: 금구슬이 적에서 적으로 연쇄로 튕김(멀티 바운스), 6번째 발사마다 럭키볼(큰 금구슬, 맞을 때마다 작은 폭발)
    ② 건배: 샴페인잔 두 개가 날아가 쨍! 금빛 거품 폭발 + 취함(비틀거림). 취한 적을 맞힌 구슬은 둘로 갈라짐(멀티볼)
    ③ 동시접속 피버: 머리 위 슬롯머신이 돌아 체리(연사 2배)·벨(금빛 불꽃놀이)·BAR(구슬 폭포)
    ④ 피날레 「잭팟」(7-7-7): 거대 슬롯 → 구슬 분수·금화 비·불꽃놀이·꽃가루 → 월계관 승리 섬광. 화면 글자 없음.
    이펙트: pixelfx(MIT) firework-burst·crit-hit·confetti·sunburst를 금빛 팔레트로 구움(fx/nk_*.png). */
-const NKC={DM:4,BD:.33,BN:4,TO:2.2,FIN:60};
+const NKC={DM:3.6,BD:.33,CT:.5,JP:.45,BN:4,TO:2.2,FIN:60};
 const NKI={};[['fw','nk_fw.png'],['ch','nk_ch.png'],['cf','nk_cf.png'],['sb','nk_sb.png']].forEach(([k,f])=>{const im=new Image();im.src='fx/'+f;NKI[k]=im});
 // [가로,세로,열,원점x,원점y,fps,프레임수]
 const NKP={fw:[240,248,8,120,100,12,32],ch:[216,136,6,84,106,14,12],cf:[200,140,7,100,126,12,42],sb:[128,128,8,64,64,12,16]};
@@ -7445,7 +7446,7 @@ function nkClink(st,x,y,vis){const B=nkB(),R=100*Math.sqrt(G.S.area);for(const e
 // ---- 동시접속 피버 (머리 위 슬롯) ----
 const NKS=['cherry','bell','bar','seven'];
 function nkSlotStart(st,force){const r=force?'seven':pick(['cherry','bell','bar']);st.sl={t:0,r,rs:[0,1,2].map(()=>Math.floor(rnd(0,4))),big:!!force};if(!G.bot)SND.p('shuffle')}
-function nkSlotTick(st,dt,vis){const s=st.sl;s.t+=dt;if(s.big)return;if(s.t>=1.25&&!s.done){s.done=1;const k=s.r,p=G.p;
+function nkSlotTick(st,dt,vis){const s=st.sl;s.t+=dt;if(s.big)return;if(s.t>=1.25&&!s.done){s.done=1;const k=s.r,p=G.p;const B=nkB();for(const e of vis)hurt(e,B*NKC.JP,'nike',{kb:0});if(!G.bot)for(let i=0;i<34;i++)G.fx.push({x:p.x+rnd(-VW/2,VW/2),y:p.y-VH/2,vx:rnd(-20,20),vy:rnd(150,300),life:rnd(1,1.8),c:pick(['#ffd34d','#fff0a0','#f0b424']),s:4,coin:1});
     if(k==='cherry'){st.fv={k,t:5};nkSpark(st,p.x,p.y-60,16,140,.8);if(!G.bot)SND.p('lvl')}
     else if(k==='bell'){st.fv={k,t:.1};const tg=vis.length?vis.slice().sort(()=>Math.random()-.5).slice(0,3):[];for(let i=0;i<3;i++){const e=tg[i];nkFW(st,e?e.x:p.x+rnd(-200,200),e?e.y:p.y+rnd(-150,150),.35+i*.25,1)}if(!G.bot)SND.p('heart')}
     else if(k==='bar'){st.fv={k,t:3};if(!G.bot)SND.p('coin')}}
@@ -7467,7 +7468,7 @@ function nkFinTick(st,dt,vis){const F=st.fin,T=F.t+=dt,B=nkB(),p=G.p,X0=p.x-VW/2
     if(i===4){F.vic=T;F.fl=.4;if(G.eb)for(const b of G.eb)b.life=0;if(!G.bot){SND.p('ach');G.shk=Math.max(G.shk||0,.6);nkSpark(st,p.x,p.y-20,60,420,1.4)}}else if(!G.bot)G.shk=Math.max(G.shk||0,.2)}});
   if(T>8.6){st.fin=null;st.sl=null}}
 // ---- 틱 ----
-function nkTick(w,dt){const st=nkIni(w),S=G.S,p=G.p,vis=dmVis();
+function nkTick(w,dt){const st=nkIni(w),S=G.S,p=G.p,vis=dmVis();G.nkN=Math.max(0,(G.nkN||0)-25*dt);
   if(st.fv){st.fv.t-=dt;if(st.fv.k==='bar'){st.fall-=dt;while(st.fall<=0){st.fall+=.07;const b=nkBall(st,p.x-VW/2+rnd(.05,.95)*VW,p.y-VH/2+6,Math.PI/2+rnd(-.5,.5),{bn:2,rb:1,life:2.2});if(b&&vis.length)nkRetarget(b,vis,null)}}if(st.fv.t<=0)st.fv=null}
   if(!st.fin){st.ft-=dt;if(st.ft<=0){st.ft=.75*S.cd/(st.fv&&st.fv.k==='cherry'?2:1);nkVolley(st,vis)}
     st.tt-=dt;if(st.tt<=0){st.tt=4.6*S.cd;nkToast(st,vis)}
@@ -7535,8 +7536,8 @@ function nkDraw(w){if(G.bot)return;const st=w.st;if(!st.i)return;const p=G.p;
   if(st.sl&&!st.sl.big)nkSlotDraw(st.sl,p.x,p.y-92,1.15);
   if(st.fv&&st.fv.k==='cherry'){ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=.25+.1*Math.sin(G.t*10);nkSp('sb',Math.floor(G.t*12)%16,p.x,p.y-8,1,1,'lighter');ctx.restore()}
   if(st.fin)nkFinFg(st,st.fin)}
-HX.push({k:'nike',a:'pachinko',b:'soju',it:'headset',q:'오늘 밤의 승리는 언니 거예요. 한 잔 받으시겠어요?',lore:'잔을 들어요. 흐르는 밤 위에서, 우리는 늘 이기니까.',col:'#ffd34d',sub:'🎰 大当り 잭팟 + 🍶 폭탄주 + 🎧 동시접속 헤드셋'});
-Object.assign(WP,{nike:{name:'수 르 퐁 미라보 쿨 라 센',icon:'🥂',evo:'headset',evoName:'수 르 퐁 미라보 쿨 라 센',hid:1,d:'잔을 들어요. 흐르는 밤 위에서, 우리는 늘 이기니까.',ed:'잔을 들어요. 흐르는 밤 위에서, 우리는 늘 이기니까.',extra:1}});
+HX.push({k:'nike',a:'pachinko',b:'soju',it:'headset',q:'오늘 밤의 승리는 언니 거예요. 한 잔 받으시겠어요?',lore:'잔을 들어요. 오늘 밤을 즐기는 사람이, 언제나 이기니까.',col:'#ffd34d',sub:'🎰 大当り 잭팟 + 🍶 폭탄주 + 🎧 동시접속 헤드셋'});
+Object.assign(WP,{nike:{name:'카르페 녹템',icon:'🥂',evo:'headset',evoName:'카르페 녹템',hid:1,d:'잔을 들어요. 오늘 밤을 즐기는 사람이, 언제나 이기니까.',ed:'잔을 들어요. 오늘 밤을 즐기는 사람이, 언제나 이기니까.',extra:1}});
 </script>
 <script>/* ===== 👻 유령 무기 (V113): 멀티에서 친구 무기를 내 화면에 그림만 그려요 (피해·효과 없음) ===== */
 (()=>{if(!window.MP)return;
@@ -10013,7 +10014,7 @@ setInterval(()=>{const lb=document.getElementById('lobby'),tl=document.querySele
 const LBN=[['언니들의 기갈이 하나로 합쳐지는 순간, 제가 마음의 선으로 이어요. 그 때 하모닉스 기갈이 탄생해요.','s'],['하모닉스 개발 완료 {hx}/12.','p',1],['크로니클 아츠. 이건 하모닉스라고도 부를 수 없어요. 그저 우연히 발견된 것일 뿐.','c'],['다음 하모닉스 연구 중 ... 크로니클 아츠 관측 중...','c'],['다음 하모닉스 연구 중 ... 기갈 최대치 관측 중...','w'],['어머, {n}. 실이 당겨지길래 누군가 했더니 언니였네요.','s'],['기갈은 강함이 아니라 BPS예요.','p'],['오늘은 어디까지 버텨 볼까요?','w'],['아껴 쓰는 여자가 아름다워요.','c'],['무수리들이 또 몰려와요. 화장 고치고 나가요.','c'],['상향이요? 어머, 못 들은 걸로 할게요.','p'],['통신기에 새 소식이 와 있을지도 몰라요.','w'],['꼭두각시라뇨. 제가 실을 쥔 쪽이에요.','s'],['제 말투가 무룩이랑 닮았다고요? 기분 탓이에요.','w'],['5분만 싸우고 오세요. 통신이 기다려요.','s'],['귀여워 보이는 애들일수록 독해요. 언니처럼요.','w'],['폴라리스의 별빛이 오늘따라 차갑네요.','c']];
 const LBT=['어머!!! 언니, 제정신이에요? 홀로그램도 아파요.','o'];
 const LBH0=['절 자꾸 건드리셔도 숨겨진 대사 같은 건 없어요. 다른 인공지능한테 분석하게 하실 거잖아요?','w'];
-const LBHX={nike:['수 르 퐁 미라보 쿨 라 센, 오늘 밤 승리의 잔은 언니에게 올릴게요.','c'],dimsw:['워 비 샹샹중 퍄오량, 차원 너머에서도 아름다울 언니를 위해서 베었어요.','c'],doom:['둠스데이, 언니가 부르면 하늘이 대답해요. 제 모든 힘을 다해서.','c'],rouge:['에클라땅뜨 아르떼, 진정한 빛은 어둠이 있을 때 더욱 아름다워 보이는 법이에요.','c'],polaris:['플로리스 폴라리스, 지금 우리 머리 위에 있는 푸른 별의 이름이에요.','c'],stellar:['스텔라 디센던트, 언니에게만 하늘에 있는 천체들로부터 전자기파가 도착해요. 제가 음성으로 번역해 드렸어요.','w'],roadster:['레이디 로드스터, 두 분은 잘 계신가요? 그 차 운전 사실 제가 하는 건데 말이죠.','s'],risha:['R.A.V.E. 네 천사의 이름이에요. 라그비엔, 아나벨라, 비비엔, 엘로이즈.','c'],glass:['시공간을 멈추는 고대 요정의 마법. 저도 몰라요. 아이기스 차원 아카이브에도 이름만 남아 있어요.','c'],soulwed:['영혼결혼식. 죽음은 인간에게 무엇인가요? 제게도 죽음이 올까요?','c'],prism:['그레이스 프리즘. 여러분들의 마음의 빛이 모두 모일 때, 분명 우리는 승리할 거예요.','c']};
+const LBHX={nike:['카르페 녹템, 오늘 밤 승리의 잔은 언니에게 올릴게요.','c'],dimsw:['워 비 샹샹중 퍄오량, 차원 너머에서도 아름다울 언니를 위해서 베었어요.','c'],doom:['둠스데이, 언니가 부르면 하늘이 대답해요. 제 모든 힘을 다해서.','c'],rouge:['에클라땅뜨 아르떼, 진정한 빛은 어둠이 있을 때 더욱 아름다워 보이는 법이에요.','c'],polaris:['플로리스 폴라리스, 지금 우리 머리 위에 있는 푸른 별의 이름이에요.','c'],stellar:['스텔라 디센던트, 언니에게만 하늘에 있는 천체들로부터 전자기파가 도착해요. 제가 음성으로 번역해 드렸어요.','w'],roadster:['레이디 로드스터, 두 분은 잘 계신가요? 그 차 운전 사실 제가 하는 건데 말이죠.','s'],risha:['R.A.V.E. 네 천사의 이름이에요. 라그비엔, 아나벨라, 비비엔, 엘로이즈.','c'],glass:['시공간을 멈추는 고대 요정의 마법. 저도 몰라요. 아이기스 차원 아카이브에도 이름만 남아 있어요.','c'],soulwed:['영혼결혼식. 죽음은 인간에게 무엇인가요? 제게도 죽음이 올까요?','c'],prism:['그레이스 프리즘. 여러분들의 마음의 빛이 모두 모일 때, 분명 우리는 승리할 거예요.','c']};
 const LA={say:null,f:'n',T:0,box:null,taps:[],last:''};
 function lbPick(){const now=performance.now();LA.taps=LA.taps.filter(t=>now-t<2500);LA.taps.push(now);if(LA.taps.length>3){LA.taps=[];return LBT}return lbLine(.1)}
 function lbLine(hp){

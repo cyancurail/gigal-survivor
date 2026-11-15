@@ -1182,16 +1182,16 @@ const FM_SUP={
 const FM_SUPN={'재건':'기갈탄','박준형':'샤넬 미사일','송기호':'디올 레이저','박계원':'마계의 나비','김세진':'오라클 위성 시스템','승태민':'고전압 제네레이터','창환이형':'네온 레이저','박민규':'크리오테라피','진형우':'에스테틱 드론','박준영':'팅커벨','하도':'애널라이징포','영규형':'윈드 위스퍼','조혁래':'디바인 레일건','임재영':'셀레스티얼 레인'};
 /* 11-15 아이기스 전략특공함: 통신기를 먹으면 비행선이 날아와 머리 위에서 멈추고, 도착하는 순간 지원 각성이 터져요(봇·연속 사용은 즉시 발동) */
 function fmSupFire(k,N){G.fmSpD=fmSupD();FM_SUP[k]();G.fmHush=G.t+3.6;if(!G.bot){toast('📡 아이기스 지휘본부 지원!',`각성 「${N?N[0]:k}」 1회 발동`,true);SND.p('radio');G.shk=Math.max(G.shk||0,.15)}}
-function fmSupport(){const ks=Object.keys(FM_SUP),k=pick(ks),N=[FM_SUPN[k]];if(G.bot||G.fmAg){fmSupFire(k,N);return}G.fmAg={t:0,k,N,f:0};G.fmHush=G.t+4.4;if(!G.bot){toast('🛰️ 아이기스 전략특공함 도착!','지원 사격 준비 중이에요, 언니',true);SND.p('radio')}}
+function fmSupport(){const ks=Object.keys(FM_SUP),k=pick(ks),N=[FM_SUPN[k]];if(G.bot||G.fmAg){fmSupFire(k,N);return}G.fmAg={t:0,k,N,f:0,sd:Math.random()<.5?-1:1};G.fmHush=G.t+4.4;if(!G.bot){toast('🛰️ 아이기스 전략특공함 도착!','지원 사격 준비 중이에요, 언니',true);SND.p('radio')}}
 function fmAegisTick(dt){const A=G.fmAg;if(!A)return;A.t+=dt;if(!A.f&&A.t>=1.1){A.f=1;fmSupFire(A.k,A.N);if(!G.bot){sparks(G.p.x,G.p.y,22,['#9ad8ff','#ffffff','#5ac8ff'],280,.55,3);pring(G.p.x,G.p.y,130,'#7fd8ff',24,.5)}}if(A.t>=3.7)G.fmAg=null}
 const AEGIS={im:null};
 function fmAegisDraw(){const A=G.fmAg;if(!A)return;let im=AEGIS.im;if(!im){im=AEGIS.im=new Image();im.src='fx/aegis_frames.png'}if(!im.complete||!im.width)return;
   /* 프레임 시트 4칸(560×640): 0 하강 · 1 상승 · 2 긴급 하강 · 3 긴급 상승. 위에서 본 시점이라 고도↓=작아짐, 고도↑=커짐 */
-  const p=G.p,t=A.t,e3=x=>1-Math.pow(1-x,3),i3=x=>x*x*x,hx=0,hy=-VH*.2,W=Math.min(VW*.6,400),H=W*640/560,sx=VW*.75,sy=-VH*.55;
+  const p=G.p,t=A.t,e3=x=>1-Math.pow(1-x,3),i3=x=>x*x*x,hx=0,hy=-VH*.2,W=Math.min(VW*.6,400),H=W*640/560,sx=A.sd*VW*.8,sy=-VH*.45;
   let ox,oy,sc=1,al=1,rot=0,fr,spd=0;
-  if(t<1.1){const k=e3(t/1.1);ox=sx+(hx-sx)*k;oy=sy+(hy-sy)*k;sc=1.5-.5*k;al=Math.min(1,t/.2);rot=(Math.atan2(hy-sy,hx-sx)+Math.PI/2)*(1-k);fr=t<.5?[[2,1]]:[[2,1-(t-.5)/.6],[0,(t-.5)/.6]];if(t<.7)spd=1}
+  if(t<1.1){const k=e3(t/1.1);ox=sx+(hx-sx)*k;oy=sy+(hy-sy)*k;sc=1.5-.5*k;al=Math.min(1,t/.2);rot=0;/* 11-16 화면 좌/우에서 대각선으로 내려오되 뱃머리는 정자세 유지 */fr=t<.5?[[2,1]]:[[2,1-(t-.5)/.6],[0,(t-.5)/.6]];if(t<.7)spd=1}
   else if(t<2.5){const k=(t-1.1)/1.4;ox=hx+Math.sin(k*3)*8;oy=hy+Math.sin(k*4)*6;fr=[[0,1]]}
-  else{const k=i3(Math.min(1,(t-2.5)/1.2));ox=-VW*.7*k;oy=hy-VH*.5*k;sc=1+.9*k;rot=-.95*k;al=1-Math.max(0,(t-3.3)/.4);fr=t<2.9?[[1,Math.min(1,(t-2.5)/.2)],[0,1-Math.min(1,(t-2.5)/.2)]]:t<3.2?[[3,(t-2.9)/.3],[1,1-(t-2.9)/.3]]:[[3,1]];if(t>3)spd=1}
+  else{const k=i3(Math.min(1,(t-2.5)/1.2));ox=-A.sd*VW*.7*k;oy=hy-VH*.5*k;sc=1+.9*k;al=1-Math.max(0,(t-3.3)/.4);fr=t<2.9?[[1,Math.min(1,(t-2.5)/.2)],[0,1-Math.min(1,(t-2.5)/.2)]]:t<3.2?[[3,(t-2.9)/.3],[1,1-(t-2.9)/.3]]:[[3,1]];if(t>3)spd=1}
   const cx=p.x+ox,cy=p.y+oy,w=W*sc;
   ctx.save();ctx.globalAlpha=.3*al;ctx.fillStyle='#000';ctx.beginPath();ctx.ellipse(p.x+ox*.5,p.y+46,W*.3,W*.07,0,0,7);ctx.fill();ctx.restore();
   if(t>1.1&&t<1.9){const f=1-(t-1.1)/.8,y0=cy+H*.22;ctx.save();ctx.globalCompositeOperation='lighter';const g=ctx.createLinearGradient(0,y0,0,p.y+20);g.addColorStop(0,'rgba(120,220,255,0)');g.addColorStop(.35,`rgba(150,230,255,${.2*f})`);g.addColorStop(1,`rgba(220,250,255,${.3*f})`);ctx.fillStyle=g;for(const bw of [92,64,40,20])ctx.fillRect(p.x-bw/2,y0,bw,p.y+20-y0);ctx.restore()}

@@ -2136,14 +2136,15 @@ function mgSpans(x0,x1,sd){const out=[];let cur=x0;const z0=mgZone(x0),z1=mgZone
 function mgEdge(x,sd){return sd?mgBot(x):mgTop(x)}
 function mgWalls(){const B=G.mgB;if(!B)return;const p=G.p,x0=p.x-VW/2-700,x1=p.x+VW/2+700,sm=ctx.imageSmoothingEnabled;
   for(let sd=0;sd<2;sd++){const GL=mgGapList(x0,x1).filter(g=>g.sd===sd).map(g=>g.x).sort((u,v)=>u-v);ctx.fillStyle='#0a0612';
-    for(const [a,b,e] of mgSpans(x0,x1,sd)){let cur=a;const F=(l,r)=>{if(r>l)ctx.fillRect(l,sd?e:e-VH-80,r-l,VH+80)};for(const gx of GL){const l=gx-MGGW/2,r=gx+MGGW/2;if(r<=cur||l>=b)continue;F(cur,Math.min(l,b));cur=Math.max(cur,r)}if(cur<b)F(cur,b)}
+    for(const [a,b,e] of mgSpans(x0,x1,sd)){let cur=a;/* 11-15: 건물·골목 뒤도 같은 바닥이 이어지게 — 까만 채움은 아주 먼 곳만(위·아래 끝 페이드) */const F=(l,r)=>{if(r<=l)return;const D0=sd?e+560:e-560,D1=sd?e+760:e-760,g3=ctx.createLinearGradient(0,D0,0,D1);g3.addColorStop(0,'rgba(10,6,18,0)');g3.addColorStop(1,'rgba(10,6,18,1)');ctx.fillStyle=g3;ctx.fillRect(l,Math.min(D0,D1),r-l,Math.abs(D1-D0));ctx.fillStyle='#0a0612';ctx.fillRect(l,sd?D1:D1-VH-80,r-l,VH+80)};F(a,b)}
+    /* 골목: 바닥이 이어진 채 안쪽으로 약하게 어둑하게(막힌 곳이라 못 들어감) */for(const gx of GL){const e=mgEdge(gx,sd),dy=sd?1:-1,g4=ctx.createLinearGradient(0,e,0,e+dy*320);g4.addColorStop(0,'rgba(8,4,16,.16)');g4.addColorStop(1,'rgba(8,4,16,0)');ctx.fillStyle=g4;for(const wd of [MGGW+90,MGGW+40,MGGW-10])ctx.fillRect(gx-wd/2,sd?e:e-320,wd,320)}
     // 일반 구간의 파인 공간 옆: 어두운 벽(경계 사이)
     for(let z=mgZone(x0);z<=mgZone(x1);z++){const A=mgAlc(z);if(!A||A.sd!==sd)continue;const g0=sd?B.b:B.t;}}
   ctx.imageSmoothingEnabled=true;
   for(let z=mgZone(x0)-1;z<=mgZone(x1)+1;z++){const th=mgTheme(z);
     for(let sd=0;sd<2;sd++){const dy=sd?1:-1;const PL=mgPieces(z,sd);
             for(const o of PL){if(o.x+o.w<x0||o.x>x1)continue;const im=mgPImg(o.n),cx=o.x+o.w/2,ey=mgEdge(cx,sd);
-        if(im){ctx.save();ctx.translate(cx,0);if(o.fl)ctx.scale(-1,1);ctx.drawImage(im,-o.w/2,sd?ey-6:ey+8-o.h,o.w,o.h);ctx.restore()}
+        if(im){ctx.save();ctx.fillStyle='rgba(6,2,14,.38)';ctx.beginPath();ctx.ellipse(cx,sd?ey-2:ey+4,o.w*.5,10,0,0,7);ctx.fill();ctx.translate(cx,0);if(o.fl)ctx.scale(-1,1);ctx.drawImage(im,-o.w/2,sd?ey-6:ey+8-o.h,o.w,o.h);ctx.restore()}
         else{ctx.fillStyle='#1a1030';ctx.fillRect(o.x,sd?ey:ey-o.h,o.w,o.h);ctx.fillStyle='#2a1850';ctx.fillRect(o.x,sd?ey:ey-o.h,o.w,6)}}}
     const A=mgAlc(z);if(A){const g0=A.sd?B.b:B.t,e=A.sd?g0+A.D:g0-A.D,y0=Math.min(g0,e),y1=Math.max(g0,e);// 공원 양옆 벽(벽돌 담)
       for(const xx of [A.a-54,A.b]){ctx.fillStyle='#2a2036';ctx.fillRect(xx,y0-2,54,y1-y0+4);ctx.fillStyle='#46385a';ctx.fillRect(xx,y0-2,5,y1-y0+4)}
@@ -2151,7 +2152,7 @@ function mgWalls(){const B=G.mgB;if(!B)return;const p=G.p,x0=p.x-VW/2-700,x1=p.x
       for(const [k,xx] of [[0,A.a-100],[1,A.b+100]])for(let j=0,yy=y0+110;yy<=y1+14;j++,yy+=112){const n=['ct1','ct2','ct3'][(mgH(z,j+k*11,77)*3)|0],im=mgPImg(n);if(!im)continue;const h=150,w=h*MG_AS[n];ctx.save();ctx.translate(xx,0);if((j+k)&1)ctx.scale(-1,1);ctx.drawImage(im,-w/2,yy-h,w,h);ctx.restore()}
       const bi=mgPImg('bu');if(bi)for(const xx of [A.a+4,A.b-4])for(let yy=y0+30;yy<=y1+30;yy+=78){const w=bi.width*.75,h=bi.height*.75;ctx.drawImage(bi,xx-w/2,yy-h+12,w,h)}}}
   ctx.imageSmoothingEnabled=sm;
-  for(let sd=0;sd<2;sd++){for(const [a,b,e] of mgSpans(x0,x1,sd)){const dy=sd?1:-1,g2=ctx.createLinearGradient(0,e,0,e-dy*90);g2.addColorStop(0,'rgba(8,4,16,.65)');g2.addColorStop(1,'rgba(8,4,16,0)');ctx.fillStyle=g2;ctx.fillRect(a,sd?e-90:e,b-a,90)}}}
+  for(let sd=0;sd<2;sd++){for(const [a,b,e] of mgSpans(x0,x1,sd)){const dy=sd?1:-1,g2=ctx.createLinearGradient(0,e-dy*110,0,e+dy*70);g2.addColorStop(0,'rgba(8,4,16,0)');g2.addColorStop(.6,'rgba(8,4,16,.34)');g2.addColorStop(1,'rgba(8,4,16,0)');ctx.fillStyle=g2;ctx.fillRect(a,Math.min(e-dy*110,e+dy*70),b-a,180)}}}
 // 공원 잔디 바닥
 const MGGI={im:null,pat:null,k:0};
 function mgGrassPat(){if(!MGGI.im){const im=new Image();im.src='mg/grass.jpg';MGGI.im=im}const im=MGGI.im;if(!im.complete||!im.width)return null;const sk=Z*(typeof DPR==='number'?DPR:1);if(MGGI.pat&&MGGI.k===sk)return MGGI.pat;

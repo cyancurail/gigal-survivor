@@ -11079,7 +11079,9 @@ const SHIPS=[
  {k:'panacea',n:'파나케이아',d:'긴급의료선',c:'AEGIS-02',line:'아이기스 파나케이아, 언니를 지킬게요.',ok:0},
  {k:'argo',n:'아르고',d:'보급수송선',c:'AEGIS-03',line:'아이기스 아르고, 보급 항로 열었어요.',ok:0},
  {k:'themis',n:'테미스',d:'방벽전개함',c:'AEGIS-04',line:'아이기스 테미스, 방벽 전개 준비.',ok:0}];
-const IMPL=SHIPS.filter(s=>s.ok).length; /* 지금 구현된 함선 수(호출기 이벤트는 이 수까지만) */
+const CD={pallas:5,panacea:6,themis:5,argo:999};/* 11-17 사용자: 재정비 시간(화면 시계 분). 아르고는 판에 1번 */
+const IMPL=SHIPS.filter(s=>s.ok).length;
+const cdLeft=k=>{const c=G.agCd&&G.agCd[k];return c?Math.max(0,c-em()):0}; /* 지금 구현된 함선 수(호출기 이벤트는 이 수까지만) */
 const agU=()=>Math.max(0,Math.min(4,(SAVE&&SAVE.agU)|0));
 const IM={};function img(k){let i=IM[k];if(!i){i=IM[k]=new Image();i.src='ag/'+k+'.webp'}return i}
 const solo=()=>!G.bot&&!(window.MP&&MP.g);
@@ -11090,7 +11092,7 @@ function evTick(dt){if(G.map!=='mg'||!G.hard||G.arena||!solo()||!G.mgB)return;
   const E=G.agE;if(!E)return;const p=G.p;
   if(E.st===0){if(em()<(window.__agFast?.25:7))return;
     let best=null,bd=1e9;const z0=mgZone(p.x);for(let z=Math.max(1,z0-1);z<=z0+8;z++){const A=mgAlc(z);if(!A)continue;const cx=(A.a+A.b)/2,d=Math.abs(cx-p.x)+(cx<p.x-200?900:0);if(d<bd){bd=d;best=A}}
-    if(!best)return;const B=G.mgB,A=best;E.x=(A.a+A.b)/2;E.y=A.sd?B.b+A.D*.42:B.t-A.D*.42;E.R=Math.max(90,Math.min(150,(A.b-A.a)/2-60,A.D*.42));E.g=0;E.out=0;E.st=1;E.t=0;
+    if(!best)return;if(!SAVE.agSeen){SAVE.agSeen=1;try{persist()}catch(e){}}const B=G.mgB,A=best;E.x=(A.a+A.b)/2;E.y=A.sd?B.b+A.D*.42:B.t-A.D*.42;E.R=Math.max(90,Math.min(150,(A.b-A.a)/2-60,A.D*.42));E.g=0;E.out=0;E.st=1;E.t=0;
     quest('📡 끊긴 호출기 신호 포착!','근처 공원에서 아이기스 '+SHIPS[E.s].n+'의 호출기가 깜빡여요. 🛰️ 화살표를 따라가요.');try{SND.p('radio')}catch(e){}
     setTimeout(()=>{try{quest('🛰️ 아리아드네','어머, 이 신호… 통신이 끊겼던 '+SHIPS[E.s].n+'예요. 언니, 공원 원 안에서 1분만 버텨 주세요. 제가 실을 이어 볼게요.')}catch(e){}},2600);return}
   if(E.st===1){E.t+=dt;const dx=p.x-E.x,dy=(p.y-E.y)/.7,inside=dx*dx+dy*dy<E.R*E.R;
@@ -11129,7 +11131,7 @@ const CSS=`#agOv{position:fixed;inset:0;z-index:9000;display:flex;align-items:ce
 #agOv h3{margin:0 0 2px;text-align:center;font-size:20px;color:#bfe9ff}#agOv .agSub{text-align:center;font-size:12px;color:#7aa6c0;margin-bottom:12px}
 #agOv .agG{display:grid;grid-template-columns:1fr 1fr;gap:10px}#agOv .agC{position:relative;border:2px solid #2a4a6a;border-radius:14px;background:rgba(20,40,64,.7);padding:6px 6px 8px;text-align:center;cursor:pointer;color:inherit;font:inherit}
 #agOv .agC canvas{width:100%;aspect-ratio:4/3;display:block}#agOv .agC b{display:block;font-size:17px;margin-top:1px}#agOv .agC small{display:block;color:#8fb8d0;font-size:12px;margin-top:4px}#agOv .agC.on:hover,#agOv .agC.on:focus{border-color:#9fe8ff;background:rgba(40,110,160,.55)}
-#agOv .agC.lk{cursor:default;opacity:.75}#agOv .agC.bz{cursor:default;opacity:.55}#agOv .agC.lk canvas{filter:brightness(0) drop-shadow(0 0 2px #2a4a6a)}#agOv .agC i{position:absolute;top:8px;right:8px;font-style:normal;font-size:11px;background:#000a;padding:2px 6px;border-radius:8px}
+#agOv .agC.lk{cursor:default;opacity:.75}#agOv .agC.bz{cursor:default;opacity:.55}#agOv .agC.lk canvas{filter:brightness(0) drop-shadow(0 0 2px #2a4a6a)}#agOv .agC i em{font-style:normal}#agOv .agC i{position:absolute;top:8px;right:8px;font-style:normal;font-size:11px;background:#000a;padding:2px 6px;border-radius:8px}
 #agOv .agB{display:block;width:100%;margin-top:10px;padding:10px;border-radius:12px;border:1.5px solid #3a6a8a;background:#0e2034;color:#cfe;font:800 13px 'Noto Sans KR',sans-serif}
 #agOv .agHQ{position:relative;border:2px solid #58c8ff;border-radius:14px;overflow:hidden;background:#030810}#agOv .agHQ canvas{width:100%;aspect-ratio:8/7;display:block}
 #agOv .agHQ:after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(0,0,0,.18) 0 2px,transparent 2px 5px);pointer-events:none}
@@ -11149,8 +11151,9 @@ function close(keep){cancelAnimationFrame(raf);anims=[];if(ov){ov.remove();ov=nu
 function turn(cv,k,fps){const im=img(k),c=cv.getContext('2d');anims.push(t=>{if(!im.width)return;const n=Math.floor(t*fps)%16;c.clearRect(0,0,cv.width,cv.height);c.drawImage(im,(n%4)*128,((n/4)|0)*96,128,96,0,0,cv.width,cv.height)})}
 function menu(){const u=agU(),run=G.agShip&&G.agShip.k;
   let h=`<div class="agW"><h3>🛰️ 아이기스 함대 · 출격 선택</h3><div class="agSub">통신기 연결 완료 · 귀환 ${u}/4</div><div class="agG">`;
-  SHIPS.forEach((s,i)=>{const lk=i>=u||!s.ok,busy=run===s.k;h+=`<button type="button" class="agC ${lk?'lk':busy?'bz':'on'}" data-i="${i}" ${lk||busy?'disabled':''}><canvas width="256" height="192"></canvas><small>${s.d}</small><b>${lk&&i>=u?'???':s.n}</b>${lk?`<i>${i>=u?'🔒 미해금':'🛠️ 정비 중'}</i>`:busy?'<i>✈️ 출격 중</i>':''}</button>`});
+  SHIPS.forEach((s,i)=>{const lk=i>=u||!s.ok,cd=cdLeft(s.k),busy=run===s.k||cd>0,tag=lk?(i>=u?'🔒 미해금':'🛠️ 정비 중'):run===s.k?'✈️ 출격 중':cd>0?(s.k==='argo'?'📦 이번 판 보급 완료':'🔧 재정비 중 <em data-cd="'+s.k+'"></em>'):'';h+=`<button type="button" class="agC ${lk?'lk':busy?'bz':'on'}" data-i="${i}" ${lk||busy?'disabled':''}><canvas width="256" height="192"></canvas><small>${s.d}</small><b>${lk&&i>=u?'???':s.n}</b>${tag?`<i>${tag}</i>`:''}</button>`});
   h+=`</div><button type="button" class="agB" data-x="sup">🛰️ 아이기스 전략특공함 화력 지원</button></div>`;open(h);
+  const cds=[...ov.querySelectorAll('[data-cd]')];anims.push(()=>{for(const e of cds){const r=Math.ceil(cdLeft(e.dataset.cd)*60);e.textContent=Math.floor(r/60)+':'+String(r%60).padStart(2,'0')}});
   ov.querySelectorAll('.agC').forEach((b,i)=>{turn(b.querySelector('canvas'),'t_'+SHIPS[i].k,8);if(!b.disabled)b.onclick=()=>{try{SND.p('click')}catch(e){}approve(i)}});
   ov.querySelector('[data-x=sup]').onclick=()=>{close();ORIG.sup()}}
 function approve(i,o){o=o||{};const s=SHIPS[i];
@@ -11165,7 +11168,8 @@ function approve(i,o){o=o||{};const s=SHIPS[i];
   let fin=0;const done=()=>{if(fin)return;fin=1;close();launch(s.k)};ov.onclick=()=>{if(st>=(o.unlock?4:3))done()};try{SND.p('radio')}catch(e){}}
 
 /* ---------- 함선 출격 ---------- */
-function launch(k){if(k==='pallas')palStart()}
+function launch(k){(G.agCd||(G.agCd={}))[k]=em()+(CD[k]||5)+(k==='pallas'?(G.hell?20:25)*TSD/60:0);if(k==='pallas')palStart()}
+const TSD=.8;/* 게임 초 → 화면 시계 초 (em과 같은 비율) */
 /* 팔라스 프레임: 0~23 피치 링, 24~47 뒤집힌 피치 링, 48~71 롤 링 (칸 144, 12열) */
 function frameOf(mp,mr){const n=a=>((a%TAU)+TAU)%TAU,id=a=>Math.round(n(a)/TAU*24)%24,near=(a,b)=>Math.min(Math.abs(a-b),TAU-Math.abs(a-b))<.12,r=n(mr),q=n(mp);
   if(near(q,0))return[48+id(mr),0];if(near(r,0))return[id(mp),0];if(near(r,PI))return[24+id(mp),0];if(near(q,PI))return[48+id(PI+mr),PI];return[id(mp),0]}

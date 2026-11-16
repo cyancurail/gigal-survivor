@@ -11149,7 +11149,7 @@ function turn(cv,k,fps){const im=img(k),c=cv.getContext('2d');anims.push(t=>{if(
 function menu(){const u=agU(),run=G.agShip&&G.agShip.k;
   let h=`<div class="agW"><h3>🛰️ 아이기스 함대 · 출격 선택</h3><div class="agSub">통신기 연결 완료 · 해금 ${u}/4</div><div class="agG">`;
   SHIPS.forEach((s,i)=>{const lk=i>=u||!s.ok,busy=run===s.k;h+=`<button type="button" class="agC ${lk?'lk':busy?'bz':'on'}" data-i="${i}" ${lk||busy?'disabled':''}><canvas width="256" height="192"></canvas><b>${lk&&i>=u?'???':s.n}</b><small>${s.d}</small>${lk?`<i>${i>=u?'🔒 미해금':'🛠️ 정비 중'}</i>`:busy?'<i>✈️ 출격 중</i>':''}</button>`});
-  h+=`</div><button type="button" class="agB" data-x="sup">🛰️ 아이기스 특공전략함 화력 지원</button></div>`;open(h);
+  h+=`</div><button type="button" class="agB" data-x="sup">🛰️ 아이기스 전략특공함 화력 지원</button></div>`;open(h);
   ov.querySelectorAll('.agC').forEach((b,i)=>{turn(b.querySelector('canvas'),'t_'+SHIPS[i].k,8);if(!b.disabled)b.onclick=()=>{try{SND.p('click')}catch(e){}approve(i)}});
   ov.querySelector('[data-x=sup]').onclick=()=>{close();ORIG.sup()}}
 function approve(i,o){o=o||{};const s=SHIPS[i];

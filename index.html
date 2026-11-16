@@ -11191,7 +11191,7 @@ function nextSeg(S){if(S.last==='immel')return'splits';if(S.seg!=='cruise'&&S.se
 function palTick(dt){const S=G.agShip;if(!S||S.k!=='pallas')return;const p=G.p;S.t+=dt;const t=S.t;
   const ENT=1.4,EX=S.T-2.6;
   if(t<ENT){const u=ez(t/ENT);S.x=lp(p.x+120,p.x+40,u);S.y=lp(p.y+VH*.75,p.y+260,u);S.alt=lp(260,0,u);S.mp=0;S.mr=0;S.h=-.2;if(t+dt>=ENT){S.alt0=0;seg(S,'aileron')}}
-  else if(t>=EX){if(!S.asc){S.asc={x:S.x,y:S.y,h:S.h};quest('🛰️ 아리아드네','팔라스, 임무 완료. 지휘 본부로 복귀 후 재정비합니다. 무사히 버텨요, 언니!')}const u=(t-EX)/2.6;S.x=lp(S.asc.x,p.x,ez(u/.5));S.y=lp(S.asc.y,p.y,ez(u/.5));S.h=lp(S.asc.h,0,ez(u/.4));S.mp=ez(u/.35)*PI/2*.92;S.mr=0;S.alt=0;const e=u*u*(3-2*u)*.4+u*u*u*.6;S.sc=lp(1,5,e*e*.7+e*.3);S.al=1-cl((u-.62)/.38);S.fire=0;if(u>=1){G.agShip=null;return}}
+  else if(t>=EX){if(!S.asc){S.asc={x:S.x,y:S.y,h:S.h};quest('🛰️ 아리아드네','팔라스, 임무 완료. 지휘 본부로 복귀 후 재정비합니다. 무사히 버텨요, 언니!')}const u=(t-EX)/2.6;S.x=lp(S.asc.x,p.x,ez(u/.5));S.y=lp(S.asc.y,p.y,ez(u/.5));S.h=lp(S.asc.h,0,ez(u/.4));S.mp=ez(u/.35)*PI/2*.92;S.mr=0;S.alt=0;const e=u*u*(3-2*u)*.4+u*u*u*.6;S.sc=lp(1,5,e*e*.7+e*.3);S.al=1;/* 11-17 사용자: 페이드 없이 선명하게 커지다가 사라짐 */S.fire=0;if(u>=1){G.agShip=null;return}}
   else{S.st+=dt;const M=MV[S.seg],u=cl(S.st/M.L),fx=Math.sin(S.sh),fy=-Math.cos(S.sh),rx=Math.cos(S.sh),ry=Math.sin(S.sh);
     if(S.seg==='cruise'||S.seg==='brk'){const d0=Math.hypot(p.x-S.x,p.y-S.y),want=Math.atan2(p.x-S.x,-(p.y-S.y))+(d0<220?1.4:.35);let d=((want-S.h+PI)%TAU+TAU)%TAU-PI;const rate=S.seg==='brk'?3.2:1.6,dh=cl(d,-rate*dt,rate*dt);S.h+=dh;
       const v=S.seg==='brk'?300:340;S.x+=Math.sin(S.h)*v*dt;S.y+=-Math.cos(S.h)*v*dt;S.mp=0;const bank=S.seg==='brk'?1.25:.6;S.mr=lp(S.mr,Math.sign(dh)*Math.min(1,Math.abs(dh)/(rate*dt+1e-6))*bank,.15);S.alt=lp(S.alt,S.alt0,.1);S.fire=1}

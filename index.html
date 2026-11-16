@@ -11086,15 +11086,15 @@ const solo=()=>!G.bot&&!(window.MP&&MP.g);
 
 /* ---------- 호출기 이벤트 (인천 어려움 50% · 헬 100%, 약 7분) ---------- */
 function evTick(dt){if(G.map!=='mg'||!G.hard||G.arena||!solo()||!G.mgB)return;
-  if(G.agE===undefined){const u=agU();G.agE=(u<IMPL&&Math.random()<(G.hell||window.__agFast?1:.5))?{st:0,s:u}:null}
+  if(G.agE===undefined){qClear();const u=agU();G.agE=(u<IMPL&&Math.random()<(G.hell||window.__agFast?1:.5))?{st:0,s:u}:null}
   const E=G.agE;if(!E)return;const p=G.p;
   if(E.st===0){if(em()<(window.__agFast?.25:7))return;
     let best=null,bd=1e9;const z0=mgZone(p.x);for(let z=Math.max(1,z0-1);z<=z0+8;z++){const A=mgAlc(z);if(!A)continue;const cx=(A.a+A.b)/2,d=Math.abs(cx-p.x)+(cx<p.x-200?900:0);if(d<bd){bd=d;best=A}}
     if(!best)return;const B=G.mgB,A=best;E.x=(A.a+A.b)/2;E.y=A.sd?B.b+A.D*.42:B.t-A.D*.42;E.R=Math.max(90,Math.min(150,(A.b-A.a)/2-60,A.D*.42));E.g=0;E.out=0;E.st=1;E.t=0;
-    toast('📡 끊긴 호출기 신호 포착!','근처 공원에서 아이기스 '+SHIPS[E.s].n+'의 호출기가 깜빡여요',true);try{SND.p('radio')}catch(e){}
-    setTimeout(()=>{try{toast('🛰️ 아리아드네','언니, 공원 한가운데 원 안에서 1분만 버텨 주세요. 제가 신호를 이어 볼게요.')}catch(e){}},2600);return}
+    quest('📡 끊긴 호출기 신호 포착!','근처 공원에서 아이기스 '+SHIPS[E.s].n+'의 호출기가 깜빡여요. 🛰️ 화살표를 따라가요.');try{SND.p('radio')}catch(e){}
+    setTimeout(()=>{try{quest('🛰️ 아리아드네','언니, 공원 한가운데 원 안에서 1분만 버텨 주세요. 제가 신호를 이어 볼게요.')}catch(e){}},2600);return}
   if(E.st===1){E.t+=dt;const dx=p.x-E.x,dy=(p.y-E.y)/.7,inside=dx*dx+dy*dy<E.R*E.R;
-    if(inside){E.g=Math.min(1,E.g+dt/60);E.out=0;if(!E.in1){E.in1=1;toast('📡 호출 중','원 밖으로 나가면 신호가 멈추고, 오래 나가 있으면 줄어들어요')}}
+    if(inside){E.g=Math.min(1,E.g+dt/60);E.out=0;if(!E.in1){E.in1=1;quest('📡 호출 중','원 밖으로 나가면 신호가 멈추고, 오래 나가 있으면 줄어들어요.')}}
     else{E.out+=dt;if(E.out>3)E.g=Math.max(0,E.g-dt/120)}
     if(E.g>=1){E.st=2;const s=E.s;SAVE.agU=Math.max(agU(),s+1);try{persist()}catch(e){}try{SND.p('clear')}catch(e){}
       sparks(E.x,E.y,40,['#9ad8ff','#ffffff','#5ac8ff'],320,.7,3);pring(E.x,E.y,E.R*1.4,'#7fd8ff',30,.6);
@@ -11110,6 +11110,18 @@ function evDraw(){const E=G.agE;if(!E||E.st!==1)return;const p=G.p,t=G.t;
   const d=Math.hypot(E.x-p.x,E.y-p.y);if(d>Math.min(VW,VH)/2-20){const a=Math.atan2(E.y-p.y,E.x-p.x),R=Math.min(VW,VH)/2-60,x=p.x+Math.cos(a)*R,y=p.y+Math.sin(a)*R;
     ctx.save();ctx.translate(x,y);ctx.globalAlpha=.75+.25*Math.sin(t*6);ctx.fillStyle='rgba(10,40,80,.75)';ctx.strokeStyle='#8fdcff';ctx.lineWidth=2;ctx.beginPath();ctx.arc(0,0,19,0,TAU);ctx.fill();ctx.stroke();ctx.font='18px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('🛰️',0,1);ctx.rotate(a);ctx.fillStyle='#8fdcff';ctx.beginPath();ctx.moveTo(32,0);ctx.lineTo(22,-7);ctx.lineTo(22,7);ctx.closePath();ctx.fill();ctx.restore()}}
 
+/* ---------- 퀘스트 창: 이벤트 문구를 10초 남김 (모바일 = 화면 아래, PC = 화면 왼쪽) ---------- */
+const QCSS=`#agQ{position:fixed;z-index:8000;display:flex;flex-direction:column;gap:6px;pointer-events:none;font-family:'Noto Sans KR',sans-serif}
+#agQ.pc{left:14px;top:34%;width:min(320px,30vw)}#agQ.mo{left:50%;transform:translateX(-50%);bottom:calc(14px + env(safe-area-inset-bottom,0px));width:min(92vw,420px)}
+#agQ .q{background:linear-gradient(90deg,rgba(6,16,32,.92),rgba(6,16,32,.78));border:1.5px solid #58c8ff;border-left:5px solid #8fdcff;border-radius:10px;padding:8px 12px;color:#e6f6ff;box-shadow:0 0 16px rgba(88,200,255,.25);animation:agQi .35s ease-out;transition:opacity .6s,transform .6s}
+#agQ .q b{display:block;font-size:13px;color:#bfe9ff;margin-bottom:2px}#agQ .q span{font-size:13px;line-height:1.45}#agQ .q.out{opacity:0;transform:translateX(-12px)}
+@keyframes agQi{from{opacity:0;transform:translateX(-16px)}}`;
+function quest(t,b){if(!G||G.bot)return;if(!document.getElementById('agQCss')){const s=document.createElement('style');s.id='agQCss';s.textContent=QCSS;document.head.appendChild(s)}
+  let box=document.getElementById('agQ');if(!box){box=document.createElement('div');box.id='agQ';document.body.appendChild(box)}
+  box.className=(matchMedia('(pointer:coarse)').matches||innerWidth<760)?'mo':'pc';
+  const q=document.createElement('div');q.className='q';q.innerHTML='<b></b><span></span>';q.querySelector('b').textContent=t;q.querySelector('span').textContent=b;box.appendChild(q);
+  while(box.children.length>3)box.firstChild.remove();
+  setTimeout(()=>{q.classList.add('out');setTimeout(()=>q.remove(),650)},10000)}
 /* ---------- 오버레이 (출격 선택 메뉴 · 지휘본부 승인 패널) ---------- */
 const CSS=`#agOv{position:fixed;inset:0;z-index:9000;display:flex;align-items:center;justify-content:center;background:rgba(2,6,14,.84);font-family:'Noto Sans KR',sans-serif;color:#e6f6ff}
 #agOv .agW{width:min(94vw,520px);max-height:94vh;overflow:auto;background:linear-gradient(#0a1424,#060d18);border:2px solid #58c8ff;border-radius:18px;box-shadow:0 0 40px rgba(88,200,255,.35);padding:16px}
@@ -11137,7 +11149,7 @@ function turn(cv,k,fps){const im=img(k),c=cv.getContext('2d');anims.push(t=>{if(
 function menu(){const u=agU(),run=G.agShip&&G.agShip.k;
   let h=`<div class="agW"><h3>🛰️ 아이기스 함대 · 출격 선택</h3><div class="agSub">통신기 연결 완료 · 해금 ${u}/4</div><div class="agG">`;
   SHIPS.forEach((s,i)=>{const lk=i>=u||!s.ok,busy=run===s.k;h+=`<button type="button" class="agC ${lk?'lk':busy?'bz':'on'}" data-i="${i}" ${lk||busy?'disabled':''}><canvas width="256" height="192"></canvas><b>${lk&&i>=u?'???':s.n}</b><small>${s.d}</small>${lk?`<i>${i>=u?'🔒 미해금':'🛠️ 정비 중'}</i>`:busy?'<i>✈️ 출격 중</i>':''}</button>`});
-  h+=`</div><button type="button" class="agB" data-x="sup">📡 지휘본부 각성 지원 요청</button></div>`;open(h);
+  h+=`</div><button type="button" class="agB" data-x="sup">🛰️ 아이기스 특공전략함 화력 지원</button></div>`;open(h);
   ov.querySelectorAll('.agC').forEach((b,i)=>{turn(b.querySelector('canvas'),'t_'+SHIPS[i].k,8);if(!b.disabled)b.onclick=()=>{try{SND.p('click')}catch(e){}approve(i)}});
   ov.querySelector('[data-x=sup]').onclick=()=>{close();ORIG.sup()}}
 function approve(i,o){o=o||{};const s=SHIPS[i];
@@ -11165,6 +11177,7 @@ const RL=150,MV={
  barrel:{L:1.5,f:u=>{const a=TAU*ez(u);return{al:u*360,sd:60*Math.sin(a),alt:60*(1-Math.cos(a)),mp:.3*Math.sin(a),mr:a}}},
  brk:{L:1.0},cruise:{L:1.5}};
 const NM={aileron:'AILERON ROLL',loop:'LOOP',immel:'IMMELMANN',splits:'SPLIT-S',barrel:'BARREL ROLL',brk:'BREAK TURN',cruise:'ENGAGE'};
+function qClear(){const b=document.getElementById('agQ');if(b)b.innerHTML=''}
 function palStart(){const p=G.p;img('pallas');G.fmSpD=fmSupD();
   G.agShip={k:'pallas',t:0,T:G.hell?20:25,x:p.x+120,y:p.y+VH*.75,h:-.2,alt:260,mp:0,mr:0,alt0:0,seg:null,cd:0,pt:[],bm:[],last:''};
   toast('🛰️ 팔라스 합류!',`전략지원기가 ${G.hell?20:25}초 동안 함께 싸워요`,true)}

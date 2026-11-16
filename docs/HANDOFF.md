@@ -597,3 +597,10 @@
 
 ## V251 (11-16) 크로니클 아츠 시간대 이름 표기 (패치노트 없음)
 - `wsfx(k,m)`: chron이면 `-이다볼의 봄/베르단디 블룸/리프와 리프트라시르`를 붙임. 무기칸 툴팁·딜표·srcName·랭킹 상세(ws.m 저장)에 적용.
+
+## V252 (11/16) 무기 아이콘 · 크로니클 갈래 업적
+- 아이콘: fx/hx_fulmine·hx_nike 교체, fx/hx_chron_{bloom,verdandi,leaf}.png = 크로니클 갈래별 (CHMI, icoSrc, wIco(k,c,m), rkIco(k,m))
+- 잔느 「로즈 그리고 너」(mx:송기호|10) nog 해제 → 일반 신화 뽑기. 옛 업적 hx_chron은 gone:1 (저장 비트 때문에 자리 유지, ACHV()로 화면·카운트 제외), 달성 후 미수령자는 스킨 바로 지급
+- POOL_V32: 잔느 13 이다볼 · 14 베르단디 · 15 호드미미르 (msk2/hx_ch_*.png, nog)
+- ACH_V35 뒤 숨김 업적 hx_chb/hx_chv/hx_chl (hx:'chron_<mode>'), SAVE.hxMade['chron_'+mode]는 hxMerge 래퍼에서 h.mode로 기록 (예전 제작 기록은 갈래 정보 없어 소급 안 됨)
+- SC_VER 36

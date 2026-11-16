@@ -589,3 +589,8 @@
 - 원인: 게임 종료 시 BPS 랭킹 제출 코드(`window.endGame` 래퍼, 끝부분 IIFE)가 `rkMap`(V106 랭킹 IIFE의 지역 const)을 못 찾아 `ReferenceError`가 try/catch에 삼켜져 **모든 맵에서** BPS 기록이 서버로 안 갔음.
 - 수정: `window.rkMap=rkMap`로 노출 + BPS 제출부에 맵 이름 폴백. 인천 헬 10분 이상 → `bpsh_mg`/tf 10 전송 확인.
 - 이미 끝난 판의 기록은 소급 불가(서버에 올라간 적 없음).
+
+## V249 (11-16) 콜포 디 풀미네 강풍 보호막 · 번개 스턴 · 글씨 가늘게
+- 풀미네 우박 단계: 전체 밀림 제거 → 주인공 둘레 투명 바람 구역(반경 175×√area)이 적(보스·고정형 제외)을 밀어내고 `G.eb` 탄막도 가속해 튕겨냄.
+- `fqStrike`: 낙뢰 18% 스턴 .7s, 연쇄 12% 스턴 .5s (지옥 난이도는 엔진이 무시).
+- `.gcard h3`, `#hxq/#rdq .ntc h2` 글꼴을 Black Han Sans → Noto Sans KR 700으로.

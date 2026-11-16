@@ -11161,7 +11161,7 @@ function approve(i,o){o=o||{};const s=SHIPS[i];
     if(hq.width){const n=Math.floor(t*7)%24,k=1+t*.03;c.globalAlpha=cl(t/.5);c.drawImage(hq,(n%6)*256,((n/6)|0)*224,256,224,256-256*k,214-224*k,512*k,448*k);c.globalAlpha=1}
     if(st<1&&t>2.15){st=1;r.textContent='ARIADNE ✓'}if(st<2&&t>2.0){st=2;ln.textContent='아리아드네, 온라인.'}if(st<3&&t>3.0){st=3;ln.textContent=s.line}if(o.unlock&&st<4&&t>4.3){st=4;ln.textContent='…'+s.n+'를 되찾았어요. 사령관님 축하드려요. 역사에 남을 업적이에요.'}
     if(t>(o.unlock?6.4:4.6))done()});
-  let fin=0;const done=()=>{if(fin)return;fin=1;close();launch(s.k)};ov.onclick=()=>{if(st>=3)done()};try{SND.p('radio')}catch(e){}}
+  let fin=0;const done=()=>{if(fin)return;fin=1;close();launch(s.k)};ov.onclick=()=>{if(st>=(o.unlock?4:3))done()};try{SND.p('radio')}catch(e){}}
 
 /* ---------- 함선 출격 ---------- */
 function launch(k){if(k==='pallas')palStart()}

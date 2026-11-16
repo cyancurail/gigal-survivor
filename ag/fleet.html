@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>아이기스 함대 · 3D</title>
+<style>
+body.emb header,body.emb .panel,body.emb #hint{display:none!important}body.emb{min-height:0;height:100dvh;background:transparent}body.emb #stage{min-height:0;height:100dvh}
+
+:root{--bg:#03050c;--panel:#0e1328;--ink:#e8f4ff;--dim:#8fa3c8;--acc:#6fd8ff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 system-ui,-apple-system,"Noto Sans KR",sans-serif;display:flex;flex-direction:column;min-height:100dvh}
+header{padding:12px 16px 4px}h1{font-size:16px;margin:0;letter-spacing:.02em}header p{margin:2px 0 0;color:var(--dim);font-size:12px}
+#stage{flex:1;min-height:64dvh;position:relative;touch-action:none;cursor:grab;overflow:hidden}
+#stage canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+#stamp{position:absolute;left:50%;top:16%;transform:translate(-50%,-50%);opacity:0;pointer-events:none;text-align:center}
+#stamp b{display:inline-block;font-size:32px;letter-spacing:.25em;color:#d8f6ff;border:3px solid #7fdcff;padding:4px 12px 4px 20px;border-radius:6px;text-shadow:0 0 14px #6fd8ff;box-shadow:0 0 22px #6fd8ff99,inset 0 0 14px #6fd8ff55;background:#06223acc}
+#stamp span{display:block;margin-top:8px;font-size:14px;color:#e8f4ff;text-shadow:0 0 8px #000,0 0 2px #000}
+.panel{background:var(--panel);padding:10px 14px 14px;border-top:1px solid #20305e}
+.btns{display:flex;flex-wrap:wrap;gap:6px}
+button{background:#151e3d;color:var(--ink);border:1px solid #2a3c74;border-radius:8px;padding:7px 11px;font:inherit;font-size:12px;cursor:pointer}
+button[aria-pressed=true]{background:#1d396c;border-color:var(--acc)}
+.lbl{color:var(--dim);font-size:11px;margin:10px 0 4px}
+#hint{position:absolute;left:12px;bottom:10px;color:var(--dim);font-size:11px;pointer-events:none}
+#err{position:absolute;inset:0;display:none;align-items:center;justify-content:center;color:var(--dim);padding:20px;text-align:center}
+</style></head><body>
+<header><h1 id="ttl">🛰️ 아이기스 함대</h1><p>본부와 지원함 4척. 끌어서 돌려 보세요.</p></header>
+<div id="stage"><canvas id="c"></canvas><div id="stamp"><b>출격</b><span id="stampT"></span></div><div id="hint">드래그: 회전 · 위아래로 끌면 기울기 · 두 손가락/휠: 확대</div><div id="err">이 기기에서는 WebGL을 쓸 수 없어요.</div></div>
+<div class="panel">
+<div class="btns" id="tabs"></div>
+<div class="lbl">보기</div>
+<div class="btns"><button id="spin" aria-pressed="true">자동 회전</button><button id="v0">정면</button><button id="v1">위에서</button><button id="v2">아래에서</button><button id="lite" aria-pressed="false">⚡ 가벼운 모드</button><button id="act"></button></div>
+</div>
+<script>
+(()=>{
+const $=id=>document.getElementById(id);const EMB=/embed=1/.test(location.search);if(EMB)document.body.classList.add('emb');
+const cv=$('c'),ctx=cv.getContext('2d');
+const glc=document.createElement('canvas'),gl=glc.getContext('webgl',{antialias:true,alpha:true,premultipliedAlpha:false,preserveDrawingBuffer:true});
+if(!gl){$('err').style.display='flex';return}
+const PI=Math.PI,C=Math.cos,S=Math.sin;
+/* ================= 모델 ================= */
+const POS=[],NOR=[],COL=[],EM=[];
+const WH=[.94,.96,.99],WH2=[.80,.85,.92],GR=[.58,.64,.74],DK=[.22,.27,.38],NE=[.42,.86,1],NE2=[.75,.95,1],GLS=[.30,.62,.92];
+const add=(a,b)=>[a[0]+b[0],a[1]+b[1],a[2]+b[2]],sub=(a,b)=>[a[0]-b[0],a[1]-b[1],a[2]-b[2]],nrm=a=>{const l=Math.hypot(...a)||1;return[a[0]/l,a[1]/l,a[2]/l]},crs=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]],dot=(a,b)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2];
+const cmp=(...f)=>p=>f.reduce((q,g)=>g(q),p),TR=(x,y,z)=>p=>[p[0]+x,p[1]+y,p[2]+z],SC=k=>p=>[p[0]*k,p[1]*k,p[2]*k],
+ RY=a=>p=>[p[0]*C(a)+p[2]*S(a),p[1],-p[0]*S(a)+p[2]*C(a)],RZ=a=>p=>[p[0]*C(a)-p[1]*S(a),p[0]*S(a)+p[1]*C(a),p[2]],RX=a=>p=>[p[0],p[1]*C(a)-p[2]*S(a),p[1]*S(a)+p[2]*C(a)],ID=p=>p;
+const xn=(xf,p,n)=>nrm(sub(xf(add(p,[n[0]*.01,n[1]*.01,n[2]*.01])),xf(p)));
+function V(p,n,c,e){POS.push(p[0],p[1],p[2]);NOR.push(n[0],n[1],n[2]);COL.push(c[0],c[1],c[2]);EM.push(e||0)}
+function tri(a,b,c,col,e,ctr,xf=ID){let n=nrm(crs(sub(b,a),sub(c,a)));if(ctr){const m=[(a[0]+b[0]+c[0])/3,(a[1]+b[1]+c[1])/3,(a[2]+b[2]+c[2])/3];if(dot(n,sub(m,ctr))<0)n=[-n[0],-n[1],-n[2]]}
+ const A=xf(a),B=xf(b),Cc=xf(c),N=xn(xf,a,n);V(A,N,col,e);V(B,N,col,e);V(Cc,N,col,e)}
+function lathe(pr,seg,colf,xf=ID,ef,flat){const sg=(pr[pr.length-1][1]>pr[0][1]&&!(pr.length===3&&pr[0][0]===0&&pr[0][1]===0))?-1:1;for(let i=0;i<pr.length-1;i++){const dr=pr[i+1][0]-pr[i][0],dy=pr[i+1][1]-pr[i][1],l=Math.hypot(dr,dy)||1,nr=-dy/l*sg,ny=dr/l*sg;if(pr[i][0]===0&&pr[i+1][0]===0)continue;
+  for(let s=0;s<seg;s++){const a0=s/seg*2*PI,a1=(s+1)/seg*2*PI,am=(a0+a1)/2,P=(k,a)=>[pr[k][0]*C(a),pr[k][1],pr[k][0]*S(a)],N=a=>{const b=flat?am:a;return[nr*C(b),ny,nr*S(b)]};
+   const col=colf(i,s),e=ef?ef(i,s):0,q=[[P(i,a0),N(a0)],[P(i,a1),N(a1)],[P(i+1,a1),N(a1)],[P(i+1,a0),N(a0)]].map(([p,n])=>[xf(p),xn(xf,p,n)]);
+   for(const ix of [[0,1,2],[0,2,3]])for(const j of ix)V(q[j][0],q[j][1],col,e)}}}
+function box(sx,sy,sz,col,xf=ID,e){const x=sx/2,y=sy/2,z=sz/2,v=[[-x,-y,-z],[x,-y,-z],[x,y,-z],[-x,y,-z],[-x,-y,z],[x,-y,z],[x,y,z],[-x,y,z]];
+ [[[0,3,2,1],[0,0,-1]],[[4,5,6,7],[0,0,1]],[[0,4,7,3],[-1,0,0]],[[1,2,6,5],[1,0,0]],[[3,7,6,2],[0,1,0]],[[0,1,5,4],[0,-1,0]]].forEach(([f,n])=>{const N=xn(xf,v[f[0]],n),P=f.map(i=>xf(v[i]));for(const j of [0,1,2,0,2,3])V(P[j],N,col,e)})}
+function torus(R,r,su,sv,col,xf=ID,e){for(let i=0;i<su;i++)for(let j=0;j<sv;j++){const P=(u,v)=>{const a=u/su*2*PI,b=v/sv*2*PI;return[(R+r*C(b))*C(a),r*S(b),(R+r*C(b))*S(a)]},Nn=(u,v)=>{const a=u/su*2*PI,b=v/sv*2*PI;return[C(b)*C(a),S(b),C(b)*S(a)]};
+  const q=[[i,j],[i+1,j],[i+1,j+1],[i,j+1]].map(([u,v])=>[xf(P(u,v)),xn(xf,P(u,v),Nn(u,v))]);for(const k of [0,1,2,0,2,3])V(q[k][0],q[k][1],typeof col==='function'?col(i,j):col,e)}}
+let seed=7;const rnd=()=>(seed=(seed*16807)%2147483647)/2147483647;
+const toX=RZ(-PI/2); // 세로(Y) 회전체를 바깥(+X)으로 눕히기
+const MODELS=[];let RNG=[];const mark=g=>RNG.push({g,s:POS.length/3}),begin=()=>{RNG=[];mark(0)};
+const endM=(name,scale,cy,yaw,act)=>{const e=POS.length/3;RNG.forEach((r,i)=>r.n=(i+1<RNG.length?RNG[i+1].s:e)-r.s);MODELS.push({name,scale,cy,yaw,act,rng:RNG})};
+begin();
+/* --- 상부: 지휘 원반 + 함교탑 --- */
+lathe([[0,9.6],[2.6,9.55],[5.6,9.1],[7.6,8.3],[8.0,7.9],[8.0,7.5],[7.6,7.1],[5.2,6.4],[2.6,6.0],[2.4,6.0]],64,(i,s)=>i===4?(s%4===0?WH2:NE):i===1?WH2:i>=6?GR:WH,ID,(i,s)=>i===4&&s%4?1:0);
+torus(7.85,.07,64,4,NE2,TR(0,8.35,0),1);
+lathe([[0,14.6],[.22,14.4],[.5,13.6],[1.3,13.2],[1.8,12.4],[2.0,11.4],[2.6,10.9],[3.0,10.2],[3.1,9.8],[2.6,9.55]],40,(i)=>i===4?GLS:i===6?WH2:WH,ID,(i)=>i===4?1:0);
+box(2.6,.35,.9,GLS,cmp(TR(0,11.9,1.75)),1);
+for(let k=0;k<3;k++){const a=k*2*PI/3+.3,h=2.4+k*.8;box(.12,h,.12,WH2,cmp(TR(.9,13.4+h/2,0),RY(-a)));box(.28,.28,.28,[1,.35,.4],cmp(TR(.9,13.4+h,0),RY(-a)),2)}
+for(let k=0;k<10;k++){const a=k*2*PI/10+.2;box(1.5,.55,1.0,k%2?WH2:WH,cmp(TR(5.9,9.1,0),RZ(-.22),RY(-a)));box(1.52,.1,1.02,NE,cmp(TR(5.9,9.32,0),RZ(-.22),RY(-a)),1)}
+for(const a of [PI*.5,PI*1.5]){const xf=cmp(RZ(-.7),TR(0,0,0),TR(4.3,9.6,0),RY(-a));lathe([[0,0],[1.2,.32],[1.4,.48]],24,()=>WH,xf);lathe([[0,0],[.06,1.1],[0,1.3]],6,()=>NE,xf,()=>1);box(.3,.8,.3,GR,cmp(TR(4.3,9.3,0),RY(-a)))}
+for(let k=0;k<16;k++){const a=k*2*PI/16,r=4.4+rnd()*2.4;box(.6+rnd()*.8,.4+rnd()*.5,.5+rnd()*.5,rnd()<.5?GR:WH2,cmp(TR(r,6.2-(r-4)*.25,0),RY(-a)))}
+/* --- 목 + 육각 격납고 --- */
+lathe([[2.4,6.0],[2.1,5.4],[2.1,3.4],[2.9,2.9]],32,(i)=>i===1?WH2:WH);
+torus(2.15,.08,32,4,NE,TR(0,4.4,0),1);
+lathe([[0,2.9],[3.2,2.9],[4.6,1.9],[4.6,-1.9],[3.4,-3.0],[0,-3.0]],6,(i)=>i===2?WH:WH2,RY(PI/6),null,true);
+for(let s=0;s<6;s++){const a=(s+.5)/6*2*PI+PI/6,r=4.6*C(PI/6);
+ box(.2,2.3,2.4,DK,cmp(TR(r,-.1,0),RY(-a)));box(.24,.12,2.5,NE,cmp(TR(r,1.12,0),RY(-a)),1);
+ for(let j=0;j<4;j++)box(.25,.32,.32,NE2,cmp(TR(r+.04,-1.5+0*j,-.9+j*.6),RY(-a)),1)}
+/* --- 세 갈래 주 선체(팔) --- */
+const ARM=[[0,2.6],[1.6,3.2],[2.1,4.5],[2.1,7.5],[2.25,7.7],[2.25,8.1],[2.1,8.3],[2.0,11],[2.15,11.2],[2.15,11.6],[1.95,11.8],[1.6,14],[1.0,16],[.35,17.6],[0,18]];
+const AA=[PI/2,PI/2+2*PI/3,PI/2+4*PI/3];
+for(const a of AA){const R=RY(-a),xf=cmp(toX,TR(0,4.2,0),R);
+ lathe(ARM,32,(i,s)=>i===4||i===8?NE:(s>=16?WH2:WH),xf,(i)=>i===4||i===8?1:0);
+ box(6.5,1.7,.22,WH,cmp(RZ(.25),TR(10.5,6.6,0),R));box(6.5,.1,.24,NE,cmp(RZ(.25),TR(10.5,5.8,0),R),1);
+ for(const z of [-1,1]){box(8,.12,.12,NE,cmp(TR(9.5,4.2,z*2.02),R),1);
+  const nf=cmp(toX,TR(0,0,0),TR(5.5,2.0,z*1.5),R);lathe([[0,0],[.75,.3],[.9,1],[.9,6],[1.0,6.2],[1.0,6.6],[.8,6.9],[.6,7]],20,(i)=>i===4?NE:i===3?WH2:WH2,nf,(i)=>i===4?1:0);
+  lathe([[0,6.95],[.55,6.95]],20,()=>NE2,nf,()=>1)}
+ for(let j=0;j<7;j++)box(.38,.18,.22,NE2,cmp(TR(5+j*1.2,5.95,0),R),1);
+ for(let j=0;j<5;j++)box(.7+rnd()*.6,.35,.6+rnd()*.5,rnd()<.5?GR:WH2,cmp(TR(4.5+j*1.6,6.15,(rnd()-.5)*1.4),R));
+}
+/* --- 하부: 줄기 + 탱크 랙 + 도킹 링 --- */
+lathe([[2.6,-3.0],[1.8,-3.6],[1.8,-8.4],[2.6,-9.0],[2.9,-9.9],[2.9,-10.3],[2.3,-10.8],[1.3,-11.3],[1.0,-12.8],[.35,-16],[0,-17.2]],32,(i,s)=>i===4?(s%2?NE:DK):i===1?WH2:WH,ID,(i,s)=>i===4&&s%2?1:0);
+torus(1.85,.07,32,4,NE,TR(0,-5.0,0),1);torus(1.85,.07,32,4,NE,TR(0,-7.4,0),1);
+for(let k=0;k<10;k++){const a=k*2*PI/10;box(.35,.9,.5,k%2?GR:WH2,cmp(TR(1.9,-4+(k%3)*-1.4,0),RY(-a)))}
+const TANK=[[0,-3.6],[.6,-3.4],[.95,-2.9],[.95,-1.35],[1.02,-1.28],[1.02,-1.0],[.95,-.95],[.95,.95],[1.02,1.0],[1.02,1.28],[.95,1.35],[.95,2.9],[.6,3.4],[0,3.6]];
+for(const a of AA.map(x=>x+PI/3)){const R=RY(-a);
+ for(const y of [-5.0,-7.4]){lathe(TANK,20,(i)=>i===4||i===9?NE:WH,cmp(toX,TR(6.0,y,0),R),(i)=>i===4||i===9?1:0);
+  box(.6,.4,.4,GR,cmp(TR(2.2,y,0),R));box(.25,.25,2.3,WH2,cmp(TR(4.0,y,0),R));box(.25,.25,2.3,WH2,cmp(TR(8.0,y,0),R))}
+ box(.35,2.8,.35,WH2,cmp(TR(4.0,-6.2,1.0),R));box(.35,2.8,.35,WH2,cmp(TR(8.0,-6.2,-1.0),R));
+ box(.6,.6,.6,[1,.35,.4],cmp(TR(9.9,-6.2,0),R),2)}
+torus(7.2,.38,72,8,(i,j)=>j<4?WH:WH2,TR(0,-9.9,0));torus(7.2,.07,72,4,NE,TR(0,-9.5,0),1);
+for(const a of AA)box(5.0,.45,.6,WH2,cmp(TR(4.7,-9.9,0),RY(-a)));
+torus(1.5,.2,32,6,NE2,TR(0,-11.2,0),1);
+/* --- 장식용 함선 --- */
+function ship(xf,stripe){const c=[-.3,0,0],P={n:[2.2,0,0],mt:[0,.45,0],ml:[.2,0,.55],mr:[.2,0,-.55],rt:[-1.2,.4,0],rl:[-1.3,0,.7],rr:[-1.3,0,-.7],b:[-.4,-.35,0],rb:[-1.3,-.3,0],wl:[-1.15,-.05,1.9],wr:[-1.15,-.05,-1.9]};
+ const T=(a,b,d,col,e)=>tri(P[a],P[b],P[d],col,e,c,xf);
+ T('n','mt','ml',WH);T('n','mr','mt',WH);T('n','ml','b',WH2);T('n','b','mr',WH2);T('mt','rt','rl',WH);T('mt','rl','ml',WH);T('mt','mr','rr',WH);T('mt','rr','rt',WH);
+ T('ml','rl','rb',GR);T('ml','rb','b',WH2);T('mr','b','rb',WH2);T('mr','rb','rr',GR);T('rt','rl','rb',NE2,1);T('rt','rb','rr',NE2,1);
+ tri(P.ml,P.wl,P.rl,stripe,0,null,xf);tri([P.ml[0],-.02,P.ml[2]],[P.wl[0],-.07,P.wl[2]],[P.rl[0],-.02,P.rl[2]],WH2,0,null,xf);
+ tri(P.mr,P.rr,P.wr,stripe,0,null,xf);tri([P.mr[0],-.02,P.mr[2]],[P.rr[0],-.02,P.rr[2]],[P.wr[0],-.07,P.wr[2]],WH2,0,null,xf);
+ tri([1.15,.27,0],[.35,.44,.2],[.35,.44,-.2],GLS,1,null,xf);
+ tri([-1.15,-.05,1.9],[-1.3,-.05,1.6],[-.95,-.05,1.75],NE,1,null,xf);tri([-1.15,-.05,-1.9],[-1.3,-.05,-1.6],[-.95,-.05,-1.75],NE,1,null,xf)}
+const STR=[[.85,.92,1],[1,.85,.93],[.86,1,.9],[.92,.88,1]];
+for(const [k,a] of AA.entries()){ship(cmp(SC(1.25),TR(13.2,6.3,0),RY(-a)),STR[k]);box(1.2,.5,.4,GR,cmp(TR(13,5.9,0),RY(-a)))}
+for(let k=0;k<6;k++){const a=k*2*PI/6+PI/6;ship(cmp(SC(1.35),RZ(-.12),TR(7.4,-11.3,0),RY(-a)),STR[k%4]);box(.25,1.0,.25,GR,cmp(TR(7.2,-10.6,0),RY(-a)))}
+for(let k=0;k<3;k++){const a=AA[k]+PI/3;ship(cmp(SC(1.0),RX(PI/2),RZ(-PI/2),TR(2.3,-13.6,0),RY(-a)),STR[(k+1)%4])}
+endM('지휘본부',1,1.3,.6,{label:'출격 승인',stamp:'아리아드네, 온라인.'});
+/* ================= 함선 4척 ================= */
+const PK=[1,.55,.8],PK2=[1,.84,.93],OR=[1,.7,.3];
+function surf(f,nu,nv,colf,xf=ID,ef,ctrf){const E=1e-3,vert=(u,v)=>{const p=f(u,v),du=sub(f(Math.min(1,u+E),v),f(Math.max(0,u-E),v)),dv=sub(f(u,v+E),f(u,v-E));let n=crs(du,dv);const o=sub(p,ctrf(u,v));
+  if(Math.hypot(...n)<1e-9)n=o;if(Math.hypot(...n)<1e-9)n=[1,0,0];n=nrm(n);if(dot(n,o)<0)n=[-n[0],-n[1],-n[2]];return[xf(p),xn(xf,p,n)]};
+ for(let i=0;i<nu;i++)for(let j=0;j<nv;j++){const q=[vert(i/nu,j/nv),vert((i+1)/nu,j/nv),vert((i+1)/nu,(j+1)/nv),vert(i/nu,(j+1)/nv)],col=colf(i,j),e=ef?ef(i,j):0;for(const k of [0,1,2,0,2,3])V(q[k][0],q[k][1],col,e)}}
+const crI=(st,t)=>{const n=st.length-1,i=Math.min(n-1,Math.floor(t)),f=t-i,g=k=>st[Math.max(0,Math.min(n,k))],a=g(i-1),b=g(i),c=g(i+1),d=g(i+2);
+ return b.map((_,k)=>k===0?b[0]+(c[0]-b[0])*f:.5*((2*b[k])+(-a[k]+c[k])*f+(2*a[k]-5*b[k]+4*c[k]-d[k])*f*f+(-a[k]+3*b[k]-3*c[k]+d[k])*f*f*f))};
+function loft(st,seg,colf,xf=ID,ef,pw=2.5){const se=v=>Math.sign(v)*Math.pow(Math.abs(v),2/pw),n=st.length-1;
+ surf((u,v)=>{const q=crI(st,u*n),a=v*2*PI;return[q[0],q[3]+Math.max(0,q[2])*se(S(a)),Math.max(0,q[1])*se(C(a))]},n*4,seg,colf,xf,ef,(u)=>{const q=crI(st,u*n);return[q[0],q[3],0]})}
+function prism(pts,y0,y1,col,xf=ID,e){const n=pts.length,c=[pts.reduce((a,p)=>a+p[0],0)/n,(y0+y1)/2,pts.reduce((a,p)=>a+p[1],0)/n],P=(i,y)=>[pts[i%n][0],y,pts[i%n][1]];
+ for(let i=1;i<n-1;i++){tri(P(0,y1),P(i,y1),P(i+1,y1),col,e,c,xf);tri(P(0,y0),P(i,y0),P(i+1,y0),col,e,c,xf)}
+ for(let i=0;i<n;i++){tri(P(i,y0),P(i+1,y0),P(i+1,y1),col,e,c,xf);tri(P(i,y0),P(i+1,y1),P(i,y1),col,e,c,xf)}}
+const disc=(r,col,xf,e=1)=>lathe([[0,0],[r,0]],20,()=>col,xf,()=>e);
+const back=RZ(PI/2),down=RX(PI),half=(sg)=>(i,j)=>j>=sg/2?WH2:WH;
+/* ---------- 1. 전략지원기 (레퍼런스 그림 비율: 기수 +X, 길이 약 22) ---------- */
+begin();
+const DT=[.08,.17,.28];
+// 주 선체: 폭은 잘록하게, 높이는 두툼하게(실제 기체 같은 단면)
+loft([[-7.6,0,0,.1],[-6.6,.75,.75,.1],[-4.8,1.25,1.0,.1],[-1.3,1.0,.95,.1],[1.5,1.1,1.0,.15],[4.3,1.6,1.05,.2],[6,1.15,.85,.2],[8,.5,.45,.12],[11.2,0,0,.05]],32,half(32),ID,null,2.6);
+// 등 능선(솟은 척추) + 배 용골
+loft([[-5.2,0,0,.7],[-4,.6,.5,.85],[0,.72,.6,1.0],[3.5,.75,.55,1.0],[5.2,0,0,.8]],20,()=>WH);
+loft([[-5,0,0,-.5],[-3,.5,.45,-.75],[2,.6,.5,-.75],[5,0,0,-.45]],16,()=>WH2);box(5,.06,.1,NE,TR(-.5,-1.24,0),1);
+box(7.4,.04,.05,GR,TR(-.3,1.6,0));for(const z of [-.3,.3])box(1.7,.05,.07,NE,TR(1.4,1.54,z),1);
+prism([[-2.5,0],[-3.2,.24],[-4.3,0],[-3.2,-.24]],1.3,1.45,NE,ID,1);
+// 조종석 캐노피
+loft([[5.4,0,0,.7],[6.1,.62,.5,.8],[7.2,.55,.42,.7],[8.1,.25,.2,.45],[8.6,0,0,.38]],16,()=>GLS,ID,()=>1);
+// 꼬리
+loft([[-6.5,.6,.6,.1],[-8.5,.4,.35,.08],[-10,.2,.18,.04],[-11.4,0,0,0]],12,half(12));
+prism([[-7.6,0],[-8.4,.24],[-11.35,0],[-8.4,-.24]],.36,.5,NE,ID,1);
+const cl=(v)=>Math.max(0,Math.min(1,v));
+for(const z of [-1,1]){const mz=p=>[p[0],p[1],p[2]*z];
+ // 날개: 뿌리는 두껍고 끝은 얇게, 살짝 아래로 처짐
+ const wg=p=>{const t=cl((p[2]-2)/6.3);return[p[0],(p[1]-.3)*(1-.75*t)+.3-.55*t,p[2]*z]};
+ prism([[6.2,2.0],[1.75,8.3],[1.45,8.2],[3.6,2.2]],.0,.62,WH,wg);
+ prism([[3.46,2.6],[3.2,2.6],[1.8,6.6],[2.02,6.6]],.14,.46,NE,wg,1);
+ prism([[5.0,3.2],[3.3,5.8],[3.0,5.7],[4.4,3.3]],.62,.66,NE,wg,1);
+ // 기수 장갑날 + 어깨 흡기구 블록
+ prism([[11.1,.02],[8.2,.7],[6,1.2],[6,.85]],.15,.5,WH,mz);
+ prism([[6.4,1.0],[5.0,2.8],[2.85,2.85],[3.3,1.2]],-.05,.1,NE,mz,1);prism([[6.3,1.0],[5.0,2.6],[3.0,2.7],[3.4,1.2]],.1,.85,WH,mz);
+ loft([[2.6,.42,.4,0],[4,.55,.5,0],[5.4,.5,.42,0],[6.2,0,0,0]],14,half(14),TR(0,.95,z*1.25));box(.1,.5,.6,NE2,TR(2.62,.95,z*1.25),1);
+ // 수직 꼬리날개(바깥으로 기울임)
+ const fin=cmp(RX(-PI/2),RX(z*.45),TR(0,.9,z*.85));
+ prism([[-4.3,0],[-7.9,2.3],[-8.7,2.3],[-7.3,0]],-.08,.08,WH,fin);prism([[-7.5,2.0],[-7.9,2.3],[-8.7,2.3],[-8.4,2.0]],-.1,.1,NE,fin,1);
+ // 후방 주 추진기
+ loft([[-7.3,.5,.5,0],[-6,.6,.6,0],[-3.5,.45,.45,0],[-2.5,0,0,0]],14,half(14),TR(0,.15,z*.95));
+ torus(.5,.12,20,6,GR,cmp(back,TR(-7.32,.15,z*.95)));disc(.44,NE2,cmp(back,TR(-7.36,.15,z*.95)));
+ for(let j=0;j<5;j++)box(.14,.3,.1,NE2,TR(-.2+j*.3,.3,z*1.03),1);
+ box(5.4,.08,.06,NE,TR(-1.4,-.25,z*1.03),1);
+ // 엔진 링(납작) + 지지대
+ for(const x of [.86,-3.45]){const T=TR(x,0,z*3.7);
+  torus(1.3,.22,36,10,(i,j)=>j<5?WH:WH2,T);torus(1.3,.05,36,4,NE2,cmp(TR(0,.23,0),T),1);torus(.8,.08,32,6,NE,T,1);torus(1.0,.05,32,4,GR,cmp(TR(0,.06,0),T));
+  lathe([[0,-.1],[1.15,-.1]],24,()=>DT,T);
+  lathe([[0,.15],[.36,.12],[.48,0],[.36,-.12],[0,-.15]],20,()=>NE2,T,()=>1);
+  box(2.3,.1,.16,WH2,T);box(.16,.1,2.3,WH2,T);box(2.0,.04,.06,NE,cmp(TR(0,.07,0),T),1);box(.06,.04,2.0,NE,cmp(TR(0,.07,0),T),1);
+  box(2.3,.06,.08,GR,cmp(RY(PI/4),T));box(2.3,.06,.08,GR,cmp(RY(-PI/4),T));
+  const pyl=p=>{const t=cl((p[2]-.9)/1.65);return[p[0],p[1]*(1-.6*t),p[2]*z]};
+  prism([[x+.55,.9],[x+.1,2.55],[x-.1,2.55],[x-.55,.9]],-.3,.4,WH,pyl);box(.07,.04,1.2,NE,TR(x,.3,z*1.85),1)}
+ prism([[-.7,.9],[-1.0,1.55],[-1.6,1.55],[-1.9,.9]],-.3,.45,WH2,mz);box(.6,.04,.1,NE,TR(-1.3,.47,z*1.3),1);
+ // 뒤쪽 겹 장갑(쐐기)
+ const sk=p=>{const t=cl((-4.2-p[0])/4);return[p[0],p[1]*(1-.6*t),p[2]*z]};
+ prism([[-4.2,1.1],[-4.8,2.1],[-8.0,2.0],[-6.4,.9]],-.3,.5,WH,sk);
+ prism([[-5.0,1.0],[-6.0,1.6],[-7.2,1.05],[-6.3,.75]],.5,.56,NE,sk,1);
+ prism([[-6.0,.75],[-6.6,1.35],[-9.6,1.1],[-8.2,.45]],-.25,.5,WH,sk);
+ prism([[-7.6,.4],[-8.3,.8],[-10.6,.55],[-9.4,.22]],-.2,.45,WH2,sk)}
+endM('전략지원기',1.42,0,2.3,{label:'⚡ 지원 사격 신호'});
+/* ---------- 2. 긴급의료선 ---------- */
+begin();
+loft([[-6.6,1.9,1.25,0],[-6,2.5,1.6,0],[-3,3.6,2.2,0],[2,3.4,2.1,.1],[5.5,2.2,1.4,.1],[7.6,.8,.6,0],[8.3,0,0,0]],32,(i,j)=>(i>=8&&i<=10)?PK2:(j>=16?WH2:WH),ID,null,3);
+loft([[3.2,0,0,1.75],[4.2,1.5,.55,1.72],[6,1.2,.5,1.2],[7.1,0,0,.85]],16,()=>GLS,ID,()=>1);
+box(.12,2.3,3.9,DK,TR(-6.6,0,0));for(const z of [-1.25,0,1.25])disc(.55,PK2,cmp(back,TR(-6.68,0,z)));
+lathe([[0,2.42],[1.35,2.42],[1.5,2.2]],6,()=>PK,TR(-1.2,0,0),()=>1,true);lathe([[0,2.5],[.62,2.5],[.7,2.42]],6,()=>[1,1,1],TR(-1.2,0,0),()=>1,true);
+const ringX=cmp(toX,TR(-1.2,0,0));torus(6.3,.36,64,10,(i,j)=>j<5?WH:WH2,ringX);torus(5.86,.09,64,4,PK,ringX,1);torus(6.74,.09,64,4,NE,ringX,1);
+for(let k=0;k<4;k++)box(.45,3.4,.7,WH2,cmp(TR(0,4.5,0),RX(k*PI/2+PI/4),TR(-1.2,0,0)));
+for(let k=0;k<8;k++){const a=k*PI/4;box(1.1,.6,.9,WH,cmp(TR(0,6.5,0),RX(a),TR(-1.2,0,0)));box(1.12,.12,.5,k%2?PK:NE,cmp(TR(0,6.84,0),RX(a),TR(-1.2,0,0)),1)}
+torus(2.1,.22,32,8,WH,TR(.4,-1.95,0));lathe([[0,-3.2],[1.0,-3.0],[1.7,-2.4],[1.95,-1.9]],24,(i)=>i===1?PK2:PK,TR(.4,0,0),()=>1);
+for(const z of [-1,1]){loft([[-5.2,.7,.7,0],[-4.6,.9,.9,0],[1,.9,.9,0],[3,.5,.5,0],[3.9,0,0,0]],16,(i,j)=>i===5||i===6?PK2:(j>=8?WH2:WH),TR(0,-.5,z*4.5));
+ disc(.6,PK2,cmp(back,TR(-5.24,-.5,z*4.5)));box(1.6,.5,1.6,WH2,TR(-1,-.4,z*3.5));box(4,.1,.1,PK,TR(-1.5,.42,z*4.5),1)}
+endM('긴급의료선',1.9,0,2.2,{label:'💗 치유 광선'});
+/* ---------- 3. 보급수송선 ---------- */
+begin();
+loft([[5,1.8,1.5,.8],[7,1.7,1.4,.8],[8.6,1.2,.9,.6],[9.4,.5,.4,.45],[9.7,0,0,.45]],24,half(24),ID,null,5);
+box(.8,.5,2.3,GLS,cmp(RZ(-.75),TR(8.45,1.45,0)),1);
+box(15.2,1.2,2.2,WH,TR(-1.6,1.6,0));for(const z of [-1,1])box(14,.1,.1,NE,TR(-1.6,1.25,z*1.12),1);
+for(let j=0;j<9;j++)box(.7+rnd()*.9,.3+rnd()*.3,.6+rnd()*.9,rnd()<.5?GR:WH2,TR(-7.5+j*1.5,2.3,(rnd()-.5)*1.1));
+box(2.6,2.7,4.6,WH2,TR(-9.4,.95,0));box(2.62,.14,4.62,NE,TR(-9.4,1.9,0),1);for(const z of [-1.15,1.15]){torus(.95,.16,20,6,GR,cmp(back,TR(-10.72,.9,z)));disc(.85,NE2,cmp(back,TR(-10.74,.9,z)))}
+const cont=(x,z,k)=>{const c=STR[k%4];box(3.6,2.2,2.5,k%2?WH:WH2,TR(x,-.4,z));box(3.62,.32,2.52,c,TR(x,.25,z));box(.16,2.24,2.54,GR,TR(x-1.5,-.4,z));box(.16,2.24,2.54,GR,TR(x+1.5,-.4,z));box(.5,.5,.06,NE,TR(x,-.6,z+Math.sign(z)*1.26),1)};
+for(const [i,x] of [-5.6,2.6].entries()){for(const z of [-1.35,1.35])cont(x,z,i*2+(z>0?1:0));box(.3,.5,5.6,GR,TR(x,.95,0))}
+for(const [x,z] of [[4.4,1],[4.4,-1],[-6.9,1],[-6.9,-1]]){box(.8,.6,3.4,WH2,TR(x,1.5,z*2.7));lathe([[0,1.25],[.9,1.15],[1.25,.6],[1.25,.1],[1.33,.05],[1.33,-.25],[1.25,-.3],[1.25,-.8],[1.0,-1.2]],24,(i)=>i===4?NE:WH,TR(x,1.3,z*4.4),(i)=>i===4?1:0);
+ disc(.98,NE2,cmp(down,TR(x,.12,z*4.4)));box(.3,.3,.3,OR,TR(x,2.62,z*4.4),2)}
+mark(1);for(const [x,z] of [[5.8,1.5],[5.8,-1.5],[-9.4,1.9],[-9.4,-1.9]]){box(.35,2.5,.35,GR,TR(x,.65,z));box(.6,.5,.6,WH2,TR(x,-.4,z));box(1.2,.22,1.2,DK,TR(x,-.72,z));box(.3,.08,.3,OR,TR(x,-.58,z+.5),2)}
+mark(2);for(const z of [-1.35,1.35])cont(-1.5,z,z>0?2:3);box(4.2,.24,5.7,GR,TR(-1.5,-1.63,0));box(4.22,.08,5.72,OR,TR(-1.5,-1.63,0),1);
+mark(3);lathe([[0,-3.36],[10.6,-3.36],[11.2,-3.8],[0,-3.8]],48,(i)=>i===0?GR:DK);torus(9.6,.1,64,4,NE,TR(0,-3.33,0),1);torus(4.2,.07,48,4,OR,TR(0,-3.33,0),1);
+for(let k=0;k<8;k++)box(1.6,.06,.4,NE2,cmp(TR(7,-3.33,0),RY(k*PI/4)),1);
+endM('보급수송선',1.42,0,2.2,{label:'🛬 착륙',label2:'🛫 이륙',toggle:1});
+/* ---------- 4. 방벽전개함 ---------- */
+begin();
+torus(7.5,.95,72,12,(i,j)=>j<6?WH:WH2);torus(6.5,.1,72,4,NE,TR(0,.25,0),1);torus(8.5,.1,72,4,NE,ID,1);torus(7.5,.1,72,4,NE2,TR(0,.97,0),1);
+lathe([[0,2.3],[.8,2.1],[1.6,1.3],[2.2,.45],[2.3,.15],[2.3,-.15],[2.2,-.45],[1.4,-1.5],[.5,-2.5],[0,-2.9]],32,(i)=>i===1?GLS:i===4?NE:WH,ID,(i)=>i===1||i===4?1:0);
+for(let k=0;k<3;k++){const R=RY(k*2*PI/3+PI/3);box(4.6,.6,1.1,WH2,cmp(TR(4.4,0,0),R));box(4.4,.08,.2,NE,cmp(TR(4.4,.33,0),R),1)}
+for(let k=0;k<6;k++){const R=RY(k*PI/3+PI/6);box(1.7,2.8,.5,WH,cmp(RZ(-.35),TR(8.3,1.5,0),R));box(1.72,.3,.52,NE,cmp(RZ(-.35),TR(8.75,2.75,0),R),1);
+ lathe([[0,-1.9],[.5,-1.6],[.65,-1.0],[.5,-.8]],16,(i)=>i<2?NE2:WH,cmp(TR(7.5,0,0),R),(i)=>i<2?1:0)}
+loft([[6.6,1.3,.8,0],[8.6,1.0,.6,0],[10.2,.45,.3,0],[11,0,0,0]],16,half(16));loft([[7.4,0,0,.75],[8.2,.5,.3,.72],[9.2,.35,.22,.5],[9.8,0,0,.4]],12,()=>GLS,ID,()=>1);
+for(const z of [-1,1]){loft([[-9.8,.7,.7,0],[-9.2,.95,.95,0],[-6.6,.85,.85,0],[-5.4,0,0,0]],16,half(16),TR(0,0,z*2.3));disc(.6,NE2,cmp(back,TR(-9.84,0,z*2.3)))}
+mark(3);for(const [y,R] of [[-3,9.6],[0,10.6],[3,9.6]])torus(R,.08,72,4,NE2,TR(0,y,0),1);
+for(let k=0;k<12;k++){const R=RY(k*PI/6);for(const [y,r,tz] of [[1.5,10.2,.33],[-1.5,10.2,-.33]])lathe([[0,0],[1.25,0],[1.4,-.08],[1.25,-.16],[0,-.16]],6,(i)=>NE,cmp(RZ(-PI/2+tz),TR(r,y,0),R),()=>1,true)}
+endM('방벽전개함',1.45,0,.5,{label:'🛡️ 방벽 전개',label2:'🛡️ 방벽 해제',toggle:1});
+const NV=POS.length/3;
+
+/* ================= GL ================= */
+const dExt=gl.getExtension('OES_standard_derivatives');
+const vs=`attribute vec3 p,n,c;attribute float e;uniform mat4 M,P;uniform mat3 N;uniform vec3 off,lx,ly,lz,lc;uniform float mode,lr;varying vec3 vn,vc,vp,vm,vw,vl;varying float ve;
+void main(){vec4 w=M*vec4(p+off,1.);vw=w.xyz;vn=N*n;vm=n;vc=c;ve=e;vp=p;vec3 q=w.xyz-lc;vl=vec3(dot(q,lx),dot(q,ly),dot(q,lz))/lr;
+ if(mode>2.5)gl_Position=vec4(vl.x,vl.y,-vl.z,1.);else gl_Position=P*w;}`;
+const fs=(dExt?'#extension GL_OES_standard_derivatives : enable\n':'')+`precision highp float;varying vec3 vn,vc,vp,vm,vw,vl;varying float ve;uniform float mode,t,pulse,dn,dr,lite;uniform sampler2D ts;
+float h1(vec2 q){return fract(sin(dot(q,vec2(127.1,311.7)))*43758.5453);}
+float vnz(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(h1(i),h1(i+vec2(1.,0.)),f.x),mix(h1(i+vec2(0.,1.)),h1(i+vec2(1.,1.)),f.x),f.y);}
+float fw(float x){${dExt?'return max(fwidth(x),1e-4);':'return .02;'}}
+void panel(vec2 uv,out vec3 col,out float glow,out float bev,out float seamo){
+ vec2 g=uv*.6,c=floor(g),f=fract(g);float r=h1(c);vec2 lo=vec2(0.),hi=vec2(1.);
+ if(r<.5){float s=.3+.4*h1(c+7.1);if(f.x<s)hi.x=s;else lo.x=s;}else{float s=.3+.4*h1(c+3.7);if(f.y<s)hi.y=s;else lo.y=s;}
+ if(h1(c+1.9)<.35){if(r<.5){float s=lo.y+(hi.y-lo.y)*(.35+.3*h1(c+9.));if(f.y<s)hi.y=s;else lo.y=s;}else{float s=lo.x+(hi.x-lo.x)*(.35+.3*h1(c+5.));if(f.x<s)hi.x=s;else lo.x=s;}}
+ vec2 sz=(hi-lo)/.6,lp=(f-lo)/(hi-lo),d0=lp*sz,d1=(1.-lp)*sz;float e=min(min(d0.x,d1.x),min(d0.y,d1.y));
+ float pr=h1(floor((c+lo)*13.7)+floor(hi*7.3));
+ float aa=fw(e),seam=1.-smoothstep(.02-aa,.02+aa,e);seamo=seam;
+ float bw=.07;bev=(smoothstep(bw,0.,d1.y)-smoothstep(bw,0.,d0.y))+.6*(smoothstep(bw,0.,d0.x)-smoothstep(bw,0.,d1.x));
+ col=vec3(.93,.95,.98)*(.90+.12*pr);glow=0.;
+ bool lng=sz.x>sz.y;float ax=lng?d0.y:d0.x,al=lng?d0.x:d0.y,sw=lng?sz.y:sz.x;
+ if(pr<.13&&sw>.35){float ie=e-.11,a2=fw(ie);float inr=smoothstep(-a2,a2,ie);
+   vec3 rc=vec3(.16,.26,.50);float st=abs(fract((ax-.11)/(sw-.22)*2.)-.5);float sl=(1.-smoothstep(.10,.16,st))*inr;
+   col=mix(col,rc,inr);glow=sl;bev=mix(bev,-bev,inr);}
+ else if(pr<.26){float st=abs(fract(al*6.)-.5);float inr=step(.08,e);col*=1.-inr*.45*(1.-smoothstep(.18,.3,st));col=mix(col,vec3(.66,.72,.82),inr*.5);}
+ else if(pr<.42){col=vec3(.74,.79,.87);}
+ else if(pr<.46){vec2 q=fract(lp*sz*2.5)-.5;float l=1.-smoothstep(.10,.16,length(q));l*=step(.12,e);glow=l*.9;}
+ else if(pr<.52){float l=step(.1,e)*(1.-smoothstep(.02,.05,abs(ax-sw*.5)));glow=l;}
+ col=mix(col,vec3(.22,.27,.38),seam*.85);}
+float shd(float ndl){vec2 uv=vl.xy*.5+.5;float z=vl.z*.5+.5,b=.004+.012*(1.-ndl),s=0.;
+ for(int i=-1;i<=1;i++)for(int j=-1;j<=1;j++){vec4 q=texture2D(ts,uv+vec2(float(i),float(j))/1024.);s+=step(q.r+q.g/255.,z+b);}return s/9.;}
+void main(){
+ float bl=ve>1.5?step(0.,sin(t*5.+vp.x*3.)):1.;vec3 ec=vc*(1.+pulse*1.2)*bl;
+ vec3 N=normalize(vn);
+ if(mode>2.5){float d=clamp(vl.z*.5+.5,0.,1.)*255.;gl_FragColor=vec4(floor(d)/255.,fract(d),0.,1.);return;}
+ if(mode>1.5){float d=clamp((-vw.z-dn)/dr,0.,1.)*255.;gl_FragColor=vec4(N.xy*.5+.5,floor(d)/255.,fract(d));return;}
+ vec3 pc=vc;float glow=0.,bev=0.,seam=0.;vec2 uvp=vec2(0.);
+ if(ve<.5){vec3 a=abs(normalize(vm));uvp=a.y>max(a.x,a.z)?vp.xz:(a.x>a.z?vp.zy:vp.xy);
+   if(lite<.5)panel(uvp,pc,glow,bev,seam);else pc=vec3(.84);float tone=dot(vc,vec3(.333)),mx=max(max(vc.r,vc.g),vc.b);
+   if(tone<.35){pc=vc*(1.-.5*seam);glow=0.;}else pc*=vc/max(mx,.01)*mix(.72,1.,smoothstep(.5,.95,tone));}
+ if(mode>.5){gl_FragColor=ve>.5?vec4(ec,1.):vec4(vec3(.5,.92,1.)*glow*.45*(1.+pulse),1.);return;}
+ vec3 V=normalize(-vw),L=normalize(vec3(-.55,.65,.55));
+ if(ve>.5){float f=pow(1.-max(dot(N,V),0.),3.);gl_FragColor=vec4(min(ec*(.82+.35*f)+vec3(.05),vec3(1.)),1.);return;}
+ float n1=.5,n2=.5,n3=0.;if(lite<.5){n1=vnz(uvp*2.3);n2=vnz(uvp*7.1+3.);n3=vnz(vec2(uvp.x*1.3,uvp.y*11.));}
+ vec3 alb=pow(pc,vec3(2.2))*.84;alb*=.84+.22*n1;alb*=1.-.14*smoothstep(.5,.85,n3);alb*=.94+.1*n2;
+ float nl0=dot(N,L),ndl=clamp(nl0+bev*.12,0.,1.),sh=lite>.5?1.:shd(clamp(nl0,0.,1.));
+ vec3 sun=vec3(1.,.96,.9)*3.3;
+ vec3 amb=mix(vec3(.17,.26,.46),vec3(.06,.075,.12),smoothstep(-.6,.6,N.y))*1.25+vec3(.30,.32,.38)*clamp(dot(N,normalize(vec3(.7,.1,.5))),0.,1.);
+ vec3 col=alb*(sun*ndl*sh+amb);
+ vec3 H=normalize(L+V);float gls=mix(140.,28.,n1);float sp=pow(max(dot(N,H),0.),gls)*(gls+8.)/60.;col+=sun*sp*.09*sh*step(0.,nl0);
+ float fr=pow(1.-max(dot(N,V),0.),5.);vec3 R=reflect(-V,N);vec3 env=mix(vec3(.01,.015,.03),vec3(.12,.30,.70),smoothstep(.15,-.7,R.y));col+=env*(.05+.6*fr);
+ col+=vec3(.45,.9,1.)*glow*(1.7+pulse*2.);
+ col=(col*(2.51*col+.03))/(col*(2.43*col+.59)+.14);col=pow(clamp(col,0.,1.),vec3(1./2.2));
+ gl_FragColor=vec4(col,1.);}`;
+const vq=`attribute vec2 q;varying vec2 u;void main(){u=q*.5+.5;gl_Position=vec4(q,0.,1.);}`;
+const fq=`precision highp float;varying vec2 u;uniform sampler2D tc,tn;uniform vec2 px;uniform float dr;
+float dep(vec4 v){return (v.b+v.a/255.)*dr;}
+void main(){vec4 c=texture2D(tc,u);if(c.a<.5){gl_FragColor=vec4(0.);return;}
+ vec4 n0=texture2D(tn,u);float d0=dep(n0),ao=0.,ed=0.;
+ for(int i=0;i<6;i++){float a=float(i)*.5236+.2,r=i<3?4.:11.;vec2 o=vec2(cos(a),sin(a))*px*r;
+  float dA=texture2D(tc,u+o).a>.5?d0-dep(texture2D(tn,u+o)):0.,dB=texture2D(tc,u-o).a>.5?d0-dep(texture2D(tn,u-o)):0.;
+  ao+=smoothstep(.04,.5,dA+dB)*(1.-smoothstep(2.,5.,max(dA,dB)));}
+ for(int i=0;i<4;i++){vec2 o=i==0?vec2(px.x,0.):i==1?vec2(-px.x,0.):i==2?vec2(0.,px.y):vec2(0.,-px.y);
+  if(texture2D(tc,u+o).a>.5){vec4 nn=texture2D(tn,u+o);ed=max(ed,max(smoothstep(.25,.6,abs(dep(nn)-d0)),smoothstep(.45,.8,length(n0.xy-nn.xy)*2.)));}}
+ vec3 col=c.rgb*(1.-.6*ao/6.)*(1.-.4*ed);gl_FragColor=vec4(col,1.);}`;
+function sh(t,s){const o=gl.createShader(t);gl.shaderSource(o,s);gl.compileShader(o);if(!gl.getShaderParameter(o,gl.COMPILE_STATUS))throw new Error(gl.getShaderInfoLog(o));return o}
+function prog(a,b){const p=gl.createProgram();gl.attachShader(p,sh(gl.VERTEX_SHADER,a));gl.attachShader(p,sh(gl.FRAGMENT_SHADER,b));gl.linkProgram(p);if(!gl.getProgramParameter(p,gl.LINK_STATUS))throw new Error(gl.getProgramInfoLog(p));return p}
+const pg=prog(vs,fs),pq=prog(vq,fq);
+const mk=(arr)=>{const b=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(arr),gl.STATIC_DRAW);return b};
+const BP=mk(POS),BN=mk(NOR),BC=mk(COL),BE=mk(EM),BQ=mk([-1,-1,1,-1,-1,1,-1,1,1,-1,1,1]);
+const att=(p,name,b,sz)=>{const l=gl.getAttribLocation(p,name);if(l<0)return;gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.enableVertexAttribArray(l);gl.vertexAttribPointer(l,sz,gl.FLOAT,false,0,0)};
+const U=n=>gl.getUniformLocation(pg,n),uM=U('M'),uP=U('P'),uN=U('N'),uMo=U('mode'),uT=U('t'),uPu=U('pulse'),uDn=U('dn'),uDr=U('dr'),uOff=U('off'),uLx=U('lx'),uLy=U('ly'),uLz=U('lz'),uLc=U('lc'),uLr=U('lr'),uTs=U('ts'),uLi=U('lite');
+const Q={tc:gl.getUniformLocation(pq,'tc'),tn:gl.getUniformLocation(pq,'tn'),px:gl.getUniformLocation(pq,'px'),dr:gl.getUniformLocation(pq,'dr')};
+const mul=(a,b)=>{const o=new Float32Array(16);for(let i=0;i<4;i++)for(let j=0;j<4;j++){let s=0;for(let k=0;k<4;k++)s+=a[k*4+j]*b[i*4+k];o[i*4+j]=s}return o};
+const persp=(f,a,n,fa)=>{const t=1/Math.tan(f/2);return new Float32Array([t/a,0,0,0,0,t,0,0,0,0,(fa+n)/(n-fa),-1,0,0,2*fa*n/(n-fa),0])};
+const rx=a=>new Float32Array([1,0,0,0,0,C(a),S(a),0,0,-S(a),C(a),0,0,0,0,1]),ry=a=>new Float32Array([C(a),0,-S(a),0,0,1,0,0,S(a),0,C(a),0,0,0,0,1]),tr=(x,y,z)=>new Float32Array([1,0,0,0,0,1,0,0,0,0,1,0,x,y,z,1]),scm=k=>new Float32Array([k,0,0,0,0,k,0,0,0,0,k,0,0,0,0,1]);
+function fbo(lin){const tx=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,tx);[gl.TEXTURE_MIN_FILTER,gl.TEXTURE_MAG_FILTER].forEach(k=>gl.texParameteri(gl.TEXTURE_2D,k,gl.NEAREST));[gl.TEXTURE_WRAP_S,gl.TEXTURE_WRAP_T].forEach(k=>gl.texParameteri(gl.TEXTURE_2D,k,gl.CLAMP_TO_EDGE));
+ return{tx,rb:gl.createRenderbuffer(),fb:gl.createFramebuffer(),w:0,h:0}}
+function sizeF(F,w,h){if(F.w===w&&F.h===h)return;F.w=w;F.h=h;gl.bindTexture(gl.TEXTURE_2D,F.tx);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,w,h,0,gl.RGBA,gl.UNSIGNED_BYTE,null);
+ gl.bindRenderbuffer(gl.RENDERBUFFER,F.rb);gl.renderbufferStorage(gl.RENDERBUFFER,gl.DEPTH_COMPONENT16,w,h);gl.bindFramebuffer(gl.FRAMEBUFFER,F.fb);gl.framebufferTexture2D(gl.FRAMEBUFFER,gl.COLOR_ATTACHMENT0,gl.TEXTURE_2D,F.tx,0);gl.framebufferRenderbuffer(gl.FRAMEBUFFER,gl.DEPTH_ATTACHMENT,gl.RENDERBUFFER,F.rb)}
+const FC=fbo(),FN=fbo(),FS=fbo();
+/* ================= 화면 ================= */
+let w=0,h=0,dpr=1;const gc=document.createElement('canvas'),gx=gc.getContext('2d');
+function fit(){const r=cv.getBoundingClientRect();dpr=Math.min(2,devicePixelRatio||1);w=cv.width=glc.width=Math.max(2,r.width*dpr|0);h=cv.height=glc.height=Math.max(2,r.height*dpr|0);gc.width=Math.max(1,w>>1);gc.height=Math.max(1,h>>1)}
+fit();new ResizeObserver(fit).observe($('stage'));
+let stars=[];for(let i=0;i<320;i++)stars.push([Math.random(),Math.random(),Math.random()*1.3+.3,Math.random()]);
+const VW={yaw:.6,pitch:.28,tgt:.28,spin:true,drag:false,lx:0,ly:0,zoom:1,push:0},T0=performance.now(),MI={i:0,K:0,k:0};let pulse=0;
+function bg(t){ctx.fillStyle='#03050c';ctx.fillRect(0,0,w,h);
+ const nb=ctx.createRadialGradient(w*.8,h*.2,0,w*.8,h*.2,w*.9);nb.addColorStop(0,'rgba(40,70,140,.25)');nb.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=nb;ctx.fillRect(0,0,w,h);
+ for(const s of stars){ctx.globalAlpha=.3+.55*Math.abs(Math.sin(t*.6+s[3]*20));ctx.fillStyle='#d6eaff';ctx.fillRect(((s[0]*w+VW.yaw*30*dpr)%w+w)%w,s[1]*h,s[2]*dpr,s[2]*dpr)}ctx.globalAlpha=1;
+ const pr=Math.max(w,h)*.95,px=w*.15,py=h+pr*.74,g=ctx.createRadialGradient(px+pr*.25,py-pr*.55,pr*.1,px,py,pr);g.addColorStop(0,'#5aa0ea');g.addColorStop(.55,'#1d4f9a');g.addColorStop(1,'#071533');
+ ctx.fillStyle=g;ctx.beginPath();ctx.arc(px,py,pr,0,7);ctx.fill();const at=ctx.createRadialGradient(px,py,pr*.97,px,py,pr*1.06);at.addColorStop(0,'rgba(140,215,255,.7)');at.addColorStop(1,'rgba(140,215,255,0)');ctx.fillStyle=at;ctx.beginPath();ctx.arc(px,py,pr*1.06,0,7);ctx.fill()}
+function offs(m,g){const k=MI.k;if(g===0)return[0,0,0];
+ if(m.name==='보급수송선'){if(g===1)return[0,-2.6*k,0];if(g===2)return[0,-1.6*k,0];return k>.01?[0,-(1-k)*8,0]:null}
+ return k>.5?[0,0,0]:null}
+const LD=nrm([-.55,.65,.55]),LX=nrm(crs([0,1,0],LD)),LY=crs(LD,LX);
+function scene(mode,t,F,vw_,vh_){gl.bindFramebuffer(gl.FRAMEBUFFER,F?F.fb:null);gl.viewport(0,0,vw_||w,vh_||h);gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.enable(gl.DEPTH_TEST);
+ gl.useProgram(pg);att(pg,'p',BP,3);att(pg,'n',BN,3);att(pg,'c',BC,3);att(pg,'e',BE,1);
+ const m=MODELS[MI.i],asp=w/h,fov=35*PI/180,tf=Math.tan(fov/2),dist=Math.max(17.5/tf,20/(tf*asp))/VW.zoom*(1-VW.push*.12);
+ const R=mul(rx(VW.pitch),ry(VW.yaw)),M=mul(tr(0,0,-dist),mul(R,mul(scm(m.scale),tr(0,m.cy,0))));
+ gl.uniformMatrix4fv(uM,false,M);gl.uniformMatrix4fv(uP,false,persp(fov,asp,1,400));gl.uniformMatrix3fv(uN,false,new Float32Array([R[0],R[1],R[2],R[4],R[5],R[6],R[8],R[9],R[10]]));
+ gl.uniform1f(uMo,mode);gl.uniform1f(uLi,LITE?1:0);gl.uniform1f(uT,t);gl.uniform1f(uPu,pulse);gl.uniform1f(uDn,dist-30);gl.uniform1f(uDr,60);
+ gl.uniform3fv(uLx,LX);gl.uniform3fv(uLy,LY);gl.uniform3fv(uLz,LD);gl.uniform3f(uLc,0,0,-dist);gl.uniform1f(uLr,23);
+ gl.activeTexture(gl.TEXTURE2);gl.bindTexture(gl.TEXTURE_2D,mode===0?FS.tx:null);gl.uniform1i(uTs,2);
+ for(const r of m.rng){const o=offs(m,r.g);if(!o||!r.n)continue;gl.uniform3fv(uOff,o);gl.drawArrays(gl.TRIANGLES,r.s,r.n)}}
+function composite(){gl.bindFramebuffer(gl.FRAMEBUFFER,null);gl.viewport(0,0,w,h);gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.disable(gl.DEPTH_TEST);
+ gl.useProgram(pq);att(pq,'q',BQ,2);gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,FC.tx);gl.uniform1i(Q.tc,0);gl.activeTexture(gl.TEXTURE1);gl.bindTexture(gl.TEXTURE_2D,FN.tx);gl.uniform1i(Q.tn,1);
+ gl.uniform2f(Q.px,dpr/w,dpr/h);gl.uniform1f(Q.dr,60);gl.drawArrays(gl.TRIANGLES,0,6)}
+let LITE=false;const AUTO={n:0,s:0,done:0},setLite=v=>{LITE=v;$('lite').setAttribute('aria-pressed',v)};
+let last=performance.now();
+function loop(now){const dt=Math.min(.05,(now-last)/1000);last=now;const t=(now-T0)/1000;
+ if(VW.spin&&!VW.drag)VW.yaw+=dt*.22;VW.pitch+=(VW.tgt-VW.pitch)*Math.min(1,dt*5);pulse=Math.max(0,pulse-dt*.8);VW.push+=((pulse>0?1:0)-VW.push)*Math.min(1,dt*3);MI.k+=(MI.K-MI.k)*Math.min(1,dt*2.2);
+ bg(t);
+ scene(1,t,null);gx.clearRect(0,0,gc.width,gc.height);gx.drawImage(glc,0,0,gc.width,gc.height);
+ if(LITE){scene(0,t,null);ctx.drawImage(glc,0,0)}
+ else{sizeF(FC,w,h);sizeF(FN,w,h);sizeF(FS,1024,1024);scene(3,t,FS,1024,1024);scene(2,t,FN);scene(0,t,FC);composite();ctx.drawImage(glc,0,0)}
+ if(!AUTO.done&&t>1.5){AUTO.n++;AUTO.s+=dt;if(AUTO.n>=50){AUTO.done=1;if(AUTO.s/AUTO.n>.04&&!LITE)setLite(true)}}
+ ctx.save();ctx.globalCompositeOperation='lighter';ctx.filter=`blur(${3*dpr}px)`;ctx.globalAlpha=.5;ctx.drawImage(gc,0,0,w,h);ctx.filter=`blur(${11*dpr}px)`;ctx.globalAlpha=.4+pulse*.5;ctx.drawImage(gc,0,0,w,h);ctx.restore();
+ requestAnimationFrame(loop)}
+requestAnimationFrame(loop);
+const st=$('stage'),pts=new Map();let pd=0;
+st.addEventListener('pointerdown',e=>{pts.set(e.pointerId,[e.clientX,e.clientY]);VW.drag=true;VW.lx=e.clientX;VW.ly=e.clientY;st.setPointerCapture(e.pointerId)});
+st.addEventListener('pointermove',e=>{if(!pts.has(e.pointerId))return;pts.set(e.pointerId,[e.clientX,e.clientY]);
+ if(pts.size===2){const [a,b]=[...pts.values()],d=Math.hypot(a[0]-b[0],a[1]-b[1]);if(pd)VW.zoom=Math.max(.6,Math.min(2.5,VW.zoom*d/pd));pd=d;return}
+ VW.yaw+=(e.clientX-VW.lx)*.008;VW.tgt=VW.pitch=Math.max(-1.2,Math.min(1.45,VW.pitch+(e.clientY-VW.ly)*.006));VW.lx=e.clientX;VW.ly=e.clientY});
+const up=e=>{pts.delete(e.pointerId);pd=0;if(!pts.size)VW.drag=false};st.addEventListener('pointerup',up);st.addEventListener('pointercancel',up);
+st.addEventListener('wheel',e=>{e.preventDefault();VW.zoom=Math.max(.6,Math.min(2.5,VW.zoom*(e.deltaY>0?.92:1.08)))},{passive:false});
+$('spin').onclick=e=>{VW.spin=!VW.spin;e.target.setAttribute('aria-pressed',VW.spin)};
+$('lite').onclick=()=>{AUTO.done=1;setLite(!LITE)};$('v0').onclick=()=>{VW.tgt=.08};$('v1').onclick=()=>{VW.tgt=1.35};$('v2').onclick=()=>{VW.tgt=-.65};
+const stp=$('stamp'),act=$('act'),tabs=[];
+function actLabel(){const a=MODELS[MI.i].act;act.textContent=a.toggle&&MI.K?a.label2:a.label;act.setAttribute('aria-pressed',!!(a.toggle&&MI.K))}
+function pick(i){MI.i=i;MI.K=0;MI.k=0;VW.yaw=MODELS[i].yaw;VW.tgt=i?.5:.28;VW.zoom=1;tabs.forEach((b,j)=>b.setAttribute('aria-pressed',j===i));actLabel()}
+MODELS.forEach((m,i)=>{const b=document.createElement('button');b.textContent=m.name;b.onclick=()=>pick(i);$('tabs').appendChild(b);tabs.push(b)});
+act.onclick=()=>{const a=MODELS[MI.i].act;if(a.toggle){MI.K=MI.K?0:1;actLabel();return}pulse=1;
+ if(a.stamp){$('stampT').textContent=a.stamp;stp.animate([{opacity:0,transform:'translate(-50%,-50%) scale(1.9)'},{opacity:1,transform:'translate(-50%,-50%) scale(1)',offset:.12},{opacity:1,transform:'translate(-50%,-50%) scale(1)',offset:.8},{opacity:0,transform:'translate(-50%,-50%) scale(1)'}],{duration:2300,easing:'ease-out',fill:'forwards'})}};
+pick(0);window.__pick=pick;window.__lite=setLite;window.__auto=AUTO;
+})();
+</script></body></html>

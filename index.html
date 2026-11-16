@@ -11225,7 +11225,64 @@ fmSupTick=function(dt){ORIG.tick(dt);try{evTick(dt);palTick(dt)}catch(e){console
 fmSupDraw=function(){ORIG.sd();if(G.map!=='mg'){try{palDraw()}catch(e){}}};
 mgDraw=function(front){ORIG.md(front);if(front){try{evDraw();palDraw()}catch(e){}}};
 togglePause=function(){if(G&&G.agMenu)return;ORIG.tp()};
-window.AG={SHIPS,menu,approve,launch,agU,fast:()=>{window.__agFast=1}};
+/* ---------- 🛰️ 로비 「전투지휘패널」 (11-17): 왼쪽 끝과 가운데의 중간 · 인천 호출기를 처음 만난 뒤부터 ---------- */
+const lbOn=()=>!!(SAVE&&(SAVE.agSeen||agU()>=1));
+const LB={box:null,hc:null};
+function holoHQ(n){const im=img('hq');if(!im.width)return null;let c=LB.hc;if(!c){c=LB.hc=document.createElement('canvas');c.width=256;c.height=224}const x=c.getContext('2d');x.globalCompositeOperation='source-over';x.clearRect(0,0,256,224);x.drawImage(im,(n%6)*256,((n/6)|0)*224,256,224,0,0,256,224);x.globalCompositeOperation='source-atop';x.fillStyle='rgba(110,225,255,.42)';x.fillRect(0,0,256,224);x.fillStyle='rgba(0,20,40,.25)';for(let y=0;y<224;y+=4)x.fillRect(0,y,256,1.5);return c}
+function lbDraw(cx,o){if(!lbOn()){LB.box=null;return}const ci=img('console');if(!ci.width)return;
+  const wx=o.ww*(.5-((o.hi||.94)-.5)*.5),X=wx-o.CAM,ch=o.sz*1.05,cw=ch*ci.width/ci.height;if(X<-cw*2||X>o.W+cw*2){LB.box=null;return}
+  const t=o.t,top=o.gy-ch*.98,hh=o.sz*1.35,hw=hh*256/224,bob=Math.sin(t*1.4)*o.sz*.025,hy=top-hh*.62+bob;
+  cx.save();cx.fillStyle='rgba(0,0,0,.3)';cx.beginPath();cx.ellipse(X,o.gy,cw*.46,o.sz*.07,0,0,7);cx.fill();cx.restore();
+  cx.drawImage(ci,X-cw/2,o.gy-ch,cw,ch);
+  /* 투영 빛기둥 */
+  const fl=.55+.25*Math.sin(t*3.1)+(Math.random()<.02?-.3:0);cx.save();cx.globalCompositeOperation='lighter';const g=cx.createLinearGradient(0,top-hh*.9,0,top+ch*.1);g.addColorStop(0,'rgba(110,225,255,0)');g.addColorStop(1,`rgba(110,225,255,${.22*fl})`);cx.fillStyle=g;cx.beginPath();cx.moveTo(X-cw*.06,top+ch*.08);cx.lineTo(X-hw*.42,top-hh*.75);cx.lineTo(X+hw*.42,top-hh*.75);cx.lineTo(X+cw*.06,top+ch*.08);cx.closePath();cx.fill();
+  /* 지휘본부 홀로그램 */
+  const hc=holoHQ(Math.floor(t*5)%24);if(hc){cx.globalAlpha=.78*fl+.15;const jx=Math.random()<.03?(Math.random()-.5)*6:0;cx.drawImage(hc,X-hw/2+jx,hy-hh/2,hw,hh)}
+  /* 귀환한 함선 궤도 점 */
+  const n=agU();for(let i=0;i<n;i++){const a=t*.9+i*TAU/4,px=X+Math.cos(a)*hw*.48,py=hy+hh*.18+Math.sin(a)*hh*.1;cx.globalAlpha=Math.sin(a)>0?1:.45;cx.fillStyle='#bff4ff';cx.beginPath();cx.arc(px,py,o.sz*.035,0,7);cx.fill()}
+  cx.restore();
+  cx.save();cx.font='800 12px "Noto Sans KR",sans-serif';cx.textAlign='center';cx.fillStyle='rgba(190,240,255,.9)';cx.shadowColor='#58c8ff';cx.shadowBlur=8;cx.fillText('🛰️ 전투지휘패널',X,o.gy+16);cx.restore();
+  LB.box={x:X-Math.max(cw,hw)/2,y:hy-hh/2,w:Math.max(cw,hw),h:o.gy-(hy-hh/2)}}
+const PCSS=`#agPn{position:fixed;inset:0;z-index:9500;display:flex;align-items:center;justify-content:center;background:rgba(2,6,14,.86);font-family:'Noto Sans KR',sans-serif;color:#e6f6ff}
+#agPn .w{width:min(96vw,560px);max-height:96vh;overflow:auto;background:linear-gradient(#0a1424,#060d18);border:2px solid #58c8ff;border-radius:18px;box-shadow:0 0 40px rgba(88,200,255,.35);padding:12px 12px 14px;position:relative}
+#agPn h3{margin:2px 0 8px;text-align:center;font-size:18px;color:#bfe9ff}#agPn .x{position:absolute;right:10px;top:8px;background:none;border:0;color:#8fdcff;font-size:22px;cursor:pointer}
+#agPn .v{position:relative;border:1.5px solid #2a5a80;border-radius:12px;overflow:hidden;background:#03050c;aspect-ratio:4/3}#agPn iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+#agPn .lk{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:6px;background:#03050c}#agPn .lk canvas{width:60%;filter:brightness(0) drop-shadow(0 0 3px #2a6a9a)}#agPn .lk p{margin:0;color:#7aa6c0;font-size:13px}
+#agPn .vb{position:absolute;right:8px;bottom:8px;z-index:2;background:#0e2034cc;border:1.5px solid #58c8ff;color:#dff;border-radius:10px;padding:6px 10px;font:800 12px 'Noto Sans KR',sans-serif;cursor:pointer;display:none}
+#agPn .tb{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin:8px 0}#agPn .tb button{padding:6px 2px;border-radius:10px;border:1.5px solid #2a4a6a;background:#0e2034;color:#cfe;font:700 11px/1.25 'Noto Sans KR',sans-serif;cursor:pointer}#agPn .tb button b{display:block;font-size:12px;color:#fff}#agPn .tb button[aria-pressed=true]{border-color:#9fe8ff;background:#1d4466}
+#agPn .inf{border:1.5px solid #2a4a6a;border-radius:12px;background:rgba(14,32,52,.75);padding:9px 12px;font-size:13px;line-height:1.55}#agPn .inf b{font-size:15px;color:#bfe9ff}#agPn .inf small{color:#8fb8d0}
+#agPn .ari{margin-top:8px;border:2px solid #58c8ff;border-radius:12px;background:rgba(8,16,30,.9);padding:7px 12px;font-size:13px}#agPn .ari b{color:#8fdcff;font-size:11px;display:block}
+#agPn .sp{margin-top:8px;font-size:12px;color:#8fb8d0;text-align:center}`;
+const INFO=[
+ ['아이기스 지휘본부','지휘본부','통신기를 주우면 이곳과 연결돼요. 귀환한 함선의 출격을 아리아드네가 승인해요.'],
+ ['팔라스','전략지원기','언니 주위를 선회하며 루프·임멜만 같은 공중 기동을 섞어 적을 쏴요. 어려움 25초 · 헬 20초 함께 싸우고, 돌아간 뒤 5분 재정비해요.'],
+ ['파나케이아','긴급의료선','핑크 락온 광선으로 언니를 붙잡고 체력을 회복시켜요. 해로운 효과를 지우고 잠깐 무적을 걸어요. 돌아간 뒤 6분 재정비해요.'],
+ ['아르고','보급수송선','공원 착륙 패드를 지키면 착륙해서 무기를 보급해요. 갖지 않은 무기 7개 중 1개, 칸이 꽉 차면 교환. 판에 1번.'],
+ ['테미스','방벽전개함','언니 위에 멈춰 육각 방벽을 펼쳐 적을 밀어내고 탄을 막아요. 돌아간 뒤 5분 재정비해요.']];
+let PN=null;
+function panel(){if(PN)return;if(!document.getElementById('agPCss')){const s=document.createElement('style');s.id='agPCss';s.textContent=PCSS;document.head.appendChild(s)}
+  const u=agU(),left=4-u,line=left>0?`어머, 사령관님. 지휘본부에 오신 걸 환영해요. 끊긴 실은 아직 ${left}가닥 남았어요.`:'어머, 사령관님. 함대가 전부 돌아왔어요. 역사에 남을 함대예요.';
+  let tb='<button type="button" data-i="0" aria-pressed="true"><small>지휘본부</small><b>본부</b></button>';SHIPS.forEach((s,i)=>{const ok=i<u;tb+=`<button type="button" data-i="${i+1}"><small>${s.d}</small><b>${ok?s.n:'🔒 ???'}</b></button>`});
+  PN=document.createElement('div');PN.id='agPn';PN.innerHTML=`<div class="w"><button class="x" type="button" aria-label="닫기">✕</button><h3>🛰️ 전투지휘패널</h3>
+   <div class="v"><iframe src="ag/fleet.html?embed=1" title="아이기스 3D" loading="eager"></iframe><div class="lk"><canvas width="256" height="192"></canvas><p>인천 공원의 호출기 신호를 찾아요.</p></div><button class="vb" type="button"></button></div>
+   <div class="tb">${tb}</div><div class="inf"></div><div class="ari"><b>아리아드네</b>${line}</div><div class="sp">🛰️ 아이기스 전략특공함은 통신기로 언제든 화력 지원을 보내 줘요.</div></div>`;
+  document.body.appendChild(PN);try{SND.p('radio')}catch(e){}
+  const fr=PN.querySelector('iframe'),lk=PN.querySelector('.lk'),vb=PN.querySelector('.vb'),inf=PN.querySelector('.inf');let lkRaf=0,land=0;
+  const fw=()=>{try{return fr.contentWindow}catch(e){return null}};
+  const sel=i=>{PN.querySelectorAll('.tb button').forEach(b=>b.setAttribute('aria-pressed',+b.dataset.i===i));cancelAnimationFrame(lkRaf);
+    const ok=i===0||i-1<u,D=INFO[i];inf.innerHTML=ok?`<b>${D[0]}</b> <small>${D[1]}</small><br>${D[2]}`:`<b>???</b> <small>${SHIPS[i-1].d}</small><br>아직 통신이 끊겨 있어요. 인천 어려움·헬에서 공원의 호출기 신호를 찾아 1분 버티면 되찾을 수 있어요.`;
+    lk.style.display=ok?'none':'flex';fr.style.visibility=ok?'visible':'hidden';land=0;
+    vb.style.display=ok&&(i===0||i===3)?'block':'none';vb.textContent=i===3?'🛬 착륙':'출격 승인';
+    if(ok){const w=fw();try{w&&w.__pick&&w.__pick(i)}catch(e){}}
+    else{const c=lk.querySelector('canvas').getContext('2d'),im=img('t_'+SHIPS[i-1].k),t0=performance.now();const L=()=>{lkRaf=requestAnimationFrame(L);if(!im.width)return;const n=Math.floor((performance.now()-t0)/125)%16;c.clearRect(0,0,256,192);c.drawImage(im,(n%4)*128,((n/4)|0)*96,128,96,0,0,256,192)};L()}};
+  vb.onclick=()=>{const w=fw();try{w.document.getElementById('act').click()}catch(e){}if(PN.querySelector('[data-i="3"][aria-pressed=true]')){land^=1;vb.textContent=land?'🛫 이륙':'🛬 착륙'}};
+  PN.querySelectorAll('.tb button').forEach(b=>b.onclick=()=>{try{SND.p('click')}catch(e){}sel(+b.dataset.i)});
+  fr.onload=()=>sel(0);sel(0);
+  const cls=()=>{cancelAnimationFrame(lkRaf);if(PN){PN.remove();PN=null}};PN.querySelector('.x').onclick=cls;PN.onclick=e=>{if(e.target===PN)cls()}}
+{const oL=window.__ariLb,oH=window.__ariLbHit;
+ window.__ariLb=(cx,o,ph)=>{if(ph==='body'){try{lbDraw(cx,o)}catch(e){}}if(oL)return oL(cx,o,ph)};
+ window.__ariLbHit=(x,y)=>{const b=LB.box;if(b&&lbOn()&&x>b.x-10&&x<b.x+b.w+10&&y>b.y-10&&y<b.y+b.h+10){try{SND.p('pop')}catch(e){}panel();return true}return oH?oH(x,y):false}}
+window.AG={SHIPS,menu,approve,launch,agU,panel,fast:()=>{window.__agFast=1}};
 })();
 </script>
 </body></html>

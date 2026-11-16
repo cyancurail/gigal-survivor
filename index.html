@@ -6524,7 +6524,7 @@ function irisGo(mid){if(!(IRIS.complete&&IRIS.naturalWidth)||window.__irisBusy){
 const _sr=startRun;window.__startRunRaw=_sr;startRun=function(){const a=arguments,self=this;irisGo(()=>_sr.apply(self,a))};try{window.startRun=startRun}catch(e){}
 // ===== 🏆 랭킹 (V106): 헬 모드 클리어 판만 =====
 const RK_CAP=1800;
-const rkMap=m=>m==='sangbong'?'sangbong':m==='farm'?'farm':m==='mg'?'mg':'gigal';
+const rkMap=m=>m==='sangbong'?'sangbong':m==='farm'?'farm':m==='mg'?'mg':'gigal';window.rkMap=rkMap;/* 11-16 BPS 랭킹 제출(다른 IIFE)이 못 찾아서 조용히 실패하던 문제 */
 window.rkSkin=id=>rkSkin(id);function rkSkin(id){const fz=id==='쥬은'||!!(SAVE.fancy||{})[id];return{f:fz?1:0,sk:fz?(curSkin(id)||''):'',ms:fz?(mskCur(id)||0):0}}
 function rkSpr(id,k){try{if(id==='쥬은')return k&&k.ms?mskFrame(id,k.ms,0):juFrame('wt0');if(k&&k.f){if(k.ms)return mskFrame(id,k.ms,0);if(MSK_IMG[id+'|0']&&!k.sk)return mskFrame(id,0,0);return skinSpr(id,k.sk||null,0)}return SPR.draw(id,'plain',0)}catch(e){return null}}
 function rkWD(g){try{const K=(g.stats&&g.stats.k)||{},agg={},hasGl=g.weapons.some(w=>w.k==='glass');for(const k in K){const w=HXR(k,g.weapons)?HXR(k,g.weapons):WP[k]?k:DPS_ALIAS[k]||(k==='ult'||k==='kiss'?'_ult':'_etc');agg[w]=(agg[w]||0)+K[k]}
@@ -8231,7 +8231,7 @@ window.resTab=function(btn,i){try{SND.p('click')}catch(e){}const box=btn.closest
 const eg=window.endGame;window.endGame=function(win){const g=G;const r=eg.apply(this,arguments);try{if(!g||g.bot||g.tw)return r;
   try{if(window.msBump&&g.t>=60){msBump('bpsD',Math.round(bpsNow(g)),1);persist()}}catch(e){}
   if(!g.hard||!g.bpS)return r;
-  if(!window.GRANK||!GRANK.on())return r;const c=CHAR[g.ci],S=g.bpS,dk=g.hell?'h':'d',map=rkMap(g.map);
+  if(!window.GRANK||!GRANK.on())return r;const c=CHAR[g.ci],S=g.bpS,dk=g.hell?'h':'d',map=window.rkMap?window.rkMap(g.map):g.map==='sangbong'?'sangbong':g.map==='farm'?'farm':g.map==='mg'?'mg':'gigal';
   const rec={kind:'bps',map:'bps'+dk+'_'+map,rm:map,dk,ch:c.id,tf:S.tf,bps:S.v,t:S.t,raw:S.t,dmg:S.dmg,ws:S.ws,it:Object.keys(S.il),il:S.il,wb:S.wb,mul:bpMul(g),
    sk:(window.rkSkin?window.rkSkin(c.id):null),mp:window.MP&&MP.g?1:0,title:SAVE.title&&(SAVE.titles||{})[SAVE.title]&&window.TITLES?TITLES[SAVE.title]:''};
   GRANK.submit(rec,(a,b)=>a.tf>b.tf||(a.tf===b.tf&&a.bps>b.bps)).then(x=>{if(x&&x.best)toast('💄 BPS 랭킹 기록 갱신!',`${c.nick} · ⏱ ${S.tf}분 · BPS ${S.v.toLocaleString()}`,true)}).catch(e=>console.warn('bps rank',e))}catch(e){console.warn(e)}return r};

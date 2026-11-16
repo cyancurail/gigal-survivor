@@ -57,6 +57,8 @@ h1{font-size:30px;letter-spacing:2px;margin-top:6px;background:linear-gradient(9
 .rkp td.sg small{display:block;font-size:10px;opacity:.6;font-weight:400}
 .rkp .emp{text-align:center;opacity:.7;padding:18px 0;font-size:13px}
 .rkp .note{font-size:11px;opacity:.55;margin-top:6px}
+.ariD{position:fixed;bottom:0;z-index:5;pointer-events:none;display:none}
+.ariD img{display:block;width:100%;height:100%;object-fit:contain;object-position:bottom;transition:opacity .25s}
 </style></head><body>
 <canvas id="cv"></canvas>
 <button id="pz">⏸</button>
@@ -106,6 +108,7 @@ h1{font-size:30px;letter-spacing:2px;margin-top:6px;background:linear-gradient(9
   <div class="row"><button class="btn on" id="again">다시 걷기</button><button class="btn" id="back">처음으로</button></div>
 </section>
 
+<div class="ariD" id="ariL"><img alt=""></div><div class="ariD" id="ariR"><img alt="" style="transform:scaleX(-1)"></div>
 <script>
 const RWH=(()=>{try{return parent!==window&&parent.RW_HOST||null}catch(e){return null}})();
 const HI0={hx_stellar:'어머, 사령관 세나님. 춤으로 싸우는 언니한테 런웨이는 홈그라운드죠. ✨',hx_polaris:'총사령관 태태영님 입장이에요. 무대 바닥이 얼지 않게만 걸어 주세요.',hx_rave:'언니, 게임은 해 보고 말씀하시는 거예요? …오늘은 직접 걸어 보세요.',hx_soulwed:'K1님, 웨딩 워킹이에요. 눈물은 광광 나도 박자는 놓치지 마세요.',hx_glass:'힐블님, 시간 멈추는 마법은 금지예요. 박자도 멈추거든요.',hx_prism_pn:'리더님, 분석은 잠깐 내려놓고 오늘은 디바로만 서 주세요.',hx_prism_mt:'맘터님, 오늘은 콧수염 없이 예쁘게 나가는 거예요. 약속해요.',hx_rouge:'점장님, 바쁘신 거 알아요. 한 곡이면 충분해요.',hx_nike:'영애님, 가챠 말고 박자에 도파민을 걸어 봐요.'};
@@ -205,7 +208,7 @@ function addDancer(kind){
   S.maxD=Math.max(S.maxD,act.length+1);return true}
 function removeDancer(){
   const e=S.dn.filter(d=>!d.out&&d.k==='e').sort((a,b)=>b.n-a.n)[0];if(!e)return false;
-  e.out=1;e.side=e.x<W/2?-1:1;return true}
+  e.out=1;e.side=e.x<W/2?-1:1;S.su={t:1.5,s:e.side};return true}
 function endFinale(){S.dn.forEach(d=>{if(!d.out&&d.k==='x'){d.out=1;d.side=d.x<W/2?-1:1}})}
 function joinFx(){tick(.05,1000);setTimeout(()=>tick(.05,1500),80)}
 function judge(n,dt){
@@ -360,6 +363,7 @@ function frame(now){
   }
   drawStage(L,t,dt);
   drawLanes(L,t,dt);
+  ariDom(performance.now()/1000);
   requestAnimationFrame(frame);
 }
 function drawStage(L,t,dt){
@@ -436,8 +440,48 @@ function drawStage(L,t,dt){
 }
 function now(){return performance.now()}
 function rr(a,b,w,h,r){x.beginPath();x.moveTo(a+r,b);x.arcTo(a+w,b,a+w,b+h,r);x.arcTo(a+w,b+h,a,b+h,r);x.arcTo(a,b+h,a,b,r);x.arcTo(a,b,a+w,b,r);x.closePath()}
+/* ---------- 🌙 아리아드네: PC 모드 양옆 빈 공간 (플레이=캔버스 / 화면=DOM) ---------- */
+const ARI={};function ari(k){let o=ARI[k];if(!o){o=ARI[k]=new Image();o.src='ari/'+k+'.webp'}return o}
+const aok=im=>im&&im.complete&&im.naturalWidth>0;
+['sm_0','sm_1','sm_2','mk_0','mk_1','mk_2','su','calm','tired'].forEach(ari);
+setTimeout(()=>{for(let s=1;s<3;s++)for(let i=0;i<8;i++)ari('d'+s+'_'+i)},1200);
+const MKSEQ=[[0,1.5],[1,.5],[2,1.2],[1,.5]],MKT=3.7;
+function ariSp(L){const sw=L.lx-14;return sw>=170&&H>=480?{sw,mh:H-L.stageH-10}:null}
+function aDraw(k,cx,bot,maxW,maxH,al,flip,k2){const im=ari(k);if(!aok(im)||al<=0)return;
+  const s=Math.min(maxW/im.naturalWidth,maxH/im.naturalHeight,1.5)*(k2||1),w=im.naturalWidth*s,h=im.naturalHeight*s;
+  x.save();x.globalAlpha=al;x.imageSmoothingEnabled=true;x.imageSmoothingQuality='high';x.translate(cx,bot);if(flip)x.scale(-1,1);x.drawImage(im,-w/2,-h,w,h);x.restore()}
+function aFade(arr,dur,T,off){const n=arr.length,u=T/dur+(off||0),i=Math.floor(u)%n,p=u-Math.floor(u);return p<.12?[[arr[(i+n-1)%n],1-p/.12],[arr[i],p/.12]]:[[arr[i],1]]}
+function drawAri(L,t,dt){const sp=ariSp(L);if(!sp||!S)return;
+  const T=now()/1000,fin=S.fin>0;S.af=(S.af||0)+((fin?1:0)-(S.af||0))*Math.min(1,dt*5);
+  const cxL=L.lx/2,cxR=W-L.lx/2,bt=t>0?bq(t)*CUR.dm:T*1.6,hb=Math.floor(bt*2);
+  if(S.su){S.su.t-=dt;if(S.su.t<=0)S.su=null}
+  if(S.af>.03){ // 피날레: 양쪽 전신 댄스 (바깥에서 슬라이드 인)
+    const e=1-Math.pow(1-Math.min(1,S.af),3),off=(1-e)*sp.sw,cl=fin&&S.fin<2.4;
+    const fl=cl?(S.fin>1.2?'d2_5':'d2_6'):'d1_'+(hb%8),fr=cl?(S.fin>1.2?'d2_5':'d2_6'):'d2_'+((hb+4)%8);
+    aDraw(fl,cxL-off,H-26-Math.abs(Math.sin(bt*Math.PI))*5,sp.sw-10,sp.mh,e);aDraw(fr,cxR+off,H-26-Math.abs(Math.sin(bt*Math.PI))*5,sp.sw-10,sp.mh,e,cl)}
+  const a=1-Math.min(1,S.af*1.6);if(a<=0)return;
+  const bob=Math.sin(T*3)*3,mw=sp.sw-10,mh=sp.mh*.86;
+  // 왼쪽: 화장 고치기 (놀람이 오면 교체)
+  const su=S.su,pop=su?(k=>{const p=Math.min(1,(1.5-su.t)/.2);return .7+.3*(1-Math.pow(1-p,3))+(p<1?.08*Math.sin(p*9):0)})():1;
+  if(su&&su.s<0)aDraw('su',cxL,H+6,mw,mh,a,false,pop);
+  else{let u=T%MKT,k='mk_0';for(const[f,d]of MKSEQ){if(u<d){k='mk_'+f;break}u-=d}aDraw(k,cxL,H+6+bob,mw,mh,a)}
+  // 오른쪽: 평소 미소 (놀람이 오면 교체)
+  if(su&&su.s>0)aDraw('su',cxR,H+6,mw,mh,a,true,pop);
+  else for(const[k,al]of aFade(['sm_0','sm_1','sm_2'],3.4,T,1))aDraw(k,cxR,H+6+bob,mw,mh,a*al,true)}
+const ariEl={L:document.getElementById('ariL'),R:document.getElementById('ariR')};let ariKey='';
+function ariDom(T){const sc=document.querySelector('.scr.on'),id=sc?sc.id:'';const sw=(W-600)/2,ok=!!sc&&id!=='pzm'&&sw>=180&&H>=480;
+  if(!ok){if(ariKey!=='off'){ariEl.L.style.display=ariEl.R.style.display='none';ariKey='off'}return}
+  const w=Math.min(sw-8,470),hh=Math.min(H*.8,w*1.15);let kl,kr;
+  if(id==='res'){const r=(document.getElementById('rk').textContent||'').trim();kl=r==='C'?'tired':'calm';kr=r==='C'?'tired':(r==='B'?'calm':'sm_1')}
+  else{const i=Math.floor(T/3.6)%3;kl='sm_'+i;kr='sm_'+((i+1)%3)}
+  const key=id+'|'+kl+'|'+kr+'|'+(w|0);if(key===ariKey)return;
+  for(const[e,k,side]of[[ariEl.L,kl,'left'],[ariEl.R,kr,'right']]){const im=e.firstChild;e.style.cssText='display:block;'+side+':'+Math.max(2,(sw-w)/2)+'px;width:'+w+'px;height:'+hh+'px';
+    if(!im.dataset.k||im.dataset.k===k){im.dataset.k=k;im.src='ari/'+k+'.webp';im.style.opacity=1}
+    else{im.style.opacity=0;setTimeout(()=>{im.dataset.k=k;im.src='ari/'+k+'.webp';im.style.opacity=1},250)}}
+  ariKey=key}
 function drawLanes(L,t,dt){
   const {lx,lw,hitY,top}=L;x.fillStyle='rgba(10,5,20,.92)';x.fillRect(0,L.stageH,W,H-L.stageH);
+  drawAri(L,t,dt);
   for(let l=0;l<4;l++){const X=lx+l*lw;x.fillStyle=S&&S.lanes[l]?'rgba(255,255,255,.10)':l%2?'rgba(255,255,255,.035)':'rgba(255,255,255,.06)';x.fillRect(X,top,lw,H-top);
     if(S&&S.lanes[l]){const g=x.createLinearGradient(0,hitY,0,top);g.addColorStop(0,LC[l]+'55');g.addColorStop(1,LC[l]+'00');x.fillStyle=g;x.fillRect(X,top,lw,hitY-top)}}
   x.strokeStyle='rgba(255,255,255,.12)';for(let l=0;l<=4;l++){x.beginPath();x.moveTo(lx+l*lw,top);x.lineTo(lx+l*lw,H);x.stroke()}

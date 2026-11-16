@@ -584,3 +584,8 @@
 - POOL_V31: 박준영 9칸 「꿈」 (msk2/cf17), SC_VER 35 (v34 코드 = POOL.slice(0,POOL_V31))
 - shSel(cid): 인자 없으면 캐릭터 3열 격자(아직 없는 신화 수·컴플리트 흐리게), cid면 그 캐릭터 목록 + ◀ 버튼
 - mselPreview(pid,back): back이면 「다시 고를래요」/바깥 클릭 시 shSel(owner)로 복귀
+
+## V248 (11-16) BPS 랭킹 제출 버그 수정 (패치노트 없음)
+- 원인: 게임 종료 시 BPS 랭킹 제출 코드(`window.endGame` 래퍼, 끝부분 IIFE)가 `rkMap`(V106 랭킹 IIFE의 지역 const)을 못 찾아 `ReferenceError`가 try/catch에 삼켜져 **모든 맵에서** BPS 기록이 서버로 안 갔음.
+- 수정: `window.rkMap=rkMap`로 노출 + BPS 제출부에 맵 이름 폴백. 인천 헬 10분 이상 → `bpsh_mg`/tf 10 전송 확인.
+- 이미 끝난 판의 기록은 소급 불가(서버에 올라간 적 없음).

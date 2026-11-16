@@ -11092,10 +11092,11 @@ function evTick(dt){if(G.map!=='mg'||!G.hard||G.arena||!solo()||!G.mgB)return;
     let best=null,bd=1e9;const z0=mgZone(p.x);for(let z=Math.max(1,z0-1);z<=z0+8;z++){const A=mgAlc(z);if(!A)continue;const cx=(A.a+A.b)/2,d=Math.abs(cx-p.x)+(cx<p.x-200?900:0);if(d<bd){bd=d;best=A}}
     if(!best)return;const B=G.mgB,A=best;E.x=(A.a+A.b)/2;E.y=A.sd?B.b+A.D*.42:B.t-A.D*.42;E.R=Math.max(90,Math.min(150,(A.b-A.a)/2-60,A.D*.42));E.g=0;E.out=0;E.st=1;E.t=0;
     quest('📡 끊긴 호출기 신호 포착!','근처 공원에서 아이기스 '+SHIPS[E.s].n+'의 호출기가 깜빡여요. 🛰️ 화살표를 따라가요.');try{SND.p('radio')}catch(e){}
-    setTimeout(()=>{try{quest('🛰️ 아리아드네','언니, 공원 한가운데 원 안에서 1분만 버텨 주세요. 제가 신호를 이어 볼게요.')}catch(e){}},2600);return}
+    setTimeout(()=>{try{quest('🛰️ 아리아드네','어머, 이 신호… 통신이 끊겼던 '+SHIPS[E.s].n+'예요. 언니, 공원 원 안에서 1분만 버텨 주세요. 제가 실을 이어 볼게요.')}catch(e){}},2600);return}
   if(E.st===1){E.t+=dt;const dx=p.x-E.x,dy=(p.y-E.y)/.7,inside=dx*dx+dy*dy<E.R*E.R;
     if(inside){E.g=Math.min(1,E.g+dt/60);E.out=0;if(!E.in1){E.in1=1;quest('📡 호출 중','원 밖으로 나가면 신호가 멈추고, 오래 나가 있으면 줄어들어요.')}}
-    else{E.out+=dt;if(E.out>3)E.g=Math.max(0,E.g-dt/120)}
+    else{E.out+=dt;if(E.out>3){E.g=Math.max(0,E.g-dt/120);if(!E.wr&&E.g>0){E.wr=1;quest('🛰️ 아리아드네','언니, 원 밖이에요! 실이 끊어지기 전에 돌아와요.')}}}
+    if(inside)E.wr=0;if(!E.half&&E.g>=.5){E.half=1;quest('🛰️ 아리아드네','신호가 잡혀요. 조금만 더요, 언니.')}
     if(E.g>=1){E.st=2;const s=E.s;SAVE.agU=Math.max(agU(),s+1);try{persist()}catch(e){}try{SND.p('clear')}catch(e){}
       sparks(E.x,E.y,40,['#9ad8ff','#ffffff','#5ac8ff'],320,.7,3);pring(E.x,E.y,E.R*1.4,'#7fd8ff',30,.6);
       approve(s,{unlock:1})}}}
@@ -11127,7 +11128,7 @@ const CSS=`#agOv{position:fixed;inset:0;z-index:9000;display:flex;align-items:ce
 #agOv .agW{width:min(94vw,520px);max-height:94vh;overflow:auto;background:linear-gradient(#0a1424,#060d18);border:2px solid #58c8ff;border-radius:18px;box-shadow:0 0 40px rgba(88,200,255,.35);padding:16px}
 #agOv h3{margin:0 0 2px;text-align:center;font-size:20px;color:#bfe9ff}#agOv .agSub{text-align:center;font-size:12px;color:#7aa6c0;margin-bottom:12px}
 #agOv .agG{display:grid;grid-template-columns:1fr 1fr;gap:10px}#agOv .agC{position:relative;border:2px solid #2a4a6a;border-radius:14px;background:rgba(20,40,64,.7);padding:6px 6px 8px;text-align:center;cursor:pointer;color:inherit;font:inherit}
-#agOv .agC canvas{width:100%;aspect-ratio:4/3;display:block}#agOv .agC b{display:block;font-size:16px}#agOv .agC small{color:#8fb8d0;font-size:11px}#agOv .agC.on:hover,#agOv .agC.on:focus{border-color:#9fe8ff;background:rgba(40,110,160,.55)}
+#agOv .agC canvas{width:100%;aspect-ratio:4/3;display:block}#agOv .agC b{display:block;font-size:17px;margin-top:1px}#agOv .agC small{display:block;color:#8fb8d0;font-size:12px;margin-top:4px}#agOv .agC.on:hover,#agOv .agC.on:focus{border-color:#9fe8ff;background:rgba(40,110,160,.55)}
 #agOv .agC.lk{cursor:default;opacity:.75}#agOv .agC.bz{cursor:default;opacity:.55}#agOv .agC.lk canvas{filter:brightness(0) drop-shadow(0 0 2px #2a4a6a)}#agOv .agC i{position:absolute;top:8px;right:8px;font-style:normal;font-size:11px;background:#000a;padding:2px 6px;border-radius:8px}
 #agOv .agB{display:block;width:100%;margin-top:10px;padding:10px;border-radius:12px;border:1.5px solid #3a6a8a;background:#0e2034;color:#cfe;font:800 13px 'Noto Sans KR',sans-serif}
 #agOv .agHQ{position:relative;border:2px solid #58c8ff;border-radius:14px;overflow:hidden;background:#030810}#agOv .agHQ canvas{width:100%;aspect-ratio:8/7;display:block}
@@ -11147,13 +11148,13 @@ function open(html){if(!document.getElementById('agCss')){const s=document.creat
 function close(keep){cancelAnimationFrame(raf);anims=[];if(ov){ov.remove();ov=null}if(!keep&&G){G.agMenu=0;G.paused=false}}
 function turn(cv,k,fps){const im=img(k),c=cv.getContext('2d');anims.push(t=>{if(!im.width)return;const n=Math.floor(t*fps)%16;c.clearRect(0,0,cv.width,cv.height);c.drawImage(im,(n%4)*128,((n/4)|0)*96,128,96,0,0,cv.width,cv.height)})}
 function menu(){const u=agU(),run=G.agShip&&G.agShip.k;
-  let h=`<div class="agW"><h3>🛰️ 아이기스 함대 · 출격 선택</h3><div class="agSub">통신기 연결 완료 · 해금 ${u}/4</div><div class="agG">`;
-  SHIPS.forEach((s,i)=>{const lk=i>=u||!s.ok,busy=run===s.k;h+=`<button type="button" class="agC ${lk?'lk':busy?'bz':'on'}" data-i="${i}" ${lk||busy?'disabled':''}><canvas width="256" height="192"></canvas><b>${lk&&i>=u?'???':s.n}</b><small>${s.d}</small>${lk?`<i>${i>=u?'🔒 미해금':'🛠️ 정비 중'}</i>`:busy?'<i>✈️ 출격 중</i>':''}</button>`});
+  let h=`<div class="agW"><h3>🛰️ 아이기스 함대 · 출격 선택</h3><div class="agSub">통신기 연결 완료 · 귀환 ${u}/4</div><div class="agG">`;
+  SHIPS.forEach((s,i)=>{const lk=i>=u||!s.ok,busy=run===s.k;h+=`<button type="button" class="agC ${lk?'lk':busy?'bz':'on'}" data-i="${i}" ${lk||busy?'disabled':''}><canvas width="256" height="192"></canvas><small>${s.d}</small><b>${lk&&i>=u?'???':s.n}</b>${lk?`<i>${i>=u?'🔒 미해금':'🛠️ 정비 중'}</i>`:busy?'<i>✈️ 출격 중</i>':''}</button>`});
   h+=`</div><button type="button" class="agB" data-x="sup">🛰️ 아이기스 전략특공함 화력 지원</button></div>`;open(h);
   ov.querySelectorAll('.agC').forEach((b,i)=>{turn(b.querySelector('canvas'),'t_'+SHIPS[i].k,8);if(!b.disabled)b.onclick=()=>{try{SND.p('click')}catch(e){}approve(i)}});
   ov.querySelector('[data-x=sup]').onclick=()=>{close();ORIG.sup()}}
 function approve(i,o){o=o||{};const s=SHIPS[i];
-  open(`<div class="agW">${o.unlock?`<div class="agUn">🔓 아이기스 ${s.n} 해금!</div>`:''}<div class="agHQ"><div class="agHd">AEGIS HQ · LINK ESTABLISHED<small>SIGNAL 100% · ARIADNE ONLINE</small></div><canvas width="512" height="448"></canvas>
+  open(`<div class="agW">${o.unlock?`<div class="agUn">🛰️ 아이기스 ${s.n} 귀환!</div>`:''}<div class="agHQ"><div class="agHd">AEGIS HQ · LINK ESTABLISHED<small>SIGNAL 100% · ARIADNE ONLINE</small></div><canvas width="512" height="448"></canvas>
   <div class="agP"><div class="l">LAUNCH AUTHORIZATION · ${s.c}</div><div class="r">VERIFYING</div><div class="s">출격</div><div class="bar"></div></div></div>
   <div class="agL"><b>아리아드네</b><span></span></div></div>`);
   const cv=ov.querySelector('canvas'),c=cv.getContext('2d'),hq=img('hq'),r=ov.querySelector('.agP .r'),ln=ov.querySelector('.agL span');let st=0;
@@ -11186,7 +11187,7 @@ function nextSeg(S){if(S.last==='immel')return'splits';if(S.seg!=='cruise'&&S.se
 function palTick(dt){const S=G.agShip;if(!S||S.k!=='pallas')return;const p=G.p;S.t+=dt;const t=S.t;
   const ENT=1.4,EX=S.T-2.6;
   if(t<ENT){const u=ez(t/ENT);S.x=lp(p.x+120,p.x+40,u);S.y=lp(p.y+VH*.75,p.y+260,u);S.alt=lp(260,0,u);S.mp=0;S.mr=0;S.h=-.2;if(t+dt>=ENT){S.alt0=0;seg(S,'aileron')}}
-  else if(t>=EX){if(!S.asc)S.asc={x:S.x,y:S.y,h:S.h};const u=(t-EX)/2.6;S.x=lp(S.asc.x,p.x,ez(u/.5));S.y=lp(S.asc.y,p.y,ez(u/.5));S.h=lp(S.asc.h,0,ez(u/.4));S.mp=ez(u/.35)*PI/2*.92;S.mr=0;S.alt=0;const e=u*u*(3-2*u)*.4+u*u*u*.6;S.sc=lp(1,5,e*e*.7+e*.3);S.al=1-cl((u-.62)/.38);S.fire=0;if(u>=1){G.agShip=null;return}}
+  else if(t>=EX){if(!S.asc){S.asc={x:S.x,y:S.y,h:S.h};quest('🛰️ 아리아드네','팔라스, 임무 완료. 지휘 본부로 복귀 후 재정비합니다. 무사히 버텨요, 언니!')}const u=(t-EX)/2.6;S.x=lp(S.asc.x,p.x,ez(u/.5));S.y=lp(S.asc.y,p.y,ez(u/.5));S.h=lp(S.asc.h,0,ez(u/.4));S.mp=ez(u/.35)*PI/2*.92;S.mr=0;S.alt=0;const e=u*u*(3-2*u)*.4+u*u*u*.6;S.sc=lp(1,5,e*e*.7+e*.3);S.al=1-cl((u-.62)/.38);S.fire=0;if(u>=1){G.agShip=null;return}}
   else{S.st+=dt;const M=MV[S.seg],u=cl(S.st/M.L),fx=Math.sin(S.sh),fy=-Math.cos(S.sh),rx=Math.cos(S.sh),ry=Math.sin(S.sh);
     if(S.seg==='cruise'||S.seg==='brk'){const d0=Math.hypot(p.x-S.x,p.y-S.y),want=Math.atan2(p.x-S.x,-(p.y-S.y))+(d0<220?1.4:.35);let d=((want-S.h+PI)%TAU+TAU)%TAU-PI;const rate=S.seg==='brk'?3.2:1.6,dh=cl(d,-rate*dt,rate*dt);S.h+=dh;
       const v=S.seg==='brk'?300:340;S.x+=Math.sin(S.h)*v*dt;S.y+=-Math.cos(S.h)*v*dt;S.mp=0;const bank=S.seg==='brk'?1.25:.6;S.mr=lp(S.mr,Math.sign(dh)*Math.min(1,Math.abs(dh)/(rate*dt+1e-6))*bank,.15);S.alt=lp(S.alt,S.alt0,.1);S.fire=1}

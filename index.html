@@ -797,6 +797,8 @@ function fmFrame(){fmLoad();const p=G.p,A=G.arena,mx=VW*.62+200,my=VH*.62+260,L=
 // ⚡ 렉 줄이기: 그림을 화면 해상도에 맞춰 미리 줄여 두고(캐시) 그대로 찍음
 function fmSC(k,w){const im=FM.img[k];if(!im||!im.complete||!im.width)return null;const sk=Z*(typeof DPR==='number'?DPR:1);if(FM.scK!==sk){FM.sc=new Map();FM.scK=sk;FM.pat=null;FM.vig={}}
   const pw=Math.max(1,Math.round(w*sk)),key=k+'|'+pw;let c=FM.sc.get(key);if(!c){const ph=Math.max(1,Math.round(pw*im.height/im.width));c=document.createElement('canvas');c.width=pw;c.height=ph;const g=c.getContext('2d');g.imageSmoothingEnabled=true;g.imageSmoothingQuality='high';g.drawImage(im,0,0,pw,ph);FM.sc.set(key,c)}return c}
+/* 11-17 ⚡ 장수 헬 렉: 좌우 뒤집힌 그림도 미리 만들어 두고(save·restore 없이 바로 찍기) */
+const FM_FLIP=new WeakMap();function fmFlip(c){let f=FM_FLIP.get(c);if(!f){f=document.createElement('canvas');f.width=c.width;f.height=c.height;const g=f.getContext('2d');g.translate(c.width,0);g.scale(-1,1);g.drawImage(c,0,0);FM_FLIP.set(c,f)}return f}
 function fmPat(){fmSC('floor',1);if(FM.pat)return FM.pat;const im=FM.img.floor;if(!im||!im.complete||!im.width)return null;const sk=FM.scK||1,c=fmSC('floor',im.width/2);if(!c)return null;const P=ctx.createPattern(c,'repeat');try{P.setTransform(new DOMMatrix().scale(im.width/2/c.width))}catch(e){}FM.pat=P;FM.patS=P.setTransform?1:0;return P}
 function fmFloor(fi){fmLoad();const P=fmPat();if(!P)return false;
   ctx.save();ctx.translate(innerWidth/2,innerHeight/2);ctx.scale(Z,Z);ctx.translate(-G.p.x,-G.p.y);ctx.imageSmoothingEnabled=true;ctx.fillStyle=P;ctx.fillRect(G.p.x-VW/2-4,G.p.y-VH/2-4,VW+8,VH+8);ctx.restore();
@@ -948,7 +950,7 @@ function fmDarkDraw(){const lv=fmLv();if(!lv)return;const p=G.p;let R=fmVis();G.
   const sm=ctx.imageSmoothingEnabled;ctx.imageSmoothingEnabled=true;ctx.drawImage(D,x0,y0,WW,HH);
   if(TL){ctx.save();ctx.globalCompositeOperation='lighter';for(const t of TL){if(t.lit<=0)continue;const r=TR*.8*t.lit;ctx.globalAlpha=.55*t.lit*(.85+.15*Math.sin(G.t*13+t.ph));ctx.drawImage(FM.glow,t.x-r,t.y-95-r,r*2,r*2)}ctx.restore()}
   ctx.imageSmoothingEnabled=sm;
-  if(lv===2){for(const e of G.enemies){if(e.boss||e.fixed)continue;const d=Math.hypot(e.x-p.x,e.y-p.y);if(d<R*.9)continue;const s=e.r*.35;ctx.fillStyle='#ff2a2a';ctx.globalAlpha=.75;ctx.fillRect(e.x-s-1,e.y-e.r*.3,2,2);ctx.fillRect(e.x+s-1,e.y-e.r*.3,2,2)}ctx.globalAlpha=1}}
+  if(lv===2){/* 11-17 ⚡ 빨간 눈: 한 번에 모아서 칠하기 · 화면 밖 생략 */ctx.fillStyle='#ff2a2a';ctx.globalAlpha=.75;ctx.beginPath();for(const e of G.enemies){if(e.boss||e.fixed||Math.abs(e.x-p.x)>VW/2+20||Math.abs(e.y-p.y)>VH/2+20)continue;const d=Math.hypot(e.x-p.x,e.y-p.y);if(d<R*.9)continue;const s=e.r*.35;ctx.rect(e.x-s-1,e.y-e.r*.3,2,2);ctx.rect(e.x+s-1,e.y-e.r*.3,2,2)}ctx.fill();ctx.globalAlpha=1}}
 // 착한 토마토
 function fmAllyTick(dt){const p=G.p,lv=fmLv();const A=G.fmA||(G.fmA=[]);G.fmAT=(G.fmAT===undefined?8:G.fmAT)-dt;
   if(G.fmAT<=0&&A.length<3&&!G.arena){G.fmAT=lv===2?16:20;const a=rnd(0,6.283),r=rnd(Math.max(VW,VH)*.45,Math.max(VW,VH)*.62);const x=p.x+Math.cos(a)*r,y=p.y+Math.sin(a)*r;
@@ -987,8 +989,8 @@ function fmCamp(dt){if(!fmLv())return;const p=G.p,C=G.fmC||(G.fmC={x:p.x,y:p.y,t
 function fmTick(dt){if(!G.fmL)return;fmTrig(dt);fmTick4(dt);fmHide(dt);fmDarkTick(dt);fmHuntTick(dt);fmAllyTick(dt);fmCamp(dt);for(const o of G.fmL)if(o.shk>0)o.shk-=dt;for(const e of G.enemies)if(e.pop>0)e.pop-=dt}
 // 농장 몹 그리기(③: 화난 토마토·새싹 — ④에서 늘림)
 function fmEDraw(e,k,w){const im0=FM.img[k];if(!im0||!im0.width)return;if(e.mad&&!e.fmSplit&&!G.bot){ctx.font='12px serif';ctx.textAlign='center';ctx.fillText('💢',e.x+e.r*.6,e.y-e.r*1.5)}if(e.esz){w*=e.esz;fmEliteRing(e)}const im=fmSC(k,w)||im0,h=w*im0.height/im0.width,pp=e.pop>0?1-e.pop/.35:1,fz=e.fz>0?1-e.fz/e.fzF:0,s=(.35+.65*pp)*(1+fz*.4),by=Math.abs(Math.sin(G.t*9+(e.i||0)))*2;
-  const fl=e.dash?e.dash.vx<0:G.p.x<e.x,sk=(e.hold>0?Math.sin(G.t*60)*2:0);ctx.save();ctx.translate(e.x+sk,e.y+e.r*.6-by*s);if(fl)ctx.scale(-1,1);ctx.drawImage(im,-w*s/2,-h*s,w*s,h*s);
-  if(e.flash>0||(fz&&Math.sin(G.t*(30+fz*40))>0)){ctx.globalCompositeOperation='lighter';ctx.globalAlpha=fz?.35+fz*.4:.55;ctx.drawImage(im,-w*s/2,-h*s,w*s,h*s)}ctx.restore()}
+  const fl=e.dash?e.dash.vx<0:G.p.x<e.x,sk=(e.hold>0?Math.sin(G.t*60)*2:0);/* 11-17 ⚡ save·restore 없이 뒤집힌 그림 캐시로 */const I=fl?fmFlip(im):im,ws=w*s,hs=h*s,x=e.x+sk-ws/2,y=e.y+e.r*.6-by*s-hs;ctx.drawImage(I,x,y,ws,hs);
+  if(e.flash>0||(fz&&Math.sin(G.t*(30+fz*40))>0)){const ga=ctx.globalAlpha;ctx.globalCompositeOperation='lighter';ctx.globalAlpha=(fz?.35+fz*.4:.55)*ga;ctx.drawImage(I,x,y,ws,hs);ctx.globalCompositeOperation='source-over';ctx.globalAlpha=ga}}
 
 /* ---- 농장 ④: 무수리 · 농장 몹 · 벌레 떼 · 수박 무리 · 허수아비 · 정적 ---- */
 // 화면 밖에서 오는 무수리(아스가르드 디펜스 그림 td/m1_xx 어두운 · m2_xx 귀여운)
@@ -1024,8 +1026,9 @@ function fmMob0(kind){const m=em(),r=Math.random();
   if(m>=6&&r<.12)return'fm_rhino';return r<.35?'fm_sprout':r<.55?'fm_cater':r<.75?'fm_ant':r<.9?'fm_beetle':'fm_angry'}
 // 무수리 그리기: 보통 = 귀여운(m2), 헬 = 어두운(m1), 어려움 = 반반
 function fmMuDraw(e){if(e.esz)fmEliteRing(e);if(!e.sk)e.sk=fmLv()===2&&Math.random()<.15?2:1;const mk='mu'+e.sk+'_'+FM_MU[e.type],im0=FM.img[mk];if(!im0||!im0.width)return;
-  const w=e.r*4.2,im=fmSC(mk,w)||im0,h=w*im0.height/im0.width,pp=e.pop>0?1-e.pop/.35:1,s=.35+.65*pp;ctx.save();ctx.translate(e.x,e.y);
-  if(e.type==='fm_mu_star')ctx.rotate(G.t*2.5);else ctx.rotate(Math.sin(G.t*6+(e.i||0))*.08);if(G.p.x<e.x&&e.type!=='fm_mu_star')ctx.scale(-1,1);
+  const w=e.r*4.2,im=fmSC(mk,w)||im0,h=w*im0.height/im0.width,pp=e.pop>0?1-e.pop/.35:1,s=.35+.65*pp;
+  if(e.type!=='fm_mu_star'){/* 11-17 ⚡ 빠른 길: 회전 흔들림 → 살짝 통통 튀기, 뒤집힌 그림 캐시 */const I=G.p.x<e.x?fmFlip(im):im,ws=w*s,hs=h*s,x=e.x-ws/2,y=e.y-hs/2+Math.sin(G.t*6+(e.i||0))*1.5;ctx.drawImage(I,x,y,ws,hs);if(e.flash>0){const ga=ctx.globalAlpha;ctx.globalCompositeOperation='lighter';ctx.globalAlpha=.5*ga;ctx.drawImage(I,x,y,ws,hs);ctx.globalCompositeOperation='source-over';ctx.globalAlpha=ga}return}
+  ctx.save();ctx.translate(e.x,e.y);ctx.rotate(G.t*2.5);
   ctx.drawImage(im,-w*s/2,-h*s/2,w*s,h*s);if(e.flash>0){ctx.globalCompositeOperation='lighter';ctx.globalAlpha=.5;ctx.drawImage(im,-w*s/2,-h*s/2,w*s,h*s)}ctx.restore()}
 // 수박 무리: 큰 수박 + 둘레를 도는 작은 수박(살아 있으면 큰 수박 피해 −50%)
 function fmMelon(x,y){const b=fmPop(mkEnemy('fm_melon',x,y,{elite:1}));const n=G.hell?5:G.hard?4:3;b.fmG=[];for(let i=0;i<n;i++){const s=fmPop(mkEnemy('fm_melon_s',x,y,{fixed:1}));s.orb={o:b,a:i/n*6.283,R:60};b.fmG.push(s)}return b}
@@ -1303,7 +1306,7 @@ function fmTick8(dt){fmHutRise(dt);fmEvTick(dt);fmFolTick(dt);fmRadioTick(dt);fm
 
 // 화면 위(어둠 위)에 그리는 것들: 드론 탐지 원 · 낙하 그림자 · 횃불 · 감시함 · 조준 원 · 광선
 function fmSkyDraw(){const lv=fmLv();if(!lv)return;const p=G.p,sm=ctx.imageSmoothingEnabled;
-  const SR=lv===2?175:150;for(const e of G.enemies){if(e.type!=='fm_drone'||e.dead)continue;ctx.save();ctx.globalCompositeOperation='lighter';const on=e.cd<=0;ctx.globalAlpha=on?.13:.05;ctx.fillStyle='#ff1a1a';ctx.beginPath();ctx.arc(e.x,e.y,SR,0,7);ctx.fill();
+  const SR=lv===2?175:150;for(const e of G.enemies){if(e.type!=='fm_drone'||e.dead||Math.abs(e.x-p.x)>VW/2+SR||Math.abs(e.y-p.y)>VH/2+SR)continue;ctx.save();ctx.globalCompositeOperation='lighter';const on=e.cd<=0;ctx.globalAlpha=on?.13:.05;ctx.fillStyle='#ff1a1a';ctx.beginPath();ctx.arc(e.x,e.y,SR,0,7);ctx.fill();
     ctx.globalAlpha=on?.55:.18;ctx.strokeStyle='#ff3a3a';ctx.lineWidth=2;ctx.setLineDash([10,8]);ctx.beginPath();ctx.arc(e.x,e.y,SR,0,7);ctx.stroke();ctx.setLineDash([]);
     if(on){const a=G.t*2.2+(e.ph||0);ctx.globalAlpha=.22;ctx.beginPath();ctx.moveTo(e.x,e.y);ctx.arc(e.x,e.y,SR,a,a+.6);ctx.closePath();ctx.fill()}ctx.restore()}
   for(const d of G.fmDrop||[]){const k=1-d.t/d.T;ctx.globalAlpha=.25+.45*k;ctx.fillStyle='#000';ctx.beginPath();ctx.ellipse(d.x,d.y,6+12*k,3+5*k,0,0,7);ctx.fill();ctx.globalAlpha=.6*k;ctx.strokeStyle='#ff3a3a';ctx.lineWidth=1.5;ctx.beginPath();ctx.ellipse(d.x,d.y,20-8*k,8-3*k,0,0,7);ctx.stroke()}ctx.globalAlpha=1;
@@ -2575,7 +2578,18 @@ function hellTick(dt){const p=G.p;
   if(G.hev){G.hev.el+=dt;G.hev.t-=dt;if(G.hev.k==='nammi')for(const w of G.hev.w)if(!w.done&&G.hev.el>=w.at){w.done=1;nammiWave()}if(G.hev.t<=0){G.hev=null;G.sealed=null}}
   else if(!G.arena&&G.map!=='farm'&&G.map!=='mg'){G.hevT-=dt;if(G.hevT<=0){G.hevT=120;hellEvent(pick(Object.keys(HEV)))}}
 }
-function drawHellWorld(){if(G.eb.length){const pu=.5+.5*Math.sin(G.t*12);for(const b of G.eb){const r=Math.max(b.r,5)*1.25,sp=Math.hypot(b.vx||0,b.vy||0)||1;ctx.globalAlpha=.25+.2*pu;ctx.fillStyle=b.c;ctx.beginPath();ctx.arc(b.x,b.y,r*2.4,0,7);ctx.fill();ctx.globalAlpha=.5;ctx.strokeStyle=b.c;ctx.lineWidth=r*.9;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(b.x-(b.vx||0)/sp*r*2.6,b.y-(b.vy||0)/sp*r*2.6);ctx.lineTo(b.x,b.y);ctx.stroke();ctx.globalAlpha=1;ctx.fillStyle='#120818';ctx.beginPath();ctx.arc(b.x,b.y,r+2,0,7);ctx.fill();ctx.fillStyle=b.c;ctx.beginPath();ctx.arc(b.x,b.y,r,0,7);ctx.fill();ctx.fillStyle='#ffffff';ctx.beginPath();ctx.arc(b.x,b.y,r*.45,0,7);ctx.fill()}}
+/* 11-17 ⚡ 적 탄 렉 줄이기: 탄 그림을 색·크기별로 미리 그려 두고 찍기 · 꼬리는 색별로 한 번에 · 화면 밖은 생략 · 많거나 느리면 바깥 빛 생략 */
+const EB_SPR=new Map();let EB_SK=0;
+function ebSpr(c,r,glow){const sk=Z*(typeof DPR==='number'?DPR:1);if(EB_SK!==sk){EB_SPR.clear();EB_SK=sk}const rr=Math.round(r*4)/4,key=c+'|'+rr+'|'+glow;let o=EB_SPR.get(key);if(o)return o;
+  const R=(glow?rr*2.4:rr+2)+1,pw=Math.max(2,Math.ceil(R*2*sk)),cv=document.createElement('canvas');cv.width=cv.height=pw;const g=cv.getContext('2d');g.scale(pw/(R*2),pw/(R*2));g.translate(R,R);
+  if(glow){g.fillStyle=c;g.beginPath();g.arc(0,0,rr*2.4,0,7);g.fill()}else{g.fillStyle='#120818';g.beginPath();g.arc(0,0,rr+2,0,7);g.fill();g.fillStyle=c;g.beginPath();g.arc(0,0,rr,0,7);g.fill();g.fillStyle='#ffffff';g.beginPath();g.arc(0,0,rr*.45,0,7);g.fill()}
+  o={c:cv,h:R};if(EB_SPR.size>400)EB_SPR.clear();EB_SPR.set(key,o);return o}
+function drawHellWorld(){if(G.eb.length){const pu=.5+.5*Math.sin(G.t*12),p=G.p,x0=p.x-VW/2-60,x1=p.x+VW/2+60,y0=p.y-VH/2-60,y1=p.y+VH/2+60,V=[];for(const b of G.eb)if(b.x>x0&&b.x<x1&&b.y>y0&&b.y<y1)V.push(b);
+    if(V.length){const ga=ctx.globalAlpha;
+      if(V.length<120&&FXQ>.7){ctx.globalAlpha=.25+.2*pu;for(const b of V){const S=ebSpr(b.c,Math.max(b.r,5)*1.25,1);ctx.drawImage(S.c,b.x-S.h,b.y-S.h,S.h*2,S.h*2)}}
+      ctx.globalAlpha=.5;ctx.lineCap='round';const M=new Map();for(const b of V){const r=Math.max(b.r,5)*1.25,k=b.c+'|'+r;let a=M.get(k);if(!a)M.set(k,a=[]);a.push(b)}
+      for(const a of M.values()){const r=Math.max(a[0].r,5)*1.25;ctx.strokeStyle=a[0].c;ctx.lineWidth=r*.9;ctx.beginPath();for(const b of a){const sp=Math.hypot(b.vx||0,b.vy||0)||1;ctx.moveTo(b.x-(b.vx||0)/sp*r*2.6,b.y-(b.vy||0)/sp*r*2.6);ctx.lineTo(b.x,b.y)}ctx.stroke()}
+      ctx.globalAlpha=1;for(const b of V){const S=ebSpr(b.c,Math.max(b.r,5)*1.25,0);ctx.drawImage(S.c,b.x-S.h,b.y-S.h,S.h*2,S.h*2)}ctx.globalAlpha=ga}}
   const L=G.blz;if(L){const len=L.blk||Math.max(VW,VH)*1.6,ex=L.x+Math.cos(L.a)*len,ey=L.y+Math.sin(L.a)*len;ctx.save();if(L.t<1){ctx.setLineDash([10,8]);ctx.strokeStyle=`rgba(255,40,80,${.4+.4*Math.sin(L.t*30)})`;ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(L.x,L.y);ctx.lineTo(ex,ey);ctx.stroke()}else{const a=Math.min(1,(1.7-L.t)*3);ctx.globalAlpha=a;ctx.lineCap='round';ctx.strokeStyle='#ff3fd2';ctx.shadowColor='#ff3fd2';ctx.shadowBlur=24;ctx.lineWidth=60;ctx.beginPath();ctx.moveTo(L.x,L.y);ctx.lineTo(ex,ey);ctx.stroke();ctx.shadowBlur=0;ctx.strokeStyle='#ffffff';ctx.lineWidth=16;ctx.stroke()}ctx.restore()}}
 function drawHellScreen(){const W=innerWidth,H=innerHeight;ctx.fillStyle=G.tw?'rgba(40,10,70,.24)':'rgba(40,0,0,.2)';ctx.fillRect(0,0,W,H);
   if(G.hev&&G.hev.k==='faction'){const a=Math.min(1,G.hev.t*2,(25-G.hev.t)*2)*.88;ctx.fillStyle=`rgba(6,0,10,${a})`;G.hev.side<0?ctx.fillRect(0,0,W/2,H):ctx.fillRect(W/2,0,W/2,H)}

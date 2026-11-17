@@ -1162,11 +1162,11 @@ function fmFolTick(dt){if(G.arena)return;const p=G.p,F=G.fmF||(G.fmF=[]);G.fmFoT
     if(d<28){F.splice(i,1);const hv=Math.round(G.S.maxHp*.08);healP(hv,'fm');fmRescue({x:a.x,y:a.y,fol:1});if(!G.bot){G.texts.push({x:p.x,y:p.y-46,v:'언니! +'+hv,life:1,col:'#ff9ab8'});SND.p('heal')}continue}
     if(a.life<=0)F.splice(i,1)}}
 /* 11-17 사용자: 헬 골드 보따리 — 장수 헬은 울타리 우리 한가운데(들어가면 함정), 인천 헬은 공원 맨 안쪽. 화살표 없이 빛으로만, 40초 뒤 사라짐. 20분 최대 약 2000G */
-const FM_BAG_T=40;function fmBagMk(x,y,mg){const big=Math.random()<.15;return{x,y,life:FM_BAG_T,ph:rnd(0,6),big,g:big?200:30+Math.floor(Math.random()*41),mg:mg?1:0}}
+const FM_BAG_T=40;function fmBagMk(x,y,mg){/* 11-17 사용자: 장수가 골드벌이 맵 — 장수 20분 최대 약 3500G(일반 50~110·대형 30%·간격 34~42초), 인천은 일반 30~70·대형 15% */const big=Math.random()<(mg?.15:.3);return{x,y,life:FM_BAG_T,ph:rnd(0,6),big,g:big?200:mg?30+Math.floor(Math.random()*41):50+Math.floor(Math.random()*61),mg:mg?1:0}}
 function fmBagTick(dt){if(G.tw||!G.hell||G.arena||(G.map!=='farm'&&G.map!=='mg'))return;const B=G.fmBg||(G.fmBg=[]),p=G.p;
   if(G.map==='farm'){G.fmBgT=(G.fmBgT===undefined?40:G.fmBgT)-dt;
     if(G.fmBgT<=0){if(B.length){G.fmBgT=2}else{const seen=new Set(),C=[];for(const o of G.fmL||[]){const P=o.pen;if(!P||!P.gate||P.st!==0||seen.has(P)||P===G.fmBgLast)continue;seen.add(P);const d=Math.hypot(P.cx-p.x,P.cy-p.y);if(d>300&&d<1250)C.push(P)}
-      if(C.length){const P=pick(C);G.fmBgLast=P;B.push(fmBagMk(P.cx,P.cy));G.fmBgT=rnd(55,65);if(!G.bot)toast(B[B.length-1].big?'✨ 대형 보따리!':'💰 반짝이는 보따리!','울타리 안에서 반짝여요 · 40초 안에 · 함정 조심')}else G.fmBgT=4}}}
+      if(C.length){const P=pick(C);G.fmBgLast=P;B.push(fmBagMk(P.cx,P.cy));G.fmBgT=rnd(34,42);if(!G.bot)toast(B[B.length-1].big?'✨ 대형 보따리!':'💰 반짝이는 보따리!','울타리 안에서 반짝여요 · 40초 안에 · 함정 조심')}else G.fmBgT=4}}}
   for(let i=B.length-1;i>=0;i--){const a=B[i];a.life-=dt;if(Math.hypot(p.x-a.x,p.y-a.y)<32){B.splice(i,1);G.bonusGold=(G.bonusGold||0)+a.g;if(!G.bot){G.texts.push({x:p.x,y:p.y-46,v:'💰 +'+a.g+'G',life:1.2,big:1,col:'#ffd34d'});sparks(a.x,a.y-12,a.big?40:20,['#ffe14d','#fff6c0','#ffffff'],200,.6,3);SND.p('coin')}continue}
     if(a.life<=0)B.splice(i,1)}}
 function fmBagDraw(){const B=G.fmBg;if(!B||!B.length)return;ctx.save();ctx.textAlign='center';ctx.textBaseline='alphabetic';

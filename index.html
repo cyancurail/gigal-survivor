@@ -1993,34 +1993,33 @@ function suFloor(){if(!SU.im){const im=new Image();im.src='su/floor.jpg';SU.im=i
 function suTrunk(x0,y0,x1,y1,gi){const wv=suWaveGate(gi);ctx.lineCap='round';ctx.strokeStyle='#b39a6c';ctx.lineWidth=16;ctx.beginPath();ctx.moveTo(x0,y0);ctx.lineTo(x1,y1);ctx.stroke();
   ctx.strokeStyle='#e9eef4';ctx.lineWidth=11;ctx.stroke();ctx.strokeStyle=wv?(Math.sin(G.t*10)>0?'#ff3a2a':'#ff9a5a'):'#18a8ea';ctx.lineWidth=4;ctx.stroke();ctx.strokeStyle=wv?'#ffd0c0':'#b4efff';ctx.lineWidth=1.5;ctx.stroke();
   const L=Math.hypot(x1-x0,y1-y0),ux=(x1-x0)/L,uy=(y1-y0)/L;ctx.fillStyle='#ffffff';for(let s=(G.t*140)%160;s<L;s+=160){const x=x0+ux*s,y=y0+uy*s;if(Math.abs(x-G.p.x)>VW/2+20||Math.abs(y-G.p.y)>VH/2+20)continue;ctx.globalAlpha=.9;ctx.fillRect(x-(ux?7:2),y-(uy?7:2),ux?14:4,uy?14:4)}ctx.globalAlpha=1}
-function suGate(x,y,hz,gi){const W=SU.GW,t=G.t,gh=G.suGH?G.suGH[gi]:3,wv=suWaveGate(gi),FA=gh<=0?0:gh/3,FC=wv?'#ff6a4a':'#35c0ff';ctx.save();ctx.translate(x,y);
-  if(hz){/* 위·아래 벽의 게이트: 가로로 열린 문 */ctx.fillStyle='#cfd6e2';ctx.fillRect(-W/2-26,-78,26,92);ctx.fillRect(W/2,-78,26,92);ctx.fillStyle='#f4f7fb';ctx.fillRect(-W/2-26,-78,26,14);ctx.fillRect(W/2,-78,26,14);
-    ctx.fillStyle='#3a56aa';ctx.fillRect(-W/2-30,-92,W+60,16);ctx.fillStyle='#18a8ea';ctx.fillRect(-W/2-30,-80,W+60,4);
-    ctx.globalAlpha=.6;ctx.fillStyle=gh<=0?'#3a1408':'#16306e';ctx.fillRect(-W/2,-76,W,84);ctx.globalAlpha=(.5+.12*Math.sin(t*3))*FA;ctx.fillStyle=FC;ctx.fillRect(-W/2,-76,W,84);ctx.globalAlpha=1;for(let i=0;i<3;i++){ctx.fillStyle=i<gh?'#8fe6ff':'#5a2a1a';ctx.fillRect(-27+i*20,-112,14,10)}if(gh<=0){ctx.fillStyle='#8a8f9a';for(let i=0;i<7;i++)ctx.fillRect(-W/2+10+i*38,-8-(i*37%22),30,16+(i*13%12))}ctx.globalAlpha=.7*FA;ctx.fillStyle='#d8f6ff';for(let i=0;i<5;i++){const yy=-70+((t*40+i*17)%78);ctx.fillRect(-W/2,yy,W,1.5)}}
-  else{/* 좌·우 벽의 게이트: 세로로 열린 문 */ctx.fillStyle='#cfd6e2';ctx.fillRect(-20,-W/2-30,40,30);ctx.fillRect(-20,W/2,40,30);ctx.fillStyle='#3a56aa';ctx.fillRect(-24,-W/2-36,48,10);ctx.fillRect(-24,W/2+26,48,10);
-    ctx.globalAlpha=.6;ctx.fillStyle=gh<=0?'#3a1408':'#16306e';ctx.fillRect(-14,-W/2,28,W);ctx.globalAlpha=(.5+.12*Math.sin(t*3))*FA;ctx.fillStyle=FC;ctx.fillRect(-14,-W/2,28,W);ctx.globalAlpha=1;for(let i=0;i<3;i++){ctx.fillStyle=i<gh?'#8fe6ff':'#5a2a1a';ctx.fillRect(-7,-W/2-70+i*-16,14,10)}if(gh<=0){ctx.fillStyle='#8a8f9a';for(let i=0;i<6;i++)ctx.fillRect(-18+(i*17%20),-W/2+14+i*44,22+(i*7%10),26)}ctx.globalAlpha=.7*FA;ctx.fillStyle='#d8f6ff';for(let i=0;i<5;i++){const xx=-12+((t*14+i*6)%24);ctx.fillRect(xx,-W/2,1.5,W)}}
+const SUWM={"gateH0":{"w":510,"h":180,"ox":255.0,"oy":159.0},"gateH1":{"w":510,"h":180,"ox":255.0,"oy":159.0},"gateH2":{"w":499,"h":186,"ox":255.0,"oy":153.0},"gateV0":{"w":104,"h":518,"ox":52.0,"oy":258.0},"gateV1":{"w":104,"h":518,"ox":52.0,"oy":258.0},"gateV2":{"w":114,"h":453,"ox":57.0,"oy":193.0},"wallH":{"w":226,"h":92,"ox":113.0,"oy":78.0},"wallV":{"w":54,"h":177,"ox":27.0,"oy":108.0}};
+/* 11-19: 성벽·게이트는 3D로 구운 그림(su/wallH·wallV·gateH0~2·gateV0~2, 1px = 월드 1). 에너지 문·내구 칸은 코드로 덧그림. */
+function suPc(k,x,y){const im=suIm2(k),m=SUWM[k];if(!im.complete||!im.width)return;ctx.drawImage(im,x-m.ox,y-m.oy,m.w,m.h)}
+function suGate(x,y,hz,gi){const W=SU.GW,t=G.t,gh=G.suGH?G.suGH[gi]:3,wv=suWaveGate(gi),FA=gh<=0?0:gh/3,FC=wv?'#ff6a4a':'#35c0ff',st=gh>=3?0:gh>0?1:2;ctx.save();
+  if(hz){if(FA>0){ctx.globalAlpha=.55;ctx.fillStyle='#16306e';ctx.fillRect(x-W/2,y-96,W,96);ctx.globalAlpha=(.5+.12*Math.sin(t*3))*FA;ctx.fillStyle=FC;ctx.fillRect(x-W/2,y-96,W,96);ctx.globalAlpha=.7*FA;ctx.fillStyle='#d8f6ff';for(let i=0;i<5;i++)ctx.fillRect(x-W/2,y-92+((t*40+i*19)%88),W,1.5)}
+    ctx.globalAlpha=1;suPc('gateH'+st,x,y);for(let i=0;i<3;i++){ctx.fillStyle=i<gh?'#8fe6ff':'#5a2a1a';ctx.fillRect(x-27+i*20,y-178,14,9)}}
+  else{if(FA>0){ctx.globalAlpha=.55;ctx.fillStyle='#16306e';ctx.fillRect(x-12,y-W/2-70,24,W+70);ctx.globalAlpha=(.5+.12*Math.sin(t*3))*FA;ctx.fillStyle=FC;ctx.fillRect(x-12,y-W/2-70,24,W+70);ctx.globalAlpha=.7*FA;ctx.fillStyle='#d8f6ff';for(let i=0;i<5;i++)ctx.fillRect(x-10+((t*14+i*5)%20),y-W/2-70,1.5,W+70)}
+    ctx.globalAlpha=1;suPc('gateV'+st,x,y);for(let i=0;i<3;i++){ctx.fillStyle=i<gh?'#8fe6ff':'#5a2a1a';ctx.fillRect(x-7,y-W/2-150-i*14,14,9)}}
   ctx.restore()}
-function suDraw(front){const p=G.p,H=SU.H,W=SU.GW,ER=SU.ER,vx0=p.x-VW/2-60,vx1=p.x+VW/2+60,vy0=p.y-VH/2-120,vy1=p.y+VH/2+120;
+function suWalls(front){const p=G.p,H=SU.H,x0=p.x-VW/2-140,x1=p.x+VW/2+140,y0=p.y-VH/2-120,y1=p.y+VH/2+220;
+  if(!front){if(y0<-H+40){const y=-H-22;for(let x=-H-100;x<=H+100;x+=200){if(Math.abs(x)<340||x<x0||x>x1)continue;suPc('wallH',x,y)}suGate(0,y,1,0)}
+    for(const sx of [-1,1]){const x=sx*(H+24);if(sx<0?x0>x+60:x1<x-60)continue;for(let y=-H-80;y<=H+60;y+=116){if(Math.abs(y+20)<330||y<y0-80||y>y1)continue;suPc('wallV',x,y)}suGate(x,0,0,sx<0?2:3)}}
+  else if(y1>H-20){const y=H+34;for(let x=-H-100;x<=H+100;x+=200){if(Math.abs(x)<340||x<x0||x>x1)continue;suPc('wallH',x,y)}suGate(0,y,1,1)}}
+function suDraw(front){const p=G.p,H=SU.H,ER=SU.ER,vx0=p.x-VW/2-60,vx1=p.x+VW/2+60,vy0=p.y-VH/2-120,vy1=p.y+VH/2+120;
   const sm=ctx.imageSmoothingEnabled;ctx.imageSmoothingEnabled=true;
   if(!front){
     suTrunk(0,-ER*.6,0,-H+10,0);suTrunk(0,ER*.6,0,H-10,1);suTrunk(-ER,0,-H+10,0,2);suTrunk(ER,0,H-10,0,3);
     const pd=SU.pad;if(pd&&pd.complete&&pd.width){for(const q of SU.pads){const w=pd.width*q[2],h=pd.height*q[2];if(q[0]+w/2<vx0||q[0]-w/2>vx1||q[1]+h/2<vy0||q[1]-h/2>vy1)continue;ctx.drawImage(pd,q[0]-w/2,q[1]-h/2,w,h)}
       if(Math.abs(p.x)<VW/2+420&&Math.abs(p.y)<VH/2+300){const s=2.5,w=pd.width*s,h=pd.height*s;ctx.drawImage(pd,-w/2,-h/2+6,w,h)}}
-    suBurnDraw();suSyncDraw();suTuDraw(0);
-    /* 북쪽 벽(뒤) + 좌우 벽 */
-    if(vy0<-H+10){ctx.fillStyle='#dfe5ee';ctx.fillRect(-H-40,-H-70,H-W/2+40,84);ctx.fillRect(W/2,-H-70,H-W/2+40,84);ctx.fillStyle='#f6f9fc';ctx.fillRect(-H-40,-H-70,H-W/2+40,16);ctx.fillRect(W/2,-H-70,H-W/2+40,16);ctx.fillStyle='#18a8ea';ctx.fillRect(-H-40,-H-18,H-W/2+40,4);ctx.fillRect(W/2,-H-18,H-W/2+40,4);suGate(0,-H,1,0)}
-    for(const sx of[-1,1]){if(sx<0?vx0>-H+40:vx1<H-40)continue;const x=sx*H+(sx<0?-40:0);ctx.fillStyle='#e6ebf2';ctx.fillRect(x,-H-70,40,H-W/2+70);ctx.fillRect(x,W/2,40,H-W/2+50);ctx.fillStyle='#18a8ea';ctx.fillRect(x+(sx<0?34:2),-H-70,4,H-W/2+70);ctx.fillRect(x+(sx<0?34:2),W/2,4,H-W/2+50);suGate(sx*H+sx*-0,0,0,sx<0?2:3)}
-    /* 엘리베이터 기단 */
+    suBurnDraw();suSyncDraw();suWalls(0);suTuDraw(0);
     if(Math.abs(p.x)<VW/2+200&&Math.abs(p.y)<VH/2+200){ctx.fillStyle='#8f9db8';ctx.beginPath();ctx.ellipse(0,10,ER,ER*.6,0,0,7);ctx.fill();ctx.fillStyle='#eef2f7';ctx.beginPath();ctx.ellipse(0,-6,ER,ER*.6,0,0,7);ctx.fill();ctx.strokeStyle='#18a8ea';ctx.lineWidth=4;ctx.beginPath();ctx.ellipse(0,-6,ER*.78,ER*.47,0,0,7);ctx.stroke()}
   }else{
-    /* 엘리베이터 기둥: 화면 위 끝까지 */
     if(Math.abs(p.x)<VW/2+80&&p.y-VH/2<0&&p.y+VH/2>-60){const top=p.y-VH/2-40,hid=Math.abs(p.x)<70&&p.y<-10;ctx.globalAlpha=hid?.4:1;
       const g=ctx.createLinearGradient(-44,0,44,0);g.addColorStop(0,'#b9c4d6');g.addColorStop(.3,'#ffffff');g.addColorStop(.7,'#e6ecf4');g.addColorStop(1,'#9fadc6');ctx.fillStyle=g;ctx.fillRect(-44,top,88,-12-top);
       ctx.fillStyle='#18a8ea';ctx.fillRect(-3,top,6,-12-top);ctx.fillStyle='#d8f6ff';for(let y=-12-((G.t*220)%90);y>top;y-=90)ctx.fillRect(-3,y-26,6,26);
       ctx.fillStyle='#3a56aa';ctx.fillRect(-52,-34,104,10);ctx.fillRect(-52,-150,104,6);ctx.globalAlpha=1}
-    /* 남쪽 벽(앞) */
-    if(vy1>H-10){ctx.fillStyle='#f6f9fc';ctx.fillRect(-H-40,H,H-W/2+40,14);ctx.fillRect(W/2,H,H-W/2+40,14);ctx.fillStyle='#dfe5ee';ctx.fillRect(-H-40,H+14,H-W/2+40,60);ctx.fillRect(W/2,H+14,H-W/2+40,60);ctx.fillStyle='#18a8ea';ctx.fillRect(-H-40,H+56,H-W/2+40,4);ctx.fillRect(W/2,H+56,H-W/2+40,4);suGate(0,H+78,1,1)}
-    suTuDraw(1);suShipDraw();suWaveDraw();try{fmSupDraw()}catch(e){}
+    suWalls(1);suTuDraw(1);suShipDraw();suWaveDraw();try{fmSupDraw()}catch(e){}
   }
   ctx.imageSmoothingEnabled=sm}
 /* ---- 수원 보스 3 「옥타르트 옥산느」 (11-18, 그림 = 언니가 그록으로 뽑아 온 시트 su/oks_a·oks_b·oks_drone) ----

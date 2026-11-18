@@ -372,6 +372,24 @@ mark(6);
  for(const x of [.2,1.8])loft([[-.03,0,0,0],[0,1.0,.04,.12],[.03,0,0,0]],4,()=>RG,TR(x,Y+.2,0))}
 }
 endM('탈로스F',1.18,.9,2.3,{label:'🦢 착지 · 하프 레일건 전개',label2:'🚀 접기 · 이륙',toggle:1});
+/* ---------- 9~16. 수원 성벽·게이트 (11-19): 게임 그림용. 정면 카메라(yaw 0)로 구움. 원점 = 바닥 가운데.
+   gate(st,vert): st 0 멀쩡 · 1 금 감 · 2 무너짐 / vert = 동·서 게이트(문이 깊이 방향, 화면에서 세로 280이 되게 폭 24.1) ---------- */
+function mkWall(vert){const R=vert?RY(PI/2):ID,L=10;
+ prism([[-L/2,-1.1],[L/2,-1.1],[L/2,1.1],[-L/2,1.1]],0,.5,GR,R);box(L,2.6,1.5,WH,cmp(TR(0,1.8,0),R));box(L,.12,1.54,NE,cmp(TR(0,1.3,0),R),1);
+ box(L,.3,1.9,WH2,cmp(TR(0,3.2,0),R));for(const x of [-3.75,-1.25,1.25,3.75])box(1.3,.5,.3,WH,cmp(TR(x,3.6,.8),R));for(const x of [-3.75,-1.25,1.25,3.75])box(1.3,.5,.3,WH,cmp(TR(x,3.6,-.8),R));
+ for(const x of [-2.5,2.5])box(.5,2.9,1.7,WH2,cmp(TR(x,1.75,0),R));box(L,.08,.08,NE2,cmp(TR(0,3.37,.96),R),1);box(L,.08,.08,NE2,cmp(TR(0,3.37,-.96),R),1)}
+function mkGate(st,vert){const R=vert?RY(PI/2):ID,S=vert?24.1:14,hx=S/2+1.3,RD=[1,.35,.4];
+ const py=(sx,h,brk)=>{const T=cmp(TR(sx*hx,0,0),R);lathe([[0,0],[1.9,0],[2.0,.3],[1.6,.9],[1.4,1.2],[1.4,h-.9],[1.7,h-.6],[1.7,h],[0,h]],8,(i)=>i===1?NE:i===5?NE2:i===3||i===6?WH2:WH,cmp(RY(PI/8),T),(i)=>i===1||(i===5&&!brk)?1:0,true);
+   torus(1.5,.1,24,6,st?GR:NE,cmp(TR(0,h*.5,0),T),st?0:1);if(!brk){lathe([[0,0],[.5,.1],[.7,.6],[0,1.4]],8,()=>st===0?NE2:RD,cmp(TR(0,h,0),T),()=>st===0?1:2,true)}else{for(let k=0;k<5;k++)box(.5+rnd()*.7,.4+rnd()*.9,.5+rnd()*.6,rnd()<.5?GR:DK,cmp(RZ(rnd()-.5),TR((rnd()-.5)*2,h+.2,(rnd()-.5)*2),T))}};
+ const H=7.2;py(-1,H,st===2);py(1,st===2?3.4:H,st===2);
+ if(st<2){box(S+1.2,1.0,1.5,WH,cmp(RZ(st?-.035:0),TR(0,H-.9,0),R));box(S+1.2,.12,1.54,st?RD:NE,cmp(RZ(st?-.035:0),TR(0,H-1.5,0),R),st?2:1);for(let k=0;k<5;k++)box(1.2,.5,1.7,WH2,cmp(TR(-S*.4+k*S*.2,H-.3,0),R));
+  lathe([[0,0],[.5,-.2],[.6,-.7],[0,-1.0]],8,()=>st?GR:NE2,cmp(TR(0,H-1.4,0),R),()=>st?0:1,true)}
+ else{box(S*.55,1.0,1.5,WH,cmp(RZ(-.5),TR(-S*.16,2.1,.3),R));box(S*.3,1.0,1.5,WH2,cmp(RZ(.2),RY(.4),TR(S*.2,.6,.8),R));for(let k=0;k<16;k++)box(.6+rnd()*1.4,.4+rnd()*.9,.6+rnd()*1.2,rnd()<.4?DK:rnd()<.5?GR:WH2,cmp(RY(rnd()*3),TR((rnd()-.5)*S*.95,.3+rnd()*.3,(rnd()-.5)*3.2),R));
+  for(let k=0;k<3;k++)box(.3,.3,.3,RD,cmp(TR((rnd()-.5)*S*.6,1.1,(rnd()-.5)*2),R),2)}
+ if(st===1){for(let k=0;k<7;k++)box(.12,.9+rnd()*1.6,.05,DK,cmp(RZ(rnd()*1.4-.7),TR((k%2?1:-1)*hx+(rnd()-.5)*1.2,1.6+rnd()*4,1.45),R));for(const sx of [-1,1])box(.3,.3,.3,RD,cmp(TR(sx*hx,H*.72,1.5),R),2)}
+ for(const sx of [-1,1]){prism([[sx*(hx+1.6),-1.3],[sx*(hx+3.4),-1.1],[sx*(hx+3.4),1.1],[sx*(hx+1.6),1.3]],0,st===2&&sx>0?1.2:4.2,WH2,R);box(1.4,.12,2.3,NE,cmp(TR(sx*(hx+2.5),2.0,0),R),st===2&&sx>0?0:1)}}
+for(const [nm,st,v] of [['gateH0',0,0],['gateH1',1,0],['gateH2',2,0],['gateV0',0,1],['gateV1',1,1],['gateV2',2,1]]){begin();seed=11+st*7;mkGate(st,v);endM(nm,1,0,0,{label:nm})}
+begin();mkWall(0);endM('wallH',1,0,0,{label:'wallH'});begin();mkWall(1);endM('wallV',1,0,0,{label:'wallV'});
 const NV=POS.length/3;
 
 /* ================= GL ================= */

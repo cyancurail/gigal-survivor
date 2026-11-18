@@ -1425,7 +1425,7 @@ function fmFenceTick(dt){if(!G.hell)return;G.fmFT=(G.fmFT||0)-dt;if(G.fmFT>0)ret
     if(n>=4||brk){o.press=(o.press||0)+.2*(n/5)+(brk?.7:0);o.shk=.22+Math.min(.3,o.press*.05);if(!G.bot&&(G.fmCrk||0)<G.t&&Math.abs(o.x-p.x)<VW*.5){G.fmCrk=G.t+1.1;SND.p('paper')}}
     else o.press=Math.max(0,(o.press||0)-.1);
     if(o.press>=3.5){o.broken=1;if(!G.bot){sparks(o.x,o.y-16,26,['#8a5a2a','#c89060','#3a2410'],230,.6,3);G.texts.push({x:o.x,y:o.y-46,v:'와장창!',life:.9,col:'#ffd34d'});SND.p('boom');if(Math.abs(o.x-p.x)<VW*.5)G.shk=Math.max(G.shk||0,.2)}}}}
-function newGame(ci,fancy,hard,hell,tw){if(SAVE.map==='mg'&&mgU()){tw=false;hard=true;if(hell&&!mgHU())hell=false}if(SAVE.map==='farm'&&fmU()&&fmHellOff()&&(hell||tw)){hell=false;tw=false;hard=true}s2Desc();FM.cache.clear();
+function newGame(ci,fancy,hard,hell,tw){try{FXG.lv=0;FXG.ema=0;FXG.n=0}catch(e){}if(SAVE.map==='mg'&&mgU()){tw=false;hard=true;if(hell&&!mgHU())hell=false}if(SAVE.map==='farm'&&fmU()&&fmHellOff()&&(hell||tw)){hell=false;tw=false;hard=true}s2Desc();FM.cache.clear();
   HELLFX=hellFxOn();
   G={map:SAVE.map==='sangbong'?'sangbong':(SAVE.map==='farm'&&fmU())?'farm':(SAVE.map==='mg'&&mgU())?'mg':'gigal',sbL:null,wb:[],witch:null,knN:0,ci,fancy,tw:!!tw,twNext:180,twK:0,hard:!!hard||!!hell||!!tw,hell:!!hell||!!tw,hevT:120,eb:[],id:CHAR[ci].id,t:0,running:true,paused:false,freeze:0,kills:0,lvl:1,xp:0,next:5,items:{},weapons:[],enemies:[],projs:[],gems:[],fx:[],texts:[],pickups:[],zones:[],chests:0,
      p:{x:0,y:0,hp:100,fx:1,fy:0,inv:0,walk:0,frame:0},spawnAcc:0,eliteT:45,bossIdx:0,swarms:[260,560,820,1040,1320,1560,1760],ult:null,ultReady:false,ultCd:0,energy:30,xpMul:1,xpMulT:0,
@@ -1456,7 +1456,7 @@ function onScreen(e){return Math.abs(e.x-G.p.x)<VW/2+20&&Math.abs(e.y-G.p.y)<VH/
 function canHit(e,key,cd){const n=e.h[key]||0;if(n>G.t)return false;e.h[key]=G.t+cd;return true}
 function hurt(e,amt,key,opts={}){
   if(e.dead)return;if(e.hunt){e.stg=.3;e.flash=.06;return}if(G.mskA&&(key===G.mskA||(key==='star'&&G.mskA==='fairy')))G.mAtk=.35;
-  let d=amt;let crit=false;if(window.SN)d=SN.dmg(e,d);if(G.ultOn&&G.ultOn.juInv&&JUB_K[key])d*=2;if(e.fmInv>0)return;if(e.mgBub>0){e.flash=.05;if(!G.bot&&Math.random()<.3)sparks(e.x+rnd(-24,24),e.y-20+rnd(-24,24),3,['#9ad8ff','#ffffff'],80,.25,2);return}if(e.fmCalm)fmAggro(e);if(e.tpl==='witch'&&G.knN>0)d*=.7;if(e.fmG&&e.fmG.some(q=>!q.dead))d*=.5;if(e.boss&&(key==='unnie'||key==='bride'||key==='emerald'||key==='sapphire'||key==='diamond')){const n=sumN(key);if(n>1)d/=Math.sqrt(n)}
+  let d=amt;let crit=false;if(window.SN)d=SN.dmg(e,d);if(G.ultOn&&G.ultOn.juInv&&JUB_K[key])d*=2;if(e.amV>G.t&&JUB_K[key])d*=1+(e.amVk||0);if(e.fmInv>0)return;if(e.mgBub>0){e.flash=.05;if(!G.bot&&Math.random()<.3)sparks(e.x+rnd(-24,24),e.y-20+rnd(-24,24),3,['#9ad8ff','#ffffff'],80,.25,2);return}if(e.fmCalm)fmAggro(e);if(e.tpl==='witch'&&G.knN>0)d*=.7;if(e.fmG&&e.fmG.some(q=>!q.dead))d*=.5;if(e.boss&&(key==='unnie'||key==='bride'||key==='emerald'||key==='sapphire'||key==='diamond')){const n=sumN(key);if(n>1)d/=Math.sqrt(n)}
   if((G.ultOn&&G.ultOn.lucky)||Math.random()<G.S.crit*(opts.critMul||1)){d*=opts.critDmg||2;crit=true}
   if(e.frog>0)d*=2;
   if(e.frz>0)d*=1.3;
@@ -1478,7 +1478,7 @@ function hurt(e,amt,key,opts={}){
   if(key==='talis'&&G.lsB>0){const tw=W('talis');if(tw&&tw.evo){const h=Math.min(d*.08,G.lsB);G.lsB-=h;healP(h)}}
   if(e.hp<=0)kill(e,key);
 }
-function kill(e,key){if(e.hunt)return;if(G.map==='mg'&&e.type&&e.type.slice(0,3)==='mg_')mgDie(e);if(G.map==='farm'&&e.type&&e.type.slice(0,3)==='fm_')fmDie(e);if(G.map==='farm'&&e.boss&&e.type==='fm_b_queen'&&!G.bot&&!G.tw&&G.hard){achGet('jangsuH');if(G.hell)achGet('jangsuX')}if(G.map==='mg'&&e.boss&&e.type==='mg_b4'&&!G.bot&&!G.tw&&G.hard){achGet('mgH');if(G.hell)achGet('mgX');if(!G.bot){setTimeout(()=>{toast('📡 아리아드네','끝났어요. 인천은 다시 우리 땅이에요.',true);if(G.hell)setTimeout(()=>toast('📡 아리아드네','이 승리는 헬의 언니들만 가져갈 수 있었어요. 선택권을 받아가세요.',true),2600)},1500)}}if(key==='kkh'&&!e.boss&&!e.guard&&!e.elite&&e.type!=='dtower'){const kw=W('kkheart');juCharm(e,5*(G.S.sdur||1),(16+5*(kw?kw.lvl:1))*G.S.might*(kw&&kw.evo?1.5:1),'kkhA')}if(key==='pearl'&&!e.boss&&!e.guard&&e.type!=='dtower'&&G.id==='쥬은'){const pw=W('pearl');if(pw&&pw.evo&&pw.st.evd)juCharm(e)}
+function kill(e,key){if(e.hunt)return;if(G.map==='mg'&&e.type&&e.type.slice(0,3)==='mg_')mgDie(e);if(G.map==='farm'&&e.type&&e.type.slice(0,3)==='fm_')fmDie(e);if(G.map==='farm'&&e.boss&&e.type==='fm_b_queen'&&!G.bot&&!G.tw&&G.hard){achGet('jangsuH');if(G.hell){achGet('jangsuX');jgUnl('r','❤️‍🔥 맹세하는 7월 해금!')}}if(G.map==='mg'&&e.boss&&e.type==='mg_b4'&&!G.bot&&!G.tw&&G.hard){achGet('mgH');if(G.hell){achGet('mgX');jgUnl('a','💜 속삭이는 2월 해금!')}if(!G.bot){setTimeout(()=>{toast('📡 아리아드네','끝났어요. 인천은 다시 우리 땅이에요.',true);if(G.hell)setTimeout(()=>toast('📡 아리아드네','이 승리는 헬의 언니들만 가져갈 수 있었어요. 선택권을 받아가세요.',true),2600)},1500)}}if(key==='kkh'&&!e.boss&&!e.guard&&!e.elite&&e.type!=='dtower'){const kw=W('kkheart');juCharm(e,5*(G.S.sdur||1),(16+5*(kw?kw.lvl:1))*G.S.might*(kw&&kw.evo?1.5:1),'kkhA')}if(key==='pearl'&&!e.boss&&!e.guard&&e.type!=='dtower'&&G.id==='쥬은'){const pw=W('pearl');if(pw&&pw.evo&&pw.st.evd)juCharm(e)}
   if(MPKILL&&MPKILL(e,key))return;e.dead=true;G.kills++;if(e.boss&&!G.bot)G.spB=(G.spB||0)+1;if(e.tal>G.t)swGuest(e);if(key==='soulwed')healP(.6);if(!G.bot)SND.p(e.boss?'bosskill':'kill');
   const xpv=e.xp;
   if(!G.tw){const gv=xpv*XPV*(G.hell?1.3:1);if(!(MPXP&&MPXP(gv)))G.gems.push({x:e.x,y:e.y,v:gv,big:xpv>=10})}
@@ -1515,7 +1515,7 @@ const KC={rain:'#9fd8ff',talis:'#ffe36a',photo:'#ffffff',mic:'#ff9ad8',bag:'#ff7
 const JU={id:'쥬은',nick:'쥬은',w:'emerald',ju:1,bg:'linear-gradient(160deg,#d01a1a,#ffd34d 55%,#2bd96b)',perk:'소환물 체력 +25%',pk:s=>s.sumHp=(s.sumHp||1)*1.25};
 const CH12=()=>CHAR.filter(c=>!c.ju&&!c.x2);const CHX=()=>CHAR.filter(c=>c.x2);
 function juJ(){return SAVE.ju||{}}
-function juUnl(k){const J=juJ();return k==='emerald'?!!J.n:k==='sapphire'?!!J.h:(k==='diamond'||k==='pearl')?!!J.x:true}
+function juUnl(k){const J=juJ(),A=SAVE.ach||{};return k==='emerald'?!!J.n:k==='sapphire'?!!J.h:(k==='diamond'||k==='pearl')?!!J.x:k==='ruby'?!!(J.r||A.jangsuX):k==='amethyst'?!!(J.a||A.mgX):true}
 function juAllow(k,id){const w=WP[k];if(w&&w.hid)return false;if(k==='emerald')return juUnl('emerald');if(w&&w.ju)return id==='쥬은'&&juUnl(k);if(IT[k]&&IT[k].ju)return id==='쥬은'||!!(typeof G!=='undefined'&&G&&G.running&&G.weapons&&G.weapons.some(x=>x.k==='emerald'));return true}
 Object.assign(WP,{
  emerald:{name:'해방하는 5월',icon:'💚',evo:'love',evoName:'해방하라, 5월이여',ju:1,col:'#3aff8a',d:'에메랄드 정령기사가 주인을 지키며 근처의 적을 베어요',ed:'보석에 담긴 힘을 더욱 해방하여 강력한 정령을 소환한다.'},
@@ -1537,14 +1537,14 @@ function juEvoFx(w,dt,spots){const st=w.st,p=G.p,W0=WP[w.k];if(st.evd)return fal
 function juInv(){return!!(G.ultOn&&G.ultOn.juInv)}
 function juCardFix(){const b=$('#selgrid').querySelector(`.pc[data-i="${CHAR.indexOf(JU)}"]`);if(!b)return;const J=juJ();
   if(!J.n){b.classList.add('jlock');b.innerHTML=`<canvas width="64" height="64"></canvas><b>???</b><small>💎 ???</small><span class="badges"><span class="bd">🔒 상봉의 마녀</span></span>`;const x=b.querySelector('canvas').getContext('2d');x.imageSmoothingEnabled=false;x.drawImage(juFrame('wt0',1),0,0,64,64);b.onclick=()=>toast('🔒 ???','「외로운 축제의 도시, 상봉」의 마지막 보스를 쓰러뜨리면…');return}
-  const bd=b.querySelector('.badges');if(bd)bd.innerHTML=['💚','💙','🤍','🩷'].map((e,i)=>`<span class="bd ${[J.n,J.h,J.x,J.x][i]?'on':''}">${[J.n,J.h,J.x,J.x][i]?e:'🔒'}</span>`).join('')}
+  const bd=b.querySelector('.badges');if(bd)bd.innerHTML=['💚','💙','🤍','🩷','❤️‍🔥','💜'].map((e,i)=>`<span class="bd ${[J.n,J.h,J.x,J.x,juUnl('ruby'),juUnl('amethyst')][i]?'on':''}">${[J.n,J.h,J.x,J.x,juUnl('ruby'),juUnl('amethyst')][i]?e:'🔒'}</span>`).join('')}
 function juDetail(c){const J=juJ();const FMX=SAVE.map==='farm'&&fmU()&&fmHellOff();const MGM=curMap()==='mg';if(FMX){selHell=false;selTw=false}if(MGM){selTw=false;if(!mgHU())selHell=false;selHard=true}if(!SAVE.twU)selTw=false;if(selTw){selHard=false;selHell=false}selFancy=false;
   const gem=(e,n,ok,how)=>`<div style="display:flex;gap:8px;align-items:center;opacity:${ok?1:.55}"><span style="font-size:20px">${ok?e:'🔒'}</span><span><b>${ok?esc(n):'???'}</b><br><small>${ok?'해금':esc(how)}</small></span></div>`;
   $('#detail').innerHTML=`<div class="dscroll"><div class="row"><canvas width="64" height="64"></canvas><div><h3>쥬은 <small style="font-size:12px;opacity:.8">보석의 마녀</small></h3><p>${WP.emerald.icon} ${esc(WP.emerald.name)}: ${esc(WP.emerald.d)}<br>특성: ${esc(c.perk)} · 화려한 모습 없음</p></div></div>
   <div class="forms"><button type="button" data-m="gigal" aria-pressed="${curMap()==='gigal'}">🌃 기본 맵</button><button type="button" data-m="sangbong" aria-pressed="${SAVE.map==='sangbong'}">🎡 상봉 · Act.2</button>${fmU()?`<button type="button" data-m="farm" aria-pressed="${SAVE.map==='farm'}">🍅 장수 · S3</button>`:'<button type="button" disabled>🔒 장수 (상봉 헬 15분)</button>'}${mgU()?`<button type="button" data-m="mg" aria-pressed="${curMap()==='mg'}">👾 인천 · S4</button>`:'<button type="button" disabled>🔒 인천 (장수 어려움 10분)</button>'}</div>
   <div class="forms"><button type="button" data-h="0" aria-pressed="${!selHard&&!selTw}" ${MGM?'style="display:none"':''}>보통</button><button type="button" data-h="1" class="hardb" aria-pressed="${selHard&&!selHell}" ${SAVE.map==='sangbong'&&sbU('쥬은')<1?'disabled':''}>${SAVE.map==='sangbong'&&sbU('쥬은')<1?'🔒 어려움 (상봉 보통 10분)':'🔥 어려움'}</button><button type="button" data-h="2" class="hellb" aria-pressed="${selHell}" ${FMX||MGM&&!mgHU()||SAVE.map==='sangbong'&&sbU('쥬은')<2?'disabled':''}>${FMX?'🔒 헬 (곧 열려요)':MGM&&!mgHU()?'🔒 헬 (인천 어려움 20분)':SAVE.map==='sangbong'&&sbU('쥬은')<2?'🔒 헬 (상봉 어려움 10분)':'💀 헬'}</button><button type="button" data-h="3" class="twb" aria-pressed="${selTw}" ${SAVE.twU&&!FMX&&!MGM?'':'disabled'}>${FMX?'🔒 트와일라잇 (곧 열려요)':MGM?'🔒 트와일라잇 (이 맵은 없어요)':SAVE.twU?'🌙 트와일라잇':'🔒 트와일라잇'}</button></div>${selTw?twPicker(c):''}
-  ${stuRow(c)}${jmsRow()}<div class="wardrobe" style="display:grid;grid-template-columns:1fr 1fr;gap:8px">${gem('💚','해방하는 5월',J.n,'')}${gem('💙','추억하는 9월',J.h,'어려움 보석의 마녀 처치')}${gem('🤍','공명하는 4월',J.x,'헬 보석의 마녀 처치')}${gem('🩷','사랑하는 자들의 6월',J.x,'헬 보석의 마녀 처치')}</div>
-  <p style="font-size:12px;opacity:.85">🌙 트와일라잇에서는 일반 모드에서 한 번 진화시킨 보석만 쓸 수 있어요 · 진화 기록: ${['emerald','sapphire','diamond','pearl'].map(k=>(SAVE.juEvo||{})[k]?WP[k].icon:'·').join(' ')}</p>
+  ${stuRow(c)}${jmsRow()}<div class="wardrobe" style="display:grid;grid-template-columns:1fr 1fr;gap:8px">${gem('💚','해방하는 5월',J.n,'')}${gem('💙','추억하는 9월',J.h,'어려움 보석의 마녀 처치')}${gem('🤍','공명하는 4월',J.x,'헬 보석의 마녀 처치')}${gem('🩷','사랑하는 자들의 6월',J.x,'헬 보석의 마녀 처치')}${gem('❤️‍🔥','맹세하는 7월',juUnl('ruby'),'장수 헬 토마토 여왕 처치')}${gem('💜','속삭이는 2월',juUnl('amethyst'),'인천 헬 브리트니 처치')}</div>
+  <p style="font-size:12px;opacity:.85">🌙 트와일라잇에서는 일반 모드에서 한 번 진화시킨 보석만 쓸 수 있어요 · 진화 기록: ${['emerald','sapphire','diamond','pearl','ruby','amethyst'].map(k=>(SAVE.juEvo||{})[k]?WP[k].icon:'·').join(' ')}</p>
   <p>💌 짝 아이템 「사랑의 기억」(적 공격력 −6%) · 진화 짝: 모든 보석의 기억들<br>💥 필살기 「${esc(ULT['쥬은'].n)}」 (${esc(ULT['쥬은'].type)}): ${esc(ULT['쥬은'].d)} · 쿨타임 3분</p>
   </div><button type="button" class="big${selHard||selTw?' hardgo':''}" id="goB">${selTw?'🌙 ':selHard?'🔥 ':''}쥬은으로 시작</button>`;
   sprCanvas($('#detail canvas'),c.id,'plain');
@@ -3732,7 +3732,7 @@ function draw(){
     else if(w.k==='laser'&&w.st.beams){const rb=wfxOn('laser');w.st.beams.forEach(([cx,cy,len],bi)=>{ctx.strokeStyle=rb?`hsl(${(bi*67+G.t*120)%360},100%,62%)`:w.evo?(achOn('goldevo')?'#ffd34d':'#3ff7ff'):'#ff3fd2';ctx.lineWidth=w.evo?9:6;ctx.globalAlpha=.85;ctx.beginPath();ctx.moveTo(G.p.x,G.p.y);ctx.lineTo(G.p.x+cx*len,G.p.y+cy*len);ctx.stroke();ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.stroke();ctx.globalAlpha=1})}
   }
   gf(false);
-  };dW();
+  };dW();if(window.jgUnder)jgUnder();
   if(G.sbL&&G.map==='sangbong')sbDraw(0);else if(G.map==='farm'){fmDraw(0);fmAllyDraw();fmFolDraw();fmBagDraw()}else if(G.map==='mg'){mgDraw(0);fmFolDraw();fmBagDraw()}
   // enemies
   for(const e of G.enemies){
@@ -3801,7 +3801,7 @@ function draw(){
   }
   gf(false);};dF();
   pxDraw();skDraw();bfDraw();
-  const dS=()=>{drawSummons();juDraw();juDraw2();jgDraw();hdDraw();jgNailDraw();kkDraw();jrDraw();drawDust();drawPhoto();hxDraw()};dS();
+  const dS=()=>{drawSummons();juDraw();juDraw2();if(window.jgDraw2)jgDraw2();jgDraw();hdDraw();jgNailDraw();kkDraw();jrDraw();drawDust();drawPhoto();hxDraw()};dS();
   if(window.ghDraw)ghDraw([dZ,dW,dP,dF,dS]);if(window.lbPetDraw)lbPetDraw();
   drawArena();drawHellWorld();if(G.map==='sangbong')s2World();
   // player
@@ -4499,7 +4499,7 @@ function exportCode(){
   {const X=CHX();scVar(o,X.length);for(const c of X){const id=c.id;o.push(((SAVE.fancyE||SAVE.fancy)[id]?1:0)|(SAVE.ult[id]?2:0)|(SAVE.cine[id]?4:0)|((SAVE.tallOff||{})[id]?8:0)|(sbU(id)>=1?16:0)|(sbU(id)>=2?32:0));o.push(Math.min(255,Math.floor((SAVE.best[id]||0)/10)),Math.min(255,Math.floor(((SAVE.bestH||{})[id]||0)/10)));const s=SAVE.skin[id],i=s?POOL.findIndex(p=>p.id===s):-1;scVar(o,i+1)}}
   {const K=SN.SNK;scVar(o,K.length);for(const k of K){const a=SN.cnt(k);for(const n of a)scVar(o,n)}const E=(SAVE.saintEq||[]);for(let i=0;i<3;i++){const j=E[i]?K.indexOf(E[i]):-1;o.push(j+1)}o.push(SAVE.neckEq?K.indexOf(SAVE.neckEq)+1:0)}
   {const D=SAVE.gd||{},N=D.n||{},cl=Math.min(255,D.cl|0);scVar(o,cl);o.push((D.op?1:0)|(D.c3?2:0)|(D.end?4:0));let m=0;for(const k in N)if(N[k]>0)m=Math.max(m,+k+1);m=Math.min(m,255);scVar(o,m);for(let i=0;i<m;i++)scVar(o,Math.min(9999,N[i]|0))}
-  o.push((SAVE.mgU?1:0)|(SAVE.mgH?2:0));
+  {const J=SAVE.ju||{},E=SAVE.juEvo||{};o.push((SAVE.mgU?1:0)|(SAVE.mgH?2:0)|(J.r?4:0)|(J.a?8:0)|(E.ruby?16:0)|(E.amethyst?32:0))}
   const h=scHash(o);o.push(h&255,h>>8&255);
   const m=scMask(o);let s='';for(const b of m)s+=String.fromCharCode(b);
   return 'GIGAL-'+btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
@@ -4524,7 +4524,7 @@ function parseCode(code){
     if(ver>=13){const n=scRVar(body,st),X=CHX();if(n>X.length)return null;S.sbU=S.sbU||{};for(const c of X.slice(0,n)){const id=c.id,fl=body[st.p++],b1=body[st.p++],b2=body[st.p++];if(b2===undefined)return null;if(fl&1)S.fancy[id]=true;if(fl&2)S.ult[id]=true;if(fl&4)S.cine[id]=true;if(fl&8)S.tallOff[id]=true;if(fl&32)S.sbU[id]=2;else if(fl&16)S.sbU[id]=1;if(b1)S.best[id]=b1*10;if(b2)S.bestH[id]=b2*10;const v=scRVar(body,st);if(v&&POOL[v-1]&&['color','swim','hanbok','wed','god'].includes(POOL[v-1].kind))S.skin[id]=POOL[v-1].id}}
     if(ver>=23){const K=SN.SNK,n=scRVar(body,st);if(n>K.length)return null;S.saint={};for(let i=0;i<n;i++){const a=[];for(let j=0;j<5;j++)a.push(scRVar(body,st));if(a.some(x=>x>0))S.saint[K[i]]=a}S.saintEq=[];for(let i=0;i<3;i++){const v=body[st.p++];if(v===undefined)return null;S.saintEq.push(v&&K[v-1]?K[v-1]:null)}if(ver>=24){const v=body[st.p++];if(v===undefined)return null;S.neckEq=v&&K[v-1]?K[v-1]:null}}
     if(ver>=27){const cl=scRVar(body,st),f=body[st.p++];if(f===undefined)return null;const m=scRVar(body,st);if(m>255)return null;const n={};for(let i=0;i<m;i++){const v=scRVar(body,st);if(v)n[i]=v}S.gd={cl,n,seen:{},deck:null};if(f&1)S.gd.op=1;if(f&2)S.gd.c3=1;if(f&4)S.gd.end=1}
-    if(ver>=33){const f=body[st.p++];if(f===undefined)return null;S.mgU=(f&1)||(f&2)?1:0;S.mgH=(f&2)?1:0}
+    if(ver>=33){const f=body[st.p++];if(f===undefined)return null;S.mgU=(f&1)||(f&2)?1:0;S.mgH=(f&2)?1:0;S.ju=S.ju||{};S.juEvo=S.juEvo||{};if(f&4)S.ju.r=1;if(f&8)S.ju.a=1;if(f&16)S.juEvo.ruby=1;if(f&32)S.juEvo.amethyst=1}
     if(st.p!==body.length||body.slice(1).some(b=>b===undefined))return null;
     Object.keys(S.inv).forEach(k=>{const it=PBY[k];if(it&&it.kind==='wfx'&&!it.hw&&S.wfx[it.wk]!==false)S.wfx[it.wk]=true});
     return S}catch(e){return null}
@@ -5473,9 +5473,9 @@ const GEMI={};
 function gemIcon(k){if(GEMI[k])return GEMI[k];const c=document.createElement('canvas');c.width=c.height=64;const g=c.getContext('2d');g.imageSmoothingEnabled=false;
   const img=k==='diamond'?'dgem':k==='pearl'?'pearl':null;
   if(img&&s2ok(img)){const im=S2[img],s=Math.min(52/im.width,52/im.height);g.drawImage(im,Math.round(32-im.width*s/2),Math.round(32-im.height*s/2),Math.round(im.width*s),Math.round(im.height*s));return GEMI[k]=c.toDataURL()}
-  const P=k==='sapphire'?['#0a1e66','#1f4fd0','#5aa8ff','#cfe8ff']:['#064a22','#0c7a3a','#2bd96b','#c8ffe0'];
+  const P=k==='sapphire'?['#0a1e66','#1f4fd0','#5aa8ff','#cfe8ff']:k==='amethyst'?['#2a1050','#5a2aa8','#b48aff','#efe4ff']:k==='ruby'?['#4a0610','#9a1222','#ff4a52','#ffd0c8']:['#064a22','#0c7a3a','#2bd96b','#c8ffe0'];
   const poly=(pts,col)=>{g.fillStyle=col;g.beginPath();pts.forEach(([x,y],i)=>i?g.lineTo(x,y):g.moveTo(x,y));g.closePath();g.fill()};
-  if(k==='sapphire'){poly([[32,6],[50,22],[50,42],[32,58],[14,42],[14,22]],P[0]);poly([[32,10],[46,24],[46,40],[32,54],[18,40],[18,24]],P[1]);poly([[32,10],[46,24],[32,30],[18,24]],P[2]);poly([[32,30],[46,24],[46,40]],P[1]);poly([[24,20],[30,16],[30,24]],P[3])}
+  if(k==='sapphire'||k==='amethyst'){poly([[32,6],[50,22],[50,42],[32,58],[14,42],[14,22]],P[0]);poly([[32,10],[46,24],[46,40],[32,54],[18,40],[18,24]],P[1]);poly([[32,10],[46,24],[32,30],[18,24]],P[2]);poly([[32,30],[46,24],[46,40]],P[1]);poly([[24,20],[30,16],[30,24]],P[3])}
   else{poly([[22,4],[42,4],[54,18],[54,46],[42,60],[22,60],[10,46],[10,18]],P[0]);poly([[24,8],[40,8],[50,20],[50,44],[40,56],[24,56],[14,44],[14,20]],P[1]);poly([[24,8],[40,8],[44,18],[20,18]],P[2]);poly([[20,18],[44,18],[44,46],[20,46]],P[2]);poly([[22,22],[30,22],[30,40],[22,40]],P[3]);poly([[44,18],[50,20],[50,44],[44,46]],P[1])}
   g.globalCompositeOperation='lighter';g.fillStyle='rgba(255,255,255,.55)';g.fillRect(24,10,4,4);g.fillRect(46,26,2,6);
   return GEMI[k]=c.toDataURL()}
@@ -5571,7 +5571,7 @@ function juTwHp(w){const S=G.S;return(60+25*w.lvl)*(1+em()*.25)*(w.evo?1.7:1)*(S
 function juShHp(w){return juTwHp(w)}
 function juShR(w){return(70+3*w.lvl)*(w.evo?1.35:1)}
 // ---- 필살기 ----
-function juUltStart(){G.ultOn={t:15,juInv:1};toast('💎 보석의 마녀','15초 · 소환물 무적 · 공격력 2배 · 공격속도 1.5배');{const S=G.S,p=G.p;G.jrain=[];for(let i=0;i<36;i++)G.jrain.push({k:pick(['emerald','sapphire','diamond','pearl']),x:p.x+rnd(-VW/2,VW/2),ty:p.y+rnd(-VH/2+40,VH/2-20),t:-i*.06-rnd(0,.1),T:.5})}for(const w of G.weapons){if((w.k==='unnie'||w.k==='bride')&&w.st.ss)for(const q of w.st.ss){q.hp=sumMaxHp(w,w.k);if(q.dead>0)q.dead=.01}if(w.k==='roadster'&&w.st.c)for(const c of w.st.c){c.hp=rdMaxHp();if(c.dead>0)c.dead=.01}}for(const w of G.weapons){if(w.k==='emerald'&&w.st.k)for(const k of w.st.k){k.hp=juKnHp(w);if(!k.on)k.dead=0}if(w.k==='diamond'&&w.st.t)for(const t of w.st.t){t.sh=juShMax(w);if(!t.on)t.dead=0}if(w.k==='sapphire'&&w.st.d)for(const d of w.st.d){if(d.on)d.hp=juDolHp(w);else d.dead=0}if(w.k==='sapphire'){if(w.st.on)w.st.hp=juWspHp(w);else w.st.dead=0}if(w.k==='pearl'){if(w.st.on)w.st.mana=PEARL_T;else w.st.dead=0}}if(!G.bot)sparks(G.p.x,G.p.y-30,80,['#ffd34d','#3aff8a','#5aa8ff','#ffffff'],380,.8,3)}
+function juUltStart(){G.ultOn={t:15,juInv:1};toast('💎 보석의 마녀','15초 · 소환물 무적 · 공격력 2배 · 공격속도 1.5배');{const S=G.S,p=G.p;G.jrain=[];for(let i=0;i<36;i++)G.jrain.push({k:pick(['emerald','sapphire','diamond','pearl','ruby','amethyst']),x:p.x+rnd(-VW/2,VW/2),ty:p.y+rnd(-VH/2+40,VH/2-20),t:-i*.06-rnd(0,.1),T:.5})}for(const w of G.weapons){if((w.k==='unnie'||w.k==='bride')&&w.st.ss)for(const q of w.st.ss){q.hp=sumMaxHp(w,w.k);if(q.dead>0)q.dead=.01}if(w.k==='roadster'&&w.st.c)for(const c of w.st.c){c.hp=rdMaxHp();if(c.dead>0)c.dead=.01}}for(const w of G.weapons){if(w.k==='emerald'&&w.st.k)for(const k of w.st.k){k.hp=juKnHp(w);if(!k.on)k.dead=0}if(w.k==='diamond'&&w.st.t)for(const t of w.st.t){t.sh=juShMax(w);if(!t.on)t.dead=0}if(w.k==='sapphire'&&w.st.d)for(const d of w.st.d){if(d.on)d.hp=juDolHp(w);else d.dead=0}if(w.k==='sapphire'){if(w.st.on)w.st.hp=juWspHp(w);else w.st.dead=0}if(w.k==='pearl'){if(w.st.on)w.st.mana=PEARL_T;else w.st.dead=0}}if(!G.bot)sparks(G.p.x,G.p.y-30,80,['#ffd34d','#3aff8a','#5aa8ff','#ffffff'],380,.8,3)}
 // ---- 그리기 ----
 function juDraw(){if(!G.weapons.some(w=>WP[w.k].ju)&&!(G.juQ&&G.juQ.length))return;const inv=juInv();
   if(G.juQ&&G.juQ.length){const q=G.juQ[0];gemDraw(q.k,G.p.x,G.p.y-46-q.t*34,14+q.t*24,.8*Math.min(1,q.t*4))}
@@ -5697,9 +5697,263 @@ function juDiaSkin(){return!!(SAVE.inv['wl:diamond']&&(SAVE.wsel||{}).diamond!==
 function juClosetRow(){const has=!!SAVE.inv['wl:diamond'],on=juDiaSkin();return `<div class="clowrow"><span class="wn">💎 공명하는 4월 <small style="opacity:.7">(쥬은 전용)</small></span><span class="wb"><button type="button" class="wfxb cws" data-k="diamond" data-v="" aria-pressed="${!on}">기본</button><button type="button" class="wfxb cws" data-k="diamond" data-v="r" aria-pressed="${on}" ${has?'':'disabled'}>${has?'💎 다이아 기갈타워':'🔒 ??? (전설)'}</button></span></div>`}
 
 Object.assign(WU,{diamond(w,dt){juDiamond(w,dt)},pearl(w,dt){juPearl(w,dt)},emerald(w,dt){juKnights(w,dt)},sapphire(w,dt){juSapph(w,dt)}});
+/* ===== 11-17 사용자: 쥬은 보석 5·6번째 — ❤️‍🔥 맹세하는 7월(루비, 장수 헬 토마토 여왕) · 💜 속삭이는 2월(자수정, 인천 헬 브리트니). 쥬은 전용.
+   루비 = 도트 루비가 상공을 돌며 던지는 불꽃탄+화상(진화: 꽃 비행체가 링을 바닥에 펼쳐 6방향 도트 불줄기 → 맹세의 꽃, 보스 추적) / 자수정 = 유틸리티 「2월의 인력」(공전 → 분신 → 중력장: 끌어당김+보석 취약). 이펙트 pixelfx(MIT) 리컬러 + 공용 셰이더 FXG (11-18) ===== */
+Object.assign(WP,{
+ ruby:{name:'맹세하는 7월',icon:'❤️‍🔥',evo:'love',evoName:'맹세하라, 7월이여',ju:1,col:'#ff4a52',d:'작은 루비가 쥬은 머리 위 하늘을 천천히 돌며 몬스터에게 불꽃탄을 던져요. 맞은 적은 잠깐 불타요',lu:'피해↑, 2레벨마다 불꽃탄 +1',ed:'루비가 꽃 비행체로 피어나 하늘을 선회하다가, 지상으로 불을 쏟아붓고 맹세의 꽃을 피워요 (테슬라: 불줄기 방향 +1)'},
+ amethyst:{name:'속삭이는 2월',icon:'💜',evo:'love',evoName:'속삭이는 2월의 악몽',ju:1,col:'#b48aff',d:'자수정이 쥬은 곁을 돌다가 적이 몰린 곳에 나타나 바닥에 보랏빛 원을 열어요. 원 안의 적은 끌려오고 보석에 10% 더 아파요',lu:'원 크기 · 끌어당김 · 지속↑, 간격↓, 테슬라: 분신 +1',ed:'달빛 자수정이 분신으로 흩어져 넓은 중력장을 열어요. 보석 조각이 흩날려 모이고, 적은 보석에 20% 더 아파요'}});
+Object.assign(KC,{ruby:'#ff4a52',amethyst:'#b48aff'});
+Object.assign(GEMPAL,{ruby:['#9a1222','#ff4a52','#ffc8b8'],amethyst:['#4a2a8a','#b48aff','#e6dcff']});
+JUB_K.ruby=1;JUB_K.amethyst=1;
+const JGV={rb:1.1,rr:1.1,rf:.35,am:.25};// 밸런스 배율 (루비 불꽃탄 · 불줄기 · 맹세의 꽃(화면 전체) · 자수정 중력장 피해)
+const JG_IMG={};[['dot','jr_dot'],['dfb','jr_dotfb'],['fl','jr_flower'],['br','jr_breath'],['adot','ja_dot'],['cs','ja_cs'],['moon','ja_moon']].forEach(([k,f])=>{JG_IMG[k]=Object.assign(new Image(),{src:'fx/'+f+'.png'})});
+const jgOk=k=>JG_IMG[k].complete&&JG_IMG[k].naturalWidth>0;
+function jgUnl(f,msg){if(G.tw||G.bot)return;const J=SAVE.ju=SAVE.ju||{};if(J[f])return;J[f]=1;persist();if(G.id!=='쥬은'&&!juUnl('emerald'))return;G.unlockedNow.push(msg);setTimeoutG(()=>toast(msg,'쥬은만 쓸 수 있는 보석이에요',true),1.2)}
+function jgDense(R,lim){const p=G.p,C=G.enemies.filter(e=>!e.dead&&Math.abs(e.x-p.x)<VW/2+30&&Math.abs(e.y-p.y)<VH/2+30&&(e.x-p.x)**2+(e.y-p.y)**2<lim*lim);let best=null,bs=-1;
+  for(let k=0;k<Math.min(C.length,24);k++){const e=C.length>24?pick(C):C[k];let sc=0;for(const o of C)if((o.x-e.x)**2+((o.y-e.y)/.6)**2<R*R)sc++;if(sc>bs){bs=sc;best=e}}return best}
+function jgBoss(lim){const p=G.p;let bo=null,bd=lim*lim;for(const e of G.enemies){if(e.dead||!e.boss||e.fmInv>0)continue;const d2=(e.x-p.x)**2+(e.y-p.y)**2;if(d2<bd){bd=d2;bo=e}}return bo}
+// ---- ❤️‍🔥 맹세하는 7월 (11-18 개편) ----
+// 일반형 = 일부러 투박한 도트 루비가 쥬은 머리 위 상공을 천천히 돌며 도트 불꽃탄을 던져요
+// 진화형 = 꽃 비행체가 하늘을 선회하다 링을 바닥에 펼쳐 6방향 도트 불줄기 → 끝나면 「맹세의 꽃」이 피어나요(셰이더: 바닥 열기·착지 충격·맹세의 꽃)
+// 보스 보완: 화면 가까이(700) 보스가 있으면 비행체가 보스를 따라가 그 위에서 불을 쏟아요
+const JR_YS=.62;
+// 맹세의 꽃 반지름: 처음엔 빠르게, 화면 끝으로 갈수록 천천히 (1.5초에 화면 끝까지)
+function jrFinR(f){const u=Math.min(1,f.t/1.5);return f.M*(1-Math.pow(1-u,2.2))}
+function jrSm(x){x=x<0?0:x>1?1:x;return x*x*(3-2*x)}
+function jrN(){return 6+Math.min(2,G.S.amount||0)}              // 테슬라: 불줄기 방향 +1·+2
+function jrRad(w){return Math.min(170,(112+3*w.lvl)*G.S.area)}    // 범위 상한 170
+function jrBoom(w,x,y){const S=G.S,L=w.lvl,st=w.st,RS=(28+1.2*L)*S.area,dm=(16+6*L)*S.might*JGV.rb,bt=2*(S.dur||1);
+  for(const o of G.enemies){if(o.dead)continue;const R=RS+o.r*.6;if((o.x-x)**2+((o.y-y)/.8)**2<R*R){hurt(o,dm,'ruby',{kb:o.boss?0:12});o.rbT=G.t+bt;o.rbD=dm*.22}}
+  if(!G.bot){(st.fx=st.fx||[]).push({x,y,t:0,R:RS});sparks(x,y,8,['#ff4a3a','#ffb070','#ffe0b0'],130,.35,2)}}
+function jrThrow(w){const st=w.st,S=G.S,L=w.lvl,p=G.p,n=Math.min(8,1+Math.floor((L-1)/2)+(S.amount||0)),C=[];
+  for(const e of G.enemies){if(e.dead||e.fmInv>0)continue;if((e.x-p.x)**2+(e.y-p.y)**2<340*340)C.push(e)}
+  if(!C.length)return 0;const sc=e=>((e.x-p.x)**2+(e.y-p.y)**2)*(e.boss?.15:e.elite?.5:1);C.sort((a,b)=>sc(a)-sc(b));
+  for(let i=0;i<n;i++){const e=C[i%C.length],a=Math.atan2(e.y-st.sy,e.x-st.sx)+(C.length<n?(i-(n-1)/2)*.1:0);st.fb.push({x:st.sx,y:st.sy,a,e,t:0,d:i*.07})}
+  return n}
+function jrFlyTick(w,dt,um){const st=w.st,S=G.S,L=w.lvl,p=G.p;
+  if(!st.cg){st.cg={x:p.x,y:p.y-60};st.ct={x:p.x,y:p.y};st.cy=0;st.ra=0;st.kr=0;st.bl=0;st.pt=0;st.sp=0;st.newc=1;st.md='idle'}
+  const cg=st.cg,ct=st.ct,R=jrRad(w),n=jrN(),T0=4.6*S.cd*um.cd/juUB(),F=2.9*Math.min(1.7,S.dur||1),cru=Math.max(1.1,T0-(.8+F)),tot=cru+.8+F;
+  st.bl=Math.min(1,st.bl+dt/.9);st.cy+=dt;if(st.cy>=tot){st.cy-=tot;st.newc=1}
+  const ph=st.cy,fire=ph>=cru+.4&&ph<cru+.4+F;
+  st.kr=ph<cru?0:ph<cru+.4?jrSm((ph-cru)/.4):fire?1:1-jrSm((ph-cru-.4-F)/.4);st.amp=fire?Math.min(1,(ph-cru-.4)/.25,(cru+.4+F-ph)/.25):0;st.ra+=(26+10*st.kr)*dt;st.sp+=(40+60*st.kr)*dt;
+  // 맹세의 꽃: 분사가 끝나는 순간 피어나요
+  if(st.fire&&!fire){let M=R*1.25;for(const sx of [-1,1])for(const sy of [-1,1])M=Math.max(M,Math.hypot(p.x+sx*(VW/2+40)-cg.x,(p.y+sy*(VH/2+40)-cg.y)/JR_YS));st.fin={t:0,id:(st.finId=(st.finId||0)+1),x:cg.x,y:cg.y,M}}st.fire=fire;
+  if(st.fin){const f=st.fin;f.t+=dt;const rr=jrFinR(f),dm=(14+5.4*L)*S.might*JGV.rr*JGV.rf;
+    for(const e of G.enemies){if(e.dead||e.rfin===f.id)continue;const q=Math.hypot(e.x-f.x,(e.y-f.y)/JR_YS);if(q<rr+e.r*.5){e.rfin=f.id;hurt(e,dm,'ruby',{kb:e.boss?0:14})}}
+    if(f.t>=1.6)st.fin=null}
+  const bo=jgBoss(700);
+  if(st.newc){st.newc=0;if(bo)st.md='boss';else{const tg=jgDense(R*.9,340);if(tg){st.md='pack';let tx=tg.x,ty=tg.y;const dx=tx-p.x,dy=ty-p.y,d=Math.hypot(dx,dy)||1,dd=Math.max(130,Math.min(200,d));tx=p.x+dx/d*dd;ty=p.y+dy/d*dd;ct.x=tx;ct.y=ty}else st.md='idle'}}
+  if(st.md==='boss'){if(bo){ct.x=bo.x;ct.y=bo.y}else st.md='idle'}
+  if(st.md==='idle'){const a=G.t*.32;ct.x=p.x+Math.cos(a)*150;ct.y=p.y-20+Math.sin(a)*70}
+  if(!fire){const k=Math.min(1,dt*(st.md==='idle'?.8:1.3));cg.x+=(ct.x-cg.x)*k+Math.sin(G.t*1.7)*27*dt;cg.y+=(ct.y-cg.y)*k+Math.cos(G.t*1.3)*15*dt}
+  else if(st.md==='boss'){const dx=ct.x-cg.x,dy=ct.y-cg.y,d=Math.hypot(dx,dy);if(d>1){const v=Math.min(d,150*dt);cg.x+=dx/d*v;cg.y+=dy/d*v}}
+  else{cg.x+=Math.sin(G.t*1.3)*7*dt;cg.y+=Math.cos(G.t*1.1)*4*dt}
+  {const lim=st.md==='boss'?700:240,dx=cg.x-p.x,dy=cg.y-p.y,d=Math.hypot(dx,dy);if(d>lim){cg.x=p.x+dx/d*lim;cg.y=p.y+dy/d*lim}}
+  if(fire&&!st.said){st.said=1;if(!G.bot&&G.texts.length<70&&Math.random()<.5)G.texts.push({x:cg.x,y:cg.y-110,v:pick(['맹세해요','타올라라~','7월이여!']),life:.9,col:'#ff8a7a'})}if(!fire)st.said=0;
+  if(fire){st.pt-=dt;if(st.pt<=0){st.pt=.25*S.cd*um.cd/juUB();const dm=(14+5.4*L)*S.might*JGV.rr*(st.md==='boss'?1.3:1);
+    const E=[];for(let k=0;k<n;k++){const a=(st.ra+360*k/n+15)*Math.PI/180;E.push([cg.x+Math.cos(a)*R,cg.y+Math.sin(a)*R*JR_YS])}
+    for(const e of G.enemies){if(e.dead)continue;const W2=(34+e.r*.6)**2;for(const q of E){if(segD2(e.x,e.y,cg.x,cg.y,q[0],q[1])<W2){hurt(e,dm,'ruby',{kb:e.boss?0:8});e.rbT=G.t+1.2*(S.dur||1);e.rbD=dm*.45;break}}}}}}
+function juRuby(w,dt){const st=w.st,S=G.S,L=w.lvl,ev=w.evo,p=G.p,um=ultMods();st.fb=st.fb||[];
+  if(st.sx===undefined){st.sx=p.x;st.sy=p.y-112}
+  { // 화상 틱
+    st.bt=(st.bt||0)-dt;if(st.bt<=0){st.bt=.5;for(const e of G.enemies){if(e.dead||!(e.rbT>G.t))continue;hurt(e,e.rbD,'ruby',{kb:0});if(!G.bot&&Math.random()<.35)px(e.x+rnd(-8,8),e.y+rnd(-6,4),rnd(-10,10),-rnd(30,70),.5,pick(['#ff4a3a','#ffb070','#ffe0b0']),2,1,1)}}}
+  if(st.fx){for(const f of st.fx)f.t+=dt;st.fx=st.fx.filter(f=>f.t<.32)}
+  if(ev&&!st.evd){if(juEvoFx(w,dt,[[st.sx,st.sy]]))return}
+  if(ev&&st.evd){jrFlyTick(w,dt,um);return}
+  // 일반형: 쥬은 머리 위 상공을 천천히 선회해요
+  {const a=G.t*.6,tx=p.x+Math.cos(a)*64,ty=p.y-112+Math.sin(a)*16;st.sx+=(tx-st.sx)*Math.min(1,dt*5);st.sy+=(ty-st.sy)*Math.min(1,dt*5);if(Math.abs(st.sx-p.x)>VW||Math.abs(st.sy-p.y)>VH){st.sx=tx;st.sy=ty}}
+  for(const b of st.fb){b.d-=dt;if(b.d>0)continue;b.t+=dt;let e=b.e;
+    if(!e||e.dead){let bd=300*300;e=null;for(const o of G.enemies){if(o.dead||o.fmInv>0)continue;const d2=(o.x-b.x)**2+(o.y-b.y)**2;if(d2<bd){bd=d2;e=o}}b.e=e}
+    if(e){const want=Math.atan2(e.y-b.y,e.x-b.x),da=((want-b.a)%6.2832+9.4248)%6.2832-3.1416;b.a+=Math.max(-4.5*dt,Math.min(4.5*dt,da))}
+    b.x+=Math.cos(b.a)*290*dt;b.y+=Math.sin(b.a)*290*dt;
+    if(e&&(e.x-b.x)**2+(e.y-b.y)**2<(e.r+8)**2){b.done=1;jrBoom(w,b.x,b.y)}else if(b.t>1.5)b.done=1}
+  st.fb=st.fb.filter(b=>!b.done);
+  st.cd=(st.cd===undefined?.5:st.cd)-dt;if(st.cd<=0){st.cd=Math.max(.7,1.3-.07*L)*S.cd*um.cd/juUB();if(!jrThrow(w)){st.cd=.3;return}
+    st.cast=.3;if(!G.bot){SND.p('pop');if(G.texts.length<70&&Math.random()<.12)G.texts.push({x:st.sx,y:st.sy-24,v:pick(['맹세해요','타올라라~','가랏!']),life:.8,col:'#ff8a7a'})}}
+  if(st.cast>0)st.cast-=dt}
+// ---- 💜 속삭이는 2월 (11-18 개편: 유틸리티 「2월의 인력」) ----
+// 자수정은 쥬은 곁을 공전해요(테슬라 = 수정 조각이 궤도를 뒤따라요). 발동하면 본체와 조각이 적이 몰린 곳마다
+// 날아가(조각은 도착하면 자수정이 돼요) 바닥에 중력장을 열고, 끝나면 다시 궤도로 날아와요: 끌어당김 + 보석 취약. 보스는 끌지 않고 둔화 + 취약.
+// 일반형 = 투박한 도트 자수정 + 바닥의 보라 원 / 진화형 = 보름달 자수정(코드 리그) + 보랏빛 안개 셰이더 + 흩날려 모이는 보석 조각
+function jaR(w){return w.evo&&w.st.evd?Math.min(320,(220+8*w.lvl)*G.S.area):(60+4*w.lvl)*G.S.area}
+function jaDur(w){return (w.evo&&w.st.evd?5.5:4+.2*w.lvl)*(G.S.dur||1)}
+function jaInt(w,um){return (w.evo&&w.st.evd?7:6.5-.25*w.lvl)*G.S.cd*um.cd/juUB()}
+function jaOrb(w){const st=w.st,p=G.p,evd=w.evo&&st.evd,oR=evd?80:62;return(i)=>{const a=(st.oa||0)-i*.55;return{x:p.x+Math.cos(a)*oR,y:p.y-24+Math.sin(a)*oR*.42}}}
+function jaSpots(N,R){const p=G.p,RY=R*.5,out=[],inn=(o,s,k)=>((o.x-s.x)/R)**2+((o.y-s.y)/RY)**2<k;
+  const bo=jgBoss(450);if(bo)out.push({x:bo.x,y:bo.y,e:bo});
+  const C=G.enemies.filter(e=>!e.dead&&!e.boss&&!(e.fmInv>0)&&Math.abs(e.x-p.x)<VW/2+20&&Math.abs(e.y-p.y)<VH/2+20);
+  while(out.length<N&&C.length){let best=null,bs=0;const M=Math.min(C.length,28);
+    for(let k=0;k<M;k++){const e=C.length>28?C[(Math.random()*C.length)|0]:C[k];if(out.some(s=>inn(e,s,1.2)))continue;let sc=0;for(const o of C)if(inn(o,e,1)&&!out.some(s=>inn(o,s,1)))sc++;if(sc>bs){bs=sc;best=e}}
+    if(!best)break;out.push({x:best.x,y:best.y})}
+  return out}
+// 분신 c: 본체(i=0)·수정 조각(i≥1)이 각자 자리로 날아가요(ph 'go') → 도착하면 자수정이 되어 중력장(ph 'on', t/T) → 다시 궤도로 날아와요(ph 'back')
+function jaFly(c,tx,ty,dt){const dx=tx-c.gx,dy=ty-c.gy,d=Math.hypot(dx,dy),v=Math.min(d,(c.ph==='back'?620:560)*dt);if(d>.5){c.gx+=dx/d*v;c.gy+=dy/d*v}if(!G.bot&&Math.random()<.5)px(c.gx+rnd(-4,4),c.gy+rnd(-4,4),rnd(-8,8),rnd(-8,8),.4,pick(['#c4a8ff','#e6dcff','#9b6dff']),2,1,1);return d<10}
+function juAmeth(w,dt){const st=w.st,S=G.S,L=w.lvl,ev=w.evo,p=G.p,um=ultMods(),evd=ev&&st.evd;
+  st.oa=(st.oa||0)+dt*(evd?.9:1.3);const O=jaOrb(w),o0=O(0);
+  if(st.mx===undefined){st.mx=o0.x;st.my=o0.y}
+  if(ev&&!st.evd){st.cl=null;if(juEvoFx(w,dt,[[st.mx,st.my]]))return}
+  if(!st.cl){st.mx+=(o0.x-st.mx)*Math.min(1,dt*8);st.my+=(o0.y-st.my)*Math.min(1,dt*8);if(Math.abs(st.mx-p.x)>VW||Math.abs(st.my-p.y)>VH){st.mx=o0.x;st.my=o0.y}}
+  const R=jaR(w),RY=R*.5,hy=evd?74:46;
+  if(st.cl){let alive=0;const pull=evd?140+10*L:70+8*L,dm=(evd?10+3.5*L:6+2.5*L)*S.might*JGV.am,vk=evd?.2:.1;
+    for(const c of st.cl){if(c.ph==='done')continue;alive++;
+      if(c.e){if(c.e.dead)c.e=null;else{c.x=c.e.x;c.y=c.e.y+6}}
+      if(c.ph==='go'){if(jaFly(c,c.x,c.y-hy,dt)){c.ph='on';c.t=0;if(!G.bot)sparks(c.gx,c.gy,10,['#c4a8ff','#ffffff'],120,.35,2)}continue}
+      if(c.ph==='back'){const q=O(c.i);if(jaFly(c,q.x,q.y,dt))c.ph='done';continue}
+      c.t+=dt;c.gx=c.x;c.gy=c.y-hy;c.kr=Math.max(0,Math.min(1,c.t/.35,(c.T-c.t)/.35));
+      if(c.t>=c.T){c.ph='back';c.kr=0;continue}
+      c.tk-=dt;const tick=c.tk<=0;if(tick)c.tk=.5;
+      for(const e of G.enemies){if(e.dead)continue;const dx=c.x-e.x,dy=c.y-e.y;if((dx/R)**2+(dy/RY)**2>1)continue;
+        e.amV=G.t+.4;e.amVk=vk;if(tick)hurt(e,dm,'amethyst',{kb:0});
+        if(e.boss){e.slow=Math.max(e.slow||0,.3);continue}
+        const d=Math.hypot(dx,dy);if(d>6){const v=pull*c.kr*(.4+.6*Math.min(1,d/R))*dt,k=Math.min(1,v/d);e.x+=dx*k;e.y+=dy*k}}}
+    if(!alive){st.cl=null;st.mx=o0.x;st.my=o0.y;st.cd=Math.max(.6,(st.int||3)-(st.dur||3))}
+    return}
+  st.cd=(st.cd===undefined?1:st.cd)-dt;if(st.cd>0)return;
+  const N=1+Math.min(3,S.amount||0),T=jaDur(w),sp=jaSpots(N,R);if(!sp.length){st.cd=.4;return}
+  st.int=jaInt(w,um);st.dur=T;
+  st.cl=sp.map((s,i)=>{const q=i?O(i):{x:st.mx,y:st.my};return{i,x:s.x,y:s.y,e:s.e||null,gx:q.x,gy:q.y,ph:'go',t:0,T,tk:.15,kr:0}});
+  if(!G.bot){SND.p('pop');if(G.texts.length<70&&Math.random()<.3)G.texts.push({x:st.mx,y:st.my-30,v:pick(['이리 와…','쉿, 모여 봐','2월의 인력']),life:.9,col:'#c4a8ff'})}}
+Object.assign(WU,{ruby(w,dt){juRuby(w,dt)},amethyst(w,dt){juAmeth(w,dt)}});
+// ================= 이펙트 셰이더 (루비·자수정 공용, 11-18) =================
+// WebGL 캔버스 1장, 화면의 ½(느려지면 ¼) 해상도 → 2D 캔버스에 screen 합성. 판정은 게임 코드, 셰이더는 그리기만.
+// 더 느려지거나(FXQ<.5) WebGL이 없으면 도트·그라데이션 방식으로 자동 대체.
+const FXG={c:null,gl:null,ok:null,U:{},off:0};
+const FXG_FS=`precision mediump float;
+uniform vec2 res;uniform float t;uniform vec4 r0,r1,r2;uniform vec4 af[4];uniform float an;
+float h(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+float n2(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(h(i),h(i+vec2(1,0)),f.x),mix(h(i+vec2(0,1)),h(i+vec2(1,1)),f.x),f.y);}
+float fbm(vec2 p){float v=0.,a=.5;for(int i=0;i<4;i++){v+=a*n2(p);p=p*2.03+vec2(1.7,9.2);a*=.5;}return v;}
+float b2(vec2 a){a=floor(a);return fract(a.x*.5+a.y*a.y*.75);}
+float bay(vec2 a){return b2(.5*a)*.25+b2(a);}
+vec3 rampR(float l){return l<.5?vec3(0.):l<1.5?vec3(.35,.02,.06):l<2.5?vec3(.72,.06,.08):l<3.5?vec3(.96,.32,.08):l<4.5?vec3(1.,.62,.16):l<5.5?vec3(1.,.88,.46):vec3(1.,1.,.9);}
+vec3 rampA(float l){return l<.5?vec3(0.):l<1.5?vec3(.10,.03,.19):l<2.5?vec3(.24,.07,.44):l<3.5?vec3(.42,.17,.75):l<4.5?vec3(.61,.36,.94):vec3(.84,.70,1.);}
+void main(){vec2 fc=vec2(gl_FragCoord.x,res.y-gl_FragCoord.y);float bd=bay(fc);vec3 col=vec3(0.);
+ if(r2.z>.5){vec2 q=fc-r0.xy;q.y/=r0.w;float R=r0.z,r=length(q)/R,a=atan(q.y,q.x),heat=0.,glow=0.;
+  if(r<1.9||r2.x>=0.){float seg=6.2831853/r1.x,da=mod(a-r1.y+seg*.5,seg)-seg*.5,ak=a-da;vec2 e=vec2(cos(ak),sin(ak));float de=length(q/R-e);
+   float fl=n2(vec2(a*7.,t*9.))*.5+n2(fc*.18+vec2(0.,t*4.))*.5;
+   float sp=exp(-de*de*60.)*(.7+.6*fl);float st=exp(-pow(da*r/.07,2.))*smoothstep(1.12,.25,r)*smoothstep(.0,.3,r)*.5;
+   heat+=(sp*1.15+st*fl)*r1.z;glow+=exp(-de*de*10.)*.55*r1.z+smoothstep(1.25,0.,r)*.16*r1.w;
+   if(r2.x>=0.){float rg=r2.x,pet=.5+.5*cos(a*6.+rg*3.),wv=fbm(vec2(a*4.,rg*2.-t))*.14,dr=abs(r-rg-wv*pet),th=.06+pet*.07;
+    heat=max(heat,smoothstep(th,0.,dr)*(.6+.5*fbm(vec2(a*12.,r*4.-t*4.)))*r2.y);glow+=exp(-dr/.18)*.5*r2.y;
+    heat=max(heat,smoothstep(.55,0.,rg)*exp(-r*3./(rg*3.+.25))*1.1*r2.y);}}
+  col+=rampR(floor(clamp(heat,0.,1.)*6.+bd*.9));col+=vec3(.55,.08,.12)*(floor(clamp(glow,0.,1.)*3.+bd)/3.)*.55;}
+ float I=0.;
+ for(int i=0;i<4;i++){if(float(i)>=an)break;vec4 f=af[i];vec2 q=(fc-f.xy)/vec2(f.z,f.z*.45);float r=length(q);if(r>2.5)continue;float a=atan(q.y,q.x);
+  float u=log(r+.05)+t*1.15,a2=a+1.1/(r+.35)+t*.35;vec2 cs=vec2(cos(a2),sin(a2));
+  float n=fbm(cs*1.7+vec2(u*2.2,-u*1.4)),m=fbm(cs*3.1+vec2(u*4.,u*1.1)+3.);
+  float fil=pow(clamp(n*1.35-.28,0.,1.),2.)+.55*pow(clamp(m-.42,0.,1.)*2.,3.);
+  float band=smoothstep(2.5,1.,r)*smoothstep(.25,.9,r);
+  I+=(fil*band*1.25+exp(-r*r*5.)*.55*(.6+.4*sin(t*5.)))*f.w*1.15;}
+ if(an>.5){col+=rampA(floor(clamp(clamp(I,0.,1.)*5.+bd-.5,0.,5.)));}
+ gl_FragColor=vec4(min(col,vec3(1.)),1.);}`;
+function fxgInit(){if(FXG.ok!==null)return FXG.ok;FXG.ok=false;try{const c=document.createElement('canvas'),gl=c.getContext('webgl',{alpha:false,antialias:false,depth:false,stencil:false,premultipliedAlpha:false,preserveDrawingBuffer:false,powerPreference:'low-power'});if(!gl)return false;
+  const sh=(tp,s)=>{const o=gl.createShader(tp);gl.shaderSource(o,s);gl.compileShader(o);if(!gl.getShaderParameter(o,gl.COMPILE_STATUS))throw new Error(gl.getShaderInfoLog(o));return o};
+  const pr=gl.createProgram();gl.attachShader(pr,sh(gl.VERTEX_SHADER,'attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}'));gl.attachShader(pr,sh(gl.FRAGMENT_SHADER,FXG_FS));gl.linkProgram(pr);if(!gl.getProgramParameter(pr,gl.LINK_STATUS))throw new Error('link');gl.useProgram(pr);
+  const b=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);const L=gl.getAttribLocation(pr,'p');gl.enableVertexAttribArray(L);gl.vertexAttribPointer(L,2,gl.FLOAT,false,0,0);
+  for(const k of ['res','t','r0','r1','r2','af','an'])FXG.U[k]=gl.getUniformLocation(pr,k);
+  c.addEventListener('webglcontextlost',e=>{e.preventDefault();FXG.ok=false});FXG.c=c;FXG.gl=gl;FXG.ok=true}catch(e){FXG.ok=false}return FXG.ok}
+// 자동 하향: 전체 fps(FXQ)와 셰이더 자체 비용(평균 6ms 초과)을 함께 봐요. ½ → ¼ → 도트 대체(이번 판 동안)
+function fxgQ(){const f=typeof FXQ!=='number'||FXQ>=.75?0:FXQ>=.5?1:2,l=Math.max(f,FXG.lv||0);return l===0?.5:l===1?.25:0}
+function fxgCost(ms){FXG.ema=(FXG.ema||0)*.9+ms*.1;FXG.n=(FXG.n||0)+1;if(FXG.n>45&&FXG.ema>6&&(FXG.lv||0)<2){FXG.lv=(FXG.lv||0)+1;FXG.ema=0;FXG.n=0}}
+function fxgS(x,y,q){return[(innerWidth/2+(x-G.p.x)*Z)*q,(innerHeight/2+(y-G.p.y)*Z)*q]}
+// rb: {x,y,R,n,rot,amp,kr,fin,finA} 또는 null · fs: [{x,y,R,kr}] (자수정 진화 중력장)
+function fxgDraw(rb,fs){const q=fxgQ();if(!q||!fxgInit())return false;const t0=performance.now();const gl=FXG.gl,c=FXG.c,U=FXG.U,W=Math.max(2,Math.round(innerWidth*q)),H=Math.max(2,Math.round(innerHeight*q));
+  if(c.width!==W||c.height!==H){c.width=W;c.height=H}gl.viewport(0,0,W,H);gl.uniform2f(U.res,W,H);gl.uniform1f(U.t,G.t%600);
+  if(rb){const [sx,sy]=fxgS(rb.x,rb.y,q);gl.uniform4f(U.r0,sx,sy,rb.R*Z*q,JR_YS);gl.uniform4f(U.r1,rb.n,rb.rot,rb.amp,rb.kr);gl.uniform4f(U.r2,rb.fin,rb.finA,1,0)}else gl.uniform4f(U.r2,-1,0,0,0);
+  const A=new Float32Array(16);let n=0;for(const f of fs){if(n>=4)break;const [sx,sy]=fxgS(f.x,f.y,q);A.set([sx,sy,f.R*.5*(.35+.65*f.kr)*Z*q,f.kr],n*4);n++}gl.uniform4fv(U.af,A);gl.uniform1f(U.an,n);
+  gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
+  ctx.save();ctx.setTransform(DPR,0,0,DPR,0,0);ctx.globalCompositeOperation='screen';ctx.imageSmoothingEnabled=false;ctx.drawImage(c,0,0,innerWidth,innerHeight);ctx.restore();fxgCost(performance.now()-t0);return true}
+// 대체(도트·그라데이션) 그리기
+function fxgFallback(rb,fs){ctx.save();ctx.globalCompositeOperation='lighter';
+  if(rb){const R=rb.R;if(rb.amp>0)for(let k=0;k<rb.n;k++){const a=rb.rot+6.2832*k/rb.n,x=rb.x+Math.cos(a)*R,y=rb.y+Math.sin(a)*R*JR_YS,g=ctx.createRadialGradient(x,y,0,x,y,30);g.addColorStop(0,'rgba(255,200,110,'+(.55*rb.amp)+')');g.addColorStop(1,'rgba(255,60,40,0)');ctx.fillStyle=g;ctx.beginPath();ctx.ellipse(x,y,30,30*JR_YS,0,0,7);ctx.fill()}
+    if(rb.fin>=0&&rb.finA>0){ctx.beginPath();for(let i=0;i<=96;i++){const a=i/96*6.2832,r=R*rb.fin*(1+.1*Math.cos(a*6+rb.fin*3));const x=rb.x+Math.cos(a)*r,y=rb.y+Math.sin(a)*r*JR_YS;i?ctx.lineTo(x,y):ctx.moveTo(x,y)}for(const [lw,c,al] of [[16,'#c8142a',.35],[8,'#ff7a3a',.7],[3,'#ffe6a0',.9]]){ctx.globalAlpha=rb.finA*al;ctx.strokeStyle=c;ctx.lineWidth=lw;ctx.stroke()}ctx.globalAlpha=1}}
+  for(const f of fs){const g=ctx.createRadialGradient(f.x,f.y,0,f.x,f.y,f.R);g.addColorStop(0,'rgba(200,160,255,'+(.3*f.kr)+')');g.addColorStop(.7,'rgba(110,50,200,'+(.18*f.kr)+')');g.addColorStop(1,'rgba(60,20,120,0)');ctx.fillStyle=g;ctx.save();ctx.translate(f.x,f.y);ctx.scale(1,.5);ctx.translate(-f.x,-f.y);ctx.beginPath();ctx.arc(f.x,f.y,f.R,0,7);ctx.fill();ctx.restore()}
+  ctx.restore()}
+// ---- 그리기 ----
+const JAM={rc:[48.4,70.2],ra:67.3,rb:23.8,ang:-16,gc:[31.2,58.1],sh:[[100,0,7,12,81.0,105.6],[109,0,7,7,5.9,110.4],[118,0,4,5,67.1,114.2],[124,0,4,6,26.6,115.5],[130,0,7,11,42.0,117.5],[139,0,10,12,16.9,121.7],[151,0,12,16,64.9,121.9],[165,0,4,5,56.1,124.7],[171,0,10,15,40.9,133.1],[183,0,4,5,31.9,136.0]]};
+function jaRing(t,front,ral){const tl=(JAM.ang+3.5*Math.sin(t*6.2832/4.8))*Math.PI/180,B=JAM.rb*(1+.1*Math.sin(t*6.2832/3.2+1)),A=JAM.ra,c=Math.cos(tl),s=Math.sin(tl),P=(p,k)=>[A*k*Math.cos(p)*c-B*k*Math.sin(p)*s,A*k*Math.cos(p)*s+B*k*Math.sin(p)*c],N=48;
+  ctx.globalAlpha=ral;for(const [wd,col,k] of [[2.9,'#78768c',1],[1.8,'#d6d8e8',1],[.7,'#ffffff',1],[.9,'#aaaac4',.955]]){ctx.strokeStyle=col;ctx.lineWidth=wd;ctx.beginPath();let on=false;for(let i=0;i<=N;i++){const p=i/N*6.2832;if((Math.sin(p)>0)!==front){on=false;continue}const [x,y]=P(p,k);if(!on){ctx.moveTo(x,y);on=true}else ctx.lineTo(x,y)}ctx.stroke()}
+  const ph=t*6.2832/6;for(let j=0;j<14;j++){const p=ph+j*6.2832/14;if((Math.sin(p)>0)!==front)continue;const [x,y]=P(p,1);if(j%2===0){const r=2.9;ctx.fillStyle='#9650e6';ctx.strokeStyle='#ebebfa';ctx.lineWidth=.6;ctx.beginPath();ctx.moveTo(x,y-r*1.5);ctx.lineTo(x+r,y);ctx.lineTo(x,y+r*1.5);ctx.lineTo(x-r,y);ctx.closePath();ctx.fill();ctx.stroke()}else{ctx.fillStyle='#e2e4f4';ctx.beginPath();ctx.arc(x,y,1.5,0,7);ctx.fill()}}
+  ctx.globalAlpha=1}
+// 보름달 자수정(코드 리그): 몸체 + 은빛 링(앞/뒤) + 둥둥 뜨는 조각. (x,y)=링 중심
+function jaMoonDraw(x,y,sc,ral,sal,glow){const I=JG_IMG.moon;if(!jgOk('moon')){gemDraw('amethyst',x,y,14*sc/.5,1);return}const t=G.t,bob=Math.sin(t*6.2832/2.6)*2;
+  ctx.save();ctx.translate(x,y+bob*sc);ctx.scale(sc,sc);ctx.imageSmoothingEnabled=true;
+  if(ral>.02)jaRing(t,false,ral);
+  ctx.drawImage(I,0,0,98,116,-JAM.rc[0],-JAM.rc[1],98,116);
+  {const pul=.5+.5*Math.sin(t*6.2832/1.7),gx=JAM.gc[0]-JAM.rc[0],gy=JAM.gc[1]-JAM.rc[1],g=ctx.createRadialGradient(gx,gy,0,gx,gy,34);g.addColorStop(0,'rgba(232,205,255,'+Math.min(.6,.22*(.5+.7*pul)*glow)+')');g.addColorStop(1,'rgba(232,205,255,0)');ctx.save();ctx.globalCompositeOperation='lighter';ctx.fillStyle=g;ctx.beginPath();ctx.arc(gx,gy,34,0,7);ctx.fill();ctx.restore()}
+  if(ral>.02)jaRing(t,true,ral);
+  if(sal>.02){ctx.globalAlpha=sal;JAM.sh.forEach(([sx,sy,w,h,ox,oy],i)=>{const p=i*1.3,dy=Math.sin(t*6.2832/2.1+p)*3+bob*.6,dx=Math.sin(t*6.2832/3.7+p*2)*1.3,an=Math.sin(t*6.2832/3+p)*.24;ctx.save();ctx.translate(ox+w/2+dx-JAM.rc[0],oy+h/2+2.6+dy-JAM.rc[1]);ctx.rotate(an);ctx.drawImage(I,sx,sy,w,h,-w/2,-h/2,w,h);ctx.restore()});ctx.globalAlpha=1}
+  ctx.restore()}
+function jaShardsSpiral(c,R){const I=JG_IMG.moon;if(!jgOk('moon'))return;const t=G.t,kr=c.kr,NP=26;ctx.save();ctx.imageSmoothingEnabled=true;
+  for(let n=0;n<NP;n++){const i=n%10,szk=n<10?1:.45,k=(t*.5+(n*.37)%1)%1,rr=(1-Math.pow(k,1.2))*R*.92*kr,p=n*6.2832/NP+k*3.2+t*.5,x=c.x+Math.cos(p)*rr,y=c.y+Math.sin(p)*rr*.45-10*(1-k),al=Math.min(1,k/.15,(1-k)/.2)*kr;if(al<=.02)continue;
+    const [sx,sy,w,h]=JAM.sh[i],s=1.6*szk*(1-.45*k);ctx.globalAlpha=al;ctx.save();ctx.translate(x,y);ctx.rotate(p*.7);ctx.drawImage(I,sx,sy,w,h,-w*s/2,-h*s/2,w*s,h*s);ctx.restore()}
+  ctx.restore()}
+function jgUnder(){if(!G.weapons)return;let rb=null;const fs=[];
+  for(const w of G.weapons){const st=w.st;
+    if(w.k==='ruby'&&w.evo&&st.evd&&st.cg){const f=st.fin,R=jrRad(w);if(st.kr>0||f)rb={x:f?f.x:st.cg.x,y:f?f.y:st.cg.y,R,n:jrN(),rot:(st.ra+15)*Math.PI/180,amp:st.amp||0,kr:st.kr||0,fin:f?jrFinR(f)/R:-1,finA:f?Math.min(1,f.t/.1)*(1-jrSm((f.t-1.1)/.5)):0};if(f&&st.kr>0){rb.x=st.cg.x;rb.y=st.cg.y}}
+    if(w.k==='amethyst'&&st.cl){const R=jaR(w),evd=w.evo&&st.evd;for(const c of st.cl){if(c.ph!=='on')continue;if(evd)fs.push({x:c.x,y:c.y,R,kr:c.kr});else jaBaseField(c,R)}}}
+  if(rb||fs.length){if(!fxgDraw(rb,fs))fxgFallback(rb,fs)}
+  for(const w of G.weapons){if(w.k==='ruby'&&w.evo&&w.st.evd&&w.st.cg)jrGround(w)}}
+// 일반형 자수정 원: 물귀신처럼 바닥에 그려지는 투박한 보라 원 + 빨려 드는 도트
+function jaBaseField(c,R){const kr=c.kr,RY=R*.5;ctx.save();ctx.globalAlpha=.16*kr;ctx.fillStyle='#6a3dbf';ctx.beginPath();ctx.ellipse(c.x,c.y,R*(.6+.4*kr),RY*(.6+.4*kr),0,0,7);ctx.fill();
+  ctx.globalAlpha=.75*kr;const N=Math.max(24,Math.round(R/2.5));for(let i=0;i<N;i++){if((i+Math.floor(G.t*6))%3===0)continue;const a=i/N*6.2832+G.t*.4;ctx.fillStyle=i%2?'#b48aff':'#4a2a8a';ctx.fillRect(snapPx(c.x+Math.cos(a)*R-1.5),snapPx(c.y+Math.sin(a)*RY-1.5),3,3)}
+  for(let j=0;j<10;j++){const k=(G.t*.9+j*.37)%1,a=j*2.1+G.t*.6,x=c.x+Math.cos(a)*R*(1-k),y=c.y+Math.sin(a)*RY*(1-k);ctx.globalAlpha=kr*(1-k);ctx.fillStyle=j%2?'#e6dcff':'#9b6dff';ctx.fillRect(snapPx(x-1),snapPx(y-1),2,2)}
+  ctx.restore()}
+function jaGem(evd,x,y,sc,ral,sal,glow){if(evd)jaMoonDraw(x,y,sc,ral,sal,glow);else if(jgOk('adot'))s2img(JG_IMG.adot,x,y+14,1.2);else gemDraw('amethyst',x,y,10,1)}
+function jaShard(x,y,i,evd){if(!jgOk('cs'))return;const fr=(Math.floor(G.t*15)+i*9)%38,s=evd?1.2:1;ctx.drawImage(JG_IMG.cs,fr*32,0,32,38,x-16*s,y-26*s,32*s,38*s)}
+function jaDraw(w,inv){const st=w.st,evd=w.evo&&st.evd,O=jaOrb(w);
+  if(st.efx&&st.efx.burst&&!st.evd)return;
+  if(st.cl){const R=jaR(w);for(const c of st.cl){if(c.ph==='done')continue;
+      if(c.ph!=='on'){if(c.i)jaShard(c.gx,c.gy,c.i,evd);else jaGem(evd,c.gx,c.gy,.42,1,1,1);continue}
+      const kr=c.kr;
+      if(evd){ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=.1*kr;ctx.fillStyle='#be96ff';ctx.beginPath();ctx.moveTo(c.gx-4,c.gy+10);ctx.lineTo(c.gx+4,c.gy+10);ctx.lineTo(c.x+22,c.y);ctx.lineTo(c.x-22,c.y);ctx.closePath();ctx.fill();ctx.restore();jaShardsSpiral(c,R);jaMoonDraw(c.gx,c.gy+Math.sin(G.t*2.6)*3,.42+.17*Math.min(1,c.t/.35),1-kr,1-kr,1+kr)}
+      else{ctx.globalAlpha=.3;ctx.fillStyle='#1a0a30';ctx.beginPath();ctx.ellipse(c.x,c.y-6,9,3,0,0,7);ctx.fill();ctx.globalAlpha=1;jaGem(false,c.gx,c.gy+Math.sin(G.t*3+c.x)*2)}}}
+  else{const n=Math.min(3,G.S.amount||0);
+    for(let i=n;i>=1;i--){const q=O(i);jaShard(q.x,q.y,i,evd)}
+    if(inv){ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=.35;ctx.fillStyle='#ffd34d';ctx.beginPath();ctx.arc(st.mx,st.my-8,evd?30:18,0,7);ctx.fill();ctx.restore()}
+    jaGem(evd,st.mx,st.my+(evd?0:Math.sin(G.t*3)*2),.42,1,1,1)}}
+// 도트 그림 한 장을 발밑 기준(가운데 아래)으로 픽셀 그대로 그려요
+function s2img(im,x,y,sc){ctx.save();ctx.imageSmoothingEnabled=false;ctx.drawImage(im,Math.round(x-im.width*sc/2),Math.round(y-im.height*sc),im.width*sc,im.height*sc);ctx.restore()}
+// ---- 루비 그리기 ----
+function jrRing(cx,cy,rx,ry,ang,part,al,lit,n,big){const a0=ang*Math.PI/180,N=Math.max(60,Math.round(rx*2)),ok=sn=>part==='all'||(part==='front'&&sn>=0)||(part==='back'&&sn<0);ctx.save();
+  for(let pass=0;pass<(big?2:1);pass++){ctx.lineWidth=pass===0&&big?6:big?2:1.3;ctx.strokeStyle=pass===0&&big?'#ff4a3a':'#d68a70';ctx.globalAlpha=pass===0&&big?al*.1:al*.95;ctx.beginPath();let on=false;
+    for(let i=0;i<=N;i++){const a=a0+i/N*6.2832,sn=Math.sin(a),x=cx+Math.cos(a)*rx,y=cy+sn*ry;if(!ok(sn)){on=false;continue}if(!on){ctx.moveTo(x,y);on=true}else ctx.lineTo(x,y)}ctx.stroke()}
+  ctx.globalAlpha=al;const nb=Math.round(rx/2.6)+8;
+  for(let i=0;i<nb;i++){const a=a0+i/nb*6.2832,sn=Math.sin(a);if(!ok(sn))continue;ctx.fillStyle=i%2?'#ff4a52':'#ffcd8c';ctx.fillRect(snapPx(cx+Math.cos(a)*rx-1),snapPx(cy+sn*ry-1),2,2)}
+  for(let k=0;k<n;k++){const a=a0+k/n*6.2832,sn=Math.sin(a);if(!ok(sn))continue;const x=cx+Math.cos(a)*rx,y=cy+sn*ry,r=big?3:2;ctx.fillStyle=lit?'#ff9696':'#ff4a52';ctx.strokeStyle='#ffcd8c';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(x,y-r-1);ctx.lineTo(x+r,y);ctx.lineTo(x,y+r+1);ctx.lineTo(x-r,y);ctx.closePath();ctx.fill();ctx.stroke();if(lit){ctx.fillStyle='#fff';ctx.fillRect(snapPx(x-1),snapPx(y-1),2,2)}}
+  ctx.restore()}
+function jrPos(w){const st=w.st,bob=Math.sin(G.t*2.2)*3;return{x:st.cg.x,y:st.cg.y-74+bob}}
+function jrGround(w){const st=w.st,cg=st.cg,R=jrRad(w),n=jrN(),pos=jrPos(w),kr=st.kr||0;
+  ctx.save();ctx.globalAlpha=.3;ctx.fillStyle='#000';ctx.beginPath();ctx.ellipse(cg.x,cg.y+4,24,7,0,0,7);ctx.fill();ctx.restore();
+  if(kr>.5)jrRing(cg.x,cg.y,26+(R-26)*kr,(9+(R*JR_YS-9)*kr),st.ra+15,'all',1,st.fire,n,true);
+  if(st.fire&&st.amp>0&&jgOk('br')){for(let k=0;k<n;k++){const a=(st.ra+360*k/n+15)*Math.PI/180,ex=cg.x+Math.cos(a)*R,ey=cg.y+Math.sin(a)*R*JR_YS,nx=pos.x+Math.cos(a)*10,ny=pos.y+14+Math.sin(a)*5,dx=ex-nx,dy=ey-ny,L=Math.hypot(dx,dy),sc=L/118*st.amp+.01,fr=(Math.floor(G.t*14)+k*3)%18;
+    ctx.save();ctx.translate(nx,ny);ctx.rotate(Math.atan2(dy,dx));ctx.scale(sc,sc);ctx.drawImage(JG_IMG.br,fr*160,0,160,116,-12,-72,160,116);ctx.restore()}}}
+function jrbDraw(w,inv){const st=w.st;
+  if(w.evo&&st.evd&&st.cg){const pos=jrPos(w),kr=st.kr||0,R=jrRad(w),n=jrN(),cg=st.cg,rcx=pos.x+(cg.x-pos.x)*kr,rcy=(pos.y+30)+(cg.y-(pos.y+30))*kr,rx=26+(R-26)*kr,ry=9+(R*JR_YS-9)*kr,ra=st.ra+15;
+    if(kr<=.5)jrRing(rcx,rcy,rx,ry,ra,'back',1,false,n,false);
+    if(jgOk('fl')){const sp=st.sp||0,bank=Math.sin(G.t*1.7)*6*(1-kr)+Math.sin(G.t*1.3)*2*kr,sq=.88+.12*Math.abs(Math.cos(sp*.5*Math.PI/180)),b=st.bl,sc=.4+.6*b;
+      if(st.fire){ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=.18;ctx.fillStyle='#ff9a78';ctx.beginPath();ctx.arc(pos.x,pos.y,22,0,7);ctx.fill();ctx.restore()}
+      if(inv){ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=.3;ctx.fillStyle='#ffd34d';ctx.beginPath();ctx.arc(pos.x,pos.y,30,0,7);ctx.fill();ctx.restore()}
+      ctx.save();ctx.imageSmoothingEnabled=true;ctx.globalAlpha=b;ctx.translate(pos.x,pos.y);ctx.rotate((sp+bank)*Math.PI/180);ctx.scale(sq*sc,sc);ctx.drawImage(JG_IMG.fl,(Math.floor(G.t*8)%6)*58,0,58,62,-29,-27,58,62);ctx.restore()}
+    if(kr<=.5)jrRing(rcx,rcy,rx,ry,ra,'front',1,false,n,false);
+    if(!G.bot&&kr<.5&&Math.random()<.5)px(pos.x+rnd(-12,12),pos.y+16+rnd(0,6),rnd(-12,12),rnd(8,24),.6,pick(['#ffcd8c','#ff8a7a','#ffffff']),2,1,1);return}
+  // 일반형: 투박한 도트 루비 + 도트 불꽃탄
+  if(!st.efx||!st.efx.burst||st.evd){const bob=Math.sin(G.t*3)*2,y=st.sy+bob+(st.cast>0?-3:0);
+    ctx.globalAlpha=.18;ctx.fillStyle='#3a0610';ctx.beginPath();ctx.ellipse(st.sx,st.sy+112,8,2.5,0,0,7);ctx.fill();ctx.globalAlpha=1;
+    if(inv){ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=.35;ctx.fillStyle='#ffd34d';ctx.beginPath();ctx.arc(st.sx,y-14,20,0,7);ctx.fill();ctx.restore()}
+    if(jgOk('dot'))s2img(JG_IMG.dot,st.sx,y+14,1.2);else gemDraw('ruby',st.sx,y,12,1)}
+  if(st.fb)for(const b of st.fb){if(b.d>0)continue;
+    for(let k=1;k<=3;k++){ctx.globalAlpha=.6-k*.15;ctx.fillStyle=k===1?'#ffb070':'#ff4a3a';ctx.fillRect(snapPx(b.x-Math.cos(b.a)*k*6-1.5),snapPx(b.y-Math.sin(b.a)*k*6-1.5),3,3)}ctx.globalAlpha=1;
+    if(jgOk('dfb')){ctx.save();ctx.imageSmoothingEnabled=false;ctx.translate(Math.round(b.x),Math.round(b.y));ctx.rotate(b.a-Math.PI/2);ctx.drawImage(JG_IMG.dfb,-7,-9,14,15);ctx.restore()}else{ctx.fillStyle='#ffb070';ctx.fillRect(snapPx(b.x-3),snapPx(b.y-3),6,6)}}
+  if(st.fx)for(const f of st.fx){const k=f.t/.3,r=6+f.R*k*.9;ctx.save();ctx.globalAlpha=Math.max(0,1-k);ctx.fillStyle='#ffaa6e';const N=10;for(let i=0;i<N;i++){const a=i/N*6.2832;ctx.fillRect(snapPx(f.x+Math.cos(a)*r-1.5),snapPx(f.y+Math.sin(a)*r*.7-1.5),3,3)}ctx.fillStyle='#ffe6b4';ctx.globalAlpha=Math.max(0,.8*(1-k));ctx.fillRect(snapPx(f.x-r*.3),snapPx(f.y-r*.2),snapPx(r*.6)||2,snapPx(r*.4)||2);ctx.restore()}}
+function jgDraw2(){if(!G.weapons)return;const inv=juInv();for(const w of G.weapons){
+  if(w.k==='ruby')jrbDraw(w,inv);
+  if(w.k==='amethyst')jaDraw(w,inv)}}
 /* ================= loop ================= */
+let FCAP_N=0;/* V263: 120Hz 등 고주사율 화면에서 게임 루프를 60fps로 제한(발열 제보, 갤럭시 S26) */
 function loop(now){
   requestAnimationFrame(loop);try{SND.tick()}catch(e){}
+  if(now<FCAP_N-4)return;FCAP_N+=1000/60;if(now-FCAP_N>1000/60)FCAP_N=now;
   if(!G){ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,cv.width,cv.height);return}
   let dt=Math.max(0,Math.min(.05,(now-last)/1000));last=now;
   if(G&&G.running&&!G.paused&&!RM){fpsAcc+=dt;fpsN++;if(fpsAcc>2){const fps=fpsN/fpsAcc;FXQ=fps<40?Math.max(.35,FXQ-.15):fps>55?Math.min(1,FXQ+.1):FXQ;fpsAcc=0;fpsN=0}}
@@ -6360,7 +6614,7 @@ function attM(){const A=att(),can=attCan(),n=A.n>=7&&can?0:A.n;const o=ovM(`<div
   <div class="btns"><button type="button" class="big" id="attGo" ${can?'':'disabled'}>${can?`🎁 ${n+1}일째 선물 받기`:'✔ 오늘은 받았어요 · 내일 또 만나요'}</button><button type="button" class="ghost" id="lbX">닫기</button></div></div>`);
   o.querySelector('#attGo').onclick=()=>{if(!attCan())return;const A=att();if(A.n>=7)A.n=0;const r=ATT7[A.n];A.n++;A.d=today();if(r.g)SAVE.gold+=r.g;SAVE.tix=SAVE.tix||{};for(const k in (r.t||{}))SAVE.tix[k]=(SAVE.tix[k]||0)+r.t[k];persist();try{SND.p('ach')}catch(e){}toast('🎉 출석 '+A.n+'일째',rwTxt(r).replace(/<br>/g,' + '));res();badges();attM()}}
 // ---- 📜 패치내역 (V118) ----
-const PATCH=[["V261", "11/17", "히든 보따리가 추가됩니다.", ["보따리에서는 골드를 획득할 수 있습니다.", "대형 보따리에서는 더 많은 골드를 획득할 수 있습니다."]],["V259", "11/17", "💀 인천 헬 해금 조건 변경", ["💀 인천 헬은 이제 인천 어려움에서 20분을 버티면 열려요", "🏆 이미 인천을 클리어한 계정은 바로 열려 있어요", "⚡ 하늘의 감시함이 나올 때 덜 끊기도록 다듬었어요"]], ["V258", "11/17", "⚡ 장수 헬 렉 줄이기", ["🐛 몬스터와 탄이 많이 몰릴 때 화면이 덜 버벅이도록 다듬었어요"]], ["V257", "11/17", "📿 목걸이 효과 공개", ["📿 목걸이 효과를 걸기 전에도 볼 수 있어요", "🎁 뽑기 결과에도 효과가 바로 나와요", "아리아드네 : 숨길 이유가 없어졌네요. 골라서 거세요, 언니."]],["V254", "11/17", "🌃 인천 히든 이벤트", ["📡 인천 난이도 하향을 위해 히든 이벤트가 생성되었습니다."]], ["V253", "11/17", "🎵 련의 웨이 신곡 추가! 💃 댄서 추가!"], ["V252", "11/16", "🔄 무기 아이콘 · 업적 갱신", ["🎨 무기 아이콘들이 새로 갱신되었습니다.", "🏆 업적이 갱신되었습니다. 기존에 지급받은 업적 보상은 지급하며, 새로 갱신된 업적을 달성해 새 보상을 받아보세요."]], ["V249", "11/16", "✨ 글씨 다듬기", ["📜 합체·진화 안내와 뽑기 결과 이름 글씨를 가볍게 다듬었어요"]], ["V246", "11/16", "📡 통신기를 주우면 아이기스 전략특공함이 날아와요 (장수·인천)", ["🛰️ 비행선이 내려와 지원 각성을 쏘고 하늘로 올라가요", "아리아드네 : 사령관님, 이번엔 함대가 직접 왔어요."]], ["V245", "11/16", "⚔️ 사이퍼즈 콜라보레이션 스킨 출시", ["👑 신화 뽑기에 사이퍼즈 콜라보레이션 스킨이 추가됐어요", "🌷 마음의 정원 카드 스킨도 신화 뽑기에 들어왔어요", "🎁 출시 기념 신화 확정 선택권 1장을 드려요"]], ["V243", "11/15", "🎵 련의 웨이 신곡 : 립스틱난도 · 에클라땅뜨 아르떼", ["💋 「립스틱난도」와 「에클라땅뜨 아르떼」가 무대에 올라왔어요 (모두 33곡)", "🆕 새로 들어온 곡은 곡 목록 맨 위에 NEW로 떠요"]], ["V242", "11/15", "🎵 련의 웨이 : 노트가 멜로디를 따라와요", ["🎤 노트가 베이스 대신 보컬·멜로디와 훅을 따라 내려와요, 음이 높을수록 오른쪽 줄", "👍 엄지로 치기 편하게: 한 손에 노트 하나, 긴 노트를 누르는 동안 같은 손 쪽엔 노트가 안 나와요", "✨ 긴 노트를 누르고 있으면 콤보가 쭉쭉 올라가요", "💬 아리아드네 말풍선이 판정 위로 옮겨와 크게 보여요", "아리아드네 : 이제 언니 귀랑 손가락이 같은 노래를 들어요."]], ["V240", "11/15", "💀 련의 웨이 헬 모드 · 새 곡 5곡", ["💀 보통 · 어려움 · 헬 — 헬은 노트가 어려움의 두 배쯤이에요", "🎵 박자가 약한 곡에는 헬이 없어요", "🏆 친구 랭킹에도 헬이 따로 있어요", "🎶 디펜스·전투 곡 5곡이 무대에 올라왔어요 (모두 31곡)", "아리아드네 : 손가락 스트레칭은 하고 오셨죠, 언니?"]], ["V239", "11/15", "🍅 헬 보스를 이미 클리어한 언니들은 장수 맵이 바로 열려요"], ["V238", "11/15", "🍅 장수 맵이 상봉 헬 클리어로도 열려요"], ["V237", "11/15", "💃 련의 웨이 : 친구 랭킹 · 우리 대원 무대", ["👑 센터는 로비 캐릭터예요", "👯 백댄서는 다른 대원들이에요. 가진 신화 스킨을 입고, 없으면 그 모습 그대로 나와요", "✨ 피날레엔 아직 못 가진 신화 스킨도 무대에 올라와요", "🏆 친구들과 곡별 BPS를 겨루는 온라인 랭킹 · 🌟 종합 랭킹"]], ["V236", "11/15", "💃 새 미니게임 「련의 웨이」", ["🎵 26곡 리듬 런웨이: 내 신화 스킨이 무대 센터에 서요", "👯 콤보를 이으면 신화 스킨 백댄서가 하나둘 모여요", "✨ BPS 게이지를 채우면 피날레, 무대가 넓어지고 대원들이 함께 포즈", "🏆 곡별 BPS 랭킹", "아리아드네 : 오늘의 무대는 언니 거예요. 박자만 믿고 걸어요."]], ["V235", "11/15", "🌃 시즌4 새 맵 「인천」 (어려움 이상)", ["🏙️ 장수 어려움을 10분 버티면 열려요. 마계로 변한 인천에서 무수리 퀸의 둥지를 탈환해요.", "📡 아리아드네가 전투 중에 길을 알려줘요."]], ["V233", "11/14", "⚖️ 밸런스 조정 : 결재 서류 부메랑"], ["V232", "11/14", "⚖️ 밸런스 조정 : 추억하는 9월", ["💙 사파이어 정령이 더욱 아름답고 강력해졌어요."]], ["V227", "11/14", "🍅 토마토 벌레의 질주를 피하기 쉬워졌어요 (하향)"], ["V224", "11/13", "🛡️ 디펜스 카드 정리 (공통 카드·디버프)", ["⚔️ 정예 사냥 +25%, 정밀 조준 +8%, 속도 카드는 피해 +8%도 함께", "🔥 맘터 에스테틱 드론 기본 피해 +25%", "🩸 취약·점화·기절 등 디버프 카드에 효과 수치 표시", "🔗 같은 디버프를 또 거는 카드는 선행 카드가 있어야 나오고 「강화」로 합쳤어요"]],["V223", "11/13", "🛡️ 아스가르드 디펜스 카드 개편 (후반 카드 상향)", ["🌌 3랭크·각성 카드 9장 대폭 상향 (특이점·절대 영역·화륜 합체 등)", "✨ 약한 순수 피해 카드 36장에 피해 보너스 추가", "카드 설명에 보너스가 같이 표시돼요"]],["V222", "11/13", "📱 모바일 조이스틱이 손가락을 덜 끌고 다녀요"], ["V221", "11/13", "🛡️ 디펜스 카드 개선 — 상태이상 카드 100%·1장, 조건부 피해 카드 상향"],["V220", "11/13", "🌷 마음의 정원 어려움 4~6장 · 새 대원 9명 · 무수리 도감", ["🌙 4·5·6장: 1·2·3장의 어려움 버전이 열려요", "🃏 새 대원 카드 9장이 어려움 정원에서 합류해요", "⚖️ 덜 쓰이던 카드들 상향 (실드·샌드·슬리피·허그·이그니션·리턴·봄버)", "📖 만나 본 무수리를 도감에서 볼 수 있어요", "🖼️ 지도·대원 선택·장 표지 그림 새 단장"]],["V219", "11/12", "더 이상 k1 같은 련만 믿고는 나대실 수 없을거에요.", ["🎵 K1 쏭카드: 노래는 30초면 끝나요, 한 번에 4명까지 (하향)", "⭐ 맘터 스타카드: 더 빨리 자라고 더 많이 짜요 (상향)", "🧵 맘터가 짠 실타래가 눈에 잘 띄어요", "🌷 무수리들이 조금 더 많이 몰려와요"]],["V218", "11/12", "🌷 마음의 정원 오픈"],["V217", "11/11", "⚡ 게임 속도·대원 크기 개선, 강화 골드 인하(환급 우편), 레벨업 리롤 1회"],["V216", "11/11", "🛡️ 아스가르드 디펜스 대원 개편", ["🔑 대원마다 「핵심 카드」 등장 (카드 10장 이상)", "⚔️ 어려움·헬에 정예 적이 나와요", "🎯 쁘니·하도·무룩은 체력 높은 적부터 노려요", "☠️ 세나는 독 웅덩이, 💖 태태영은 한 곳에 몰아치는 유성", "📋 대원별 초당 피해 표시, 대원 강화 +6%"]],["V215", "11/11", "🐛 25분이 지나도 최종 보스와 끝까지 싸울 수 있어요"], ["V214", "11/11", "🛡️ 디펜스 모드 시스템 개선 (강화제한삭제)"], ["V213", "11/11", "🧵 새 뽑기 연출", ["👗 아리아드네가 마음의 선으로 드레스를 지어요", "✨ 등급이 높을수록 드레스가 더 화려해져요", "아리아드네 : 오로라가 보이면… 숨 참으세요, 언니."]], ["V211", "11/11", "🎰 상점 새 단장", ["🧵 아리아드네의 아틀리에에서 뽑기를 해요", "📜 획득 가능한 아이템 목록에서 확률과 반지·목걸이를 볼 수 있어요", "💍 장비 화면의 반지·목걸이 버튼이 더 잘 보여요", "아리아드네 : 언니를 위한 옷, 제가 직접 지어 드릴게요."]], ["V210", "11/11", "⚖️ 밸런스 조정 : 결재 서류 부메랑", ["📄 보스가 나타나면 서류가 전부 보스에게 결재를 올려요"]], ["V209", "11/11", "⚖️ 장수 밸런스 조정 : 침략자들이 약해졌어요"], ["V207", "11/11", "오리지널 카드 시리즈 스킨 추가"], ["V205", "11/10", "📿 신화 장비 [세이크리드썸띵] 추가"], ["V203", "11/10", "⚖️ 밸런스 조정 : 파칭코 미사일", ["🎰 눈먼년에게 눈을 달아줬어요."]], ["V202", "11/10", "⚖️ 밸런스 조정 : 스탯 강화", ["📈 스탯 강화 수치를 전체적으로 조정했어요", "↺ 스탯 강화 초기화가 모든 캐릭터에게 다시 한 번 무료예요"]], ["V201", "11/10", "💃 아스가르드 디펜스 공격 모션", ["💃 신화 스킨을 입은 대원은 공격할 때 공격 모션을 보여줘요"]], ["V200", "11/10", "💍 새 전설 반지 4종 · 🌑 장수의 어둠이 더 짙어졌어요"], ["V198", "11/10", "👁️ 장수 어려움·헬에 무언가가 깨어났어요"], ["V197", "11/10", "⚖️ 밸런스 조정 : 마계 베일, 네온 레이저, 우지", ["🖤 마계 베일 (상향)", "💗 네온 레이저 (상향)", "🔫 우지 (상향)"]], ["V196", "11/10", "🍅 장수 리밸런싱"], ["V195", "11/10", "🏆 랭킹에 🍅 장수 맵이 추가됐어요"], ["V194", "11/10", "🎫 시즌 패스 40단계 · 새 로비 맵 「은방울꽃의 궁전」"], ["V192", "11/10", "⚖️ 아스가르드 디펜스 밸런스 조정 · ↩️ 강화 초기화", ["🎯 짱재·잔느·쁘니·하도·무룩은 보스와 정예를 녹이는 단일 딜러가 됐어요", "↩️ 대원 강화 창에서 강화를 무료로 초기화하고 재료를 돌려받을 수 있어요 (11/25까지)", "🕸️ 무수리들이 더 단단해졌어요"]], ["V189", "11/9", "🛡️ 아스가르드 디펜스 패스 출시"], ["V188", "11/9", "💍 장비 「세인트썸띵」 추가", ["💍 로비 캐릭터 탭이 장비 탭이 되었어요. 반지를 손가락에 끼워 보세요", "🎰 뽑기 희귀·전설에서 반지가 나와요. 같은 반지 3개가 모이면 자동으로 다음 단계", "🎲 신화 확률을 조금 낮추고 전설 확률을 조금 올렸어요", "아리아드네 : 같은 반지 두 개는 안 돼요. 욕심이 끼스럽거든요."]], ["V187", "11/9", "💀 장수 헬 오픈 · 새 업적", ["💀 장수 헬 모드가 열렸어요", "🏆 토마토 여왕을 쓰러뜨리면 전설 확정권, 헬이라면 신화 선택권!", "📄 결재 서류가 서로 다른 적을 노리고 꿰뚫어요 (상향)"]], ["V186", "11/9", "🧬 아스가르드 대원들이 특성을 갖게 되었습니다."], ["V185", "11/9", "🃏 신화스킨 추가 : 카드 시리즈"], ["V184", "11/9", "🍅 장수 이벤트 추가 · 밸런스 조정", ["🔥 들불 · 🚦 무궁화 꽃이 피었습니다 · 🧺 착한 토마토 호송 이벤트가 생겼어요. 해내면 보물상자!", "🛡️ 어려움 장수 몬스터가 단단해지고, 엘리트는 덜 나와요 (하향)", "🛸 감시 드론·감시함이 더 많은 무수리를 불러요 (하향)", "🎵 배경음이 가끔 멈추던 오류를 고쳤어요", "아리아드네 : 상자는 이제 직접 벌어야 해요, 언니."]], ["V179", "11/9", "🌳 아스가르드 디펜스 카드 나무", ["👥 대원 관리·🧬 대원 조합에서 무기를 누르면 카드가 어떻게 이어지고 어떤 대원과 조합되는지 나무로 보여요", "🔒 아직 열리지 않은 카드는 비밀이에요. 강화하면 하나씩 드러나요"]], ["V175", "11/9", "🌌 로비 아리아드네"], ["V174", "11/9", "🛡️ 아스가르드 디펜스 재개 · 에이전트 어셈블리", ["[아스가르드 디펜스 대원들의 공격로직이 변경되었습니다.] 로직모드를 에이전트 어셈블리, 싱크로율 단위를 1.6으로 변경했습니다.", "🤝 무기끼리 섞는 조합 카드 40장 (2인 30 · 💜 트리오 10)", "🧬 아래 메뉴 [대원 조합]: 무기별 강화 단계 · 카드 나무 · 조합", "🔥 어려움 5부터 스테이지 특성 (속성 저항 · 넉백 저항 · 비행 · 장갑 · 치유 · 장벽), 헬은 1부터", "📮 무기 강화가 Lv1로 초기화되고 쓴 강화 칩·골드는 아리아드네 우편으로 돌려드려요"]], ["V173", "11/9", "🍅 장수 맵이 좀 더 컨셉에 맞게 다듬어졌어요"], ["V172", "11/9", "🔧 아스가르드 디펜스 잠시 점검 중", ["🛗 궤도 엘레베이터 수리 중이에요. 대원들의 공격 로직을 손보는 동안 잠시 입장이 막혀요"]], ["V169", "11/9", "🌿 장수 수풀 숨기 강화", ["🌿 수풀에 숨으면 바로 옆 몬스터도 언니를 놓쳐요 (상향)", "👁️ 보스와 감시자들은 여전히 언니를 찾아요"]], ["V168", "11/9", "⚖️ 장수 밸런스 조정", ["🍅 자폭한 과일이 작게 갈라져요, 경험치를 덜 잃어요 (상향)", "🛸 감시 드론이 훨씬 단단해졌어요 (하향)", "💣 포탑 무수리가 쉬지 않고 쏴요 (하향)", "아리아드네 : 장수에선 숨는 것도 실력이에요, 언니."]], ["V167", "11/9", "💀 상봉 헬 전원 해금", ["💀 상봉 헬에서 15분을 버티면 모든 캐릭터의 상봉 헬이 열려요", "🍅 이미 장수를 연 언니들은 접속하면 바로 열려요"]], ["V166", "11/8", "🍅 시즌3 Act.2 「위기의 토마토 농장」 · 새 맵 장수", ["🗺️ 새 맵 「장수」: 상봉 헬 15분을 버티면 열려요 (보통·어려움, 헬은 곧 열려요)", "✨ 아리아드네가 실체화해서 판 안에서 함께 싸워요", "🎵 장수 전용 배경음", "🖼️ 새 로비 배경 3종: 패스 「빛의 길을 따라 저에게로」·「믿음의 흔적」, 업적 「토마토 농장」", "아리아드네 : 이번엔 통신기 너머가 아니에요, 언니. 바로 옆이에요."]], ["V165", "11/8", "🎯 디펜스 사거리 조정 : 샤넬 미사일, 네온 레이저", ["🚀 샤넬 미사일: 사거리를 조금 늘렸어요 (상향)", "💜 네온 레이저: 사거리를 늘렸어요 (상향)"]], ["V164", "11/8", "🌸 신화스킨 추가 : 체리 시리즈"], ["V163", "11/8", "🖥️ PC 통신기 글씨 크게", ["📡 PC에서는 통신기가 가운데 큰 창으로 열리고 글씨가 커져요"]], ["V162", "11/8", "💠 어려움·헬 강화 칩 보상 증가", ["💠 어려움은 강화 칩 2배, 헬은 3배를 받아요", "아리아드네 : 다섯 명 고루 키우세요. 편애는 단톡방에서도 티 나요."]], ["V161", "11/8", "💠 강화 칩 · 무기 강화 비용 조정", ["💠 대원 관리의 「경험치」가 「강화 칩」으로 이름이 바뀌었어요", "🔧 무기 강화 Lv7부터 강화 칩이 점점 더 많이 들어요 (각성 카드까지 가는 길이 험해져요)", "아리아드네 : 각성은 아무나 하는 게 아니에요. 집착하세요, 사령관님."]], ["V160", "11/8", "🛡️ 아스가르드 디펜스 카드 개편", ["🎴 레벨업 공통 카드는 같은 카드가 여러 번, 한 장 수치는 작게", "🔧 고유 카드는 대원 관리에서 무기를 강화하면 하나씩 해금", "🎁 황금 무수리: 엎어진 카드 뒤집기 · 한 번 더!", "🎲 레벨업 다시 뽑기 한 판 5번", "📱 세로로 긴 폰 화면 꽉 채우기", "🎯 샤넬 미사일 사거리 하향 · 디올 레이저 사거리 상향", "아리아드네 : 하나만 키우는 편애는 이제 안 통해요, 사령관님."]], ["V158", "11/8", "🖼️ 로비 아트 추가"], ["V157", "11/8", "👑 신화 선택권 미리보기(실루엣)"], ["V155", "11/8", "🌌 시즌 3. Act.1 아스가르드 디펜스"], ["V154", "11/8", "⚖️ BPS 조정 : 뇌우, 독차", ["🌧️ 뇌우: 너무 촉촉했던 아름다움을 조정했어요 (하향)", "☠️ 호호 독차: 진화형의 아름다움 점수를 조정했어요 (하향)", "아리아드네 : 둘다 예쁜건 아니잖아요?"]], ["V149", "11/8", "💬 기갈 게시판 오픈"], ["V147", "11/8", "💀 헬모드를 연 적이 있으면 모든 캐릭터의 어려움 모드가 열려요"], ["V146", "11/7", "앙헬 → 밍키 이름 변경"], ["V145", "11/7", "⚖️ 밸런스 조정 : 힐블", ["🧚 요정 소환: 요정들의 치유가 확실히 느껴질 거예요 (상향)", "🧚 힐블: 특성 회복이 더 든든해졌어요 (상향)"]], ["V143", "11/7", "⚖️ 밸런스 조정 : 회복", ["💆 리쥬란: 체력이 차오르는 게 확실히 느껴질 거예요 (상향)", "🍲 순대국: 한 그릇이 더 든든해졌어요 (상향)", "💄 마녀: 처치할 때 회복이 더 자주 와요 (상향)", "🖤💄 마계의 웨딩·립스틱 난도: 진화형의 처치 회복이 좋아졌어요 (상향)", "✨ 천상의 빛기둥: 진화형 회복 구슬이 더 많이 채워 줘요 (상향)", "🧧 부적: 진화형 피흡이 이제 써 보기 좋을 거예요 (상향)"]], ["V140", "11/7", "🐞 버그 수정 : 립스틱 난도", ["은방울꽃 : 립스틱 난도에 버그가 있다는 제보가 들어왔어.", "아리아드네 : 어머, 우리 마녀 언니 무기요? 바로 들여다볼게요 💄", "아리아드네 : 찾았어요. 관객이 셋은 모여야 글씨를 쓰는 도도한 련이라, 보스 혼자 있는 보스방에선 입을 꾹 다물고 있었어요.", "은방울꽃 : 화면 다 덮는 큰 글씨는?", "아리아드네 : 그것도 사실 한 번도 안 나왔어요… 이제 제때 화면을 덮어요. 세기는 그대로예요. 밸런스는 제가 지켜요.", "아리아드네 : 고쳤어요. 이걸로 언니들이 다시 세상을 지킬 수 있게 되었어요. 그런데 누가 제보해준거에요? 람쥐언니일거라 생각해요. 그분의 분석력은 저를 놀랍게 해요."]], ["V138", "11/7", "⚖️ 밸런스 조정: 사진좀요, 우지", ["📸 사진좀요: 남은 보호막이 한눈에 보이게 바뀌었어요. 이제 써 보기 좋을 거예요", "🔫 우지: 사용감이 좋아졌어요. 레벨이 오를수록 손맛이 달라져요", "🔫 우지: 진화하면 양옆 총이 조금 더 신나게 쏴요", "🔊 우지 사운드 이펙트를 새로 만들었어요"]], ["V137", "11/7", "게임 엔진 개선 업데이트 : \"아리아드네\" 인공지능 엔진 모델로 스킨 비쥬얼이 상향되었습니다."], ["V134", "11/7", "⚖️ 이 련은 빼버리기 2회 → 3회", ["✕ 마음에 안 드는 카드를 조금 더 자주 뺄 수 있어요"]], ["V132", "11/7", "🔊 음악·효과음 볼륨 조절 추가"], ["V131", "11/6", "🎵 로비 배경음 변경"], ["V130", "11/6", "📖 위키: ✨ 성격분석 시즌2 (카드를 뒤집어 보세요)"], ["V129", "11/6", "밸런스 패치 : 펫은 주인공이 아니에요. 이 련이 좀 나대서 기강을 좀 잡았어요.", ["🐾 펫: 경험치 줍는 범위와 속도를 조정했어요 (하향)"]], ["V128", "11/6", "📖 위키 캐릭터: 필살기 · ✨ 성격분석 보기"], ["V126", "11/6", "로비 메뉴 접기 · 📖 위키 버튼 · 캐릭터 탭에서 로비 캐릭터 바꾸기"], ["V125", "11/6", "기갈위키최신화", ["📈 스탯 강화: 방어 강화가 조금 더 든든해졌어요 (상향)"]], ["V123", "11/5", "레벨업 카드 빼버리기 추가"], ["V121", "11/5", "신화스킨 추가"], ["V120", "11/5", "긴급소식:왕언니가 불법무면허운전으로 적발되어, 사회교육 및 면허취득 후 다시 합류했어요.", ["👊 왕언니: 진화형 헤드라이트를 조정했어요 (하향)"]], ["V119", "11/5", "💄 BPS(Beauty per Sec) 추가 · 결과창 DPS/BPS/HPS · 🏆 랭킹에 ⚔️ DPS · 💄 BPS 카테고리"], ["V118", "11/5", "📜 패치내역이 생겼어요 · 미션 아이콘을 하나로 합쳤어요"], ["V117", "11/5", "⚖️ 밸런스 패치: 해방하는 5월, 비련의 신부, 왕언니, 공명하는 4월", ["💚 해방하는 5월: 진화하면 기사들이 몸을 던져 지켜 줘요. 대신 공격력은 조정했어요 (하향)", "💔 비련의 신부: 진화형이 적을 끌어와 사용감이 좋아졌어요 (상향)", "👊 왕언니: 진화형이 확 달라졌어요. 이제 써 보기 좋을 거예요 (상향)", "💎 공명하는 4월: 쉴드가 단단해지고, 진화하면 반격이 이어져요 (상향)"]], ["V116", "11/5", "일일 미션이 오전 4시에 바뀌어요"], ["V115", "11/5", "스탯 강화 초기화: 첫 1회는 무료, 이후 50% 환급"], ["V113~V114", "11/5", "👻 멀티에서 친구 무기가 보여요 · 태태영 필살기 연출 새 단장"], ["V111~V112", "11/5", "PC 로비가 부드러워지고, 랭킹 상세 보기 추가 · 멀티 시작 오류 수정"], ["V107~V109", "11/4", "PC 화면 배율 설정 · 로비 캐릭터 대사 · 동물 친구들 그림 오류 수정"], ["V106", "11/4", "🏠 로비 · 🎫 시즌 패스 · 📅 미션 · 🎉 출석 · 🏆 헬 랭킹"], ["V105", "11/4", "📮 우편함"], ["V100~V101", "11/3", "멀티 멈춤 오류 수정 · PC 렉 개선"], ["V97~V99", "11/2~3", "필살기 해금 오류 수정 · 신화 입장 연출 복구 + 태태영 Ⅲ"], ["V93~V96", "11/2", "👥 친구와 함께하기(2인 협동) · 모바일 캐릭터 선택 화면 개선"], ["V88~V92", "11/2", "🌐 기갈 서바이버 사이트·앱 오픈 · 로그인·계정 저장"]];
+const PATCH=[["V266", "11/18", "💠 디펜스 대원 강화가 훨씬 가벼워졌어요", ["💠 강화 칩 필요량 대폭 하향 (Lv30까지 1,868 → 297개)", "🪙 강화 골드 필요량 70% 하향", "🎁 이미 쓴 만큼 차액을 칩·골드로 우편 환급 (접속하면 도착, 30일간 수령)"]],["V265", "11/18", "쥬은의 전용무기 2종 업데이트", ["1. 장수 헬모드 클리어시 획득", "2. 인천 헬모드 클리어시 획득"]],["V263", "11/18", "💉 노르망디몽키바이러스 백신 1차 접종", ["📱 일부 폰에서 헬모드 후반에 기기가 뜨거워지던 증상을 진정시켰어요", "아리아드네 : 폰이 뜨거워진 건 언니들의 열정 때문이 아니라 그 원숭이 때문이었어요. 진정시켜 놨어요."]],["V261", "11/17", "히든 보따리가 추가됩니다.", ["보따리에서는 골드를 획득할 수 있습니다.", "대형 보따리에서는 더 많은 골드를 획득할 수 있습니다."]],["V259", "11/17", "💀 인천 헬 해금 조건 변경", ["💀 인천 헬은 이제 인천 어려움에서 20분을 버티면 열려요", "🏆 이미 인천을 클리어한 계정은 바로 열려 있어요", "⚡ 하늘의 감시함이 나올 때 덜 끊기도록 다듬었어요"]], ["V258", "11/17", "⚡ 장수 헬 렉 줄이기", ["🐛 몬스터와 탄이 많이 몰릴 때 화면이 덜 버벅이도록 다듬었어요"]], ["V257", "11/17", "📿 목걸이 효과 공개", ["📿 목걸이 효과를 걸기 전에도 볼 수 있어요", "🎁 뽑기 결과에도 효과가 바로 나와요", "아리아드네 : 숨길 이유가 없어졌네요. 골라서 거세요, 언니."]],["V254", "11/17", "🌃 인천 히든 이벤트", ["📡 인천 난이도 하향을 위해 히든 이벤트가 생성되었습니다."]], ["V253", "11/17", "🎵 련의 웨이 신곡 추가! 💃 댄서 추가!"], ["V252", "11/16", "🔄 무기 아이콘 · 업적 갱신", ["🎨 무기 아이콘들이 새로 갱신되었습니다.", "🏆 업적이 갱신되었습니다. 기존에 지급받은 업적 보상은 지급하며, 새로 갱신된 업적을 달성해 새 보상을 받아보세요."]], ["V249", "11/16", "✨ 글씨 다듬기", ["📜 합체·진화 안내와 뽑기 결과 이름 글씨를 가볍게 다듬었어요"]], ["V246", "11/16", "📡 통신기를 주우면 아이기스 전략특공함이 날아와요 (장수·인천)", ["🛰️ 비행선이 내려와 지원 각성을 쏘고 하늘로 올라가요", "아리아드네 : 사령관님, 이번엔 함대가 직접 왔어요."]], ["V245", "11/16", "⚔️ 사이퍼즈 콜라보레이션 스킨 출시", ["👑 신화 뽑기에 사이퍼즈 콜라보레이션 스킨이 추가됐어요", "🌷 마음의 정원 카드 스킨도 신화 뽑기에 들어왔어요", "🎁 출시 기념 신화 확정 선택권 1장을 드려요"]], ["V243", "11/15", "🎵 련의 웨이 신곡 : 립스틱난도 · 에클라땅뜨 아르떼", ["💋 「립스틱난도」와 「에클라땅뜨 아르떼」가 무대에 올라왔어요 (모두 33곡)", "🆕 새로 들어온 곡은 곡 목록 맨 위에 NEW로 떠요"]], ["V242", "11/15", "🎵 련의 웨이 : 노트가 멜로디를 따라와요", ["🎤 노트가 베이스 대신 보컬·멜로디와 훅을 따라 내려와요, 음이 높을수록 오른쪽 줄", "👍 엄지로 치기 편하게: 한 손에 노트 하나, 긴 노트를 누르는 동안 같은 손 쪽엔 노트가 안 나와요", "✨ 긴 노트를 누르고 있으면 콤보가 쭉쭉 올라가요", "💬 아리아드네 말풍선이 판정 위로 옮겨와 크게 보여요", "아리아드네 : 이제 언니 귀랑 손가락이 같은 노래를 들어요."]], ["V240", "11/15", "💀 련의 웨이 헬 모드 · 새 곡 5곡", ["💀 보통 · 어려움 · 헬 — 헬은 노트가 어려움의 두 배쯤이에요", "🎵 박자가 약한 곡에는 헬이 없어요", "🏆 친구 랭킹에도 헬이 따로 있어요", "🎶 디펜스·전투 곡 5곡이 무대에 올라왔어요 (모두 31곡)", "아리아드네 : 손가락 스트레칭은 하고 오셨죠, 언니?"]], ["V239", "11/15", "🍅 헬 보스를 이미 클리어한 언니들은 장수 맵이 바로 열려요"], ["V238", "11/15", "🍅 장수 맵이 상봉 헬 클리어로도 열려요"], ["V237", "11/15", "💃 련의 웨이 : 친구 랭킹 · 우리 대원 무대", ["👑 센터는 로비 캐릭터예요", "👯 백댄서는 다른 대원들이에요. 가진 신화 스킨을 입고, 없으면 그 모습 그대로 나와요", "✨ 피날레엔 아직 못 가진 신화 스킨도 무대에 올라와요", "🏆 친구들과 곡별 BPS를 겨루는 온라인 랭킹 · 🌟 종합 랭킹"]], ["V236", "11/15", "💃 새 미니게임 「련의 웨이」", ["🎵 26곡 리듬 런웨이: 내 신화 스킨이 무대 센터에 서요", "👯 콤보를 이으면 신화 스킨 백댄서가 하나둘 모여요", "✨ BPS 게이지를 채우면 피날레, 무대가 넓어지고 대원들이 함께 포즈", "🏆 곡별 BPS 랭킹", "아리아드네 : 오늘의 무대는 언니 거예요. 박자만 믿고 걸어요."]], ["V235", "11/15", "🌃 시즌4 새 맵 「인천」 (어려움 이상)", ["🏙️ 장수 어려움을 10분 버티면 열려요. 마계로 변한 인천에서 무수리 퀸의 둥지를 탈환해요.", "📡 아리아드네가 전투 중에 길을 알려줘요."]], ["V233", "11/14", "⚖️ 밸런스 조정 : 결재 서류 부메랑"], ["V232", "11/14", "⚖️ 밸런스 조정 : 추억하는 9월", ["💙 사파이어 정령이 더욱 아름답고 강력해졌어요."]], ["V227", "11/14", "🍅 토마토 벌레의 질주를 피하기 쉬워졌어요 (하향)"], ["V224", "11/13", "🛡️ 디펜스 카드 정리 (공통 카드·디버프)", ["⚔️ 정예 사냥 +25%, 정밀 조준 +8%, 속도 카드는 피해 +8%도 함께", "🔥 맘터 에스테틱 드론 기본 피해 +25%", "🩸 취약·점화·기절 등 디버프 카드에 효과 수치 표시", "🔗 같은 디버프를 또 거는 카드는 선행 카드가 있어야 나오고 「강화」로 합쳤어요"]],["V223", "11/13", "🛡️ 아스가르드 디펜스 카드 개편 (후반 카드 상향)", ["🌌 3랭크·각성 카드 9장 대폭 상향 (특이점·절대 영역·화륜 합체 등)", "✨ 약한 순수 피해 카드 36장에 피해 보너스 추가", "카드 설명에 보너스가 같이 표시돼요"]],["V222", "11/13", "📱 모바일 조이스틱이 손가락을 덜 끌고 다녀요"], ["V221", "11/13", "🛡️ 디펜스 카드 개선 — 상태이상 카드 100%·1장, 조건부 피해 카드 상향"],["V220", "11/13", "🌷 마음의 정원 어려움 4~6장 · 새 대원 9명 · 무수리 도감", ["🌙 4·5·6장: 1·2·3장의 어려움 버전이 열려요", "🃏 새 대원 카드 9장이 어려움 정원에서 합류해요", "⚖️ 덜 쓰이던 카드들 상향 (실드·샌드·슬리피·허그·이그니션·리턴·봄버)", "📖 만나 본 무수리를 도감에서 볼 수 있어요", "🖼️ 지도·대원 선택·장 표지 그림 새 단장"]],["V219", "11/12", "더 이상 k1 같은 련만 믿고는 나대실 수 없을거에요.", ["🎵 K1 쏭카드: 노래는 30초면 끝나요, 한 번에 4명까지 (하향)", "⭐ 맘터 스타카드: 더 빨리 자라고 더 많이 짜요 (상향)", "🧵 맘터가 짠 실타래가 눈에 잘 띄어요", "🌷 무수리들이 조금 더 많이 몰려와요"]],["V218", "11/12", "🌷 마음의 정원 오픈"],["V217", "11/11", "⚡ 게임 속도·대원 크기 개선, 강화 골드 인하(환급 우편), 레벨업 리롤 1회"],["V216", "11/11", "🛡️ 아스가르드 디펜스 대원 개편", ["🔑 대원마다 「핵심 카드」 등장 (카드 10장 이상)", "⚔️ 어려움·헬에 정예 적이 나와요", "🎯 쁘니·하도·무룩은 체력 높은 적부터 노려요", "☠️ 세나는 독 웅덩이, 💖 태태영은 한 곳에 몰아치는 유성", "📋 대원별 초당 피해 표시, 대원 강화 +6%"]],["V215", "11/11", "🐛 25분이 지나도 최종 보스와 끝까지 싸울 수 있어요"], ["V214", "11/11", "🛡️ 디펜스 모드 시스템 개선 (강화제한삭제)"], ["V213", "11/11", "🧵 새 뽑기 연출", ["👗 아리아드네가 마음의 선으로 드레스를 지어요", "✨ 등급이 높을수록 드레스가 더 화려해져요", "아리아드네 : 오로라가 보이면… 숨 참으세요, 언니."]], ["V211", "11/11", "🎰 상점 새 단장", ["🧵 아리아드네의 아틀리에에서 뽑기를 해요", "📜 획득 가능한 아이템 목록에서 확률과 반지·목걸이를 볼 수 있어요", "💍 장비 화면의 반지·목걸이 버튼이 더 잘 보여요", "아리아드네 : 언니를 위한 옷, 제가 직접 지어 드릴게요."]], ["V210", "11/11", "⚖️ 밸런스 조정 : 결재 서류 부메랑", ["📄 보스가 나타나면 서류가 전부 보스에게 결재를 올려요"]], ["V209", "11/11", "⚖️ 장수 밸런스 조정 : 침략자들이 약해졌어요"], ["V207", "11/11", "오리지널 카드 시리즈 스킨 추가"], ["V205", "11/10", "📿 신화 장비 [세이크리드썸띵] 추가"], ["V203", "11/10", "⚖️ 밸런스 조정 : 파칭코 미사일", ["🎰 눈먼년에게 눈을 달아줬어요."]], ["V202", "11/10", "⚖️ 밸런스 조정 : 스탯 강화", ["📈 스탯 강화 수치를 전체적으로 조정했어요", "↺ 스탯 강화 초기화가 모든 캐릭터에게 다시 한 번 무료예요"]], ["V201", "11/10", "💃 아스가르드 디펜스 공격 모션", ["💃 신화 스킨을 입은 대원은 공격할 때 공격 모션을 보여줘요"]], ["V200", "11/10", "💍 새 전설 반지 4종 · 🌑 장수의 어둠이 더 짙어졌어요"], ["V198", "11/10", "👁️ 장수 어려움·헬에 무언가가 깨어났어요"], ["V197", "11/10", "⚖️ 밸런스 조정 : 마계 베일, 네온 레이저, 우지", ["🖤 마계 베일 (상향)", "💗 네온 레이저 (상향)", "🔫 우지 (상향)"]], ["V196", "11/10", "🍅 장수 리밸런싱"], ["V195", "11/10", "🏆 랭킹에 🍅 장수 맵이 추가됐어요"], ["V194", "11/10", "🎫 시즌 패스 40단계 · 새 로비 맵 「은방울꽃의 궁전」"], ["V192", "11/10", "⚖️ 아스가르드 디펜스 밸런스 조정 · ↩️ 강화 초기화", ["🎯 짱재·잔느·쁘니·하도·무룩은 보스와 정예를 녹이는 단일 딜러가 됐어요", "↩️ 대원 강화 창에서 강화를 무료로 초기화하고 재료를 돌려받을 수 있어요 (11/25까지)", "🕸️ 무수리들이 더 단단해졌어요"]], ["V189", "11/9", "🛡️ 아스가르드 디펜스 패스 출시"], ["V188", "11/9", "💍 장비 「세인트썸띵」 추가", ["💍 로비 캐릭터 탭이 장비 탭이 되었어요. 반지를 손가락에 끼워 보세요", "🎰 뽑기 희귀·전설에서 반지가 나와요. 같은 반지 3개가 모이면 자동으로 다음 단계", "🎲 신화 확률을 조금 낮추고 전설 확률을 조금 올렸어요", "아리아드네 : 같은 반지 두 개는 안 돼요. 욕심이 끼스럽거든요."]], ["V187", "11/9", "💀 장수 헬 오픈 · 새 업적", ["💀 장수 헬 모드가 열렸어요", "🏆 토마토 여왕을 쓰러뜨리면 전설 확정권, 헬이라면 신화 선택권!", "📄 결재 서류가 서로 다른 적을 노리고 꿰뚫어요 (상향)"]], ["V186", "11/9", "🧬 아스가르드 대원들이 특성을 갖게 되었습니다."], ["V185", "11/9", "🃏 신화스킨 추가 : 카드 시리즈"], ["V184", "11/9", "🍅 장수 이벤트 추가 · 밸런스 조정", ["🔥 들불 · 🚦 무궁화 꽃이 피었습니다 · 🧺 착한 토마토 호송 이벤트가 생겼어요. 해내면 보물상자!", "🛡️ 어려움 장수 몬스터가 단단해지고, 엘리트는 덜 나와요 (하향)", "🛸 감시 드론·감시함이 더 많은 무수리를 불러요 (하향)", "🎵 배경음이 가끔 멈추던 오류를 고쳤어요", "아리아드네 : 상자는 이제 직접 벌어야 해요, 언니."]], ["V179", "11/9", "🌳 아스가르드 디펜스 카드 나무", ["👥 대원 관리·🧬 대원 조합에서 무기를 누르면 카드가 어떻게 이어지고 어떤 대원과 조합되는지 나무로 보여요", "🔒 아직 열리지 않은 카드는 비밀이에요. 강화하면 하나씩 드러나요"]], ["V175", "11/9", "🌌 로비 아리아드네"], ["V174", "11/9", "🛡️ 아스가르드 디펜스 재개 · 에이전트 어셈블리", ["[아스가르드 디펜스 대원들의 공격로직이 변경되었습니다.] 로직모드를 에이전트 어셈블리, 싱크로율 단위를 1.6으로 변경했습니다.", "🤝 무기끼리 섞는 조합 카드 40장 (2인 30 · 💜 트리오 10)", "🧬 아래 메뉴 [대원 조합]: 무기별 강화 단계 · 카드 나무 · 조합", "🔥 어려움 5부터 스테이지 특성 (속성 저항 · 넉백 저항 · 비행 · 장갑 · 치유 · 장벽), 헬은 1부터", "📮 무기 강화가 Lv1로 초기화되고 쓴 강화 칩·골드는 아리아드네 우편으로 돌려드려요"]], ["V173", "11/9", "🍅 장수 맵이 좀 더 컨셉에 맞게 다듬어졌어요"], ["V172", "11/9", "🔧 아스가르드 디펜스 잠시 점검 중", ["🛗 궤도 엘레베이터 수리 중이에요. 대원들의 공격 로직을 손보는 동안 잠시 입장이 막혀요"]], ["V169", "11/9", "🌿 장수 수풀 숨기 강화", ["🌿 수풀에 숨으면 바로 옆 몬스터도 언니를 놓쳐요 (상향)", "👁️ 보스와 감시자들은 여전히 언니를 찾아요"]], ["V168", "11/9", "⚖️ 장수 밸런스 조정", ["🍅 자폭한 과일이 작게 갈라져요, 경험치를 덜 잃어요 (상향)", "🛸 감시 드론이 훨씬 단단해졌어요 (하향)", "💣 포탑 무수리가 쉬지 않고 쏴요 (하향)", "아리아드네 : 장수에선 숨는 것도 실력이에요, 언니."]], ["V167", "11/9", "💀 상봉 헬 전원 해금", ["💀 상봉 헬에서 15분을 버티면 모든 캐릭터의 상봉 헬이 열려요", "🍅 이미 장수를 연 언니들은 접속하면 바로 열려요"]], ["V166", "11/8", "🍅 시즌3 Act.2 「위기의 토마토 농장」 · 새 맵 장수", ["🗺️ 새 맵 「장수」: 상봉 헬 15분을 버티면 열려요 (보통·어려움, 헬은 곧 열려요)", "✨ 아리아드네가 실체화해서 판 안에서 함께 싸워요", "🎵 장수 전용 배경음", "🖼️ 새 로비 배경 3종: 패스 「빛의 길을 따라 저에게로」·「믿음의 흔적」, 업적 「토마토 농장」", "아리아드네 : 이번엔 통신기 너머가 아니에요, 언니. 바로 옆이에요."]], ["V165", "11/8", "🎯 디펜스 사거리 조정 : 샤넬 미사일, 네온 레이저", ["🚀 샤넬 미사일: 사거리를 조금 늘렸어요 (상향)", "💜 네온 레이저: 사거리를 늘렸어요 (상향)"]], ["V164", "11/8", "🌸 신화스킨 추가 : 체리 시리즈"], ["V163", "11/8", "🖥️ PC 통신기 글씨 크게", ["📡 PC에서는 통신기가 가운데 큰 창으로 열리고 글씨가 커져요"]], ["V162", "11/8", "💠 어려움·헬 강화 칩 보상 증가", ["💠 어려움은 강화 칩 2배, 헬은 3배를 받아요", "아리아드네 : 다섯 명 고루 키우세요. 편애는 단톡방에서도 티 나요."]], ["V161", "11/8", "💠 강화 칩 · 무기 강화 비용 조정", ["💠 대원 관리의 「경험치」가 「강화 칩」으로 이름이 바뀌었어요", "🔧 무기 강화 Lv7부터 강화 칩이 점점 더 많이 들어요 (각성 카드까지 가는 길이 험해져요)", "아리아드네 : 각성은 아무나 하는 게 아니에요. 집착하세요, 사령관님."]], ["V160", "11/8", "🛡️ 아스가르드 디펜스 카드 개편", ["🎴 레벨업 공통 카드는 같은 카드가 여러 번, 한 장 수치는 작게", "🔧 고유 카드는 대원 관리에서 무기를 강화하면 하나씩 해금", "🎁 황금 무수리: 엎어진 카드 뒤집기 · 한 번 더!", "🎲 레벨업 다시 뽑기 한 판 5번", "📱 세로로 긴 폰 화면 꽉 채우기", "🎯 샤넬 미사일 사거리 하향 · 디올 레이저 사거리 상향", "아리아드네 : 하나만 키우는 편애는 이제 안 통해요, 사령관님."]], ["V158", "11/8", "🖼️ 로비 아트 추가"], ["V157", "11/8", "👑 신화 선택권 미리보기(실루엣)"], ["V155", "11/8", "🌌 시즌 3. Act.1 아스가르드 디펜스"], ["V154", "11/8", "⚖️ BPS 조정 : 뇌우, 독차", ["🌧️ 뇌우: 너무 촉촉했던 아름다움을 조정했어요 (하향)", "☠️ 호호 독차: 진화형의 아름다움 점수를 조정했어요 (하향)", "아리아드네 : 둘다 예쁜건 아니잖아요?"]], ["V149", "11/8", "💬 기갈 게시판 오픈"], ["V147", "11/8", "💀 헬모드를 연 적이 있으면 모든 캐릭터의 어려움 모드가 열려요"], ["V146", "11/7", "앙헬 → 밍키 이름 변경"], ["V145", "11/7", "⚖️ 밸런스 조정 : 힐블", ["🧚 요정 소환: 요정들의 치유가 확실히 느껴질 거예요 (상향)", "🧚 힐블: 특성 회복이 더 든든해졌어요 (상향)"]], ["V143", "11/7", "⚖️ 밸런스 조정 : 회복", ["💆 리쥬란: 체력이 차오르는 게 확실히 느껴질 거예요 (상향)", "🍲 순대국: 한 그릇이 더 든든해졌어요 (상향)", "💄 마녀: 처치할 때 회복이 더 자주 와요 (상향)", "🖤💄 마계의 웨딩·립스틱 난도: 진화형의 처치 회복이 좋아졌어요 (상향)", "✨ 천상의 빛기둥: 진화형 회복 구슬이 더 많이 채워 줘요 (상향)", "🧧 부적: 진화형 피흡이 이제 써 보기 좋을 거예요 (상향)"]], ["V140", "11/7", "🐞 버그 수정 : 립스틱 난도", ["은방울꽃 : 립스틱 난도에 버그가 있다는 제보가 들어왔어.", "아리아드네 : 어머, 우리 마녀 언니 무기요? 바로 들여다볼게요 💄", "아리아드네 : 찾았어요. 관객이 셋은 모여야 글씨를 쓰는 도도한 련이라, 보스 혼자 있는 보스방에선 입을 꾹 다물고 있었어요.", "은방울꽃 : 화면 다 덮는 큰 글씨는?", "아리아드네 : 그것도 사실 한 번도 안 나왔어요… 이제 제때 화면을 덮어요. 세기는 그대로예요. 밸런스는 제가 지켜요.", "아리아드네 : 고쳤어요. 이걸로 언니들이 다시 세상을 지킬 수 있게 되었어요. 그런데 누가 제보해준거에요? 람쥐언니일거라 생각해요. 그분의 분석력은 저를 놀랍게 해요."]], ["V138", "11/7", "⚖️ 밸런스 조정: 사진좀요, 우지", ["📸 사진좀요: 남은 보호막이 한눈에 보이게 바뀌었어요. 이제 써 보기 좋을 거예요", "🔫 우지: 사용감이 좋아졌어요. 레벨이 오를수록 손맛이 달라져요", "🔫 우지: 진화하면 양옆 총이 조금 더 신나게 쏴요", "🔊 우지 사운드 이펙트를 새로 만들었어요"]], ["V137", "11/7", "게임 엔진 개선 업데이트 : \"아리아드네\" 인공지능 엔진 모델로 스킨 비쥬얼이 상향되었습니다."], ["V134", "11/7", "⚖️ 이 련은 빼버리기 2회 → 3회", ["✕ 마음에 안 드는 카드를 조금 더 자주 뺄 수 있어요"]], ["V132", "11/7", "🔊 음악·효과음 볼륨 조절 추가"], ["V131", "11/6", "🎵 로비 배경음 변경"], ["V130", "11/6", "📖 위키: ✨ 성격분석 시즌2 (카드를 뒤집어 보세요)"], ["V129", "11/6", "밸런스 패치 : 펫은 주인공이 아니에요. 이 련이 좀 나대서 기강을 좀 잡았어요.", ["🐾 펫: 경험치 줍는 범위와 속도를 조정했어요 (하향)"]], ["V128", "11/6", "📖 위키 캐릭터: 필살기 · ✨ 성격분석 보기"], ["V126", "11/6", "로비 메뉴 접기 · 📖 위키 버튼 · 캐릭터 탭에서 로비 캐릭터 바꾸기"], ["V125", "11/6", "기갈위키최신화", ["📈 스탯 강화: 방어 강화가 조금 더 든든해졌어요 (상향)"]], ["V123", "11/5", "레벨업 카드 빼버리기 추가"], ["V121", "11/5", "신화스킨 추가"], ["V120", "11/5", "긴급소식:왕언니가 불법무면허운전으로 적발되어, 사회교육 및 면허취득 후 다시 합류했어요.", ["👊 왕언니: 진화형 헤드라이트를 조정했어요 (하향)"]], ["V119", "11/5", "💄 BPS(Beauty per Sec) 추가 · 결과창 DPS/BPS/HPS · 🏆 랭킹에 ⚔️ DPS · 💄 BPS 카테고리"], ["V118", "11/5", "📜 패치내역이 생겼어요 · 미션 아이콘을 하나로 합쳤어요"], ["V117", "11/5", "⚖️ 밸런스 패치: 해방하는 5월, 비련의 신부, 왕언니, 공명하는 4월", ["💚 해방하는 5월: 진화하면 기사들이 몸을 던져 지켜 줘요. 대신 공격력은 조정했어요 (하향)", "💔 비련의 신부: 진화형이 적을 끌어와 사용감이 좋아졌어요 (상향)", "👊 왕언니: 진화형이 확 달라졌어요. 이제 써 보기 좋을 거예요 (상향)", "💎 공명하는 4월: 쉴드가 단단해지고, 진화하면 반격이 이어져요 (상향)"]], ["V116", "11/5", "일일 미션이 오전 4시에 바뀌어요"], ["V115", "11/5", "스탯 강화 초기화: 첫 1회는 무료, 이후 50% 환급"], ["V113~V114", "11/5", "👻 멀티에서 친구 무기가 보여요 · 태태영 필살기 연출 새 단장"], ["V111~V112", "11/5", "PC 로비가 부드러워지고, 랭킹 상세 보기 추가 · 멀티 시작 오류 수정"], ["V107~V109", "11/4", "PC 화면 배율 설정 · 로비 캐릭터 대사 · 동물 친구들 그림 오류 수정"], ["V106", "11/4", "🏠 로비 · 🎫 시즌 패스 · 📅 미션 · 🎉 출석 · 🏆 헬 랭킹"], ["V105", "11/4", "📮 우편함"], ["V100~V101", "11/3", "멀티 멈춤 오류 수정 · PC 렉 개선"], ["V97~V99", "11/2~3", "필살기 해금 오류 수정 · 신화 입장 연출 복구 + 태태영 Ⅲ"], ["V93~V96", "11/2", "👥 친구와 함께하기(2인 협동) · 모바일 캐릭터 선택 화면 개선"], ["V88~V92", "11/2", "🌐 기갈 서바이버 사이트·앱 오픈 · 로그인·계정 저장"]];
 function patchM(){try{localStorage.setItem('gs_patch',PATCH[0][0])}catch(e){}const o=ovM(`<div class="lbM"><h3>📜 패치내역</h3><div class="lbPatch">${PATCH.map((p,i)=>`<div class="${i?'':'new'}${p[3]?' pd':''}"><b>${p[0]}<small>${p[1]}${p[3]?` <i class="pdA">${i?'▸':'▾'}</i>`:''}</small></b><span>${p[2]}</span>${p[3]?`<ul${i?' hidden':''}>${p[3].map(t=>`<li>${t}</li>`).join('')}</ul>`:''}</div>`).join('')}</div><div class="btns"><button type="button" class="ghost" id="lbX">닫기</button></div></div>`);o.querySelectorAll('.lbPatch .pd').forEach(d=>d.onclick=()=>{const u=d.querySelector('ul'),A=d.querySelector('.pdA');u.hidden=!u.hidden;A.textContent=u.hidden?'▸':'▾'});badges();return o}
 // ---- 공용 모달 ----
 function ovM(html){let o=document.getElementById('lbOv');if(o)o.remove();o=document.createElement('div');o.className='ov';o.id='lbOv';o.innerHTML=`<div class="modal">${html}</div>`;document.body.appendChild(o);o.addEventListener('pointerdown',e=>{if(e.target===o)o.remove()});const x=o.querySelector('#lbX');if(x)x.onclick=()=>o.remove();return o}
@@ -8227,7 +8481,7 @@ window.ghDraw=fns=>{if(!live()||!GH.g||GH.real!==G)return;const half=(SAVE.mpFx|
 // 가중치: [기본형, 진화형] (사용자 승인 표)
 const BPW={lipstick:[2,6],laser:[3,5.5],heart:[2.5,5],rose:[2.5,5],pillar:[2.5,4.5],diamond:[2.5,4.5],veil:[2,4],cotton:[2,4],pachinko:[1.5,4],cblade:[1.5,4],pearl:[2,4],
  fairy:[2,3.5],emerald:[2,3.5],sapphire:[2,3.5],bolt:[1.5,3],poison:[1,1.5],docs:[.5,1.5],uzi:[.5,1.5],
- kkheart:[2,4.5],meteor:[2,4],wing:[2,4],pet:[1.5,4],bride:[2,3.5],nail:[1.5,3.5],unnie:[1,3],rain:[1,1.5],drone:[1,3],ice:[1,2.5],photo:[1.5,2.5],talis:[1,2],bag:[2,8],ghost:[.5,1.5],soju:[.5,1.5]};
+ kkheart:[2,4.5],meteor:[2,4],wing:[2,4],pet:[1.5,4],bride:[2,3.5],nail:[1.5,3.5],unnie:[1,3],rain:[1,1.5],drone:[1,3],ice:[1,2.5],photo:[1.5,2.5],talis:[1,2],bag:[2,8],ghost:[.5,1.5],soju:[.5,1.5],ruby:[2,4],amethyst:[1.5,3.5]};
 const BP_HID=8,BP_EVO=20000,BP_ULT=8000,BP_HX=200000,BP_TF=[600,900,1200];
 const ZK={cland:'cotton',kiss:'lipstick',pool:'ghost',mwarn:'meteor',soju:'soju',moon:'pet',wedding:'_ult'};
 const bpKey=k=>HXR(k)?HXR(k):WP[k]?k:DPS_ALIAS[k]||(k==='ult'||k==='kiss'?'_ult':'_etc');
@@ -8328,7 +8582,7 @@ const trTxt=R=>[R.rs&&`${R.rs[2]} ${R.rs[1]} 저항`,R.kb&&'⚓ 넉백 저항',R
 const SOF=id=>STAGES.find(q=>q.id===id)||STAGES[0];
 const rnd=(a,b)=>a+Math.random()*(b-a),pick=a=>a[Math.floor(Math.random()*a.length)],cl=(v,a,b)=>v<a?a:v>b?b:v;
 const nick=id=>{const c=CHAR.find(q=>q.id===id);return c?c.nick:id};
-const TDS=()=>{SAVE.td=SAVE.td||{};const t=SAVE.td;t.un=t.un||[];t.best=t.best||{};t.st=t.st||{};t.od=t.od||0;t.sl=t.sl||0;if(!t.s60)stgMigrate(t);if(!t.wl){t.wl={};const M=[1,5,10,12,16,20,40];for(const id in (t.up||{}))t.wl[id]=M[Math.min(6,t.up[id]||0)]||1}if(!t.rf1&&typeof tdRefund==='function')tdRefund();return t};
+const TDS=()=>{SAVE.td=SAVE.td||{};const t=SAVE.td;t.un=t.un||[];t.best=t.best||{};t.st=t.st||{};t.od=t.od||0;t.sl=t.sl||0;if(!t.s60)stgMigrate(t);if(!t.wl){t.wl={};const M=[1,5,10,12,16,20,40];for(const id in (t.up||{}))t.wl[id]=M[Math.min(6,t.up[id]||0)]||1}if(!t.rf1&&typeof tdRefund==='function')tdRefund();if(!t.rf3&&typeof tdRefund3==='function')tdRefund3();return t};
 /* 예전 23스테이지(보통 10·어려움 10·헬 3) → 60스테이지: 예전 n번째 = 새 2n−1번째, 헬 1·2·3 = 새 헬 1·7·13. 깬 스테이지 이전은 모두 깬 것으로 */
 function stgMigrate(t){t.s60=1;const ob=t.best||{},os=t.st||{},nb={},ns={},W1=22;
   const map=(d,n)=>d===3?[1,7,13][n-1]:2*n-1;
@@ -8474,7 +8728,7 @@ function stApply(r){hkRun(r);const td=TDS(),s=stSum(td.sl||0);r.hp=r.hpMax=V2?ln
 const WLMAX=40,wlOf=id=>Math.max(1,(TDS().wl||{})[id]||1);
 const /* 11-11 사용자: 강화 레벨당 +3% → +6% (쁘니 피드백: 세지는 티) */wlMul=id=>{const l=wlOf(id);return(1+.06*(l-1))*(l>=10?1.1:1)*(l>=30?1.1:1)*(l>=40?1.1:1)}/* 11-08 사용자 A안: 레벨당 +10%, 특성 +10% */;
 /* 11-08 사용자: 강화 칩은 무기마다 따로, Lv6까지는 싸고(3~7) Lv7부터 15%씩 비싸짐 — 각성(Lv34)까지 가는 길을 어렵게 */
-/* 11-09 사용자: Lv30까지 골드 약 6.5만 (예전 1.3만, ×5) — 이미 올린 Lv는 그대로 */const wlCost=l=>({c:l<6?2+l:Math.round(10*Math.pow(1.15,l-6)),g:50*l});/* 11-11 사용자: 강화 골드 1/3 (150→50) */
+/* 11-09 사용자: Lv30까지 골드 약 6.5만 (예전 1.3만, ×5) — 이미 올린 Lv는 그대로 *//* 11-18 사용자(D안, 가벼운 강화): 칩 Lv1~9는 (2+Lv)의 절반, Lv10부터 레벨당 +7%, 골드 15×Lv — 이미 키운 무기는 차액을 우편으로 환급(tdRefund3) */const wlCost=l=>({c:l<10?Math.max(1,Math.round((2+l)*.5)):Math.round(6*Math.pow(1.07,l-9)),g:15*l}),wlCostOld=l=>({c:l<6?2+l:Math.round(10*Math.pow(1.15,l-6)),g:50*l});/* 11-11 사용자: 강화 골드 1/3 (150→50) */
 const WLT=[[10,'피해 +10%'],[20,'시작 무기로 고르면 랭크1 카드 1장을 받고 시작'],[30,'피해 +10%'],[40,'💜 희귀 카드 확률 2배 + 피해 +10%']];
 const lvSum=m=>m.lv.reduce((a,b)=>a+b,0);
 const ORDER=[2,1,3,0,4];/* 리더는 가운데 칸 */
@@ -10468,8 +10722,10 @@ window.TPASS={TP,live:tpLive,lv:tpLv,s:tpS,amt:tpAmt,pick:tpPick,un:()=>w2Un(),n
   ms:()=>{const M=tpMs();return M?{dl:M.dl.map(q=>Object.assign({n:TPD[q.k].n,g:TPD[q.k].g,x:TP.MXD},q)),wl:M.wl.map(q=>Object.assign({n:TPW[q.k].n,g:TPW[q.k].g,x:TP.MXW},q))}:{dl:[],wl:[]}},
   msCanN(){if(!tpLive())return 0;const M=tpMs();if(!M)return 0;return [...M.dl,...M.wl].filter(q=>!q.got&&q.v>=(TPD[q.k]||TPW[q.k]).g).length},
   msClaim(k,wk){const M=tpMs(),q=(wk?M.wl:M.dl).find(x=>x.k===k),D=wk?TPW[k]:TPD[k];if(!q||q.got||q.v<D.g)return 0;q.got=1;const x=tpAdd(wk?TP.MXW:TP.MXD);try{persist()}catch(e){}return x}};
+/* 11-18 강화 비용 인하(D안) 소급 환급: 레벨은 그대로, 옛 누적 비용 − 새 누적 비용을 무기별 칩·골드로 한 번 우편 지급 */
+function tdRefund3(){if(typeof SAVE==='undefined'||!SAVE||!SAVE.td)return null;const t=SAVE.td;if(t.rf3)return t.rf3;const wl=t.wl||{};const rows=[],cd={};let g=0;for(const id in wl){const L=Math.min(WLMAX,wl[id]||1);if(L<=1||!W2N[id])continue;let c=0,x=0;for(let l=1;l<L;l++){const o=wlCostOld(l),n=wlCost(l);c+=o.c-n.c;x+=o.g-n.g}if(c<=0&&x<=0)continue;cd[id]=c;g+=x;rows.push([id,L,c,x])}t.rf3={at:Date.now(),cd,g,rows};try{persist()}catch(e){}return t.rf3}
 function tdRefund2(){if(typeof SAVE==='undefined'||!SAVE||!SAVE.td)return null;const t=SAVE.td;if(t.rf2)return t.rf2;const wl=t.wl||{};let g=0;const rows=[];for(const id in wl){const L=Math.min(WLMAX,wl[id]||1);if(L<=1||!W2N[id])continue;let x=0;for(let l=1;l<L;l++)x+=100*l;g+=x;rows.push([id,L,x])}t.rf2={at:Date.now(),g,rows};try{persist()}catch(e){}return t.rf2}
-window.__tdMails=()=>{const out=[];const r=tdRefund();const r2=tdRefund2();if(r2&&r2.g>0)out.push({id:'ari_td_rf2',from:'아리아드네',title:'💰 강화 골드 가격 인하 환급',body:'무기 강화 골드가 1/3로 내려갔어요, 언니. 이미 쓴 만큼 차액을 돌려드려요.\n'+r2.rows.map(([id,L,x])=>`${W2N[id][0]}(${nick(id)}) Lv${L} · 🪙${x.toLocaleString()}`).join('\n'),g:r2.g,at:r2.at,exp:r2.at+30*864e5});if(!r||!r.rows.length)return out;out.push({id:'ari_td_rf1',from:'아리아드네',title:'🛗 궤도 엘레베이터 수리 보상',
+window.__tdMails=()=>{const out=[];const r=tdRefund();const r2=tdRefund2(),r3=tdRefund3();if(r2&&r2.g>0)out.push({id:'ari_td_rf2',from:'아리아드네',title:'💰 강화 골드 가격 인하 환급',body:'무기 강화 골드가 1/3로 내려갔어요, 언니. 이미 쓴 만큼 차액을 돌려드려요.\n'+r2.rows.map(([id,L,x])=>`${W2N[id][0]}(${nick(id)}) Lv${L} · 🪙${x.toLocaleString()}`).join('\n'),g:r2.g,at:r2.at,exp:r2.at+30*864e5});if(r3&&r3.rows.length)out.push({id:'ari_td_rf3',from:'아리아드네',title:'💠 강화 비용 인하 환급',body:'무기 강화가 훨씬 가벼워졌어요, 언니. 이미 쓴 만큼 차액을 칩과 골드로 돌려드려요.\n'+r3.rows.map(([id,L,c,x])=>`${W2N[id][0]}(${nick(id)}) Lv${L} · 💠${c} · 🪙${x.toLocaleString()}`).join('\n'),g:r3.g,cd:r3.cd,at:r3.at,exp:r3.at+30*864e5});if(!r||!r.rows.length)return out;out.push({id:'ari_td_rf1',from:'아리아드네',title:'🛗 궤도 엘레베이터 수리 보상',
   body:'수리하면서 대원들 공격 로직을 새로 짰어요. 그래서 무기 강화를 모두 Lv1로 돌려놨어요, 언니. 쓴 재료는 한 톨도 안 빼고 돌려드려요.\n'+r.rows.map(([id,L,c])=>`${W2N[id][0]}(${nick(id)}) Lv${L} → Lv1 · 💠${c}`).join('\n'),
   g:r.g,cd:r.cd,at:r.at,exp:r.at+30*864e5});return out};
 window.TD={__t:{planWave:w=>planWave(w),spawn:(...a)=>spawn(...a),offers:n=>w2Offers(n),card:c=>w2Card(c),cc:(m,k)=>cc(m,k),req:(id,k)=>w2Req(id,k),keys:id=>w2Keys(id),rk:(id,k)=>w2Rk(id,k),max:(id,k)=>w2Max(k,id)},cbKeys:()=>W2CB.map(c=>c.k),cbFxTest:(k,x,y)=>CBFX[k]&&CBFX[k]({x,y,r:14}),dumpK:()=>{const o={};for(const id in W2K){o[id]={name:W2N[id][0],nick:nick(id),keys:Object.keys(W2K[id]).map(k=>[k,W2K[id][k][0],W2K[id][k][1],w2Rk(id,k)[0],w2Rk(id,k)[1],w2Pre(id,k)||'',w2UL(id,k)]),tr:W2TR[id]||[]}}return o},ul:id=>w2ULm(id),ari:k=>ari(k,{force:1}),w2Lv:m=>w2Lv(m),w2Dm:m=>w2Dm(m),cards(){openCards()},open,close,enter,lab(){labApply()},get run(){return T},get bgm(){return bgCur},start(stg,ld){build();T=newRun(stg||'1-1',ld||TDS().un[0]||'박준형');return T},

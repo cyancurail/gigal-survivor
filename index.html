@@ -5819,13 +5819,14 @@ Object.assign(WU,{ruby(w,dt){juRuby(w,dt)},amethyst(w,dt){juAmeth(w,dt)}});
 // 더 느려지거나(FXQ<.5) WebGL이 없으면 도트·그라데이션 방식으로 자동 대체.
 const FXG={c:null,gl:null,ok:null,U:{},off:0};
 const FXG_FS=`precision mediump float;
-uniform vec2 res;uniform float t;uniform vec4 r0,r1,r2;uniform vec4 af[4];uniform float an;
+uniform vec2 res;uniform float t;uniform vec4 r0,r1,r2;uniform vec4 af[4];uniform float an;uniform vec4 th0,th1,th2;uniform vec4 thh[8];uniform float thn;
 float h(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
 float n2(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(h(i),h(i+vec2(1,0)),f.x),mix(h(i+vec2(0,1)),h(i+vec2(1,1)),f.x),f.y);}
 float fbm(vec2 p){float v=0.,a=.5;for(int i=0;i<4;i++){v+=a*n2(p);p=p*2.03+vec2(1.7,9.2);a*=.5;}return v;}
 float b2(vec2 a){a=floor(a);return fract(a.x*.5+a.y*a.y*.75);}
 float bay(vec2 a){return b2(.5*a)*.25+b2(a);}
 vec3 rampR(float l){return l<.5?vec3(0.):l<1.5?vec3(.35,.02,.06):l<2.5?vec3(.72,.06,.08):l<3.5?vec3(.96,.32,.08):l<4.5?vec3(1.,.62,.16):l<5.5?vec3(1.,.88,.46):vec3(1.,1.,.9);}
+vec3 candy(float h){h=mod(floor(h),7.);return h<.5?vec3(1.,.29,.35):h<1.5?vec3(1.,.6,.16):h<2.5?vec3(1.,.88,.24):h<3.5?vec3(.35,.85,.29):h<4.5?vec3(.24,.78,1.):h<5.5?vec3(.48,.42,1.):vec3(.96,.24,.82);}
 vec3 rampA(float l){return l<.5?vec3(0.):l<1.5?vec3(.10,.03,.19):l<2.5?vec3(.24,.07,.44):l<3.5?vec3(.42,.17,.75):l<4.5?vec3(.61,.36,.94):vec3(.84,.70,1.);}
 void main(){vec2 fc=vec2(gl_FragCoord.x,res.y-gl_FragCoord.y);float bd=bay(fc);vec3 col=vec3(0.);
  if(r2.z>.5){vec2 q=fc-r0.xy;q.y/=r0.w;float R=r0.z,r=length(q)/R,a=atan(q.y,q.x),heat=0.,glow=0.;
@@ -5845,22 +5846,34 @@ void main(){vec2 fc=vec2(gl_FragCoord.x,res.y-gl_FragCoord.y);float bd=bay(fc);v
   float band=smoothstep(2.5,1.,r)*smoothstep(.25,.9,r);
   I+=(fil*band*1.25+exp(-r*r*5.)*.55*(.6+.4*sin(t*5.)))*f.w*1.15;}
  if(an>.5){col+=rampA(floor(clamp(clamp(I,0.,1.)*5.+bd-.5,0.,5.)));}
+ if(th2.w>.5){vec2 q=fc-th0.xy;float d=length(q),a=atan(q.y,q.x),vr=th0.z,R=th0.w,k=th2.z,rip=0.;
+  for(int i=0;i<8;i++){if(float(i)>=thn)break;vec4 hh=thh[i];float da=abs(mod(a-hh.x+3.14159,6.28318)-3.14159);rip+=sin(da*R/(9.*k)-hh.y*16.)*exp(-da*da*30.)*(1.-hh.y)*hh.z;}
+  float rr=d-vr-rip*8.*k,w=7.*k*(1.+th1.y*1.5),rim=(exp(-rr*rr/(w*w))*1.6+exp(-abs(rr)/(16.*k))*.45)*th1.x,core=exp(-rr*rr/(w*w*.08))*th1.x;
+  float hu=a/6.28318*7.+th2.y*1.4+d/max(vr,1.)*1.5;vec3 cc=candy(hu+bd*.9);
+  float film=0.;if(d<vr){float u=d/max(vr,1.);float n=fbm(q/max(vr,1.)*2.6+vec2(t*.35,-t*.25));film=(smoothstep(.45,1.,u)*.55+.22*n)*th2.x;}
+  vec3 fc2=candy(n2(q/max(vr,1.)*1.8+t*.2)*7.+th2.y*2.+bd*.9);
+  float sr=th1.z,sh=sr>0.?exp(-pow((d-sr)/(7.*k),2.))*th1.w:0.;
+  float fl=th1.y*exp(-d/max(R*.55,1.));
+  float I=rim*1.1+sh*.9;I=floor(clamp(I,0.,1.)*4.+bd*.9)/4.;float F=floor(clamp(film,0.,1.)*4.+bd*.9)/4.;
+  col+=cc*I*1.15+vec3(1.)*floor(clamp(core*.8+fl,0.,1.)*4.+bd*.9)/4.+fc2*F*.7;}
  gl_FragColor=vec4(min(col,vec3(1.)),1.);}`;
 function fxgInit(){if(FXG.ok!==null)return FXG.ok;FXG.ok=false;try{const c=document.createElement('canvas'),gl=c.getContext('webgl',{alpha:false,antialias:false,depth:false,stencil:false,premultipliedAlpha:false,preserveDrawingBuffer:false,powerPreference:'low-power'});if(!gl)return false;
   const sh=(tp,s)=>{const o=gl.createShader(tp);gl.shaderSource(o,s);gl.compileShader(o);if(!gl.getShaderParameter(o,gl.COMPILE_STATUS))throw new Error(gl.getShaderInfoLog(o));return o};
   const pr=gl.createProgram();gl.attachShader(pr,sh(gl.VERTEX_SHADER,'attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}'));gl.attachShader(pr,sh(gl.FRAGMENT_SHADER,FXG_FS));gl.linkProgram(pr);if(!gl.getProgramParameter(pr,gl.LINK_STATUS))throw new Error('link');gl.useProgram(pr);
   const b=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);const L=gl.getAttribLocation(pr,'p');gl.enableVertexAttribArray(L);gl.vertexAttribPointer(L,2,gl.FLOAT,false,0,0);
-  for(const k of ['res','t','r0','r1','r2','af','an'])FXG.U[k]=gl.getUniformLocation(pr,k);
+  for(const k of ['res','t','r0','r1','r2','af','an','th0','th1','th2','thh','thn'])FXG.U[k]=gl.getUniformLocation(pr,k);
   c.addEventListener('webglcontextlost',e=>{e.preventDefault();FXG.ok=false});FXG.c=c;FXG.gl=gl;FXG.ok=true}catch(e){FXG.ok=false}return FXG.ok}
 // 자동 하향: 전체 fps(FXQ)와 셰이더 자체 비용(평균 6ms 초과)을 함께 봐요. ½ → ¼ → 도트 대체(이번 판 동안)
 function fxgQ(){const f=typeof FXQ!=='number'||FXQ>=.75?0:FXQ>=.5?1:2,l=Math.max(f,FXG.lv||0);return l===0?.5:l===1?.25:0}
 function fxgCost(ms){FXG.ema=(FXG.ema||0)*.9+ms*.1;FXG.n=(FXG.n||0)+1;if(FXG.n>45&&FXG.ema>6&&(FXG.lv||0)<2){FXG.lv=(FXG.lv||0)+1;FXG.ema=0;FXG.n=0}}
 function fxgS(x,y,q){return[(innerWidth/2+(x-G.p.x)*Z)*q,(innerHeight/2+(y-G.p.y)*Z)*q]}
 // rb: {x,y,R,n,rot,amp,kr,fin,finA} 또는 null · fs: [{x,y,R,kr}] (자수정 진화 중력장)
-function fxgDraw(rb,fs){const q=fxgQ();if(!q||!fxgInit())return false;const t0=performance.now();const gl=FXG.gl,c=FXG.c,U=FXG.U,W=Math.max(2,Math.round(innerWidth*q)),H=Math.max(2,Math.round(innerHeight*q));
+function fxgDraw(rb,fs,th){const q=fxgQ();if(!q||!fxgInit())return false;const t0=performance.now();const gl=FXG.gl,c=FXG.c,U=FXG.U,W=Math.max(2,Math.round(innerWidth*q)),H=Math.max(2,Math.round(innerHeight*q));
   if(c.width!==W||c.height!==H){c.width=W;c.height=H}gl.viewport(0,0,W,H);gl.uniform2f(U.res,W,H);gl.uniform1f(U.t,G.t%600);
   if(rb){const [sx,sy]=fxgS(rb.x,rb.y,q);gl.uniform4f(U.r0,sx,sy,rb.R*Z*q,JR_YS);gl.uniform4f(U.r1,rb.n,rb.rot,rb.amp,rb.kr);gl.uniform4f(U.r2,rb.fin,rb.finA,1,0)}else gl.uniform4f(U.r2,-1,0,0,0);
   const A=new Float32Array(16);let n=0;for(const f of fs){if(n>=4)break;const [sx,sy]=fxgS(f.x,f.y,q);A.set([sx,sy,f.R*.5*(.35+.65*f.kr)*Z*q,f.kr],n*4);n++}gl.uniform4fv(U.af,A);gl.uniform1f(U.an,n);
+  /* 11-18 테미스 방벽 셰이더: th={x,y,vr,R,a,fl,sr,sa,film,hits:[[ang,age,str]]} */
+  if(th){const [sx,sy]=fxgS(th.x,th.y,q),k=Z*q;gl.uniform4f(U.th0,sx,sy,th.vr*k,th.R*k);gl.uniform4f(U.th1,th.a,th.fl,th.sr*k,th.sa);gl.uniform4f(U.th2,th.film,G.t*.6,k,1);const H=new Float32Array(32);let m=0;for(const h of th.hits){if(m>=8)break;H.set([h[0],h[1],h[2],0],m*4);m++}gl.uniform4fv(U.thh,H);gl.uniform1f(U.thn,m)}else gl.uniform4f(U.th2,0,0,0,0);
   gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
   ctx.save();ctx.setTransform(DPR,0,0,DPR,0,0);ctx.globalCompositeOperation='screen';ctx.imageSmoothingEnabled=false;ctx.drawImage(c,0,0,innerWidth,innerHeight);ctx.restore();fxgCost(performance.now()-t0);return true}
 // 대체(도트·그라데이션) 그리기
@@ -5892,7 +5905,8 @@ function jgUnder(){if(!G.weapons)return;let rb=null;const fs=[];
   for(const w of G.weapons){const st=w.st;
     if(w.k==='ruby'&&w.evo&&st.evd&&st.cg){const f=st.fin,R=jrRad(w);if(st.kr>0||f)rb={x:f?f.x:st.cg.x,y:f?f.y:st.cg.y,R,n:jrN(),rot:(st.ra+15)*Math.PI/180,amp:st.amp||0,kr:st.kr||0,fin:f?jrFinR(f)/R:-1,finA:f?Math.min(1,f.t/.1)*(1-jrSm((f.t-1.1)/.5)):0};if(f&&st.kr>0){rb.x=st.cg.x;rb.y=st.cg.y}}
     if(w.k==='amethyst'&&st.cl){const R=jaR(w),evd=w.evo&&st.evd;for(const c of st.cl){if(c.ph!=='on')continue;if(evd)fs.push({x:c.x,y:c.y,R,kr:c.kr});else jaBaseField(c,R)}}}
-  if(rb||fs.length){if(!fxgDraw(rb,fs))fxgFallback(rb,fs)}
+  const TS=G.agThe,th=TS&&TS.thS&&!G.bot?TS.thS:null;if(TS)TS.shd=false;
+  if(rb||fs.length||th){if(fxgDraw(rb,fs,th)){if(th)TS.shd=true}else if(rb||fs.length)fxgFallback(rb,fs)}
   for(const w of G.weapons){if(w.k==='ruby'&&w.evo&&w.st.evd&&w.st.cg)jrGround(w)}}
 // 일반형 자수정 원: 물귀신처럼 바닥에 그려지는 투박한 보라 원 + 빨려 드는 도트
 function jaBaseField(c,R){const kr=c.kr,RY=R*.5;ctx.save();ctx.globalAlpha=.16*kr;ctx.fillStyle='#6a3dbf';ctx.beginPath();ctx.ellipse(c.x,c.y,R*(.6+.4*kr),RY*(.6+.4*kr),0,0,7);ctx.fill();
@@ -11544,18 +11558,25 @@ function panDraw(){const S=G.agPan;if(!S||S.x===undefined)return;const im=img('p
 
 /* ---------- 🛡️ 테미스 (방벽전개함): 언니 위에 멈춰 고리 선체 회전 · 육각 방벽(어려움 12초/헬 8초) · 적 밀어내기·탄 차단 ---------- */
 const THE_CANDY=['#ff4a5a','#ff9a2a','#ffe03c','#5ad84a','#3cc8ff','#7a6cff','#f53cd1'],THE_INK=140;/* 바깥 어둠 진하기(0~255) */
+function theHit(a,k){const S=G.agThe;if(!S)return;const H=S.hits||(S.hits=[]);H.push([a,G.t,k]);if(H.length>8)H.shift()}
 function theStart(){img('themis');G.agThe={t:0,D:G.hell?8:12,said:0}}
 function theTick(dt){const S=G.agThe;if(!S)return;const p=G.p;S.t+=dt;const t=S.t,B0=3.4,B1=B0+S.D;
   /* 11-18 사용자: pixelfx iris(candy) 그대로 — 화면 가장자리에서 언니 주변으로 조여들어 비추고, 끝나면 닫혔다가 섬광과 함께 열림. 판정은 고리가 맺힌 뒤부터 */S.on=cl((t-B0-.62)/.1)*(1-cl((t-B1)/.09));S.R=190;
   if(!G.bot&&window.PFX_IRIS&&t>=B0){const X=PFX_IRIS;if(!S.fx){S.fx=X.createFx(X.iris,{palette:THE_CANDY,hold:S.D-.62});S.fr=X.createFrame(320,320);S.cv=document.createElement('canvas');S.cv.width=S.cv.height=320;S.cx=S.cv.getContext('2d');S.id=S.cx.createImageData(320,320);S.fx.update(t-B0)}else S.fx.update(dt)}
+  /* 11-18 셰이더 방벽 상태(그리기는 jgUnder→fxgDraw). 셰이더가 안 되면 위 iris 도트로 대체 */
+  if(!G.bot){const RB=Math.hypot(VW,VH)/2+60,u=t-B0,x=t-B1,R=190,io=v=>v<.5?4*v*v*v:1-Math.pow(-2*v+2,3)/2;let vr=0,a=0,fl=0,sr=0,sa=0,film=0;
+    if(u>=0){if(u<.62){vr=lp(RB,R,io(u/.62));a=1;film=.25*u/.62}else if(x<0){vr=R+Math.sin(u*3)*2;a=1;film=1;const v=u-.62;fl=v<.35?1-v/.35:0;if(v<.6){sr=R*(1+v*1.4);sa=1-v/.6}}
+      else if(x<.09){vr=R*(1-Math.pow(x/.09,3));a=1;film=1-x/.09}else if(x<.3){vr=0;a=0;fl=x>.26?1:0}else if(x<.85){const v=(x-.3)/.55;vr=RB*(1-Math.pow(1-v,4));a=1-v;fl=v<.3?1-v/.3:0}}
+    S.vr=vr;S.thS=(u>=0&&x<.85)?{x:p.x,y:p.y,vr,R,a,fl,sr,sa,film,hits:(S.hits||[]).map(h=>[h[0],(G.t-h[1])/.55,h[2]]).filter(h=>h[1]<1)}:null}
   if(!S.said&&t>B0+1){S.said=1;quest('🛡️ 아이기스 테미스','이 선 안으로는 아무것도 못 들어와요.')}
   if(!S.bye&&t>B1+.4){S.bye=1;quest('🛡️ 아이기스 테미스','방벽 해제. 복귀 후 에너지 재충전 요망. 조금만 기다려줘요 언니.')}
-  if(S.on>.5){const R=S.R;for(const e of G.enemies){if(e.dead||e.fixed)continue;const dx=e.x-p.x,dy=e.y-p.y,d=Math.hypot(dx,dy)||1,lim=R+(e.r||10);if(d<lim){if(e.boss){e.x=p.x+dx/d*lim;e.y=p.y+dy/d*lim}else{e.x=p.x+dx/d*lim;e.y=p.y+dy/d*lim;e.kx=(e.kx||0)+dx/d*160;e.ky=(e.ky||0)+dy/d*160}}}
-    const eb=G.eb;if(eb)for(let i=eb.length-1;i>=0;i--){const b=eb[i];if(Math.hypot(b.x-p.x,b.y-p.y)<S.R+10){if(!G.bot&&Math.random()<.3)sparks(b.x,b.y,3,['#9fe8ff','#ffffff'],120,.2,2);eb.splice(i,1)}}}
+  if(S.on>.5){const R=S.R;for(const e of G.enemies){if(e.dead||e.fixed)continue;const dx=e.x-p.x,dy=e.y-p.y,d=Math.hypot(dx,dy)||1,lim=R+(e.r||10);if(d<lim){if(!G.bot&&(e.thH||0)<G.t){e.thH=G.t+.7;theHit(Math.atan2(dy,dx),e.boss?1:.6)}if(e.boss){e.x=p.x+dx/d*lim;e.y=p.y+dy/d*lim}else{e.x=p.x+dx/d*lim;e.y=p.y+dy/d*lim;e.kx=(e.kx||0)+dx/d*160;e.ky=(e.ky||0)+dy/d*160}}}
+    const eb=G.eb;if(eb)for(let i=eb.length-1;i>=0;i--){const b=eb[i];if(Math.hypot(b.x-p.x,b.y-p.y)<S.R+10){if(!G.bot){theHit(Math.atan2(b.y-p.y,b.x-p.x),.8);if(Math.random()<.3)sparks(b.x,b.y,3,['#ffffff',THE_CANDY[(Math.random()*7)|0]],120,.2,2)}eb.splice(i,1)}}}
   if(!G.bot&&t>1&&t<B1+2.2){const k=ez(cl((t-1.2)/2)),lv=ez(cl((t-B1-.5)/1.6)),alt=lp(700,260,k)+lv*800,dw=220*(lp(1.3,1,k)+lv*.3);for(const o of [-.3,0,.3])agEmit(p.x+o*dw,p.y-alt*.9+dw*.2,(Math.random()-.5)*30,100+Math.random()*60,.3,6,ECOL())}
   if(t>B1+2.4)G.agThe=null}
 function theDraw(){const S=G.agThe;if(!S)return;const im=img('themis');if(!im.width)return;const p=G.p,t=S.t,B1=3.4+S.D,k=ez(cl((t-1.2)/2)),lv=ez(cl((t-B1-.5)/1.6)),alt=lp(700,260,k)+lv*800,sc=lp(1.3,1,k)+lv*.3,dw=220*sc,X=p.x,Y=p.y-alt*.9,fi=Math.floor(t*5)%16;
-  if(S.fx&&S.fx.t<S.D+1.3){const X=PFX_IRIS,F=S.fr,d=S.id.data;X.clearFrame(F);S.fx.draw(F);X.composite(F,d,null);
+  if(S.shd&&S.thS){const vr=S.vr||0,x=S.t-B1,dim=THE_INK/255*(x<.3?1:Math.max(0,1-(x-.3)/.55))*Math.min(1,(S.t-3.4)/.3);if(dim>0){const M=4000;ctx.save();ctx.fillStyle=`rgba(11,10,16,${dim})`;ctx.beginPath();ctx.rect(p.x-M,p.y-M,2*M,2*M);if(vr>1)ctx.arc(p.x,p.y,vr,0,6.283,true);ctx.fill('evenodd');ctx.restore()}}
+  else if(S.fx&&S.fx.t<S.D+1.3){const X=PFX_IRIS,F=S.fr,d=S.id.data;X.clearFrame(F);S.fx.draw(F);X.composite(F,d,null);
     for(let q=0;q<d.length;q+=4)if(d[q+3]===255&&d[q]===11&&d[q+1]===10&&d[q+2]===16)d[q+3]=THE_INK;S.cx.putImageData(S.id,0,0);
     const k=190/24,W=320*k,x0=p.x-W/2,y0=p.y-W/2,sm=ctx.imageSmoothingEnabled;ctx.save();ctx.imageSmoothingEnabled=false;ctx.drawImage(S.cv,x0,y0,W,W);
     if(S.fx.t<S.D+.9){ctx.fillStyle=`rgba(11,10,16,${THE_INK/255})`;const M=3000;ctx.fillRect(x0-M,y0-M,W+2*M,M);ctx.fillRect(x0-M,y0+W,W+2*M,M);ctx.fillRect(x0-M,y0,M,W);ctx.fillRect(x0+W,y0,M,W)}

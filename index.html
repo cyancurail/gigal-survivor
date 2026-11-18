@@ -5852,12 +5852,12 @@ void main(){vec2 fc=vec2(gl_FragCoord.x,res.y-gl_FragCoord.y);float bd=bay(fc);v
   vec2 ag=abs(hg);float hd=max(dot(ag,vec2(.5,.8660254)),ag.x),dc=length(cc),ac=atan(cc.y,cc.x);
   float edge=smoothstep(.36,.47,hd)*(1.-smoothstep(.49,.5,hd)),band=smoothstep(vr-1.3*S,vr-.2*S,dc)*step(dc,vr),inn=step(dc,vr);
   float hit=0.;for(int i=0;i<8;i++){if(float(i)>=thn)break;vec4 h=thh[i];float da=abs(mod(ac-h.x+3.14159,6.28318)-3.14159);hit+=exp(-da*da*60.)*(1.-h.y)*h.z*smoothstep(vr-1.6*S,vr-.3*S,dc);}
-  float sw=pow(.5+.5*sin(dot(cc,vec2(.8,.6))/max(vr,1.)*3.-t*2.2),6.)*.35;
-  float pan=inn*(.03*th2.x+band*.2+sw*th2.x*.3+hit*.45)+th1.y*inn*.35;
-  float ln=edge*inn*(.16*th2.x+band*1.+hit*1.+th1.y*.8);
+  
+  /* 11-18 사용자: 깜빡임 없애기 — 훑는 빛·부딪힘 반짝·디더 제거, 고르게 */float pan=inn*(.04*th2.x+band*.2)+th1.y*inn*.35;
+  float ln=edge*inn*(.18*th2.x+band*.9+th1.y*.8);
   float sr=th1.z,sh=sr>0.?exp(-pow((length(q)-sr)/(6.*k),2.))*th1.w*.8:0.;
-  float I=clamp((pan+ln+sh)*th1.x*(.82+.28*clamp(q.y/max(vr,1.),-1.,1.)),0.,1.5),L=floor(clamp(I,0.,1.)*4.+bd*.9);
-  col+=L<.5?vec3(0.):L<1.5?vec3(.05,.22,.36):L<2.5?vec3(.16,.55,.85):L<3.5?vec3(.37,.9,1.):vec3(.85,1.,1.);}
+  float I=clamp((pan+ln+sh)*th1.x*(.82+.28*clamp(q.y/max(vr,1.),-1.,1.)),0.,1.2);
+  col+=vec3(.12,.5,.82)*min(I,1.)*1.1+vec3(.5,.45,.18)*smoothstep(.55,1.1,I);}
  gl_FragColor=vec4(min(col,vec3(1.)),1.);}`;
 function fxgInit(){if(FXG.ok!==null)return FXG.ok;FXG.ok=false;try{const c=document.createElement('canvas'),gl=c.getContext('webgl',{alpha:false,antialias:false,depth:false,stencil:false,premultipliedAlpha:false,preserveDrawingBuffer:false,powerPreference:'low-power'});if(!gl)return false;
   const sh=(tp,s)=>{const o=gl.createShader(tp);gl.shaderSource(o,s);gl.compileShader(o);if(!gl.getShaderParameter(o,gl.COMPILE_STATUS))throw new Error(gl.getShaderInfoLog(o));return o};
@@ -11567,7 +11567,7 @@ function theTick(dt){const S=G.agThe;if(!S)return;const p=G.p;S.t+=dt;const t=S.
   if(!G.bot&&window.PFX_IRIS&&t>=B0){const X=PFX_IRIS;if(!S.fx){S.fx=X.createFx(X.iris,{palette:THE_NEON,hold:S.D-.62});S.fr=X.createFrame(320,320);S.cv=document.createElement('canvas');S.cv.width=S.cv.height=320;S.cx=S.cv.getContext('2d');S.id=S.cx.createImageData(320,320);S.fx.update(t-B0)}else S.fx.update(dt)}
   /* 11-18 셰이더 방벽 상태(그리기는 jgUnder→fxgDraw). 셰이더가 안 되면 위 iris 도트로 대체 */
   if(!G.bot){const RB=Math.hypot(VW,VH)/2+60,u=t-B0,x=t-B1,R=190,io=v=>v<.5?4*v*v*v:1-Math.pow(-2*v+2,3)/2;let vr=0,a=0,fl=0,sr=0,sa=0,film=0;
-    if(u>=0){if(u<.62){vr=lp(RB,R,io(u/.62));a=1;film=.25*u/.62}else if(x<0){vr=R+Math.sin(u*3)*2;a=1;film=1;const v=u-.62;fl=v<.35?1-v/.35:0;if(v<.6){sr=R*(1+v*1.4);sa=1-v/.6}}
+    if(u>=0){if(u<.62){vr=lp(RB,R,io(u/.62));a=1;film=.25*u/.62}else if(x<0){vr=R;a=1;film=1;const v=u-.62;fl=v<.35?1-v/.35:0;if(v<.6){sr=R*(1+v*1.4);sa=1-v/.6}}
       else if(x<.09){vr=R*(1-Math.pow(x/.09,3));a=1;film=1-x/.09}else if(x<.3){vr=0;a=0;fl=x>.26?1:0}else if(x<.85){const v=(x-.3)/.55;vr=RB*(1-Math.pow(1-v,4));a=1-v;fl=v<.3?1-v/.3:0}}
     S.vr=vr;S.thS=(u>=0&&x<.85)?{x:p.x,y:p.y,vr,R,a,fl,sr,sa,film,hits:(S.hits||[]).map(h=>[h[0],(G.t-h[1])/.55,h[2]]).filter(h=>h[1]<1)}:null}
   if(!S.said&&t>B0+1){S.said=1;quest('🛡️ 아이기스 테미스','이 선 안으로는 아무것도 못 들어와요.')}
@@ -11577,6 +11577,7 @@ function theTick(dt){const S=G.agThe;if(!S)return;const p=G.p;S.t+=dt;const t=S.
   if(!G.bot&&t>1&&t<B1+2.2){const k=ez(cl((t-1.2)/2)),lv=ez(cl((t-B1-.5)/1.6)),alt=lp(700,260,k)+lv*800,dw=220*(lp(1.3,1,k)+lv*.3);for(const o of [-.3,0,.3])agEmit(p.x+o*dw,p.y-alt*.9+dw*.2,(Math.random()-.5)*30,100+Math.random()*60,.3,6,ECOL())}
   if(t>B1+2.4)G.agThe=null}
 function theDraw(){const S=G.agThe;if(!S)return;const im=img('themis');if(!im.width)return;const p=G.p,t=S.t,B1=3.4+S.D,k=ez(cl((t-1.2)/2)),lv=ez(cl((t-B1-.5)/1.6)),alt=lp(700,260,k)+lv*800,sc=lp(1.3,1,k)+lv*.3,dw=220*sc,X=p.x,Y=p.y-alt*.9,fi=Math.floor(t*5)%16;
+  if(S.on>0){const R=S.R,on=S.on;ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=.18*on;const g=ctx.createLinearGradient(X,Y,X,p.y);g.addColorStop(0,'#bfefff');g.addColorStop(1,'rgba(90,200,255,0)');ctx.fillStyle=g;ctx.beginPath();ctx.moveTo(X-20,Y+40);ctx.lineTo(X-R*.6,p.y);ctx.lineTo(X+R*.6,p.y);ctx.lineTo(X+20,Y+40);ctx.fill();ctx.restore()}/* 11-18 사용자: 원본 빛줄기 복원 */
   if(S.shd&&S.thS){/* 셰이더가 그렸음 — 맵 어둡게 없음(11-18 사용자) */}
   else if(S.fx&&S.fx.t<S.D+1.3){const X=PFX_IRIS,F=S.fr,d=S.id.data;X.clearFrame(F);S.fx.draw(F);X.composite(F,d,null);
     for(let q=0;q<d.length;q+=4)if(d[q+3]===255&&d[q]===11&&d[q+1]===10&&d[q+2]===16)d[q+3]=THE_INK;S.cx.putImageData(S.id,0,0);

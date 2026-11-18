@@ -7871,7 +7871,34 @@ function chDraw(w){if(G.bot)return;const st=w.st;if(!st.i)return;const p=G.p,t=G
   // 만개: 화면 가득 꽃밭이 피어올라요 (속박·탄막 봉쇄는 그대로)
   if(G.chB){const B=G.chB,a=Math.min(1,(B.T-B.t)*1.2);ctx.save();ctx.globalAlpha=a*.2*Math.min(1,B.t*2);ctx.fillStyle='#7fe07a';ctx.fillRect(p.x-VW/2,p.y-VH/2,VW,VH);ctx.restore();
     for(const f of B.fl){const g=B.t-f.d;if(g<=0)continue;if(f.x<p.x-VW/2-70||f.x>p.x+VW/2+70||f.y<p.y-VH/2-30||f.y>p.y+VH/2+110)continue;const fi=g<1.6?g*24:24+((g*10+f.o*10)%26);chFr('ch_bloom',124,120,51,fi,f.x,f.y,62,108,f.z,a*Math.min(1,g*3))}
-    ctx.save();ctx.strokeStyle='#d8ffb0';ctx.lineWidth=2;for(const e of G.enemies){if(e.dead||!(e.chBe>G.t)||!onScreen(e))continue;ctx.globalAlpha=a*.7;ctx.beginPath();ctx.ellipse(e.x,e.y+e.r*.6,e.r+5,(e.r+5)*.45,0,0,6.283);ctx.stroke()}ctx.restore()}}
+    ctx.save();ctx.strokeStyle='#d8ffb0';ctx.lineWidth=2;for(const e of G.enemies){if(e.dead||!(e.chBe>G.t)||!onScreen(e))continue;ctx.globalAlpha=a*.7;ctx.beginPath();ctx.ellipse(e.x,e.y+e.r*.6,e.r+5,(e.r+5)*.45,0,0,6.283);ctx.stroke()}ctx.restore()}
+  try{chLight(st)}catch(_){}}
+// V267 🌸 크로니클 아츠 셰이더: 과거=따뜻한 꽃밭 빛·꽃가루 / 현재=미사일 꼬리·겹꽃 폭발 빛 + 연쇄 때 굴절 / 미래=정령 생명의 빛 + 피날레 빛줄기. 판정 그대로.
+function chPaint(g,st,k){const t=G.t,A=G.S.area,md=st.mode;g.lineCap='round';
+  if(md==='bloom'){const R=CHR.BEDR*A;for(const b of st.bd){const a=Math.min(1,b.t*2,(CHR.BEDT-b.t)*1.5);if(a<=0)continue;g.globalAlpha=a*.5;const gr=g.createRadialGradient(b.x,b.y,0,b.x,b.y,R);gr.addColorStop(0,'#ffe2a0');gr.addColorStop(.6,'rgba(255,190,120,.5)');gr.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=gr;g.beginPath();g.ellipse(b.x,b.y+4,R,R*.7,0,0,6.283);g.fill();
+      g.fillStyle='#fff3c8';for(let i=0;i<9;i++){const u=(t*.22+glH(i,b.x))%1,x=b.x+(glH(i,b.y)-.5)*R*1.7+Math.sin(t*1.5+i)*6,y=b.y+R*.3-u*R*1.5,z=(1.2+glH(i,3))*k;g.globalAlpha=a*Math.sin(u*3.1416);g.fillRect(x-z,y-z,z*2,z*2)}}
+    if(G.chB){const B=G.chB,a=Math.max(0,Math.min(1,(B.T-B.t)*1.2)),p=G.p;let n=0;g.fillStyle='#ffe9b0';for(const f of B.fl){const gg=B.t-f.d;if(gg<=0||Math.abs(f.x-p.x)>VW/2+20||Math.abs(f.y-p.y)>VH/2+20)continue;if(n++>140)break;const tw=.5+.5*Math.sin(t*3+f.x*.05+f.y*.03),z=2.2*k;g.globalAlpha=a*Math.min(1,gg*2)*tw*.9;g.fillRect(f.x-z,f.y-12-z,z*2,z*2)}}
+    for(const f of st.fl){g.globalAlpha=Math.min(1,(CHR.FLIFE-f.t)*2)*.7;const gr=g.createRadialGradient(f.x,f.y-14,0,f.x,f.y-14,34);gr.addColorStop(0,'#ffd0e0');gr.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=gr;g.beginPath();g.arc(f.x,f.y-14,34,0,6.283);g.fill()}}
+  else if(md==='verdandi'){const C=['#ff5f9a','#9dff6a','#ffd84a'];for(const b of st.m){if(b.k!=='v'||!b.tl)continue;const n=b.tl.length/2;if(n>1){g.strokeStyle=C[b.ci];g.lineWidth=3*k;g.globalAlpha=.9;g.beginPath();g.moveTo(b.tl[0],b.tl[1]);for(let i=1;i<n;i++)g.lineTo(b.tl[i*2],b.tl[i*2+1]);g.lineTo(b.x,b.y);g.stroke()}g.globalAlpha=1;g.fillStyle='#ffffff';g.beginPath();g.arc(b.x,b.y,4*k,0,6.283);g.fill()}
+    const P=['#ff4f8a','#5dff7a','#ffb030'];for(const x of st.fx){const T=x.t,u=T/.6,fa=Math.max(0,1-u*u*1.1),D=4+40*T+300*T*T;if(fa<=0)continue;g.strokeStyle=P[x.ci];g.lineWidth=5*k*(1-u*.5);g.globalAlpha=fa;g.beginPath();g.ellipse(x.x,x.y,D,D*.85,0,0,6.283);g.stroke();g.globalAlpha=fa*(1-u);g.fillStyle='#fff0f6';g.beginPath();g.arc(x.x,x.y,16*(1-u)+4,0,6.283);g.fill()}}
+  else{for(const q of st.sp){const pu=.75+.25*Math.sin(t*3+q.x*.01),R=58*A;g.globalAlpha=.6*pu;const gr=g.createRadialGradient(q.x,q.y-20,0,q.x,q.y-20,R);gr.addColorStop(0,q.k==='lif'?'#c8ffb0':'#ffe9a0');gr.addColorStop(.5,'rgba(90,230,120,.45)');gr.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=gr;g.beginPath();g.arc(q.x,q.y-20,R,0,6.283);g.fill();
+      g.fillStyle='#eaffb0';for(let i=0;i<7;i++){const a=t*(.8+glH(i,1))+i*.9,rr=R*(.35+.5*glH(i,2)),z=1.4*k;g.globalAlpha=.9*pu;g.fillRect(q.x+Math.cos(a)*rr-z,q.y-20+Math.sin(a)*rr*.6-z,z*2,z*2)}}
+    if(st.gp){for(const p2 of st.gp){const u=p2.t/p2.l;g.globalAlpha=Math.sin(u*3.1416)*.9;g.fillStyle=p2.c;g.fillRect(p2.x-k,p2.y-k,p2.z*k,p2.z*k)}}}
+  g.globalAlpha=1}
+function chLight(st){let q=.5;try{q=fxgQ()}catch(_){}if(q<=0)return;const md=st.mode,live=md==='bloom'?(st.bd.length||st.fl.length||G.chB):md==='verdandi'?(st.m.length||st.fx.length):(st.sp.length||st.fin);if(!live)return;
+  const p=G.p,X0=p.x-VW/2,Y0=p.y-VH/2;
+  if(md==='bloom'&&G.chB){const S=fqShader(),B=G.chB;if(S)fqShDraw(S,{mode:1,ha:1.25,ray:Math.max(0,Math.min(1,B.t*1.5,(B.T-B.t)*1.2))*.7},X0,Y0,1)}
+  if(md==='leaf'&&st.fin){const S=fqShader();if(S){const T=st.fin.t,al=Math.min(1,T/1.5)*Math.max(0,Math.min(1,(7.6-T)/.8));if(al>0)fqShDraw(S,{mode:1,ha:1.25,ray:al*.8},X0,Y0,1)}}
+  const L=stLightInit();if(!L)return;const cw=Math.min(480,Math.ceil(VW/2)),chh=Math.max(1,Math.round(cw*VH/VW)),k=cw/VW;for(const cc of [L.cv,L.M])if(cc.width!==cw||cc.height!==chh){cc.width=cw;cc.height=chh}
+  const m=L.M.getContext('2d');m.setTransform(1,0,0,1,0,0);m.globalAlpha=1;m.globalCompositeOperation='source-over';m.fillStyle='#000';m.fillRect(0,0,cw,chh);m.setTransform(k,0,0,k,-X0*k,-Y0*k);m.globalCompositeOperation='lighter';chPaint(m,st,1.6);
+  const sc=L.Sm.getContext('2d');sc.globalCompositeOperation='source-over';sc.fillStyle='#000';sc.fillRect(0,0,64,36);sc.globalCompositeOperation='lighter';sc.filter='blur(4px)';for(let i=0;i<3;i++)sc.drawImage(L.M,0,0,64,36);sc.filter='none';
+  const gl=L.gl,U=L.U;gl.viewport(0,0,cw,chh);L.up(0,L.M);L.up(1,L.Sm);gl.uniform2f(U.res,cw,chh);gl.uniform2f(U.vw,VW,VH);gl.uniform2f(U.off,0,0);gl.uniform1f(U.t,G.t);gl.uniform1f(U.neb,0);gl.uniform1f(U.glo,md==='verdandi'?.8:.65);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
+  ctx.save();ctx.globalCompositeOperation='lighter';ctx.imageSmoothingEnabled=true;ctx.drawImage(L.cv,X0,Y0,VW,VH);ctx.restore();
+  // 현재: 연쇄 폭발(동시에 6개 이상)일 때 가장 새 폭발에서 투명한 굴절 고리
+  if(md==='verdandi'&&st.fx.length>=6){let nw=null;for(const x of st.fx)if(x.t<.35&&(!nw||x.t<nw.t))nw=x;const D=nw&&dmShaderInit();if(D){const v=nw.t/.35,cvs=ctx.canvas,sw=Math.min(960,cvs.width),shh=Math.max(1,Math.round(sw*cvs.height/cvs.width));if(D.src.width!==sw||D.src.height!==shh){D.src.width=sw;D.src.height=shh;D.cv.width=sw;D.cv.height=shh}
+    D.src.getContext('2d').drawImage(cvs,0,0,sw,shh);const g2=D.gl,U2=D.U;g2.viewport(0,0,sw,shh);g2.texImage2D(g2.TEXTURE_2D,0,g2.RGBA,g2.RGBA,g2.UNSIGNED_BYTE,D.src);
+    g2.uniform2f(U2.res,sw,shh);g2.uniform2f(U2.vw,VW,VH);g2.uniform2f(U2.c,nw.x-X0,nw.y-Y0);g2.uniform1f(U2.t,G.t);g2.uniform1f(U2.R,40+200*v);g2.uniform1f(U2.amp,(1-v)*.4);g2.uniform1f(U2.imp,0);g2.uniform1f(U2.heat,0);g2.uniform1f(U2.asp,VW/VH);g2.uniform1f(U2.tint,0);
+    g2.drawArrays(g2.TRIANGLE_STRIP,0,4);ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.drawImage(D.cv,0,0,cvs.width,cvs.height);ctx.restore()}}}
 WU.chron=chTick;
 </script>
 <script>/* ===== ☢️ 둠스데이 (V226 예정, 하모닉스): 결재 서류★ + 드론★(아이기스) + 🎮 밍조 리딤코드 =====

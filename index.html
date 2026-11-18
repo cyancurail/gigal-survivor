@@ -5846,7 +5846,7 @@ void main(){vec2 fc=vec2(gl_FragCoord.x,res.y-gl_FragCoord.y);float bd=bay(fc);v
   float band=smoothstep(2.5,1.,r)*smoothstep(.25,.9,r);
   I+=(fil*band*1.25+exp(-r*r*5.)*.55*(.6+.4*sin(t*5.)))*f.w*1.15;}
  if(an>.5){col+=rampA(floor(clamp(clamp(I,0.,1.)*5.+bd-.5,0.,5.)));}
- if(th2.w>.5){vec2 q=fc-th0.xy;float vr=th0.z,R=th0.w,k=th2.z,S=34.*k;
+ if(th2.w>.5){vec2 q=fc-th0.xy;q.y/=.62;/* 쿼터뷰: 바닥에 눕힌 원근(원본 육각 방벽과 같은 .62) */float vr=th0.z,R=th0.w,k=th2.z,S=34.*k;
   /* 11-18 사용자: 네온 하늘색 육각 패널 방벽 — 패널 중심이 반경 안이면 켜짐, 가장자리 띠는 밝게 */
   vec2 hp=q/S,hr=vec2(1.,1.7320508),hh=hr*.5,ha=mod(hp,hr)-hh,hb=mod(hp-hh,hr)-hh,hg=dot(ha,ha)<dot(hb,hb)?ha:hb;vec2 cc=(hp-hg)*S;
   vec2 ag=abs(hg);float hd=max(dot(ag,vec2(.5,.8660254)),ag.x),dc=length(cc),ac=atan(cc.y,cc.x);
@@ -5856,7 +5856,7 @@ void main(){vec2 fc=vec2(gl_FragCoord.x,res.y-gl_FragCoord.y);float bd=bay(fc);v
   float pan=inn*(.03*th2.x+band*.2+sw*th2.x*.3+hit*.45)+th1.y*inn*.35;
   float ln=edge*inn*(.16*th2.x+band*1.+hit*1.+th1.y*.8);
   float sr=th1.z,sh=sr>0.?exp(-pow((length(q)-sr)/(6.*k),2.))*th1.w*.8:0.;
-  float I=clamp((pan+ln+sh)*th1.x,0.,1.5),L=floor(clamp(I,0.,1.)*4.+bd*.9);
+  float I=clamp((pan+ln+sh)*th1.x*(.82+.28*clamp(q.y/max(vr,1.),-1.,1.)),0.,1.5),L=floor(clamp(I,0.,1.)*4.+bd*.9);
   col+=L<.5?vec3(0.):L<1.5?vec3(.05,.22,.36):L<2.5?vec3(.16,.55,.85):L<3.5?vec3(.37,.9,1.):vec3(.85,1.,1.);}
  gl_FragColor=vec4(min(col,vec3(1.)),1.);}`;
 function fxgInit(){if(FXG.ok!==null)return FXG.ok;FXG.ok=false;try{const c=document.createElement('canvas'),gl=c.getContext('webgl',{alpha:false,antialias:false,depth:false,stencil:false,premultipliedAlpha:false,preserveDrawingBuffer:false,powerPreference:'low-power'});if(!gl)return false;

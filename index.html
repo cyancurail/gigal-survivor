@@ -1980,7 +1980,7 @@ function suTick(dt){const p=G.p,H=SU.H;
   if(!G.suB){G.suB=1;if(!window.__mgReg){window.__mgReg=1;fmReg();const ai=new Image();ai.src='farm/m_ally.png';FM.img.m_ally=ai}p.x=0;p.y=280}
   p.x=clamp(p.x,-H+18,H-18);p.y=clamp(p.y,-H+34,H-14);suPush(p,SU.ER+14);
   for(const e of G.enemies){if(e.dead)continue;if(e.x<-H)e.x=-H;else if(e.x>H)e.x=H;if(e.y<-H)e.y=-H;else if(e.y>H)e.y=H;if(!e.boss)suPush(e,SU.ER+e.r*.5)}
-  fmRadioTick(dt);fmSupTick(dt);suShipTick(dt);suOksTick(dt);suThTick(dt);suTuTick(dt);suWaveTick(dt);suBossTick(dt);suSyncTick(dt);suHud(dt)}
+  fmRadioTick(dt);fmSupTick(dt);suShipTick(dt);suOksTick(dt);suThTick(dt);suOctTick(dt);suTuTick(dt);suWaveTick(dt);suBossTick(dt);suSyncTick(dt);suHud(dt)}
 function suFloor(){if(!SU.im){const im=new Image();im.src='su/floor.jpg';SU.im=im;const pd=new Image();pd.src='su/pad.png';SU.pad=pd}
   const im=SU.im;if(!im.complete||!im.width)return false;const sk=Z*(typeof DPR==='number'?DPR:1);
   if(!SU.pat||SU.k!==sk){const W=Math.round(640*sk),c=document.createElement('canvas');c.width=c.height=W;c.getContext('2d').drawImage(im,0,0,W,W);const P=ctx.createPattern(c,'repeat');try{P.setTransform(new DOMMatrix().scale(1/sk))}catch(e){}SU.pat=P;SU.k=sk}
@@ -2028,7 +2028,7 @@ function suDraw(front){const p=G.p,H=SU.H,ER=SU.ER,vx0=p.x-VW/2-60,vx1=p.x+VW/2+
    아직 등장 일정 없음 — 시험은 window.__suBoss('oks'). */
 const SUO={C:240,K:.66,DR:92,HPB:36000};
 function suIm2(k){const M=SU.im2||(SU.im2={});let i=M[k];if(!i){i=M[k]=new Image();i.src='su/'+k+'.webp'}return i}
-function suReg(){if(window.__suReg)return;window.__suReg=1;ENT.su_oks={hp:SUO.HPB,spd:1,dmg:26,xp:300,r:34,name:'옥타르트 옥산느'};S2D.su_oks=suOksDraw;ENT.su_than={hp:SUH.HPB,spd:1,dmg:22,xp:200,r:36,name:'타나토스'};S2D.su_than=suThDraw;for(const k of ['oks_a','oks_b','oks_drone','than','than_b'])suIm2(k)}
+function suReg(){if(window.__suReg)return;window.__suReg=1;ENT.su_oks={hp:SUO.HPB,spd:1,dmg:26,xp:300,r:34,name:'옥타르트 옥산느'};S2D.su_oks=suOksDraw;ENT.su_than={hp:SUH.HPB,spd:1,dmg:22,xp:200,r:36,name:'타나토스'};S2D.su_than=suThDraw;ENT.su_oct={hp:SUC.HPB,spd:1,dmg:24,xp:260,r:38,name:'옥타비아'};S2D.su_oct=suOctDraw;for(const k of ['oks_a','oks_b','oks_drone','than','than_b'])suIm2(k)}
 function suSafe(x,y){const H=SU.H-120;x=clamp(x,-H,H);y=clamp(y,-H,H);const d=suEll(x,y,SU.ER+90);if(d<1){x/=Math.max(d,.05);y/=Math.max(d,.05)}return[x,y]}
 function suOksSpawn(){if(G.map!=='su')return null;suReg();const p=G.p,a=rnd(0,6.283),q=suSafe(p.x+Math.cos(a)*380,p.y+Math.sin(a)*300),e=mkEnemy('su_oks',q[0],q[1],{boss:1,hp:SUO.HPB,max:SUO.HPB,name:'옥타르트 옥산느'});
   e.spd=.001;e.so={act:null,cb:2.5,ct:6,cl:5,cs:8,cp:4,da:0,mv:0,st:1,en:0,fire:0,app:1};if(!G.bot){SND.p('boss');toast('⚠ 옥타르트 옥산느 등장','감시 드론을 거느린 아름다운 무수리');G.rflash=.5}return e}
@@ -2134,13 +2134,58 @@ function suThDraw(e){const S=e.th,im=suIm2(S&&S.i?'than_b':'than');if(!S||!im.co
   if(S.rage){ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=.22+.1*Math.sin(G.t*9);const g=ctx.createRadialGradient(e.x,e.y-50,0,e.x,e.y-50,95);g.addColorStop(0,S.i?'#8a5aff':'#ff3a2a');g.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(e.x,e.y-50,95,0,7);ctx.fill();ctx.restore()}
   ctx.save();ctx.translate(e.x,by);if(fl)ctx.scale(-1,1);ctx.drawImage(im,(f%4)*C,Math.floor(f/4)*C,C,C,-C*K/2,-330*K,C*K,C*K);if(e.flash>0){ctx.globalCompositeOperation='lighter';ctx.globalAlpha=.5;ctx.drawImage(im,(f%4)*C,Math.floor(f/4)*C,C,C,-C*K/2,-330*K,C*K,C*K)}ctx.restore();
   e.hb=120;ctx.imageSmoothingEnabled=sm}
+/* ---- 옥타비아 (11-19, 2번 보스 · 10:00): 옥산느의 시녀. 네온 정팔면체 보석 — 코드로 그리는 입체(스프라이트 없음).
+   형태 0 닫힘: 십자 레이저(천천히 돎) · 1 쪼개짐: 위아래로 갈라져 한 줄기 쓸기 · 2 펼침: 꽃처럼 펴져 파편 탄막 · 3 흩어짐: 조각 8개가 사령관을 둘러싸고 안쪽으로 레이저 그물.
+   체력 절반 아래: 줄기 수·속도 증가. 수치는 전부 임시(확인 필요). */
+const SUC={HPB:7000,R:54,V:[[0,1,0],[1,0,0],[0,0,1],[-1,0,0],[0,0,-1],[0,-1,0]],F:[[0,1,2],[0,2,3],[0,3,4],[0,4,1],[5,2,1],[5,3,2],[5,4,3],[5,1,4]],C:['#7df3ff','#ff6ad5','#b48aff','#58c8ff','#ff8ae0','#8fe6ff','#d2a0ff','#4ab8ff']};
+function suOctSpawn(){if(G.map!=='su')return null;suReg();const p=G.p,a=rnd(0,6.283),q=suSafe(p.x+Math.cos(a)*420,p.y+Math.sin(a)*300),e=mkEnemy('su_oct',q[0],q[1],{boss:1,hp:SUC.HPB,max:SUC.HPB,name:'옥타비아'});
+  e.spd=.001;e.oc={f:0,ft:0,act:null,cd:2.5,pat:0,yaw:0,op:0,sp:0,sc:0,hc:0,sh:null,a0:a};if(!G.bot){SND.p('boss');toast('⚠ 옥타비아 등장','옥산느의 시녀 — 보석이 모양을 바꾸면 공격도 바뀌어요');G.rflash=.5}return e}
+function suOctBeams(e){const S=e.oc,A=S.act,L=[];if(!A)return L;const y=e.y-70;
+  if(A.k===0){const n=A.n;for(let i=0;i<n;i++)L.push([e.x,y,A.a+i*6.2832/n,1100])}
+  else if(A.k===1){L.push([e.x,y,A.a,1300]);if(A.two)L.push([e.x,y,A.a+3.1416,1300])}
+  else if(A.k===3&&S.sh){for(const h of S.sh)L.push([h.x,h.y,Math.atan2(A.cy-h.y,A.cx-h.x)+h.o,620])}
+  return L}
+function suOctTick(dt){for(const e of G.enemies){if(e.dead||e.type!=='su_oct')continue;const S=e.oc;if(!S)continue;const p=G.p,R=e.hp<e.max*.5,A=S.act;S.yaw+=dt*(A?1.6:.8);S.hc=Math.max(0,S.hc-dt);
+  const tf=A?A.k:0;S.sp+=((tf===1?1:0)-S.sp)*Math.min(1,dt*5);S.op+=((tf===2?1:0)-S.op)*Math.min(1,dt*5);S.sc+=((tf===3?1:0)-S.sc)*Math.min(1,dt*4);
+  if(A){A.t+=dt;const live=A.t>=A.tel&&A.t<A.end;
+    if(A.k===0){A.a+=dt*(R?.42:.3)*A.dir}
+    else if(A.k===1){if(live)A.a+=dt*A.w*A.dir}
+    else if(A.k===2){if(A.t>=A.tel){const n=Math.floor((A.t-A.tel)/.55);if(n>=A.n&&A.n<(R?5:4)){const N=R?16:12,o=A.n*.26+A.b;for(let i=0;i<N;i++)G.eb.push({x:e.x+Math.cos(o+i*6.2832/N)*40,y:e.y-70+Math.sin(o+i*6.2832/N)*26,vx:Math.cos(o+i*6.2832/N)*(140+A.n*14),vy:Math.sin(o+i*6.2832/N)*(140+A.n*14),r:6,dmg:e.dmg*.55,life:7,c:SUC.C[i%8],src:e});A.n++}}}
+    else if(A.k===3){for(const h of S.sh){const tx=A.cx+Math.cos(h.a)*300,ty=A.cy+Math.sin(h.a)*230,u=Math.min(1,A.t/.7),b=A.t>A.end?Math.min(1,(A.t-A.end)/.5):0;h.x=e.x+(tx-e.x)*u*(1-b);h.y=(e.y-70)+(ty-(e.y-70))*u*(1-b)}}
+    if(live&&A.k!==2&&S.hc<=0){for(const b of suOctBeams(e)){const rx=p.x-b[0],ry=p.y-b[1],al=rx*Math.cos(b[2])+ry*Math.sin(b[2]);if(al<10||al>b[3])continue;if(Math.abs(rx*Math.sin(b[2])-ry*Math.cos(b[2]))<16){S.hc=.6;hitP(e.dmg*.8);break}}}
+    if(A.t>=A.end+(A.k===3?.55:.35)){S.act=null;S.sh=null;S.cd=R?1.6:2.6;S.pat=(S.pat+1)%4}continue}
+  S.a0+=dt*.16;const q=suSafe(p.x+Math.cos(S.a0)*330,p.y+Math.sin(S.a0)*250),dx=q[0]-e.x,dy=q[1]-e.y,d=Math.hypot(dx,dy);if(d>30){const v=(R?105:80)*dt;e.x+=dx/d*Math.min(v,d);e.y+=dy/d*Math.min(v,d)}
+  S.cd-=dt;if(S.cd<=0){const k=S.pat,aim=Math.atan2(p.y-(e.y-70),p.x-e.x),dir=Math.random()<.5?-1:1;
+    if(k===0)S.act={k,t:0,tel:.9,end:R?4.2:3.4,n:R?6:4,a:aim+3.1416/(R?6:4),dir};
+    else if(k===1)S.act={k,t:0,tel:1.0,end:R?3.4:3.0,a:aim-dir*1.05,w:R?1.0:.85,dir,two:R};
+    else if(k===2)S.act={k,t:0,tel:.7,end:R?3.6:3.0,n:0,b:rnd(0,6.283)};
+    else{S.sh=[];const N=8,o=rnd(0,6.283);for(let i=0;i<N;i++)S.sh.push({a:o+i*6.2832/N,x:e.x,y:e.y-70,o:(i%2?.5:-.5)*(R?1:.7)});S.act={k,t:0,tel:1.5,end:R?3.3:2.9,cx:p.x,cy:p.y}}
+    if(!G.bot&&k===3)toast('옥타비아가 흩어져요','조각들이 그물을 쳐요 — 줄기 사이 빈틈으로',true)}}}
+function suOctGem(cx,cy,R,yaw,sp,op,al,only){const cs=Math.cos(yaw),sn=Math.sin(yaw),PT=.5,cp=Math.cos(PT),spn=Math.sin(PT),P=[];
+  for(let fi=0;fi<8;fi++){if(only!=null&&only!==fi)continue;const f=SUC.F[fi],nx=(SUC.V[f[0]][0]+SUC.V[f[1]][0]+SUC.V[f[2]][0])/3,ny=(SUC.V[f[0]][1]+SUC.V[f[1]][1]+SUC.V[f[2]][1])/3,nz=(SUC.V[f[0]][2]+SUC.V[f[1]][2]+SUC.V[f[2]][2])/3,pts=[];let zs=0;
+    for(const vi of f){const v=SUC.V[vi];let x=v[0]+nx*op*1.5,y=v[1]*1.25+ny*op*.9+(fi<4?1:-1)*sp*.75,z=v[2]+nz*op*1.5;const X=x*cs+z*sn,Z=-x*sn+z*cs,Y=y*cp-Z*spn,Z2=y*spn+Z*cp;pts.push([cx+X*R,cy-Y*R]);zs+=Z2}
+    const lx=nx*cs+nz*sn,lz=-nx*sn+nz*cs,lit=clamp(.45+.4*ny+.35*lx-.2*lz,0,1);P.push({pts,z:zs,fi,lit})}
+  P.sort((a,b)=>a.z-b.z);for(const q of P){ctx.globalAlpha=al*.86;ctx.fillStyle=SUC.C[q.fi];ctx.beginPath();ctx.moveTo(q.pts[0][0],q.pts[0][1]);ctx.lineTo(q.pts[1][0],q.pts[1][1]);ctx.lineTo(q.pts[2][0],q.pts[2][1]);ctx.closePath();ctx.fill();
+    ctx.globalAlpha=al*(1-q.lit)*.55;ctx.fillStyle='#1a1050';ctx.fill();ctx.globalAlpha=al*q.lit*.5;ctx.fillStyle='#ffffff';ctx.fill();ctx.globalAlpha=al;ctx.strokeStyle='#f4feff';ctx.lineWidth=1.6;ctx.stroke()}ctx.globalAlpha=1}
+function suOctDraw(e){const S=e.oc;if(!S){S2D_FB(e);return}const A=S.act,R=SUC.R,cy=e.y-70+Math.sin(G.t*2)*5,hp50=e.hp<e.max*.5;
+  ctx.save();ctx.globalAlpha=.28;ctx.fillStyle='#2a1408';ctx.beginPath();ctx.ellipse(e.x,e.y+e.r*.6,58*(1-S.sc*.6),15,0,0,7);ctx.fill();ctx.restore();
+  if(A&&A.k!==2){const tel=A.t<A.tel,live=!tel&&A.t<A.end;if(tel||live){ctx.save();ctx.lineCap='round';for(const b of suOctBeams(e)){const x1=b[0]+Math.cos(b[2])*b[3],y1=b[1]+Math.sin(b[2])*b[3];
+        if(tel){ctx.globalAlpha=.25+.3*Math.abs(Math.sin(A.t*12));ctx.strokeStyle='#ff6ad5';ctx.lineWidth=2;ctx.setLineDash([10,10]);ctx.beginPath();ctx.moveTo(b[0],b[1]);ctx.lineTo(x1,y1);ctx.stroke()}
+        else{ctx.setLineDash([]);ctx.globalCompositeOperation='lighter';ctx.globalAlpha=.3;ctx.strokeStyle='#ff4ad0';ctx.lineWidth=30+6*Math.sin(G.t*30);ctx.beginPath();ctx.moveTo(b[0],b[1]);ctx.lineTo(x1,y1);ctx.stroke();ctx.globalAlpha=.75;ctx.strokeStyle='#7df3ff';ctx.lineWidth=12;ctx.stroke();ctx.globalAlpha=1;ctx.strokeStyle='#ffffff';ctx.lineWidth=4;ctx.stroke()}}ctx.restore()}}
+  ctx.save();ctx.globalCompositeOperation='lighter';const g=ctx.createRadialGradient(e.x,cy,0,e.x,cy,R*2.1);g.addColorStop(0,hp50?'rgba(255,90,200,.5)':'rgba(110,230,255,.45)');g.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(e.x,cy,R*2.1,0,7);ctx.fill();ctx.restore();
+  if(S.sh&&S.sc>.05){for(let i=0;i<S.sh.length;i++){const h=S.sh[i];suOctGem(h.x,h.y,R*.5,S.yaw*2+i,0,0,1,i)}ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=.8;ctx.fillStyle='#ffffff';ctx.beginPath();ctx.arc(e.x,cy,10+3*Math.sin(G.t*9),0,7);ctx.fill();ctx.restore()}
+  else suOctGem(e.x,cy,R,S.yaw,S.sp,S.op,1);
+  if(S.sp>.1||S.op>.1){ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=.9*Math.max(S.sp,S.op);ctx.fillStyle='#ffffff';ctx.beginPath();ctx.arc(e.x,cy,9+3*Math.sin(G.t*11),0,7);ctx.fill();ctx.restore()}
+  if(e.flash>0){ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=.35;ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(e.x,cy,R*1.1,0,7);ctx.fill();ctx.restore()}
+  e.hb=150}
 /* ---- 보스 등장 일정 (11-19): 5:00 타나토스 쌍둥이 → 10:00 옥타비아(아직 없음: 자리만, 곧바로 처치된 것으로 침) → +3분 옥산느 → (헥스터 없음) 옥산느를 잡으면 클리어.
    15:00이 지나면 일반 물량을 줄이고 보스전은 계속. */
 function suDone(){return !!(G.suBs&&G.suBs.st>=5)}
 function suBossTick(dt){const B=G.suBs||(G.suBs={st:0,t2:0,fin:0}),alive=t=>G.enemies.some(e=>!e.dead&&e.type===t);
   if(B.st===0&&G.t>=300){suThSpawn();B.st=1}
   else if(B.st===1&&!alive('su_than'))B.st=2;
-  else if(B.st===2&&G.t>=600){B.st=3;B.t2=G.t;if(!G.bot)toast('📡 아리아드네','사령관님, 큰 반응이 하나 더 다가와요. 3분 남았습니다.')}
+  else if(B.st===2&&G.t>=600){suOctSpawn();B.st=2.5}
+  else if(B.st===2.5&&!alive('su_oct')){B.st=3;B.t2=G.t;if(!G.bot)toast('📡 아리아드네','사령관님, 큰 반응이 하나 더 다가와요. 3분 남았습니다.')}
   else if(B.st===3&&G.t>=B.t2+180){suOksSpawn();B.st=4}
   else if(B.st===4&&!alive('su_oks')){B.fin+=dt;if(B.fin>3)B.st=5}}
 /* ---- 방향 웨이브 · 게이트 내구 (11-19) ----
@@ -2205,7 +2250,7 @@ function suHud(dt){if(!suSolo()){if(SU.hud)SU.hud.style.display='none';return}
   const st=(b,show,busy,txt)=>{b.style.display=show?'block':'none';b.style.opacity=busy?.45:1;b.querySelector('b').textContent=txt};
   st(B[0],n>=1,!!G.suT||G.t<D.t,G.suT?'출격 중':G.t<D.t?Math.ceil(D.t-G.t)+'초':'탈로스');
   st(B[1],n>=2,!!G.suDd||G.t<D.d||D.dn<=0,G.suDd?'수리 중':D.dn<=0?'소진':G.t<D.d?Math.ceil(D.d-G.t)+'초':'수리 '+D.dn)}
-window.__suBoss=k=>k==='than'?suThSpawn():suOksSpawn();
+window.__suBoss=k=>k==='than'?suThSpawn():k==='oct'?suOctSpawn():suOksSpawn();
 /* ---- 수원 함선 (11-18): 탈로스 = 패드에 착지해 ㄷ자 레일건 전개 → 충전 3초·관통 한 발 / 다이달로스 = 게이트 위에서 수리 연출 ----
    그림 ag/talos_tf(비행→착지→전개 24장) · talos_hull(선체) · talos_gun(레일건 24방향) · daedalus(12장), 칸 320px.
    SUT.PHI = 레일건 각 장이 화면에서 가리키는 각도(구운 그림에서 잰 값), SUT.L = 회전 중심~포구 거리(px).
@@ -2917,7 +2962,7 @@ function nammiWave(tg){const p=tg||G.p,side=Math.random()*4|0,hw=VW/2+40,hh=VH/2
 function hellEvent(k){G.hev={k,t:k==='nammi'?9:25,el:0,w:[{at:.8},{at:3.4},{at:6}],side:Math.random()<.5?-1:1};if(k==='kick'&&G.weapons.length)G.sealed=pick(G.weapons);G.hban={t:4.5,title:HEV[k][0],sub:HEV[k][1]+(k==='kick'&&G.sealed?' (🔒 '+WP[G.sealed.k].name+')':'')};if(!G.bot)SND.p('boss')}
 function ebShot(e,a,v,r,dm,c,life){G.eb.push({x:e.x,y:e.y,vx:Math.cos(a)*v,vy:Math.sin(a)*v,r,dmg:e.dmg*dm,life:life||6,c,src:e})}
 function bossTick(dt){const wN=!G.hard;if(wN&&!(G.witch&&!G.witch.dead))return;const p=G.p,H=G.hell,FIN=GB()[GB().length-1].name;
-  for(const e of G.enemies){if(!e.boss||e.dead||(wN&&e.tpl!=='witch')||e.plF>G.t||e.fmInv>0||e.chBe>G.t||e.type==='fm_b_queen'||/^mg_b[1234]$/.test(e.type)||e.type==='su_oks'||e.type==='su_than'||e.suInv)continue;/* 11-14: 인천 중간보스는 고유 패턴만 */const fin=e.name===FIN,aim=Math.atan2(p.y-e.y,p.x-e.x),rg=e.rage2;
+  for(const e of G.enemies){if(!e.boss||e.dead||(wN&&e.tpl!=='witch')||e.plF>G.t||e.fmInv>0||e.chBe>G.t||e.type==='fm_b_queen'||/^mg_b[1234]$/.test(e.type)||e.type==='su_oks'||e.type==='su_than'||e.type==='su_oct'||e.suInv)continue;/* 11-14: 인천 중간보스는 고유 패턴만 */const fin=e.name===FIN,aim=Math.atan2(p.y-e.y,p.x-e.x),rg=e.rage2;
     // ring
     e.rg=(e.rg===undefined?3:e.rg)-dt;if(e.rg<=0){e.rg=H?(rg?2.5:4):(rg?3.2:5);const n=H?(rg?22:16):(rg?15:11),o=rnd(0,6.28);for(let i=0;i<n;i++)ebShot(e,o+i*6.283/n,H?130:105,6,H?.6:.45,H?'#ff4a6a':'#ff9ad5')}
     // aimed fan

@@ -7194,6 +7194,45 @@ WU.stellar=szTick;
 function szStar(x,y,r,al,col){ctx.globalAlpha=al*.35;ctx.fillStyle=col;ctx.beginPath();ctx.arc(x,y,r*2.4,0,6.283);ctx.fill();ctx.globalAlpha=al;ctx.fillStyle='#ffffff';ctx.fillRect(x-r,y-.75,r*2,1.5);ctx.fillRect(x-.75,y-r,1.5,r*2);ctx.fillRect(x-1.2,y-1.2,2.4,2.4)}
 function szFloor(w){const st=w.st;if(st.pd&&st.pd.length){ctx.save();for(const q of st.pd){const al=Math.min(1,q.t/.3)*(q.t>2.4?(3-q.t)/.6:1);ctx.globalAlpha=.22*al;ctx.fillStyle='#5a4adf';ctx.beginPath();ctx.ellipse(q.x,q.y,q.r,q.r*.7,0,0,6.283);ctx.fill();ctx.globalAlpha=.35*al;ctx.fillStyle='#a8d8ff';ctx.fillRect(q.x+Math.sin(q.t*3+q.x)*q.r*.5,q.y-q.t*6,2,2)}ctx.restore()}if(st.pool){const q=st.pool,al=Math.min(1,q.t/.4)*(q.t>7.2?(8-q.t)/.8:1);ctx.save();ctx.globalAlpha=.28*al;const g=ctx.createRadialGradient(q.x,q.y,q.r*.2,q.x,q.y,q.r);g.addColorStop(0,'#6a8cff');g.addColorStop(.7,'#4a3dbf');g.addColorStop(1,'rgba(40,30,120,0)');ctx.fillStyle=g;ctx.beginPath();ctx.ellipse(q.x,q.y,q.r,q.r*.8,0,0,6.283);ctx.fill();ctx.restore();if(!G.bot&&Math.random()<.6){const a=rnd(0,6.283),r=Math.sqrt(Math.random())*q.r;px(q.x+Math.cos(a)*r,q.y+Math.sin(a)*r*.8,0,-rnd(10,30),.8,pick(['#9ab8ff','#c4a8ff','#ffffff']),2,1,1)}}
   const c=st.c;if(c&&c.t>=SZ.DRAW-.2){const f=(c.t-SZ.DRAW+.2)*15;hxFrame('srune',f%60,c.ctr.x,c.ctr.y-30*c.R/50,c.R/50,Math.min(1,(SZ.DRAW+SZ.FX-c.t)/.5)*.8)}}
+// V267 🌠 스텔라 셰이더: 별자리 선·유성 꼬리 빛 번짐, 착탄 빛, 피날레 성운 + 반짝이는 별. 판정·피해는 그대로.
+let STL;function stLightInit(){if(STL!==undefined)return STL;STL=null;try{const cv=document.createElement('canvas');cv.width=480;cv.height=270;const gl=cv.getContext('webgl',{premultipliedAlpha:true,preserveDrawingBuffer:true,antialias:false});if(!gl)return null;
+  const M=document.createElement('canvas'),Sm=document.createElement('canvas');Sm.width=64;Sm.height=36;
+  const FS='precision highp float;uniform sampler2D uM,uS;uniform vec2 res,vw,off;uniform float t,neb,glo;'+
+  'float h(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}float vn(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(h(i),h(i+vec2(1,0)),f.x),mix(h(i+vec2(0,1)),h(i+vec2(1,1)),f.x),f.y);}'+
+  'float fbm(vec2 p){float s=0.,a=.5;for(int i=0;i<5;i++){s+=a*vn(p);p*=2.03;a*=.5;}return s;}'+
+  'void main(){vec2 uv=gl_FragCoord.xy/res;uv.y=1.-uv.y;vec2 px=1./res;vec3 b=vec3(0.);'+
+  'for(int i=0;i<8;i++){float an=float(i)*.785+.39;vec2 d=vec2(cos(an),sin(an));b+=texture2D(uM,uv+d*px*2.).rgb*.45+texture2D(uM,uv+d*px*5.).rgb*.3+texture2D(uM,uv+d*px*11.).rgb*.18+texture2D(uM,uv+d*px*20.).rgb*.1;}'+
+  'vec3 col=b/8.*2.4*glo;'+
+  'vec2 g=uv*vw+off;vec2 np=g*.0035+vec2(t*.01,0.);float n1=fbm(np*1.5+fbm(np*3.)),n2=fbm(np*2.6+3.);'+
+  'vec3 nb=mix(vec3(.5,.1,.6),vec3(.1,.4,.9),n2)*smoothstep(.45,.9,n1)+vec3(1.,.4,.7)*pow(n1,6.)*1.5;'+
+  'vec2 sp=floor(g/3.);float st=step(.9965,h(sp))*(.5+.5*sin(t*4.+h(sp+3.)*20.));'+
+  'vec3 L=texture2D(uS,uv).rgb;col+=(nb*.5+vec3(st))*neb+nb*L*2.2*neb+L*.6*glo;'+
+  'gl_FragColor=vec4(col,1.);}';
+  const sh=(tp,src)=>{const x=gl.createShader(tp);gl.shaderSource(x,src);gl.compileShader(x);if(!gl.getShaderParameter(x,gl.COMPILE_STATUS))throw 0;return x};
+  const pg=gl.createProgram();gl.attachShader(pg,sh(gl.VERTEX_SHADER,'attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}'));gl.attachShader(pg,sh(gl.FRAGMENT_SHADER,FS));gl.linkProgram(pg);if(!gl.getProgramParameter(pg,gl.LINK_STATUS))return null;gl.useProgram(pg);
+  gl.bindBuffer(gl.ARRAY_BUFFER,gl.createBuffer());gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);const lo=gl.getAttribLocation(pg,'p');gl.enableVertexAttribArray(lo);gl.vertexAttribPointer(lo,2,gl.FLOAT,false,0,0);
+  const U={};['uM','uS','res','vw','off','t','neb','glo'].forEach(k=>U[k]=gl.getUniformLocation(pg,k));
+  const TX=[0,1].map(i=>{const x=gl.createTexture();gl.activeTexture(gl.TEXTURE0+i);gl.bindTexture(gl.TEXTURE_2D,x);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);return x});
+  gl.uniform1i(U.uM,0);gl.uniform1i(U.uS,1);
+  const up=(i,src)=>{gl.activeTexture(gl.TEXTURE0+i);gl.bindTexture(gl.TEXTURE_2D,TX[i]);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,src)};
+  STL={cv,M,Sm,gl,U,up}}catch(_){STL=null}return STL}
+function stLight(st){let q=.5;try{q=fxgQ()}catch(_){}if(q<=0)return;const c=st.c,F=st.fn,fx=st.fx||[];
+  const live=fx.some(f=>f.t>=0&&f.t<f.at+.5);if(!c&&!F&&!live)return;const L=stLightInit();if(!L)return;
+  const p=G.p,X0=p.x-VW/2,Y0=p.y-VH/2,cw=Math.min(480,Math.ceil(VW/2)),chh=Math.max(1,Math.round(cw*VH/VW)),k=cw/VW;for(const cc of [L.cv,L.M])if(cc.width!==cw||cc.height!==chh){cc.width=cw;cc.height=chh}
+  const m=L.M.getContext('2d');m.setTransform(1,0,0,1,0,0);m.globalCompositeOperation='source-over';m.fillStyle='#000';m.fillRect(0,0,cw,chh);m.setTransform(k,0,0,k,-X0*k,-Y0*k);m.globalCompositeOperation='lighter';m.lineCap='round';
+  // 유성 꼬리(작은 별똥별) · 착탄 빛
+  for(const f of fx){if(f.t<0)continue;if(f.k==='ms'&&f.t<f.at){const kk=f.t/f.at,D=(1-kk)*340,hx=f.x-D*.45,hy=f.y-D,Lt=150;const g=m.createLinearGradient(hx,hy,hx-Lt*.45,hy-Lt);g.addColorStop(0,'rgba(255,255,255,1)');g.addColorStop(.25,'rgba(255,140,220,.8)');g.addColorStop(1,'rgba(120,150,255,0)');m.strokeStyle=g;m.lineWidth=4;m.globalAlpha=Math.min(1,kk*4);m.beginPath();m.moveTo(hx,hy);m.lineTo(hx-Lt*.45,hy-Lt);m.stroke()}
+    else if(f.t>=f.at&&f.t<f.at+.5){const kk=(f.t-f.at)/.5,r=(f.big?60:f.k==='ms'?18:28)*(.4+kk);m.globalAlpha=(1-kk)*.9;const g=m.createRadialGradient(f.x,f.y,0,f.x,f.y,r);g.addColorStop(0,'#ffffff');g.addColorStop(.4,f.k==='sfire'?'#ff9a5a':'#b8a0ff');g.addColorStop(1,'rgba(0,0,0,0)');m.fillStyle=g;m.beginPath();m.arc(f.x,f.y,r,0,6.283);m.fill()}}
+  // 별자리 선
+  if(c&&c.pts){const Z=c.Z,e0=Math.min(1,c.t/.8),P=c.pts.map(q2=>({x:q2.x0+(q2.x-q2.x0)*e0,y:q2.y0+(q2.y-q2.y0)*e0})),fade=c.t>SZ.DRAW+SZ.FX-.6?Math.max(0,(SZ.DRAW+SZ.FX-c.t)/.6):1,lit=c.lit||0;m.strokeStyle=c.done?ZN[Z.e]:ZC[Z.e];m.lineWidth=c.done?4:2.5;m.globalAlpha=fade*(c.done?.9:.6);
+    for(let i=0;i<Z.g.length;i++){const kk=Math.max(0,Math.min(1,lit-i));if(kk<=0)continue;const [a,b]=Z.g[i],A=P[a],B=P[b];m.beginPath();m.moveTo(A.x,A.y);m.lineTo(A.x+(B.x-A.x)*kk,A.y+(B.y-A.y)*kk);m.stroke()}}
+  // 피날레 별자리 고리
+  let neb=0;if(F){const al=F.t<1?F.t:F.t>21.5?Math.max(0,(23.5-F.t)/2):1;neb=al;const R=Math.min(VW,VH)*.36,mr=Math.min(VW,VH)*.075;m.lineWidth=3;
+    for(let i=0;i<12;i++){const ti=.6+i*.25,on=Math.min(1,Math.max(0,(F.t-ti)/.5));if(on<=0)continue;const Z=ZD[i],a=-Math.PI/2+i*Math.PI/6+F.t*.04,cx=p.x+Math.cos(a)*R,cy=p.y+Math.sin(a)*R;m.strokeStyle=ZN[Z.e];m.globalAlpha=al*on*.7;m.beginPath();for(const [u,v] of Z.g){m.moveTo(cx+Z.p[u][0]*mr,cy+Z.p[u][1]*mr);m.lineTo(cx+Z.p[v][0]*mr,cy+Z.p[v][1]*mr)}m.stroke()}}
+  m.globalAlpha=1;
+  const sc=L.Sm.getContext('2d');sc.globalCompositeOperation='source-over';sc.fillStyle='#000';sc.fillRect(0,0,64,36);sc.globalCompositeOperation='lighter';sc.filter='blur(4px)';for(let i=0;i<3;i++)sc.drawImage(L.M,0,0,64,36);sc.filter='none';
+  const gl=L.gl,U=L.U;gl.viewport(0,0,cw,chh);L.up(0,L.M);L.up(1,L.Sm);gl.uniform2f(U.res,cw,chh);gl.uniform2f(U.vw,VW,VH);gl.uniform2f(U.off,p.x*.2,p.y*.2);gl.uniform1f(U.t,G.t);gl.uniform1f(U.neb,neb);gl.uniform1f(U.glo,1);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
+  ctx.save();ctx.globalCompositeOperation='lighter';ctx.imageSmoothingEnabled=true;ctx.drawImage(L.cv,X0,Y0,VW,VH);ctx.restore()}
 function szDraw(w){const st=w.st,p=G.p;ctx.save();ctx.globalCompositeOperation='lighter';
   for(const s of st.stars||[]){const tw=.55+.45*Math.sin(G.t*4+s.ph),al=Math.min(1,s.t*3)*(s.t>SZ.LIFE-2?(SZ.LIFE-s.t)/2:1);szStar(s.x,s.y,2.2,al*tw,'#a8d8ff')}
   const c=st.c;if(c){const Z=c.Z,col=ZC[Z.e],k0=Math.min(1,c.t/.8),e0=k0*k0*(3-2*k0),fade=c.t>SZ.DRAW+SZ.FX-.6?(SZ.DRAW+SZ.FX-c.t)/.6:1,P=c.pts.map(q=>({x:q.x0+(q.x-q.x0)*e0,y:q.y0+(q.y-q.y0)*e0}));
@@ -7214,10 +7253,11 @@ function szDraw(w){const st=w.st,p=G.p;ctx.save();ctx.globalCompositeOperation='
     for(let i=0;i<12;i++){const ti=.6+i*.25,on=Math.min(1,Math.max(0,(F.t-ti)/.5));if(on<=0)continue;const Z=ZD[i],ne=ZN[Z.e],a=-Math.PI/2+i*Math.PI/6+F.t*.04,cx=p.x+Math.cos(a)*R,cy=p.y+Math.sin(a)*R,P=Z.p.map(([x,y])=>({x:cx+x*mr,y:cy+y*mr})),fl=Math.exp(-Math.max(0,F.t-ti-.3)*2.5),pul=.7+.3*Math.sin(G.t*2+i);
       for(const [u,v] of Z.g){ctx.beginPath();ctx.moveTo(P[u].x,P[u].y);ctx.lineTo(P[v].x,P[v].y);for(const [cc,lw,aa] of [[ne,9+8*fl,(.12+.3*fl)*pul],[ne,3+3*fl,.3+.4*fl],['#ffffff',1,.6]]){ctx.globalAlpha=al*on*aa;ctx.strokeStyle=cc;ctx.lineWidth=lw;ctx.stroke()}}
       for(const q of P)szStar(q.x,q.y,2+2*fl,al*on,ne)}
-    ctx.restore();
+    ctx.restore();stLight(st);
     const TX=F.tx||(F.tx=pick(SZ_TX)),tf=([...TX].length+5)/6+3,tt=F.t-7;if(tt>0&&tt<tf+1.5){const out=tt>tf?Math.max(0,(tf+1.5-tt)/1.5):1;ctx.save();ctx.textAlign='left';ctx.font='600 '+Math.round(Math.max(18,Math.min(VW,VH)*.04))+'px "Noto Serif KR",serif';ctx.shadowColor='#7fb8ff';ctx.shadowBlur=14;ctx.fillStyle='#eef6ff';
       let LS=[TX];if(ctx.measureText(TX).width>VW*.9){const cs=[...TX];let bi=-1,bd=1e9;cs.forEach((ch,i)=>{if(ch!==','&&ch!=='.'&&ch!==' ')return;const l1=cs.slice(0,i+1).join('').trim(),l2=cs.slice(i+1).join('').trim();const w0=Math.max(ctx.measureText(l1).width,ctx.measureText(l2).width);if(w0>VW*.94&&ch!==' ')return;const w=w0*(ch===' '?1:.65);if(w<bd){bd=w;bi=i}});if(bi>0)LS=[cs.slice(0,bi+1).join('').trim(),cs.slice(bi+1).join('').trim()]}
       const lh=parseInt(ctx.font.match(/(\d+)px/)[1])*1.35;let ci=0;LS.forEach((L,li)=>{const W0=ctx.measureText(L).width;let x=p.x-W0/2;const y=p.y-R*.55-(LS.length-1-li)*lh;[...L].forEach(ch=>{const a=Math.max(0,Math.min(1,(tt*6-ci)/5))*out;if(a>0){ctx.globalAlpha=a;ctx.fillText(ch,x,y)}x+=ctx.measureText(ch).width;ci++})});ctx.restore()}}
+  if(!st.fn&&!G.__gh)stLight(st);
   if(!G.__gh&&!st.fn){const Z=ZD[st.zi||0];ctx.save();ctx.globalAlpha=.85;ctx.font='700 13px "Noto Sans KR",sans-serif';ctx.textAlign='center';ctx.lineWidth=3;ctx.strokeStyle='#0a0820';const tx='★ '+((st.zi||0)+1)+'/12',y=p.y+46;ctx.strokeText(tx,p.x,y);ctx.fillStyle=ZC[Z.e];ctx.fillText(tx,p.x,y);ctx.restore()}}
 </script>
 <script>/* ===== 💋 하모닉스 「에클라땅뜨 아르떼」 (11-09 사용자 기획, 처음 이름 루즈 아르테): 립스틱★ + 하트 네일★ + 💉 위고비 =====
@@ -8445,16 +8485,16 @@ let FQS;function fqShader(){if(FQS!==undefined)return FQS;FQS=null;try{const cv=
     gl.uniform2f(U.res,cw,chh);gl.uniform2f(U.vw,VW,VH);gl.uniform2f(U.off,G.p.x*.35,G.p.y*.35);gl.uniform1f(U.t,G.t);gl.uniform1f(U.dark,o.dark||0);gl.uniform1f(U.flash,o.flash||0);gl.uniform1f(U.ha,o.ha||0);gl.uniform1f(U.mode,o.mode||0);gl.uniform1f(U.topm,o.topm||0);gl.uniform1f(U.ray,o.ray||0);
     gl.drawArrays(gl.TRIANGLE_STRIP,0,4);return cv}}}catch(_){FQS=null}return FQS}
 // V267 ⚡ 번개 셰이더: 빛 번짐 · 구름 조명 · 플라즈마 · 잔광 · 대벼락 색 갈라짐 (번개 모양·판정은 그대로, 그 위에 빛만 얹음)
-const FQX={gl:0,cl:1,pl:0,af:1,ch:1};// 사용자 결정: 구름 조명은 항상, 잔광·색 갈라짐은 대벼락만, 빛 번짐·플라즈마 없음
+const FQX={gl:1,cl:1,pl:1,af:1,ch:1};// 빛 번짐·플라즈마·잔광·색 갈라짐은 대벼락 줄기에만(uB), 구름 조명은 모든 번개// 사용자 결정: 구름 조명은 항상, 잔광·색 갈라짐은 대벼락만, 빛 번짐·플라즈마 없음
 let FQL;function fqLightInit(){if(FQL!==undefined)return FQL;FQL=null;try{const cv=document.createElement('canvas');cv.width=480;cv.height=270;const gl=cv.getContext('webgl',{premultipliedAlpha:true,preserveDrawingBuffer:true,antialias:false});if(!gl)return null;
   const M=document.createElement('canvas'),P=document.createElement('canvas'),Sm=document.createElement('canvas');Sm.width=64;Sm.height=36;
-  const FS='precision highp float;uniform sampler2D uM,uP,uS,uC;uniform vec2 res,vw,off;uniform float t,mode,fg,fc,fp,fa,chr;'+
+  const FS='precision highp float;uniform sampler2D uM,uP,uS,uC,uB;uniform vec2 res,vw,off;uniform float t,mode,fg,fc,fp,fa,chr;'+
   'float h(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}float vn(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(h(i),h(i+vec2(1,0)),f.x),mix(h(i+vec2(0,1)),h(i+vec2(1,1)),f.x),f.y);}'+
   'float fbm(vec2 p){float s=0.,a=.5;for(int i=0;i<5;i++){s+=a*vn(p);p*=2.03;a*=.5;}return s;}'+
   'void main(){vec2 uv=gl_FragCoord.xy/res;uv.y=1.-uv.y;'+
   'if(mode>.5){vec2 d=uv-.5;vec2 o=d*chr*.035;vec3 c=vec3(texture2D(uC,uv+o).r,texture2D(uC,uv).g,texture2D(uC,uv-o).b);gl_FragColor=vec4(c,1.);return;}'+
-  'vec2 px=1./res;float m=texture2D(uM,uv).r;float b=0.,a=0.;'+
-  'for(int i=0;i<8;i++){float an=float(i)*.785;vec2 dd=vec2(cos(an),sin(an));b+=texture2D(uM,uv+dd*px*2.).r*.5+texture2D(uM,uv+dd*px*5.).r*.32+texture2D(uM,uv+dd*px*10.).r*.2+texture2D(uM,uv+dd*px*18.).r*.16+texture2D(uM,uv+dd*px*30.).r*.1;a+=texture2D(uP,uv+dd*px*3.).r*.6+texture2D(uP,uv+dd*px*8.).r*.3;}'+
+  'vec2 px=1./res;float m=texture2D(uB,uv).r;float b=0.,a=0.;'+
+  'for(int i=0;i<8;i++){float an=float(i)*.785;vec2 dd=vec2(cos(an),sin(an));b+=texture2D(uB,uv+dd*px*2.).r*.5+texture2D(uB,uv+dd*px*5.).r*.32+texture2D(uB,uv+dd*px*10.).r*.2+texture2D(uB,uv+dd*px*18.).r*.16+texture2D(uB,uv+dd*px*30.).r*.1;a+=texture2D(uP,uv+dd*px*3.).r*.6+texture2D(uP,uv+dd*px*8.).r*.3;}'+
   'b/=8.;a=a/8.+texture2D(uP,uv).r*.4;vec3 col=vec3(.5,.68,1.)*b*3.6*fg;'+
   'float n=fbm(uv*vec2(90.,50.)+vec2(t*31.,-t*23.));col+=fp*m*mix(vec3(.45,.85,1.),vec3(1.,.45,1.),n)*(.6+2.2*n);'+
   'col+=vec3(.62,.36,1.)*a*.9*fa;'+
@@ -8464,11 +8504,11 @@ let FQL;function fqLightInit(){if(FQL!==undefined)return FQL;FQL=null;try{const 
   const sh=(tp,src)=>{const x=gl.createShader(tp);gl.shaderSource(x,src);gl.compileShader(x);if(!gl.getShaderParameter(x,gl.COMPILE_STATUS))throw 0;return x};
   const pg=gl.createProgram();gl.attachShader(pg,sh(gl.VERTEX_SHADER,'attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}'));gl.attachShader(pg,sh(gl.FRAGMENT_SHADER,FS));gl.linkProgram(pg);if(!gl.getProgramParameter(pg,gl.LINK_STATUS))return null;gl.useProgram(pg);
   gl.bindBuffer(gl.ARRAY_BUFFER,gl.createBuffer());gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);const lo=gl.getAttribLocation(pg,'p');gl.enableVertexAttribArray(lo);gl.vertexAttribPointer(lo,2,gl.FLOAT,false,0,0);
-  const U={};['uM','uP','uS','uC','res','vw','off','t','mode','fg','fc','fp','fa','chr'].forEach(k=>U[k]=gl.getUniformLocation(pg,k));
-  const TX=[0,1,2,3].map(i=>{const x=gl.createTexture();gl.activeTexture(gl.TEXTURE0+i);gl.bindTexture(gl.TEXTURE_2D,x);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);return x});
-  gl.uniform1i(U.uM,0);gl.uniform1i(U.uP,1);gl.uniform1i(U.uS,2);gl.uniform1i(U.uC,3);
+  const U={};['uM','uP','uS','uC','uB','res','vw','off','t','mode','fg','fc','fp','fa','chr'].forEach(k=>U[k]=gl.getUniformLocation(pg,k));
+  const TX=[0,1,2,3,4].map(i=>{const x=gl.createTexture();gl.activeTexture(gl.TEXTURE0+i);gl.bindTexture(gl.TEXTURE_2D,x);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);return x});
+  gl.uniform1i(U.uM,0);gl.uniform1i(U.uP,1);gl.uniform1i(U.uS,2);gl.uniform1i(U.uC,3);gl.uniform1i(U.uB,4);const Bm=document.createElement('canvas');
   const up=(i,src)=>{gl.activeTexture(gl.TEXTURE0+i);gl.bindTexture(gl.TEXTURE_2D,TX[i]);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,src)};
-  FQL={cv,M,P,Sm,gl,U,up,size(){const cw=Math.min(480,Math.ceil(VW/2)),chh=Math.max(1,Math.round(cw*VH/VW));for(const c of [cv,M,P])if(c.width!==cw||c.height!==chh){c.width=cw;c.height=chh}return[cw,chh]}}}catch(_){FQL=null}return FQL}
+  FQL={cv,M,P,Sm,Bm,gl,U,up,size(){const cw=Math.min(480,Math.ceil(VW/2)),chh=Math.max(1,Math.round(cw*VH/VW));for(const c of [cv,M,P,Bm])if(c.width!==cw||c.height!==chh){c.width=cw;c.height=chh}return[cw,chh]}}}catch(_){FQL=null}return FQL}
 function fqLight(st){let q=.5;try{q=fxgQ()}catch(_){}if(q<=0)return;const L=fqLightInit();if(!L)return;const p=G.p,X0=p.x-VW/2,Y0=p.y-VH/2,[cw,chh]=L.size(),k=cw/VW,F=st.fin;
   const m=L.M.getContext('2d');m.setTransform(1,0,0,1,0,0);m.globalCompositeOperation='source-over';m.fillStyle='#000';m.fillRect(0,0,cw,chh);m.setTransform(k,0,0,k,-X0*k,-Y0*k);m.globalCompositeOperation='lighter';m.lineCap='round';m.lineJoin='round';m.strokeStyle='#fff';let any=0;
   for(const b of st.bo){const a=1-b.t/b.L;if(a<=0)continue;any=1;m.globalAlpha=a;m.lineWidth=Math.max(1.5/k,b.w*1.5);for(const P of [b.P].concat(b.br)){m.beginPath();m.moveTo(P[0][0],P[0][1]);for(let i=1;i<P.length;i++)m.lineTo(P[i][0],P[i][1]);m.stroke()}}
@@ -8476,8 +8516,9 @@ function fqLight(st){let q=.5;try{q=fxgQ()}catch(_){}if(q<=0)return;const L=fqLi
   m.globalAlpha=1;
   const pc=L.P.getContext('2d');pc.globalCompositeOperation='source-over';pc.fillStyle=`rgba(0,0,0,${Math.min(1,G.dt?G.dt*2.8:.09)})`;pc.fillRect(0,0,cw,chh);if(FQX.af){pc.save();pc.setTransform(k,0,0,k,-X0*k,-Y0*k);pc.globalCompositeOperation='lighter';pc.lineCap='round';pc.lineJoin='round';pc.strokeStyle='#fff';for(const b of st.bo){if(!b.big)continue;const a=1-b.t/b.L;if(a<=0)continue;pc.globalAlpha=a*.55;pc.lineWidth=Math.max(1.5/k,b.w*1.5);for(const P of [b.P].concat(b.br)){pc.beginPath();pc.moveTo(P[0][0],P[0][1]);for(let i=1;i<P.length;i++)pc.lineTo(P[i][0],P[i][1]);pc.stroke()}}pc.restore()}
   const sc=L.Sm.getContext('2d');sc.globalCompositeOperation='source-over';sc.fillStyle='#000';sc.fillRect(0,0,64,36);sc.imageSmoothingEnabled=true;sc.globalCompositeOperation='lighter';sc.filter='blur(4px)';for(let i=0;i<4;i++)sc.drawImage(L.M,0,0,64,36);sc.filter='none';
-  const gl=L.gl,U=L.U;gl.viewport(0,0,cw,chh);L.up(0,L.M);L.up(1,L.P);L.up(2,L.Sm);
-  gl.uniform2f(U.res,cw,chh);gl.uniform2f(U.vw,VW,VH);gl.uniform2f(U.off,p.x*.35,p.y*.35);gl.uniform1f(U.t,G.t);gl.uniform1f(U.mode,0);const tr=F&&F.tr?.4:1;gl.uniform1f(U.fg,FQX.gl*tr);gl.uniform1f(U.fc,FQX.cl*((F||st.ph===0)?1:.5)*tr);gl.uniform1f(U.fp,FQX.pl);gl.uniform1f(U.fa,FQX.af);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
+  const bm=L.Bm.getContext('2d');bm.setTransform(1,0,0,1,0,0);bm.globalCompositeOperation='source-over';bm.fillStyle='#000';bm.fillRect(0,0,cw,chh);bm.setTransform(k,0,0,k,-X0*k,-Y0*k);bm.globalCompositeOperation='lighter';bm.lineCap='round';bm.lineJoin='round';bm.strokeStyle='#fff';for(const b of st.bo){if(!b.big)continue;const a=1-b.t/b.L;if(a<=0)continue;bm.globalAlpha=a;bm.lineWidth=Math.max(1.5/k,b.w*1.5);for(const P of [b.P].concat(b.br)){bm.beginPath();bm.moveTo(P[0][0],P[0][1]);for(let i=1;i<P.length;i++)bm.lineTo(P[i][0],P[i][1]);bm.stroke()}}bm.globalAlpha=1;
+  const gl=L.gl,U=L.U;gl.viewport(0,0,cw,chh);L.up(0,L.M);L.up(1,L.P);L.up(2,L.Sm);L.up(4,L.Bm);
+  gl.uniform2f(U.res,cw,chh);gl.uniform2f(U.vw,VW,VH);gl.uniform2f(U.off,p.x*.35,p.y*.35);gl.uniform1f(U.t,G.t);gl.uniform1f(U.mode,0);const tr=F&&F.tr?.4:1;gl.uniform1f(U.fg,FQX.gl*tr);gl.uniform1f(U.fc,FQX.cl*((F||st.ph===0)?1:.5)*tr*(st.chr>0&&!F?1.55:1));gl.uniform1f(U.fp,FQX.pl);gl.uniform1f(U.fa,FQX.af);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
   ctx.save();ctx.globalCompositeOperation='lighter';ctx.imageSmoothingEnabled=true;ctx.drawImage(L.cv,X0,Y0,VW,VH);ctx.restore();
   if(st.chr>0&&FQX.ch){L.up(3,ctx.canvas);gl.uniform1f(U.mode,1);gl.uniform1f(U.chr,Math.min(1,st.chr/.35));gl.drawArrays(gl.TRIANGLE_STRIP,0,4);ctx.save();ctx.globalCompositeOperation='source-over';ctx.drawImage(L.cv,X0,Y0,VW,VH);ctx.restore()}}
 // 일반 상태 대벼락: 12~18초마다 낙뢰 하나가 대벼락으로(피해는 평소 낙뢰와 같음, 연출만)

@@ -7895,12 +7895,12 @@ function dmTrails(st,dt){const p=G.p;for(const c of st.cr){if(c.k==='c')dmEmit(s
   if(st.fin&&st.fin.bmb)dmEmit(st,st.fin.bmb,'n',st.fin.bmb.x,st.fin.bmb.y,dt);
   const pt=st.pt;if(pt){for(const q of pt){q.t+=dt;q.x+=q.vx*dt;q.y+=q.vy*dt;q.vx*=.96;q.vy*=.96}st.pt=pt.filter(q=>q.t<q.l)}}
 // ---- 피날레: DOOMSDAY ----
-function dmFinTick(st,dt,vis){/* 11-14 사용자: 기체 전부 후퇴 → 전략 폭격기가 아주 느리게(4초) 와서 투하 → 빠르게 이탈 → 낙하 지점 섬광 → 화면 전체 600 (보스 360) */const F=st.fin,p=G.p;F.t+=dt;
+function dmFinTick(st,dt,vis){/* 11-14 사용자: 기체 전부 후퇴 → 전략 폭격기가 아주 느리게(4초) 와서 투하 → 빠르게 이탈 → 낙하 지점 섬광 → 화면 전체 1000 (보스 600, V267) */const F=st.fin,p=G.p;F.t+=dt;
   if(F.t>=.8&&!F.bmb){const c=vis.length?{x:vis.reduce((s,e)=>s+e.x,0)/vis.length,y:vis.reduce((s,e)=>s+e.y,0)/vis.length}:{x:p.x,y:p.y};F.ox=(c.x-p.x)*.5;F.oy=(c.y-p.y)*.5;F.bmb={rx:-F.dir*(VW/2+300),ry:-VH*.32,x:0,y:0}}
   if(F.bmb){const b=F.bmb;if(F.t<4.8){const u=(F.t-.8)/4,e=1-Math.pow(1-u,2);const s0=-F.dir*(VW/2+300);b.rx=s0+(F.ox-s0)*e}else{b.rx+=F.dir*(VW*1.6)*dt;b.ry-=VH*.5*dt}b.x=p.x+b.rx;b.y=p.y+b.ry}
   if(F.t>=4.8&&!F.drop){F.drop=1;F.bx=F.bmb.x;F.by=F.bmb.y+30;F.tx=p.x+F.ox;F.ty=p.y+F.oy;F.bxr=F.bx-p.x;F.byr=F.by-p.y;if(!G.bot)SND.p('whoosh')}
   if(F.drop&&!F.boom){F.tx=p.x+F.ox;F.ty=p.y+F.oy}
-  if(F.t>=6.8&&!F.boom){F.boom=1;for(const e of dmVis(60))hurt(e,e.boss?360:600,'doom',{kb:14});if(G.eb)for(const b of G.eb)b.life=0;if(!G.bot){SND.p('ult');SND.p('boom');G.shk=Math.max(G.shk||0,.6)}}
+  if(F.t>=6.8&&!F.boom){F.boom=1;for(const e of dmVis(60))hurt(e,e.boss?600:1000,'doom',{kb:14})/* V267 600→1000 (사용자: 헬에서 안 죽음) */;if(G.eb)for(const b of G.eb)b.life=0;if(!G.bot){SND.p('ult');SND.p('boom');G.shk=Math.max(G.shk||0,.6)}}
   if(F.t>11)st.fin=null}
 function dmTick(w,dt){const st=dmIni(w),S=G.S,p=G.p,vis=dmVis();
   {const m0=G.S.might;G.S.might=m0*DMC.DOC;try{WU.docs(st.sub.docs,dt)}finally{G.S.might=m0}}if(st.fin){const ds=st.sub.drone.st;if(ds.sh){ds.sh.ph=2;WU.drone(st.sub.drone,dt)}}else WU.drone(st.sub.drone,dt);

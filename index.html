@@ -2006,6 +2006,7 @@ function suDraw(front){const p=G.p,H=SU.H,W=SU.GW,ER=SU.ER,vx0=p.x-VW/2-60,vx1=p
     suTrunk(0,-ER*.6,0,-H+10);suTrunk(0,ER*.6,0,H-10);suTrunk(-ER,0,-H+10,0);suTrunk(ER,0,H-10,0);
     const pd=SU.pad;if(pd&&pd.complete&&pd.width){for(const q of SU.pads){const w=pd.width*q[2],h=pd.height*q[2];if(q[0]+w/2<vx0||q[0]-w/2>vx1||q[1]+h/2<vy0||q[1]-h/2>vy1)continue;ctx.drawImage(pd,q[0]-w/2,q[1]-h/2,w,h)}
       if(Math.abs(p.x)<VW/2+420&&Math.abs(p.y)<VH/2+300){const s=2.5,w=pd.width*s,h=pd.height*s;ctx.drawImage(pd,-w/2,-h/2+6,w,h)}}
+    suBurnDraw();
     /* 북쪽 벽(뒤) + 좌우 벽 */
     if(vy0<-H+10){ctx.fillStyle='#dfe5ee';ctx.fillRect(-H-40,-H-70,H-W/2+40,84);ctx.fillRect(W/2,-H-70,H-W/2+40,84);ctx.fillStyle='#f6f9fc';ctx.fillRect(-H-40,-H-70,H-W/2+40,16);ctx.fillRect(W/2,-H-70,H-W/2+40,16);ctx.fillStyle='#18a8ea';ctx.fillRect(-H-40,-H-18,H-W/2+40,4);ctx.fillRect(W/2,-H-18,H-W/2+40,4);suGate(0,-H,1)}
     for(const sx of[-1,1]){if(sx<0?vx0>-H+40:vx1<H-40)continue;const x=sx*H+(sx<0?-40:0);ctx.fillStyle='#e6ebf2';ctx.fillRect(x,-H-70,40,H-W/2+70);ctx.fillRect(x,W/2,40,H-W/2+50);ctx.fillStyle='#18a8ea';ctx.fillRect(x+(sx<0?34:2),-H-70,4,H-W/2+70);ctx.fillRect(x+(sx<0?34:2),W/2,4,H-W/2+50);suGate(sx*H+sx*-0,0,0)}
@@ -2026,7 +2027,7 @@ function suDraw(front){const p=G.p,H=SU.H,W=SU.GW,ER=SU.ER,vx0=p.x-VW/2-60,vx1=p
    그림 ag/talos_tf(비행→착지→전개 24장) · talos_hull(선체) · talos_gun(레일건 24방향) · daedalus(12장), 칸 320px.
    SUT.PHI = 레일건 각 장이 화면에서 가리키는 각도(구운 그림에서 잰 값), SUT.L = 회전 중심~포구 거리(px).
    아직 메뉴·해금 없음 — 시험은 window.__suShip('talos'|'daedalus'). */
-const SUT={K:1.3,C:320,PX:149.9,PY:125.6,GY:232,LIFE:20,CH:3,ROT:Math.PI/2,DM:14,
+const SUT={W:105,BL:16,K:1.3,C:320,PX:149.9,PY:125.6,GY:232,LIFE:20,CH:3,ROT:Math.PI/2,DM:14,
  PHI:[0.09,0.012,-0.105,-0.25,-0.421,-0.631,-0.919,-1.426,-2.047,-2.408,-2.654,-2.839,-2.994,-3.126,3.058,2.969,2.811,2.598,2.297,1.771,0.994,0.64,0.394,0.216],
  L:[112.3,112.1,108.1,99.6,88.1,75.3,63.0,54.9,58.4,69.4,82.4,95.0,105.2,111.3,113.1,111.9,105.9,94.3,80.2,68.6,74.3,87.9,100.8,109.3]};
 function suIm(k){const M=SU.ims||(SU.ims={});let i=M[k];if(!i){i=M[k]=new Image();i.src='ag/'+k+'.webp'}return i}
@@ -2041,9 +2042,10 @@ function suTalos(){if(G.suT||G.map!=='su')return false;const p=G.p;let b=null,bd
 function suTalosAim(S){const P=suPiv(S),B=new Float32Array(24);let any=0;for(const e of G.enemies){if(e.dead)continue;const dx=e.x-P[0],dy=e.y-P[1],d=Math.hypot(dx,dy);if(d>1100||d<70)continue;const i=((Math.round(Math.atan2(dy,dx)/6.2832*24)%24)+24)%24,w=e.boss?10:e.elite?3:1;B[i]+=w;B[(i+1)%24]+=w*.5;B[(i+23)%24]+=w*.5;any=1}
   if(!any)return null;let b=0;for(let i=1;i<24;i++)if(B[i]>B[b])b=i;return suAd(b/24*6.2832)}
 function suTalosFire(S){const O=suMuz(S),c=Math.cos(S.phi),s=Math.sin(S.phi),D=(G.fmSpD||60)*SUT.DM;let n=0;
-  for(const e of G.enemies){if(e.dead)continue;const rx=e.x-O[0],ry=e.y-O[1],al=rx*c+ry*s;if(al<-30||al>1600)continue;if(Math.abs(rx*s-ry*c)>34+e.r)continue;hurt(e,e.boss?Math.min(D,e.max*.01):D,'fmsup');n++}
+  for(const e of G.enemies){if(e.dead)continue;const rx=e.x-O[0],ry=e.y-O[1],al=rx*c+ry*s;if(al<-30||al>1600)continue;if(Math.abs(rx*s-ry*c)>SUT.W+e.r)continue;hurt(e,e.boss?Math.min(D,e.max*.01):D,'fmsup');n++}
+  G.suHz={x:O[0],y:O[1],a:S.phi,t:0};(G.suBurn=G.suBurn||[]).push({x:O[0],y:O[1],a:S.phi,t:G.t,s:Math.random()*400|0});if(G.suBurn.length>7)G.suBurn.shift();
   S.beam={x:O[0],y:O[1],a:S.phi,l:.45};S.rc=.3;S.ch=0;S.tg=null;S.n++;G.shk=Math.max(G.shk||0,.3);
-  if(!G.bot){try{SND.p('whoosh')}catch(e){}for(let i=0;i<26;i++){const u=rnd(0,1500);px(O[0]+c*u+rnd(-14,14),O[1]+s*u+rnd(-14,14),rnd(-40,40),rnd(-40,40),rnd(.3,.7),pick(['#ffffff','#9fe8ff','#48c8ff']),3,1,1)}sparks(O[0],O[1],14,['#ffffff','#9fe8ff','#ffd27a'],260,.4,3)}}
+  if(!G.bot){try{SND.p('whoosh')}catch(e){}for(let i=0;i<26;i++){const u=rnd(0,1500);px(O[0]+c*u-s*rnd(-90,90),O[1]+s*u+c*rnd(-90,90),rnd(-40,40),rnd(-70,10),rnd(.3,.7),pick(['#ffffff','#9fe8ff','#48c8ff']),3,1,1)}sparks(O[0],O[1],14,['#ffffff','#9fe8ff','#ffd27a'],260,.4,3)}}
 function suTalosTick(dt){const S=G.suT;if(!S)return;S.t+=dt;if(S.beam){S.beam.l-=dt;if(S.beam.l<=0)S.beam=null}S.rc=Math.max(0,S.rc-dt);
   if(S.st===0){const e=suEase(S.t/2.4);S.fx=S.x-S.dir*1000*(1-e);S.alt=260-200*e;if(!G.bot&&Math.random()<.7)px(S.fx-S.dir*120,S.y-S.alt-30+rnd(-20,20),-S.dir*rnd(120,220),rnd(-10,10),.5,pick(['#5fd8ff','#e8fbff']),3,1,1);if(S.t>=2.4){S.st=1;S.t=0;S.fx=S.x}}
   else if(S.st===1){S.alt=60*(1-suEase(S.t/.9));S.k=Math.min(1,S.t/3);if(!G.bot&&S.t<1&&Math.random()<.6)px(S.x+rnd(-150,150),S.y+rnd(-6,10),rnd(-90,90),rnd(-30,-5),.6,pick(['#e8d2a6','#cdb488','#ffffff']),3,1,1);if(S.t>=3){S.st=2;S.t=0;S.k=1;S.alt=0}}
@@ -2060,8 +2062,8 @@ function suTalosDraw(){const S=G.suT;if(!S)return;const K=SUT.K,p=G.p;if(Math.ab
     const P=suPiv(S),q=S.ch/SUT.CH;if(q>0&&S.st===2){ctx.save();ctx.globalCompositeOperation='lighter';const R=10+q*30+2*Math.sin(G.t*30),g=ctx.createRadialGradient(P[0],P[1],0,P[0],P[1],R);g.addColorStop(0,`rgba(255,255,255,${.5+.5*q})`);g.addColorStop(.4,`rgba(110,220,255,${.5*q})`);g.addColorStop(1,'rgba(60,160,255,0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(P[0],P[1],R,0,7);ctx.fill();
       if(q>.6&&S.tg!==null){const M=suMuz(S);ctx.globalAlpha=(q-.6)/.4*.55;ctx.strokeStyle='#7fe0ff';ctx.lineWidth=2;ctx.setLineDash([14,10]);ctx.lineDashOffset=-G.t*90;ctx.beginPath();ctx.moveTo(M[0],M[1]);ctx.lineTo(M[0]+Math.cos(S.phi)*1500,M[1]+Math.sin(S.phi)*1500);ctx.stroke();ctx.setLineDash([])}ctx.restore()}}
   else suSprite(suIm('talos_tf'),S.st===0||S.st===4?0:Math.round(S.k*23),6,S.fx,Y,S.dir,K);
-  if(S.beam){const b=S.beam,u=b.l/.45,ex=b.x+Math.cos(b.a)*1600,ey=b.y+Math.sin(b.a)*1600;ctx.save();ctx.globalCompositeOperation='lighter';ctx.lineCap='round';
-    for(const [w,c,al] of [[70,'#2a8cff',.25],[38,'#6fdcff',.55],[14,'#ffffff',1]]){ctx.globalAlpha=al*u;ctx.strokeStyle=c;ctx.lineWidth=w*(.4+.6*u);ctx.beginPath();ctx.moveTo(b.x,b.y);ctx.lineTo(ex,ey);ctx.stroke()}ctx.restore()}}
+  if(S.beam){const b=S.beam,u=b.l/.45,ex=b.x+Math.cos(b.a)*1600,ey=b.y+Math.sin(b.a)*1600;ctx.save();ctx.globalCompositeOperation='lighter';ctx.lineCap='butt';
+    for(const [w,c,al] of [[230,'#2a8cff',.22],[150,'#6fdcff',.4],[60,'#ffffff',.95]]){ctx.globalAlpha=al*u;ctx.strokeStyle=c;ctx.lineWidth=w*(.4+.6*u);ctx.beginPath();ctx.moveTo(b.x,b.y);ctx.lineTo(ex,ey);ctx.stroke()}ctx.restore()}}
 /* 다이달로스: 가장 가까운(③단계부터는 가장 상한) 게이트 위에 멈춰 수리 */
 function suDaed(gi){if(G.suDd||G.map!=='su')return false;const H=SU.H,GT=[[0,-H+150],[0,H-90],[-H+150,20],[H-150,20]],p=G.p;if(gi===undefined){let bd=1e9;GT.forEach((g,i)=>{const d=Math.hypot(g[0]-p.x,g[1]-p.y);if(d<bd){bd=d;gi=i}})}
   const g=GT[gi];G.suDd={st:0,t:0,gi,x:g[0],y:g[1],sx:0,sy:-260,fx:0,fy:-260,alt:320,k:0,dir:g[0]>=0?1:-1};suIm('daedalus');if(!G.bot)toast('🔧 다이달로스 출동',['북','남','서','동'][gi]+'쪽 게이트로 수리하러 갑니다');return true}
@@ -2076,8 +2078,42 @@ function suDaedDraw(){const S=G.suDd;if(!S)return;const K=1.3;suShadow(S.fx,S.fy
   if(S.st===2){ctx.save();ctx.globalCompositeOperation='lighter';ctx.strokeStyle='#7fe0ff';ctx.lineWidth=5;ctx.globalAlpha=.8;ctx.beginPath();ctx.ellipse(S.x,S.y,120,44,0,-1.57,-1.57+6.2832*Math.min(1,S.t/8));ctx.stroke();
     ctx.globalAlpha=.35+.2*Math.sin(G.t*24);ctx.lineWidth=3;for(const o of [-70,-25,25,70]){ctx.beginPath();ctx.moveTo(S.fx+o,S.fy-S.alt+40);ctx.lineTo(S.x+o*.5+rnd(-6,6),S.y+rnd(-8,8));ctx.stroke()}ctx.restore()}
   suSprite(suIm('daedalus'),Math.round(S.k*11),6,S.fx,S.fy-S.alt,S.dir,K,160,150)}
-function suShipTick(dt){suTalosTick(dt);suDaedTick(dt)}
-function suShipDraw(){suTalosDraw();suDaedDraw()}
+/* 레일건 자국: ① 셰이더 — 빛줄기 플라스마 + 뒤따르는 아지랑이(전용 WebGL 캔버스, 화면 ½ 해상도, screen 합성 · 없거나 느리면 생략) ② 그을린 땅(16초, 처음 4초는 불씨) */
+const SUG={c:null,gl:null,ok:null,U:{}};
+const SUG_FS=`precision mediump float;uniform vec2 res,o,d;uniform float t,w,k,hz,len;
+float h(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+float n2(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(h(i),h(i+vec2(1,0)),f.x),mix(h(i+vec2(0,1)),h(i+vec2(1,1)),f.x),f.y);}
+float fbm(vec2 p){float v=0.,a=.5;for(int i=0;i<3;i++){v+=a*n2(p);p=p*2.03+vec2(1.7,9.2);a*=.5;}return v;}
+void main(){vec2 fc=vec2(gl_FragCoord.x,res.y-gl_FragCoord.y),q=fc-o;float u=dot(q,d),v=dot(q,vec2(-d.y,d.x));vec3 col=vec3(0.);
+ if(u>-w*.5&&u<len&&abs(v)<w*2.6){float av=abs(v)/w,tp=smoothstep(-w*.5,w*.6,u)*smoothstep(len,len-w*4.,u);
+  float fl=fbm(vec2(u/w*1.2-t*9.,v/w*3.)),core=exp(-av*av*7.)*(1.1+.5*fl),sh=exp(-av*av*1.4)*(.3+.7*fbm(vec2(u/w*2.-t*14.,v/w*5.+3.)));
+  col+=(vec3(.78,.94,1.)*core+vec3(.14,.5,1.)*sh)*k*tp;
+  float wob=sin(u/w*3.2+t*7.+fbm(vec2(u/w,t*.8))*6.)*.35,a2=av+wob*.45,rise=fbm(vec2(u/w*1.7+wob,v/w*4.-t*1.7));
+  float band=smoothstep(.42,.62,rise)*smoothstep(2.1,.15,a2);
+  col+=mix(vec3(1.,.48,.14),vec3(1.,.9,.72),rise)*band*.95*hz*tp+vec3(1.,.4,.1)*exp(-av*av*2.)*.22*hz*tp;}
+ gl_FragColor=vec4(min(col,vec3(1.)),1.);}`;
+function sugInit(){if(SUG.ok!==null)return SUG.ok;SUG.ok=false;try{const c=document.createElement('canvas'),gl=c.getContext('webgl',{alpha:false,antialias:false,depth:false,stencil:false,premultipliedAlpha:false,powerPreference:'low-power'});if(!gl)return false;
+  const sh=(tp,src)=>{const o=gl.createShader(tp);gl.shaderSource(o,src);gl.compileShader(o);if(!gl.getShaderParameter(o,gl.COMPILE_STATUS))throw new Error(gl.getShaderInfoLog(o));return o};
+  const pr=gl.createProgram();gl.attachShader(pr,sh(gl.VERTEX_SHADER,'attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}'));gl.attachShader(pr,sh(gl.FRAGMENT_SHADER,SUG_FS));gl.linkProgram(pr);if(!gl.getProgramParameter(pr,gl.LINK_STATUS))throw new Error('link');gl.useProgram(pr);
+  const b=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);const L=gl.getAttribLocation(pr,'p');gl.enableVertexAttribArray(L);gl.vertexAttribPointer(L,2,gl.FLOAT,false,0,0);
+  for(const k of ['res','o','d','t','w','k','hz','len'])SUG.U[k]=gl.getUniformLocation(pr,k);SUG.c=c;SUG.gl=gl;SUG.ok=true}catch(e){console.warn('sug',e)}return SUG.ok}
+function suHzDraw(){const B=G.suHz;if(!B||G.bot)return;const q=typeof fxgQ==='function'?fxgQ():.5;if(!q||!sugInit())return;const gl=SUG.gl,c=SUG.c,U=SUG.U,W=Math.max(2,Math.round(innerWidth*q)),H=Math.max(2,Math.round(innerHeight*q));
+  if(c.width!==W||c.height!==H){c.width=W;c.height=H}gl.viewport(0,0,W,H);const sx=(innerWidth/2+(B.x-G.p.x)*Z)*q,sy=(innerHeight/2+(B.y-G.p.y)*Z)*q;
+  gl.uniform2f(U.res,W,H);gl.uniform2f(U.o,sx,sy);gl.uniform2f(U.d,Math.cos(B.a),Math.sin(B.a));gl.uniform1f(U.t,G.t%600);gl.uniform1f(U.w,SUT.W*Z*q);gl.uniform1f(U.len,1600*Z*q);
+  gl.uniform1f(U.k,Math.max(0,1-B.t/.5));gl.uniform1f(U.hz,B.t<.25?B.t/.25:Math.max(0,1-(B.t-.25)/1.8));gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
+  ctx.save();ctx.setTransform(DPR,0,0,DPR,0,0);ctx.globalCompositeOperation='screen';ctx.imageSmoothingEnabled=true;ctx.drawImage(c,0,0,innerWidth,innerHeight);ctx.restore()}
+function suBurnTex(){if(SU.bt)return SU.bt;const W=800,H=128,c=document.createElement('canvas');c.width=W;c.height=H;const g=c.getContext('2d');let sd=7;const r=()=>(sd=(sd*16807)%2147483647)/2147483647;
+  for(let i=0;i<900;i++){const x=r()*W,v=(r()+r()+r()-1.5)/1.5,y=H/2+v*H*.42,R=6+r()*20*(1-Math.abs(v));const gr=g.createRadialGradient(x,y,0,x,y,R);gr.addColorStop(0,'rgba(26,16,9,.55)');gr.addColorStop(1,'rgba(40,24,12,0)');g.fillStyle=gr;g.beginPath();g.arc(x,y,R,0,7);g.fill()}
+  for(let i=0;i<70;i++){const x=r()*W,y=H/2+(r()-.5)*H*.5,l=10+r()*40;g.strokeStyle='rgba(10,6,4,.5)';g.lineWidth=1+r()*2;g.beginPath();g.moveTo(x,y);g.lineTo(x+l,y+(r()-.5)*8);g.stroke()}
+  return SU.bt=c}
+function suBurnDraw(){const L=G.suBurn;if(!L||!L.length)return;const T=suBurnTex(),w=SUT.W*1.15;
+  for(const b of L){const age=G.t-b.t,al=age<.3?age/.3:Math.min(1,(SUT.BL-age)/4);if(al<=0)continue;ctx.save();ctx.translate(b.x,b.y);ctx.rotate(b.a);ctx.globalAlpha=al*.6;
+    for(let i=0;i<2;i++)ctx.drawImage(T,(b.s+i*370)%400,0,400,128,i*800-20,-w,820,w*2);
+    if(age<4){const e=1-age/4;ctx.globalCompositeOperation='lighter';for(let i=0;i<26;i++){const hx=((i*97+b.s)%160)/160,u=hx*1560+((i*53)%60),v=(((i*61+b.s)%100)/100-.5)*w*1.5,fl=.5+.5*Math.sin(G.t*9+i*2.3);ctx.globalAlpha=e*fl*.9;ctx.fillStyle=i%3?'#ff7a2a':'#ffd27a';ctx.fillRect(u,v,5+(i%4)*3,2.5)}}
+    ctx.restore();
+    if(!G.bot&&age<5&&Math.random()<.25){const u=rnd(0,1500),v=rnd(-w*.7,w*.7);px(b.x+Math.cos(b.a)*u-Math.sin(b.a)*v,b.y+Math.sin(b.a)*u+Math.cos(b.a)*v,rnd(-8,8),-rnd(20,50),rnd(.6,1.1),pick(['#5a4a3a','#8a7460','#3a2e24']),3,1,1)}}}
+function suShipTick(dt){suTalosTick(dt);suDaedTick(dt);if(G.suHz){G.suHz.t+=dt;if(G.suHz.t>2.1)G.suHz=null}if(G.suBurn&&G.suBurn.length&&G.t-G.suBurn[0].t>SUT.BL)G.suBurn.shift()}
+function suShipDraw(){suTalosDraw();suDaedDraw();suHzDraw()}
 window.__suShip=k=>k==='talos'?suTalos():suDaed();
 /* ================= 시즌4 맵: 인천 (2026-11-14 ①단계 뼈대) =================
    상봉 헬 물량 + 장수의 어둠(약화)·방어장갑. 추적자·숨기 없음. 원거리 3종은 거리를 벌리며 도망(mgRanged).

@@ -8445,7 +8445,7 @@ let FQS;function fqShader(){if(FQS!==undefined)return FQS;FQS=null;try{const cv=
     gl.uniform2f(U.res,cw,chh);gl.uniform2f(U.vw,VW,VH);gl.uniform2f(U.off,G.p.x*.35,G.p.y*.35);gl.uniform1f(U.t,G.t);gl.uniform1f(U.dark,o.dark||0);gl.uniform1f(U.flash,o.flash||0);gl.uniform1f(U.ha,o.ha||0);gl.uniform1f(U.mode,o.mode||0);gl.uniform1f(U.topm,o.topm||0);gl.uniform1f(U.ray,o.ray||0);
     gl.drawArrays(gl.TRIANGLE_STRIP,0,4);return cv}}}catch(_){FQS=null}return FQS}
 // V267 ⚡ 번개 셰이더: 빛 번짐 · 구름 조명 · 플라즈마 · 잔광 · 대벼락 색 갈라짐 (번개 모양·판정은 그대로, 그 위에 빛만 얹음)
-const FQX={gl:1,cl:1,pl:1,af:1,ch:1};
+const FQX={gl:0,cl:1,pl:0,af:1,ch:1};// 사용자 결정: 구름 조명은 항상, 잔광·색 갈라짐은 대벼락만, 빛 번짐·플라즈마 없음
 let FQL;function fqLightInit(){if(FQL!==undefined)return FQL;FQL=null;try{const cv=document.createElement('canvas');cv.width=480;cv.height=270;const gl=cv.getContext('webgl',{premultipliedAlpha:true,preserveDrawingBuffer:true,antialias:false});if(!gl)return null;
   const M=document.createElement('canvas'),P=document.createElement('canvas'),Sm=document.createElement('canvas');Sm.width=64;Sm.height=36;
   const FS='precision highp float;uniform sampler2D uM,uP,uS,uC;uniform vec2 res,vw,off;uniform float t,mode,fg,fc,fp,fa,chr;'+
@@ -8459,7 +8459,7 @@ let FQL;function fqLightInit(){if(FQL!==undefined)return FQL;FQL=null;try{const 
   'float n=fbm(uv*vec2(90.,50.)+vec2(t*31.,-t*23.));col+=fp*m*mix(vec3(.45,.85,1.),vec3(1.,.45,1.),n)*(.6+2.2*n);'+
   'col+=vec3(.62,.36,1.)*a*.9*fa;'+
   'vec2 g=uv*vw;vec2 cp=(g+off)*.004+vec2(t*.05,t*.008);float c1=fbm(cp+fbm(cp*2.+t*.05)),c2=fbm(cp*2.3-vec2(t*.08,0.));float cl=smoothstep(.35,.8,c1*.7+c2*.4);'+
-  'float L=texture2D(uS,uv).r;col+=vec3(.55,.62,1.)*L*(.3+1.7*cl)*4.*fc;'+
+  'float L=texture2D(uS,uv).r;col+=vec3(.55,.62,1.)*L*(.3+1.7*cl)*2.6*fc;'+
   'gl_FragColor=vec4(col,1.);}';
   const sh=(tp,src)=>{const x=gl.createShader(tp);gl.shaderSource(x,src);gl.compileShader(x);if(!gl.getShaderParameter(x,gl.COMPILE_STATUS))throw 0;return x};
   const pg=gl.createProgram();gl.attachShader(pg,sh(gl.VERTEX_SHADER,'attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}'));gl.attachShader(pg,sh(gl.FRAGMENT_SHADER,FS));gl.linkProgram(pg);if(!gl.getProgramParameter(pg,gl.LINK_STATUS))return null;gl.useProgram(pg);
@@ -8474,14 +8474,14 @@ function fqLight(st){let q=.5;try{q=fxgQ()}catch(_){}if(q<=0)return;const L=fqLi
   for(const b of st.bo){const a=1-b.t/b.L;if(a<=0)continue;any=1;m.globalAlpha=a;m.lineWidth=Math.max(1.5/k,b.w*1.5);for(const P of [b.P].concat(b.br)){m.beginPath();m.moveTo(P[0][0],P[0][1]);for(let i=1;i<P.length;i++)m.lineTo(P[i][0],P[i][1]);m.stroke()}}
   if(F&&F.tr){const pr=(F.t-F.t0)/1.7,fl=F.t<7.2?.8+.2*Math.random():Math.max(0,1-(F.t-7.2)/1);if(fl>0){any=1;m.globalAlpha=fl;for(let d=0;d<5;d++){m.lineWidth=Math.max(1/k,(4.5-d*1.1)*(F.t>6.6&&F.t<7?1.6:1));m.beginPath();for(const s of F.tr){if(s[4]!==d||s[5]>pr)continue;m.moveTo(s[0],s[1]);m.lineTo(s[2],s[3])}m.stroke()}}}
   m.globalAlpha=1;
-  const pc=L.P.getContext('2d');pc.globalCompositeOperation='source-over';pc.fillStyle=`rgba(0,0,0,${Math.min(1,G.dt?G.dt*2.8:.09)})`;pc.fillRect(0,0,cw,chh);if(FQX.af){pc.globalCompositeOperation='lighter';pc.globalAlpha=.55;pc.drawImage(L.M,0,0);pc.globalAlpha=1}
+  const pc=L.P.getContext('2d');pc.globalCompositeOperation='source-over';pc.fillStyle=`rgba(0,0,0,${Math.min(1,G.dt?G.dt*2.8:.09)})`;pc.fillRect(0,0,cw,chh);if(FQX.af){pc.save();pc.setTransform(k,0,0,k,-X0*k,-Y0*k);pc.globalCompositeOperation='lighter';pc.lineCap='round';pc.lineJoin='round';pc.strokeStyle='#fff';for(const b of st.bo){if(!b.big)continue;const a=1-b.t/b.L;if(a<=0)continue;pc.globalAlpha=a*.55;pc.lineWidth=Math.max(1.5/k,b.w*1.5);for(const P of [b.P].concat(b.br)){pc.beginPath();pc.moveTo(P[0][0],P[0][1]);for(let i=1;i<P.length;i++)pc.lineTo(P[i][0],P[i][1]);pc.stroke()}}pc.restore()}
   const sc=L.Sm.getContext('2d');sc.globalCompositeOperation='source-over';sc.fillStyle='#000';sc.fillRect(0,0,64,36);sc.imageSmoothingEnabled=true;sc.globalCompositeOperation='lighter';sc.filter='blur(4px)';for(let i=0;i<4;i++)sc.drawImage(L.M,0,0,64,36);sc.filter='none';
   const gl=L.gl,U=L.U;gl.viewport(0,0,cw,chh);L.up(0,L.M);L.up(1,L.P);L.up(2,L.Sm);
   gl.uniform2f(U.res,cw,chh);gl.uniform2f(U.vw,VW,VH);gl.uniform2f(U.off,p.x*.35,p.y*.35);gl.uniform1f(U.t,G.t);gl.uniform1f(U.mode,0);const tr=F&&F.tr?.4:1;gl.uniform1f(U.fg,FQX.gl*tr);gl.uniform1f(U.fc,FQX.cl*((F||st.ph===0)?1:.5)*tr);gl.uniform1f(U.fp,FQX.pl);gl.uniform1f(U.fa,FQX.af);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
   ctx.save();ctx.globalCompositeOperation='lighter';ctx.imageSmoothingEnabled=true;ctx.drawImage(L.cv,X0,Y0,VW,VH);ctx.restore();
   if(st.chr>0&&FQX.ch){L.up(3,ctx.canvas);gl.uniform1f(U.mode,1);gl.uniform1f(U.chr,Math.min(1,st.chr/.35));gl.drawArrays(gl.TRIANGLE_STRIP,0,4);ctx.save();ctx.globalCompositeOperation='source-over';ctx.drawImage(L.cv,X0,Y0,VW,VH);ctx.restore()}}
 // 일반 상태 대벼락: 12~18초마다 낙뢰 하나가 대벼락으로(피해는 평소 낙뢰와 같음, 연출만)
-function fqBigStrike(st,vis){const e=fqPick(vis);if(!e)return;fqStrike(st,e.x,e.y,vis,1,e);if(G.bot)return;fqBolt(st,e.x+rnd(-40,40),G.p.y-VH/2-40,e.x,e.y,6,.55,'200,220,255');fqBolt(st,e.x+rnd(-90,90),G.p.y-VH/2-40,e.x,e.y,3,.45,'180,200,255');
+function fqBigStrike(st,vis){const e=fqPick(vis);if(!e)return;fqStrike(st,e.x,e.y,vis,1,e);if(G.bot)return;fqBolt(st,e.x+rnd(-40,40),G.p.y-VH/2-40,e.x,e.y,6,.55,'200,220,255');fqBolt(st,e.x+rnd(-90,90),G.p.y-VH/2-40,e.x,e.y,3,.45,'180,200,255');st.bo[st.bo.length-1].big=st.bo[st.bo.length-2].big=1;
   fqFx(st,'ls',e.x,e.y,1.6);st.sf=Math.max(st.sf||0,.18);st.chr=.35;SND.p('thunder');G.shk=Math.max(G.shk||0,.35)}
 function fqSh(){let q=.5;try{q=fxgQ()}catch(_){}return q>0?fqShader():null}
 function fqShDraw(S,o,X0,Y0,mode){ctx.save();if(mode)ctx.globalCompositeOperation='lighter';ctx.imageSmoothingEnabled=true;ctx.drawImage(S.draw(o),X0,Y0,VW,VH);ctx.restore()}
@@ -8502,7 +8502,7 @@ function fqFinFg(st,F){const p=G.p,T=F.t,X0=p.x-VW/2,Y0=p.y-VH/2;
   if(T>2.2&&T<7){const u=Math.min(1,(T-2.2)/.8);ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=u*.55;const g=ctx.createRadialGradient(p.x,p.y-20,4,p.x,p.y-20,130);g.addColorStop(0,'rgba(200,225,255,1)');g.addColorStop(1,'rgba(80,120,255,0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(p.x,p.y-20,130,0,6.283);ctx.fill();ctx.restore();fqSp('cu',Math.floor(G.t*12)%33,p.x,p.y,1.6,u,'lighter')}
   if(F.tr){const pr=(T-F.t0)/1.7,fl=T<7.2?.75+.25*Math.random():Math.max(0,1-(T-7.2)/1);if(fl>0){ctx.save();ctx.globalCompositeOperation='lighter';ctx.lineCap='round';
     for(let d=0;d<5;d++){ctx.beginPath();let any=0;for(const s of F.tr){if(s[4]!==d||s[5]>pr)continue;any=1;ctx.moveTo(s[0],s[1]);ctx.lineTo(s[2],s[3])}if(!any)continue;const w=Math.max(1,4.5-d*1.1)*(T>6.6&&T<7?1.6:1);ctx.strokeStyle=`rgba(120,170,255,${fl*.4})`;ctx.lineWidth=w*4;ctx.stroke();ctx.strokeStyle=`rgba(240,248,255,${fl})`;ctx.lineWidth=w;ctx.stroke()}ctx.restore()}}
-  const wo=T>5.4&&T<8.4?(T<6.75?(T-5.4)/1.35:Math.max(0,1-(T-6.75)/1.5)):0;const fl=Math.max(F.fl>0?Math.min(1,F.fl/.3)*.8:0,wo);if(fl>0){ctx.save();ctx.globalAlpha=Math.min(.94,fl*.94);ctx.fillStyle='#f6f9ff';ctx.fillRect(X0,Y0,VW,VH);ctx.restore()}}
+  const wo=T>5.4&&T<8.4?(T<6.75?(T-5.4)/1.35:Math.max(0,1-(T-6.75)/1.5)):0;const fl=Math.max(F.fl>0?Math.min(1,F.fl/.3)*.8:0,wo);if(fl>0){ctx.save();ctx.globalAlpha=Math.min(.6,fl*.6);ctx.fillStyle='#f6f9ff';/* V267 눈부심 완화 .94→.6 */ctx.fillRect(X0,Y0,VW,VH);ctx.restore()}}
 function fqDraw(w){if(G.bot)return;const st=w.st;if(!st.i)return;const p=G.p,X0=p.x-VW/2,Y0=p.y-VH/2;
   if(st.fin)fqFinBg(st,st.fin);else fqTint(st);
   for(const q of st.tw){const fi=Math.floor((G.t+q.t)*12)%24;fqSp('tw',fi,q.x,q.y+20,1.35,.95)}

@@ -5485,7 +5485,7 @@ function rdTick(w,dt){const S=G.S,st=w.st,n=1+S.amount,p=G.p;st.c=st.c||[];
     c.hp=Math.min(c.hp,MH);c.t+=dt;c.f+=dt;
     if(c.m!=='air'&&!juInv()){for(const e of G.enemies){if(e.dead)continue;const rr=e.r+24;if((e.x-c.x)**2+(e.y-c.y)**2<rr*rr)c.hp-=e.dmg*edm()*dt*.25}if(c.hp<=0){c.dead=6;if(!G.bot){chunks(c.x,c.y,12,['#ffffff','#2a2a2a','#c07bff'],220);rdSay(c,pick(RDL.die),'#ff8ad8')}continue}}
     c.sayT-=dt;if(c.sayT<=0){c.sayT=rnd(9,15);if(Math.random()<.5)rdSay(c,pick(RDL.u),'#ffb0e8');else rdSay(c,pick(RDL.b),'#ff6a7a')}
-    if(c.m==='drive'){const v=270;c.x+=Math.cos(c.h)*v*dt;c.y+=Math.sin(c.h)*v*dt;if(!G.bot){(c.tr=c.tr||[]).push({x:c.x-c.dir*26,y:c.y+12,t:G.t});if(c.tr.length>40)c.tr.shift()}const bx=VW/2-50,by=VH/2-60;if(c.x<p.x-bx&&Math.cos(c.h)<0||c.x>p.x+bx&&Math.cos(c.h)>0)c.h=Math.PI-c.h;if(c.y<p.y-by&&Math.sin(c.h)<0||c.y>p.y+by&&Math.sin(c.h)>0)c.h=-c.h;if(Math.abs(Math.cos(c.h))>.1)c.dir=Math.cos(c.h)<0?-1:1;
+    if(c.m==='drive'){const v=270;c.x+=Math.cos(c.h)*v*dt;c.y+=Math.sin(c.h)*v*dt;const bx=VW/2-50,by=VH/2-60;if(c.x<p.x-bx&&Math.cos(c.h)<0||c.x>p.x+bx&&Math.cos(c.h)>0)c.h=Math.PI-c.h;if(c.y<p.y-by&&Math.sin(c.h)<0||c.y>p.y+by&&Math.sin(c.h)>0)c.h=-c.h;if(Math.abs(Math.cos(c.h))>.1)c.dir=Math.cos(c.h)<0?-1:1;
       for(const e of G.enemies){if(e.dead)continue;if((e.x-c.x)**2+(e.y-c.y)**2<(e.r+24)**2&&canHit(e,'rd'+c.i,.5))hurt(e,D*.3*(e.boss?.6:1),'roadster',{kb:e.boss?0:90})}
       if(!G.bot&&Math.random()<.4)px(c.x-c.dir*30+rnd(-3,3),c.y+12,-c.dir*rnd(20,50),rnd(-10,5),.4,pick(['#bfefff','#ffffff']),2,0,1);
       if(c.t>JP){let tg=G.enemies.find(e=>e.boss&&!e.dead&&Math.abs(e.x-p.x)<VW/2+80&&Math.abs(e.y-p.y)<VH/2+80);
@@ -5493,7 +5493,7 @@ function rdTick(w,dt){const S=G.S,st=w.st,n=1+S.amount,p=G.p;st.c=st.c||[];
         if(tg){c.m='up';c.t=0;c.tx=tg.x+rnd(-18,18)+c.i*14;c.ty=tg.y+rnd(-18,18);c.sx=c.x;c.sy=c.y;c.dir=c.tx<c.x?-1:1}else c.t=JP-.4}}
     else if(c.m==='up'){if(c.t>=.3){c.m='air';c.t=0}}
     else if(c.m==='air'){const T=.75;if(c.hov===undefined)c.hov=Math.random()<.5?rnd(.3,1.1):0;let k=Math.min(1,c.t/T);if(c.hov>0&&k>=.5){c.hov-=dt;c.t=T*.5;k=.5;if(!G.bot&&Math.random()<.4)px(c.x+rnd(-20,20),c.y-c.z+10,rnd(-10,10),rnd(20,50),.4,pick(['#bfefff','#ffffff']),2,0,1)}c.x=c.sx+(c.tx-c.sx)*k;c.y=c.sy+(c.ty-c.sy)*k;c.z=Math.sin(k*Math.PI)*95+(c.hov>0?Math.sin(G.t*6)*3:0);
-      if(k>=1){c.m='land';c.t=0;c.z=0;c.hov=undefined;c.lt=G.t;c.lx=c.x;c.ly=c.y;c.ls=Math.random()*90;if(!G.bot&&Math.random()<.45&&!(G.rdLand>G.t)){G.rdLand=G.t+3;rdSay(c,'이러다 또 지옥가겠노','#ff6a7a')}for(const e of G.enemies)if(!e.dead&&(e.x-c.x)**2+(e.y-c.y)**2<(R+e.r)**2)hurt(e,D*(e.boss?.6:1),'roadster',{kb:e.boss?0:150});
+      if(k>=1){c.m='land';c.t=0;c.z=0;c.hov=undefined;if(!G.bot&&Math.random()<.45&&!(G.rdLand>G.t)){G.rdLand=G.t+3;rdSay(c,'이러다 또 지옥가겠노','#ff6a7a')}for(const e of G.enemies)if(!e.dead&&(e.x-c.x)**2+(e.y-c.y)**2<(R+e.r)**2)hurt(e,D*(e.boss?.6:1),'roadster',{kb:e.boss?0:150});
         if(!G.bot){pring(c.x,c.y,R,['#ffffff','#bfefff','#c07bff'],44,.4);chunks(c.x,c.y,10,['#ffffff','#c07bff','#2a2a2a'],240);sparks(c.x,c.y,28,['#bfefff','#ffffff','#c07bff'],320,.5,2);SND.p('boom');if(G.texts.length<70&&Math.random()<.3)G.texts.push({x:c.x,y:c.y-46,v:pick(['쿵!','착지!']),life:.5,col:'#ffffff'})}}}
     else if(c.t>=.3){c.m='drive';c.t=0;c.h=rnd(0,6.28)}}}
 let RD_DMG=800;/* V267 640→800 (+25%, 사용자: 공격 향상) */
@@ -5501,26 +5501,7 @@ function rdMaxHp(){return(60+25*8)*(1+em()*.25)*1.7*(G.S.maxHp/140)*2.2*.85*(G.S
 const RDL={u:['자율주행이라더니 3일 째 집에도 못들어갔다','어머머!! 핸들이 혼자 돈다;;','넘모빠르노 ㅋㅋㅋ','충전소 어디노...','쁘니맘 오늘은 안 내린다!!','기싸움은 도로에서 하는기다','배터리 좆됐음 ㅋㅋㅋㅋ'],
  b:['어디까지 따라오노','개열받겟노.. 부케 어디갔노','빡시다 진짜','식장 다시 잡아야겠노','억울숙인데 이럼','드레스 또 찢어지노'],die:['서폿세팅으로 들어갈걸 ㅠㅠ','너무 싫어...','고생 많누 ㅠㅠ']};
 function rdSay(c,v,col){if(G.bot||G.texts.length>70)return;G.texts.push({x:c.x,y:c.y-c.z-66,v,life:2.4,col:col||'#ffffff'})}
-// V267 🚘 로드스터 셰이더: 달릴 때 네온 꼬리(빛 번짐), 착지 때 바닥 균열 빛 + 투명한 굴절 충격파. 판정은 게임 코드 그대로.
-function rdPaint(g,w,R,k){const now=G.t;g.lineCap='round';g.lineJoin='round';
-  for(const c of w.st.c){if(c.tr&&c.tr.length>1){for(const [oy,col,lw] of [[-4,'#ff4fb8',3.2*k],[4,'#c07bff',2.4*k]]){g.strokeStyle=col;for(let i=1;i<c.tr.length;i++){const a=c.tr[i-1],b=c.tr[i],al=1-(now-b.t)/.45;if(al<=0)continue;g.globalAlpha=al*al;g.lineWidth=lw*(.4+.6*al);g.beginPath();g.moveTo(a.x,a.y+oy);g.lineTo(b.x,b.y+oy);g.stroke()}}}
-    if(c.lt!==undefined){const ag=now-c.lt;if(ag<.7){const gr=Math.min(1,ag/.12),al=1-ag/.7;g.strokeStyle='#e8d0ff';g.fillStyle='#ffffff';g.lineWidth=2*k;g.globalAlpha=al;
-      for(let j=0;j<11;j++){const a0=j*.571+c.ls,L=R*(.55+.6*glH(j,c.ls))*gr;g.beginPath();g.moveTo(c.lx,c.ly);for(let q=1;q<=4;q++){const u=q/4,a=a0+(glH(j*7+q,c.ls)-.5)*.5;g.lineTo(c.lx+Math.cos(a)*L*u,c.ly+Math.sin(a)*L*u*.6)}g.stroke()}
-      g.globalAlpha=al*al*.8;g.beginPath();g.ellipse(c.lx,c.ly,R*.35*gr,R*.2*gr,0,0,6.283);g.fill()}}}
-  g.globalAlpha=1}
-function rdFx(w,R){if(G.bot)return;const st=w.st,now=G.t,p=G.p,X0=p.x-VW/2,Y0=p.y-VH/2;let any=0,last=null;for(const c of st.c){if(c.tr){c.tr=c.tr.filter(q=>now-q.t<.45);if(c.tr.length>1)any=1}if(c.lt!==undefined&&now-c.lt<.7){any=1;if(!last||c.lt>last.lt)last=c}}if(!any)return;
-  ctx.save();ctx.globalCompositeOperation='lighter';rdPaint(ctx,w,R,1);ctx.restore();
-  let q=.5;try{q=fxgQ()}catch(_){}if(q<=0)return;
-  const L=stLightInit();if(L){const cw=Math.min(480,Math.ceil(VW/2)),chh=Math.max(1,Math.round(cw*VH/VW)),k=cw/VW;for(const cc of [L.cv,L.M])if(cc.width!==cw||cc.height!==chh){cc.width=cw;cc.height=chh}
-    const m=L.M.getContext('2d');m.setTransform(1,0,0,1,0,0);m.globalAlpha=1;m.globalCompositeOperation='source-over';m.fillStyle='#000';m.fillRect(0,0,cw,chh);m.setTransform(k,0,0,k,-X0*k,-Y0*k);m.globalCompositeOperation='lighter';rdPaint(m,w,R,2);
-    const sc=L.Sm.getContext('2d');sc.globalCompositeOperation='source-over';sc.fillStyle='#000';sc.fillRect(0,0,64,36);sc.globalCompositeOperation='lighter';sc.filter='blur(4px)';for(let i=0;i<3;i++)sc.drawImage(L.M,0,0,64,36);sc.filter='none';
-    const gl=L.gl,U=L.U;gl.viewport(0,0,cw,chh);L.up(0,L.M);L.up(1,L.Sm);gl.uniform2f(U.res,cw,chh);gl.uniform2f(U.vw,VW,VH);gl.uniform2f(U.off,0,0);gl.uniform1f(U.t,G.t);gl.uniform1f(U.neb,0);gl.uniform1f(U.glo,.9);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
-    ctx.save();ctx.globalCompositeOperation='lighter';ctx.imageSmoothingEnabled=true;ctx.drawImage(L.cv,X0,Y0,VW,VH);ctx.restore()}
-  if(last&&now-last.lt<.5){const D=dmShaderInit();if(D){const v=(now-last.lt)/.5,cvs=ctx.canvas,sw=Math.min(960,cvs.width),shh=Math.max(1,Math.round(sw*cvs.height/cvs.width));if(D.src.width!==sw||D.src.height!==shh){D.src.width=sw;D.src.height=shh;D.cv.width=sw;D.cv.height=shh}
-    D.src.getContext('2d').drawImage(cvs,0,0,sw,shh);const gl=D.gl,U=D.U;gl.viewport(0,0,sw,shh);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,D.src);
-    gl.uniform2f(U.res,sw,shh);gl.uniform2f(U.vw,VW,VH);gl.uniform2f(U.c,last.lx-X0,last.ly-Y0);gl.uniform1f(U.t,G.t);gl.uniform1f(U.R,R*(.3+2.2*v));gl.uniform1f(U.amp,(1-v)*.55);gl.uniform1f(U.imp,0);gl.uniform1f(U.heat,0);gl.uniform1f(U.asp,VW/VH);gl.uniform1f(U.tint,0);
-    gl.drawArrays(gl.TRIANGLE_STRIP,0,4);ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.drawImage(D.cv,0,0,cvs.width,cvs.height);ctx.restore()}}}
-function rdDraw(){const w=G.weapons.find(q=>q.k==='roadster');if(!w||!w.st.c)return;const R=125*G.S.area;try{rdFx(w,R)}catch(_){}
+function rdDraw(){const w=G.weapons.find(q=>q.k==='roadster');if(!w||!w.st.c)return;const R=125*G.S.area;
   const MH=rdMaxHp();for(const c of w.st.c){if(c.dead>0)continue;let i;if(c.m==='drive')i=8+(Math.floor(c.f*10)%4);else if(c.m==='up')i=c.t<.15?2:3;else if(c.m==='air')i=4+Math.min(3,Math.floor(c.t/.75*4));else i=Math.floor(c.f*4)&1;
     if(c.m==='air'||c.m==='up'){const tx=c.m==='up'?c.tx:c.tx,ty=c.ty;ctx.save();ctx.globalAlpha=.55;ctx.strokeStyle='#ffffff';ctx.lineWidth=2;ctx.setLineDash([6,5]);ctx.beginPath();ctx.ellipse(tx,ty,R,R*.6,0,0,7);ctx.stroke();ctx.restore()}
     ctx.save();ctx.globalAlpha=.3;ctx.fillStyle='#000';ctx.beginPath();ctx.ellipse(c.x,c.y+14,34*(1-c.z/200),9*(1-c.z/200),0,0,7);ctx.fill();ctx.restore();

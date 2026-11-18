@@ -7991,6 +7991,33 @@ function dmDraw(w){if(G.bot)return;const st=w.st;if(!st.i)return;const p=G.p,t=G
   // 핑크 아이기스는 hdDraw가 그려요
   if(st.fin)dmFinDraw(st.fin)}
 function dmTrailLine(tl,k){if(!tl||tl.length<4)return;const n=tl.length/2;ctx.save();ctx.globalCompositeOperation='lighter';ctx.lineCap='round';for(let i=1;i<n;i++){const u=i/n;ctx.globalAlpha=.55*u*k;ctx.strokeStyle='#ff4fb8';ctx.lineWidth=1+5*u;ctx.beginPath();ctx.moveTo(tl[2*i-2],tl[2*i-1]);ctx.lineTo(tl[2*i],tl[2*i+1]);ctx.stroke();ctx.globalAlpha=.8*u*k;ctx.strokeStyle='#ffffff';ctx.lineWidth=1+1.2*u;ctx.stroke();if(i%3===0){ctx.globalAlpha=.9*u*k;ctx.fillStyle=i%2?'#ffb0e4':'#ffffff';ctx.fillRect(Math.round(tl[2*i]+rnd(-3,3)),Math.round(tl[2*i+1]+rnd(-3,3)),2,2)}}ctx.restore()}
+// V267 ☢️ 둠스데이 셰이더: 폭발 직전 빨려드는 공기 → 충격파가 화면을 실제로 일그러뜨리며 퍼짐(색 갈라짐) → 버섯구름 주변 아지랑이. 판정은 그대로.
+let DMS;function dmShaderInit(){if(DMS!==undefined)return DMS;DMS=null;try{const cv=document.createElement('canvas'),src=document.createElement('canvas');const gl=cv.getContext('webgl',{premultipliedAlpha:true,preserveDrawingBuffer:true,antialias:false});if(!gl)return null;
+  const FS='precision highp float;uniform sampler2D uC;uniform vec2 res,vw,c;uniform float t,R,amp,imp,heat,asp;'+
+  'float h(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}float vn(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(h(i),h(i+vec2(1,0)),f.x),mix(h(i+vec2(0,1)),h(i+vec2(1,1)),f.x),f.y);}'+
+  'float fbm(vec2 p){float s=0.,a=.5;for(int i=0;i<4;i++){s+=a*vn(p);p*=2.03;a*=.5;}return s;}'+
+  'void main(){vec2 uv=gl_FragCoord.xy/res;uv.y=1.-uv.y;vec2 g=uv*vw;vec2 q=(g-c)*vec2(1.,asp);float e=length(q);vec2 dir=q/max(e,1.);dir.y/=asp;'+
+  'float w=vw.x*.045;float dr=e-R;float ring=R>0.?exp(-dr*dr/(w*w))*amp:0.;'+
+  'float ri=imp>0.?exp(-pow(e-imp,2.)/(w*w*1.5))*.8:0.;'+
+  'vec2 off=-dir*ring*vw.x*.04+dir*ri*vw.x*.025;'+
+  'vec2 hc=c-vec2(0.,vw.y*.18);float hd=length((g-hc)/vec2(vw.x*.28,vw.y*.42));float hm=heat*smoothstep(1.,.2,hd);'+
+  'off+=vec2(sin(g.y*.09+t*11.)*vw.x*.004,(fbm(g*.02-vec2(0.,t*2.5))-.5)*vw.y*.012)*hm;'+
+  'vec2 o2=off/vw;float ch=(ring+ri)*.006+hm*.0015;'+
+  'vec3 col=vec3(texture2D(uC,uv-o2+dir*ch).r,texture2D(uC,uv-o2).g,texture2D(uC,uv-o2-dir*ch).b);'+
+  'col+=vec3(1.,.5,.85)*ring*.12;gl_FragColor=vec4(col,1.);}';
+  const sh=(tp,s2)=>{const x=gl.createShader(tp);gl.shaderSource(x,s2);gl.compileShader(x);if(!gl.getShaderParameter(x,gl.COMPILE_STATUS))throw 0;return x};
+  const pg=gl.createProgram();gl.attachShader(pg,sh(gl.VERTEX_SHADER,'attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}'));gl.attachShader(pg,sh(gl.FRAGMENT_SHADER,FS));gl.linkProgram(pg);if(!gl.getProgramParameter(pg,gl.LINK_STATUS))return null;gl.useProgram(pg);
+  gl.bindBuffer(gl.ARRAY_BUFFER,gl.createBuffer());gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);const lo=gl.getAttribLocation(pg,'p');gl.enableVertexAttribArray(lo);gl.vertexAttribPointer(lo,2,gl.FLOAT,false,0,0);
+  const U={};['uC','res','vw','c','t','R','amp','imp','heat','asp'].forEach(k=>U[k]=gl.getUniformLocation(pg,k));
+  const tx=gl.createTexture();gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,tx);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);gl.uniform1i(U.uC,0);
+  DMS={cv,src,gl,U}}catch(_){DMS=null}return DMS}
+function dmWarp(F){let q=.5;try{q=fxgQ()}catch(_){}if(q<=0||G.bot)return;const T=F.t,v=T-6.8;const imp=T>=6.3&&T<6.8?(6.8-T)/.5:0;if(!(imp>0||(F.boom&&v<5.6)))return;const D=dmShaderInit();if(!D)return;
+  const p=G.p,X0=p.x-VW/2,Y0=p.y-VH/2,cvs=ctx.canvas,sw=Math.min(960,cvs.width),shh=Math.max(1,Math.round(sw*cvs.height/cvs.width));
+  if(D.src.width!==sw||D.src.height!==shh){D.src.width=sw;D.src.height=shh;D.cv.width=sw;D.cv.height=shh}
+  const sc=D.src.getContext('2d');sc.drawImage(cvs,0,0,sw,shh);const gl=D.gl,U=D.U;gl.viewport(0,0,sw,shh);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,D.src);
+  const R=F.boom&&v<1.4?Math.max(VW,VH)*.9*v/1.4:0,amp=F.boom&&v<1.4?(1-v/1.4):0,heat=F.boom&&v>.4?Math.min(1,(v-.4)/.6)*(v>4.8?Math.max(0,(5.6-v)/.8):1):0;
+  gl.uniform2f(U.res,sw,shh);gl.uniform2f(U.vw,VW,VH);gl.uniform2f(U.c,F.tx-X0,F.ty-Y0);gl.uniform1f(U.t,G.t);gl.uniform1f(U.R,R);gl.uniform1f(U.amp,amp);gl.uniform1f(U.imp,imp>0?imp*Math.max(VW,VH)*.45:0);gl.uniform1f(U.heat,heat);gl.uniform1f(U.asp,VW/VH);
+  gl.drawArrays(gl.TRIANGLE_STRIP,0,4);ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.globalCompositeOperation='source-over';ctx.imageSmoothingEnabled=true;ctx.drawImage(D.cv,0,0,cvs.width,cvs.height);ctx.restore()}
 function dmFinDraw(F){const p=G.p,T=F.t,X0=p.x-VW/2,Y0=p.y-VH/2;
   // 경보: 붉은 테두리 + DOOMSDAY
   if(T<6.9){const bl=(Math.sin(T*12)+1)/2;ctx.save();ctx.globalAlpha=.25+.3*bl;const g=ctx.createRadialGradient(p.x,p.y,VH*.35,p.x,p.y,VW*.75);g.addColorStop(0,'rgba(255,0,80,0)');g.addColorStop(1,'rgba(255,20,110,1)');ctx.fillStyle=g;ctx.fillRect(X0,Y0,VW,VH);
@@ -8004,7 +8031,8 @@ function dmFinDraw(F){const p=G.p,T=F.t,X0=p.x-VW/2,Y0=p.y-VH/2;
   // 폭발
   if(F.boom){const v=T-6.8;if(v<.5){ctx.save();ctx.globalAlpha=1-v/.5;ctx.fillStyle='#ffffff';ctx.fillRect(X0,Y0,VW,VH);ctx.restore()}
     if(DMN.complete&&DMN.naturalWidth){const fi=Math.min(90,Math.floor(v*14)),fw=296,fh=236,sc=3.2;ctx.save();ctx.imageSmoothingEnabled=false;ctx.globalAlpha=v>5.5?Math.max(0,1-(v-5.5)/.7):1;ctx.drawImage(DMN,(fi%13)*fw,Math.floor(fi/13)*fh,fw,fh,F.tx-147*sc,F.ty-210*sc+40,fw*sc,fh*sc);ctx.restore()}
-    if(v<1.4){ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=(1-v/1.4)*.7;ctx.strokeStyle='#ff9ae0';ctx.lineWidth=14*(1-v/1.4)+2;ctx.beginPath();ctx.ellipse(F.tx,F.ty,VW*.9*v/1.4,VH*.9*v/1.4,0,0,6.283);ctx.stroke();ctx.restore()}}}
+    if(v<1.4){ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=(1-v/1.4)*.7;ctx.strokeStyle='#ff9ae0';ctx.lineWidth=14*(1-v/1.4)+2;ctx.beginPath();ctx.ellipse(F.tx,F.ty,VW*.9*v/1.4,VH*.9*v/1.4,0,0,6.283);ctx.stroke();ctx.restore()}}
+  dmWarp(F)}
 WU.doom=dmTick;
 /* ===== 워 비 샹샹중 퍄오량 (V227) — 끼순이어검술 + 물귀신 단체관광 + 웨딩 촛대 =====
    겁이 없어진 어검 7자루가 끼순이어검술의 움직임(꽃 회전·흩어짐·질주·부채·돌격·낙하)을 그대로 이어받아요.

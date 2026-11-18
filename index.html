@@ -2154,7 +2154,7 @@ function suCollapse(gi){const W=G.suW,g=suGP(gi),pool=SUW.INV.filter(q=>!W.used.
   if(!G.bot){G.rflash=.7;G.shk=Math.max(G.shk||0,.5);toast('💥 '+SUW.GN[gi]+'쪽 게이트 붕괴','예전의 적 「'+iv[1]+'」가 밀고 들어와요',true);sparks(g[0],g[1],40,['#ff5a3a','#ffd27a','#ffffff'],320,.8,4)}}
 function suWaveTick(dt){if(!G.suGH)G.suGH=[3,3,3,3];const W=G.suW||(G.suW={next:150,cur:null,n:0,used:[]}),GH=G.suGH;
   if(!W.cur){if(G.t>=W.next&&G.t<SU_LEN-25){const t=G.t,ord=[0,1,2,3].sort(()=>Math.random()-.5),gs=(t>=780?ord:t>=600?ord.slice(0,2):ord.slice(0,1)).map((gi,k)=>({gi,off:t>=780?k*6:0,sp:0,acc:0}));
-      W.cur={gs,t:-8,id:++W.n};if(!G.bot){SND.p('boss');toast('📡 아리아드네','사령관님, '+gs.map(g=>SUW.GN[g.gi]).join('·')+'쪽 게이트에 대군이 몰려옵니다.',true)}}return}
+      W.cur={gs,t:-8,id:++W.n};suRelay(gs[0].gi);if(!G.bot){SND.p('boss');toast('📡 아리아드네','사령관님, '+gs.map(g=>SUW.GN[g.gi]).join('·')+'쪽 게이트에 대군이 몰려옵니다.',true)}}return}
   const C=W.cur;C.t+=dt;let last=0;const m=em();
   for(const g of C.gs){const lt=C.t-g.off;last=Math.max(last,g.off);if(lt<0||lt>=15)continue;const open=GH[g.gi]<=0;g.acc+=dt*(8+m*.5)*(open?1.3:.6);const P=suGP(g.gi),hz=g.gi<2;
     while(g.acc>=1){g.acc--;if(G.enemies.length>560)continue;const o=rnd(-SU.GW*.45,SU.GW*.45),e=mkEnemy(pick(phaseTypes()),P[0]+(hz?o:rnd(-30,30)),P[1]+(hz?rnd(-30,30):o));e.suW=C.id*10+g.gi;g.sp++}}
@@ -2168,6 +2168,15 @@ function suWaveDraw(){const C=G.suW&&G.suW.cur;if(!C)return;const p=G.p;ctx.save
     ctx.save();ctx.translate(x,y);ctx.rotate(a);ctx.beginPath();ctx.moveTo(22,0);ctx.lineTo(-10,-15);ctx.lineTo(-4,0);ctx.lineTo(-10,15);ctx.closePath();ctx.fill();ctx.restore();
     ctx.font='800 13px "Noto Sans KR",sans-serif';ctx.textAlign='center';ctx.fillStyle='#ffffff';ctx.strokeStyle='#5a1408';ctx.lineWidth=3;const tx=lt<0?'대군 '+Math.ceil(-lt)+'초':'대군!';ctx.strokeText(tx,x-Math.cos(a)*40,y-Math.sin(a)*40+4);ctx.fillText(tx,x-Math.cos(a)*40,y-Math.sin(a)*40+4)}
   ctx.restore()}
+/* ---- 현장 중계 창 (11-19): 대군 예고 때 그 게이트를 진짜 3D로 4초쯤 비춤. ag/fleet.html?embed=1&relay=1 을 작은 창(iframe)으로 띄우고 postMessage로 켜고 끔.
+   게임은 멈추지 않음. SU_RELAY=0이면 끔. 휴대폰 부담이 크면 끄거나 화면을 줄일 것(확인 필요). */
+const SU_RELAY=1;
+function suRelay(gi){if(!SU_RELAY||!suSolo())return;const gh=G.suGH?G.suGH[gi]:3,st=gh>=3?0:gh>0?1:2,R=SU.rl||(SU.rl={});
+  if(!R.box){const d=document.createElement('div');d.id='suRelay';d.style.cssText='position:fixed;left:10px;top:calc(env(safe-area-inset-top,0px) + 92px);width:min(46vw,300px);aspect-ratio:16/9;z-index:29;border:2px solid #8fe6ff;border-radius:10px;overflow:hidden;box-shadow:0 0 16px #58c8ff99;background:#0a1a2c;display:none;pointer-events:none';
+    d.innerHTML='<iframe src="ag/fleet.html?embed=1&relay=1" style="width:100%;height:100%;border:0;display:block" tabindex="-1"></iframe><div style="position:absolute;left:0;right:0;top:0;padding:3px 8px;font:800 11px \'Noto Sans KR\',sans-serif;color:#fff;background:linear-gradient(#06223acc,#06223a00);letter-spacing:.04em"><span style="color:#ff5a5a">●</span> LIVE <b></b></div>';
+    document.body.appendChild(d);R.box=d;R.fr=d.querySelector('iframe');R.lb=d.querySelector('b');R.fr.addEventListener('load',()=>{R.ok=1;if(R.q){R.fr.contentWindow.postMessage(R.q,'*')}})}
+  const msg={su:'relay',on:1,st,tu:st<2?1:0};R.q=msg;R.lb.textContent=SUW.GN[gi]+'쪽 게이트 · 내구 '+'●'.repeat(Math.max(0,gh))+'○'.repeat(3-Math.max(0,gh));R.box.style.display='block';
+  try{if(R.ok)R.fr.contentWindow.postMessage(msg,'*')}catch(e){}clearTimeout(R.to);R.to=setTimeout(()=>{R.box.style.display='none';R.q=null;try{R.fr.contentWindow.postMessage({su:'relay',on:0},'*')}catch(e){}},4300)}
 /* ---- 함선 동기화 이벤트 · 호출 버튼 (11-19) ----
    SAVE.suS = 동기화한 수원 함선 수(0~2: 탈로스 → 다이달로스, 계정 영구). 판마다 3:20쯤 엘리베이터 남쪽 패드 위에 동기화 원 → 60초 버티면(밖에서 3초 뒤부터 줄어듦) 다음 1척 동기화.
    호출은 화면 오른쪽 아래 버튼(통신기 없이 바로). 탈로스 재정비 150초 / 다이달로스 한 판 2회 + 재정비 45초. */

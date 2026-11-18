@@ -478,7 +478,7 @@ function fit(){const r=cv.getBoundingClientRect();dpr=Math.min(2,devicePixelRati
 fit();new ResizeObserver(fit).observe($('stage'));
 let stars=[];for(let i=0;i<320;i++)stars.push([Math.random(),Math.random(),Math.random()*1.3+.3,Math.random()]);
 const VW={yaw:.6,pitch:.28,tgt:.28,spin:true,drag:false,lx:0,ly:0,zoom:1,push:0},T0=performance.now(),MI={i:0,K:0,k:0};let pulse=0;
-function bg(t){ctx.fillStyle='#03050c';ctx.fillRect(0,0,w,h);
+function bg(t){if(REL){const g=ctx.createLinearGradient(0,0,0,h);g.addColorStop(0,'#9fd0f0');g.addColorStop(.42,'#e9e2c8');g.addColorStop(.43,'#e2c99a');g.addColorStop(1,'#cfae78');ctx.fillStyle=g;ctx.fillRect(0,0,w,h);return}ctx.fillStyle='#03050c';ctx.fillRect(0,0,w,h);
  const nb=ctx.createRadialGradient(w*.8,h*.2,0,w*.8,h*.2,w*.9);nb.addColorStop(0,'rgba(40,70,140,.25)');nb.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=nb;ctx.fillRect(0,0,w,h);
  for(const s of stars){ctx.globalAlpha=.3+.55*Math.abs(Math.sin(t*.6+s[3]*20));ctx.fillStyle='#d6eaff';ctx.fillRect(((s[0]*w+VW.yaw*30*dpr)%w+w)%w,s[1]*h,s[2]*dpr,s[2]*dpr)}ctx.globalAlpha=1;
  const pr=Math.max(w,h)*.95,px=w*.15,py=h+pr*.74,g=ctx.createRadialGradient(px+pr*.25,py-pr*.55,pr*.1,px,py,pr);g.addColorStop(0,'#5aa0ea');g.addColorStop(.55,'#1d4f9a');g.addColorStop(1,'#071533');
@@ -494,20 +494,27 @@ function offs(m,g){const k=MI.k;if(g===0)return[0,0,0];
 const LD=nrm([-.55,.65,.55]),LX=nrm(crs([0,1,0],LD)),LY=crs(LD,LX);
 function scene(mode,t,F,vw_,vh_){gl.bindFramebuffer(gl.FRAMEBUFFER,F?F.fb:null);gl.viewport(0,0,vw_||w,vh_||h);gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.enable(gl.DEPTH_TEST);
  gl.useProgram(pg);att(pg,'p',BP,3);att(pg,'n',BN,3);att(pg,'c',BC,3);att(pg,'e',BE,1);
- const m=MODELS[MI.i],asp=w/h,fov=35*PI/180,tf=Math.tan(fov/2),dist=Math.max(17.5/tf,20/(tf*asp))/VW.zoom*(1-VW.push*.12);
- const R=mul(rx(VW.pitch),ry(VW.yaw)),M=mul(tr(0,0,-dist),mul(R,mul(scm(m.scale),tr(0,m.cy,0))));
- gl.uniformMatrix4fv(uM,false,M);gl.uniformMatrix4fv(uP,false,persp(fov,asp,1,400));gl.uniformMatrix3fv(uN,false,new Float32Array([R[0],R[1],R[2],R[4],R[5],R[6],R[8],R[9],R[10]]));
- gl.uniform1f(uMo,mode);gl.uniform1f(uCy,(m.name==='착륙포탑함'||m.name==='탈로스F')&&MI.k>.02?-1.98:-1e3);gl.uniform1f(uLi,LITE?1:0);gl.uniform1f(uT,t);gl.uniform1f(uPu,pulse);gl.uniform1f(uDn,dist-30);gl.uniform1f(uDr,60);
- gl.uniform3fv(uLx,LX);gl.uniform3fv(uLy,LY);gl.uniform3fv(uLz,LD);gl.uniform3f(uLc,0,0,-dist);gl.uniform1f(uLr,23);
+ const asp=w/h,fov=35*PI/180,tf=Math.tan(fov/2),dist=Math.max(17.5/tf,20/(tf*asp))/VW.zoom*(1-VW.push*.12),R=mul(rx(VW.pitch),ry(VW.yaw));
+ gl.uniformMatrix4fv(uP,false,persp(fov,asp,1,400));gl.uniformMatrix3fv(uN,false,new Float32Array([R[0],R[1],R[2],R[4],R[5],R[6],R[8],R[9],R[10]]));
+ gl.uniform1f(uMo,mode);gl.uniform1f(uLi,LITE?1:0);gl.uniform1f(uT,t);gl.uniform1f(uPu,pulse);gl.uniform1f(uDn,dist-30);gl.uniform1f(uDr,60);
+ gl.uniform3fv(uLx,LX);gl.uniform3fv(uLy,LY);gl.uniform3fv(uLz,LD);gl.uniform3f(uLc,0,0,-dist);gl.uniform1f(uLr,REL?34:23);
  gl.activeTexture(gl.TEXTURE2);gl.bindTexture(gl.TEXTURE_2D,mode===0?FS.tx:null);gl.uniform1i(uTs,2);
- for(const r of m.rng){if(ONLY&&!ONLY(r.g))continue;const o=offs(m,r.g);if(!o||!r.n)continue;gl.uniform3f(uOff,o[0],o[1],o[2]);gl.uniform1f(uGa,o[3]||0);gl.uniform1f(uGx,o[4]||0);gl.uniform3f(uGp,o.length>5?o[5]:-1,o.length>5?o[6]:0,o.length>5?o[7]:0);gl.drawArrays(gl.TRIANGLES,r.s,r.n)}}
+ const IT=REL?REL.items:[[MI.i,0,MODELS[MI.i].cy*MODELS[MI.i].scale,0,MODELS[MI.i].scale]];
+ for(const it of IT){const m=MODELS[it[0]];if(!m)continue;gl.uniformMatrix4fv(uM,false,mul(tr(0,0,-dist),mul(R,mul(tr(it[1],it[2],it[3]),scm(it[4])))));
+  gl.uniform1f(uCy,(m.name==='착륙포탑함'||m.name==='탈로스F')&&MI.k>.02?-1.98:-1e3);
+  for(const r of m.rng){if(ONLY&&!ONLY(r.g))continue;const o=offs(m,r.g);if(!o||!r.n)continue;gl.uniform3f(uOff,o[0],o[1],o[2]);gl.uniform1f(uGa,o[3]||0);gl.uniform1f(uGx,o[4]||0);gl.uniform3f(uGp,o.length>5?o[5]:-1,o.length>5?o[6]:0,o.length>5?o[7]:0);gl.drawArrays(gl.TRIANGLES,r.s,r.n)}}}
 function composite(){gl.bindFramebuffer(gl.FRAMEBUFFER,null);gl.viewport(0,0,w,h);gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.disable(gl.DEPTH_TEST);
  gl.useProgram(pq);att(pq,'q',BQ,2);gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,FC.tx);gl.uniform1i(Q.tc,0);gl.activeTexture(gl.TEXTURE1);gl.bindTexture(gl.TEXTURE_2D,FN.tx);gl.uniform1i(Q.tn,1);
  gl.uniform2f(Q.px,dpr/w,dpr/h);gl.uniform1f(Q.dr,60);gl.drawArrays(gl.TRIANGLES,0,6)}
-let LITE=false,ONLY=null,BAKE=false;const AUTO={n:0,s:0,done:0},setLite=v=>{LITE=v;$('lite').setAttribute('aria-pressed',v)};
+let LITE=false,ONLY=null,BAKE=false,REL=null;const RELAY=/relay=1/.test(location.search),MIX=n=>MODELS.findIndex(m=>m.name===n);
+/* 현장 중계(수원): 게임이 postMessage({su:'relay',on:1,st:게이트 상태 0~2,tu:포탑 켜짐})를 보내면 게이트·성벽·포탑을 한 장면에 놓고 카메라가 빙 돎. 꺼져 있을 땐 그리지 않음 */
+addEventListener('message',ev=>{const d=ev.data;if(!d||d.su!=='relay')return;if(!d.on){REL=null;return}
+ const it=[[MIX('gateH'+(d.st|0)),0,-6,0,1]];for(const x of [-17.2,-27.2,17.2,27.2])it.push([MIX('wallH'),x,-6,0,1]);it.push([MIX('미사일포탑'),-11,-4.7,5.5,.8]);for(const im of it)im[2]+=3.2;
+ REL={items:it,t0:performance.now(),tu:d.tu};window.__ga=undefined});const AUTO={n:0,s:0,done:0},setLite=v=>{LITE=v;$('lite').setAttribute('aria-pressed',v)};
 let last=performance.now();
-function loop(now){if(BAKE){requestAnimationFrame(loop);return}const dt=Math.min(.05,(now-last)/1000);last=now;const t=(now-T0)/1000;
+function loop(now){if(BAKE||(RELAY&&!REL)){requestAnimationFrame(loop);last=now;return}const dt=Math.min(.05,(now-last)/1000);last=now;const t=(now-T0)/1000;
  if(VW.spin&&!VW.drag)VW.yaw+=dt*.22;VW.pitch+=(VW.tgt-VW.pitch)*Math.min(1,dt*5);pulse=Math.max(0,pulse-dt*.8);VW.push+=((pulse>0?1:0)-VW.push)*Math.min(1,dt*3);MI.k+=(MI.K-MI.k)*Math.min(1,dt*2.2);
+ if(REL){const u=Math.min(1,(now-REL.t0)/3600),e=u*u*(3-2*u);VW.yaw=-.62+1.24*e;VW.pitch=VW.tgt=.36-.08*e;VW.zoom=1.75+.35*e;VW.push=0;window.__ga=REL.tu?Math.sin(now/1000*1.4)*.9+1.57:1.57;MI.k=MI.K=1}
  bg(t);
  scene(1,t,null);gx.clearRect(0,0,gc.width,gc.height);gx.drawImage(glc,0,0,gc.width,gc.height);
  if(LITE){scene(0,t,null);ctx.drawImage(glc,0,0)}
@@ -528,7 +535,7 @@ $('lite').onclick=()=>{AUTO.done=1;setLite(!LITE)};$('v0').onclick=()=>{VW.tgt=.
 const stp=$('stamp'),act=$('act'),tabs=[];
 function actLabel(){const a=MODELS[MI.i].act;act.textContent=a.toggle&&MI.K?a.label2:a.label;act.setAttribute('aria-pressed',!!(a.toggle&&MI.K))}
 function pick(i){MI.i=i;MI.K=0;MI.k=0;VW.yaw=MODELS[i].yaw;VW.tgt=i?.5:.28;VW.zoom=1;tabs.forEach((b,j)=>b.setAttribute('aria-pressed',j===i));actLabel()}
-MODELS.forEach((m,i)=>{const b=document.createElement('button');b.textContent=m.name;b.onclick=()=>pick(i);$('tabs').appendChild(b);tabs.push(b)});
+MODELS.forEach((m,i)=>{const b=document.createElement('button');b.textContent=m.name;b.onclick=()=>pick(i);if(/^(gate|wall)/.test(m.name))b.style.display='none';$('tabs').appendChild(b);tabs.push(b)});
 act.onclick=()=>{const a=MODELS[MI.i].act;if(a.toggle){MI.K=MI.K?0:1;actLabel();return}pulse=1;
  if(a.stamp){$('stampT').textContent=a.stamp;stp.animate([{opacity:0,transform:'translate(-50%,-50%) scale(1.9)'},{opacity:1,transform:'translate(-50%,-50%) scale(1)',offset:.12},{opacity:1,transform:'translate(-50%,-50%) scale(1)',offset:.8},{opacity:0,transform:'translate(-50%,-50%) scale(1)'}],{duration:2300,easing:'ease-out',fill:'forwards'})}};
 pick(0);window.__pick=pick;

@@ -5697,8 +5697,10 @@ function juClosetRow(){const has=!!SAVE.inv['wl:diamond'],on=juDiaSkin();return 
 
 Object.assign(WU,{diamond(w,dt){juDiamond(w,dt)},pearl(w,dt){juPearl(w,dt)},emerald(w,dt){juKnights(w,dt)},sapphire(w,dt){juSapph(w,dt)}});
 /* ================= loop ================= */
+let FCAP_N=0;/* V263: 120Hz 등 고주사율 화면에서 게임 루프를 60fps로 제한(발열 제보, 갤럭시 S26) */
 function loop(now){
   requestAnimationFrame(loop);try{SND.tick()}catch(e){}
+  if(now<FCAP_N-4)return;FCAP_N+=1000/60;if(now-FCAP_N>1000/60)FCAP_N=now;
   if(!G){ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,cv.width,cv.height);return}
   let dt=Math.max(0,Math.min(.05,(now-last)/1000));last=now;
   if(G&&G.running&&!G.paused&&!RM){fpsAcc+=dt;fpsN++;if(fpsAcc>2){const fps=fpsN/fpsAcc;FXQ=fps<40?Math.max(.35,FXQ-.15):fps>55?Math.min(1,FXQ+.1):FXQ;fpsAcc=0;fpsN=0}}

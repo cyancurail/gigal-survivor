@@ -1980,7 +1980,7 @@ function suTick(dt){const p=G.p,H=SU.H;
   if(!G.suB){G.suB=1;if(!window.__mgReg){window.__mgReg=1;fmReg();const ai=new Image();ai.src='farm/m_ally.png';FM.img.m_ally=ai}p.x=0;p.y=280}
   p.x=clamp(p.x,-H+18,H-18);p.y=clamp(p.y,-H+34,H-14);suPush(p,SU.ER+14);
   for(const e of G.enemies){if(e.dead)continue;if(e.x<-H)e.x=-H;else if(e.x>H)e.x=H;if(e.y<-H)e.y=-H;else if(e.y>H)e.y=H;if(!e.boss)suPush(e,SU.ER+e.r*.5)}
-  fmRadioTick(dt);fmSupTick(dt);suShipTick(dt);suOksTick(dt)}
+  fmRadioTick(dt);fmSupTick(dt);suShipTick(dt);suOksTick(dt);suTuTick(dt)}
 function suFloor(){if(!SU.im){const im=new Image();im.src='su/floor.jpg';SU.im=im;const pd=new Image();pd.src='su/pad.png';SU.pad=pd}
   const im=SU.im;if(!im.complete||!im.width)return false;const sk=Z*(typeof DPR==='number'?DPR:1);
   if(!SU.pat||SU.k!==sk){const W=Math.round(640*sk),c=document.createElement('canvas');c.width=c.height=W;c.getContext('2d').drawImage(im,0,0,W,W);const P=ctx.createPattern(c,'repeat');try{P.setTransform(new DOMMatrix().scale(1/sk))}catch(e){}SU.pat=P;SU.k=sk}
@@ -2006,7 +2006,7 @@ function suDraw(front){const p=G.p,H=SU.H,W=SU.GW,ER=SU.ER,vx0=p.x-VW/2-60,vx1=p
     suTrunk(0,-ER*.6,0,-H+10);suTrunk(0,ER*.6,0,H-10);suTrunk(-ER,0,-H+10,0);suTrunk(ER,0,H-10,0);
     const pd=SU.pad;if(pd&&pd.complete&&pd.width){for(const q of SU.pads){const w=pd.width*q[2],h=pd.height*q[2];if(q[0]+w/2<vx0||q[0]-w/2>vx1||q[1]+h/2<vy0||q[1]-h/2>vy1)continue;ctx.drawImage(pd,q[0]-w/2,q[1]-h/2,w,h)}
       if(Math.abs(p.x)<VW/2+420&&Math.abs(p.y)<VH/2+300){const s=2.5,w=pd.width*s,h=pd.height*s;ctx.drawImage(pd,-w/2,-h/2+6,w,h)}}
-    suBurnDraw();
+    suBurnDraw();suTuDraw(0);
     /* 북쪽 벽(뒤) + 좌우 벽 */
     if(vy0<-H+10){ctx.fillStyle='#dfe5ee';ctx.fillRect(-H-40,-H-70,H-W/2+40,84);ctx.fillRect(W/2,-H-70,H-W/2+40,84);ctx.fillStyle='#f6f9fc';ctx.fillRect(-H-40,-H-70,H-W/2+40,16);ctx.fillRect(W/2,-H-70,H-W/2+40,16);ctx.fillStyle='#18a8ea';ctx.fillRect(-H-40,-H-18,H-W/2+40,4);ctx.fillRect(W/2,-H-18,H-W/2+40,4);suGate(0,-H,1)}
     for(const sx of[-1,1]){if(sx<0?vx0>-H+40:vx1<H-40)continue;const x=sx*H+(sx<0?-40:0);ctx.fillStyle='#e6ebf2';ctx.fillRect(x,-H-70,40,H-W/2+70);ctx.fillRect(x,W/2,40,H-W/2+50);ctx.fillStyle='#18a8ea';ctx.fillRect(x+(sx<0?34:2),-H-70,4,H-W/2+70);ctx.fillRect(x+(sx<0?34:2),W/2,4,H-W/2+50);suGate(sx*H+sx*-0,0,0)}
@@ -2020,7 +2020,7 @@ function suDraw(front){const p=G.p,H=SU.H,W=SU.GW,ER=SU.ER,vx0=p.x-VW/2-60,vx1=p
       ctx.fillStyle='#3a56aa';ctx.fillRect(-52,-34,104,10);ctx.fillRect(-52,-150,104,6);ctx.globalAlpha=1}
     /* 남쪽 벽(앞) */
     if(vy1>H-10){ctx.fillStyle='#f6f9fc';ctx.fillRect(-H-40,H,H-W/2+40,14);ctx.fillRect(W/2,H,H-W/2+40,14);ctx.fillStyle='#dfe5ee';ctx.fillRect(-H-40,H+14,H-W/2+40,60);ctx.fillRect(W/2,H+14,H-W/2+40,60);ctx.fillStyle='#18a8ea';ctx.fillRect(-H-40,H+56,H-W/2+40,4);ctx.fillRect(W/2,H+56,H-W/2+40,4);suGate(0,H+78,1)}
-    suShipDraw();try{fmSupDraw()}catch(e){}
+    suTuDraw(1);suShipDraw();try{fmSupDraw()}catch(e){}
   }
   ctx.imageSmoothingEnabled=sm}
 /* ---- 수원 보스 3 「옥타르트 옥산느」 (11-18, 그림 = 언니가 그록으로 뽑아 온 시트 su/oks_a·oks_b·oks_drone) ----
@@ -2071,6 +2071,45 @@ function suOksDraw(e){const S=e.so,A=S&&S.act,IA=suIm2('oks_a'),IB=suIm2('oks_b'
   if(A&&A.k==='pull'&&A.t<2.4){ctx.save();ctx.globalCompositeOperation='lighter';ctx.strokeStyle='#ff3a4a';ctx.lineWidth=3;for(let i=0;i<3;i++){const r=420-((G.t*260+i*140)%420);ctx.globalAlpha=.5*(r/420);ctx.beginPath();ctx.ellipse(e.x,e.y-30,r,r*.6,0,G.t*2+i,G.t*2+i+4.2);ctx.stroke()}ctx.restore()}
   ctx.imageSmoothingEnabled=sm}
 window.__suBoss=k=>suOksSpawn();
+/* ---- 수원 「꽃부채」 미사일 포탑 8기 (11-19) ----
+   게이트 쪽 4기: 평소 가동, 그 게이트 내구(G.suGH)가 0이면 꺼짐 / 대각선 4기: 꺼진 채 시작, 곁(반경 95)에서 20초 버티면 90초 가동 후 다시 꺼짐.
+   그림 su/turret.webp (칸 200px, 5×5: 0번 받침 + 머리 24방향). 머리 방향표는 같은 카메라로 구운 탈로스 레일건(SUT.PHI)과 같음.
+   진주 유도 미사일: 작은 범위 폭발, 집계 키 fmsup, 보스는 한 발당 최대 체력 0.05% 상한. 포탑은 부서지지 않음. */
+const SUU={C:200,K:1.15,R:470,CD:2,DM:.5,ACT:20,ON:90,NEAR:95,
+  P:[[-270,-1330,0],[270,1360,1],[-1330,270,2],[1330,-270,3],[900,640,-1],[-900,640,-1],[900,-640,-1],[-900,-640,-1]]};
+function suTuInit(){G.suTu=SUU.P.map((q,i)=>({x:q[0],y:q[1],gi:q[2],on:q[2]>=0,t:0,pr:0,a:rnd(-3.14,3.14),cd:rnd(.3,1.4),sw:rnd(0,6),k:0}));G.suMs=[]}
+function suTuTick(dt){if(!G.suTu)suTuInit();const p=G.p,D=(G.fmSpD||60)*SUU.DM;
+  for(const T of G.suTu){
+    if(T.gi>=0)T.on=!(G.suGH&&G.suGH[T.gi]<=0);
+    else{const near=Math.hypot(p.x-T.x,p.y-T.y)<SUU.NEAR;if(T.on){T.t-=dt;if(T.t<=0){T.on=false;T.pr=0;if(!G.bot)G.texts.push({x:T.x,y:T.y-110,v:'포탑 휴면',life:1,col:'#9fb6c8'})}}
+      else{T.pr=near?T.pr+dt:Math.max(0,T.pr-dt*.5);if(T.pr>=SUU.ACT){T.on=true;T.t=SUU.ON;if(!G.bot){SND.p('clear');toast('🌸 꽃부채 포탑 가동','90초 동안 곁을 지켜 줘요');sparks(T.x,T.y-60,18,['#ffffff','#ffc8e6','#9fe8ff'],200,.5,3)}}}}
+    {const dx=p.x-T.x,dy=p.y-(T.y-6),d=Math.hypot(dx,dy*1.6);if(d<30&&d>.1){p.x=T.x+dx/d*30;p.y=T.y-6+dy/d*30}}
+    T.k+=((T.on?1:0)-T.k)*Math.min(1,dt*3);if(!T.on){T.a=suAd(T.a+dt*.15);continue}
+    let b=null,bs=1e9;for(const e of G.enemies){if(e.dead||e.fmInv>0)continue;const d=Math.hypot(e.x-T.x,e.y-T.y);if(d>SUU.R)continue;const sc=d*(e.boss?.4:e.elite?.7:1);if(sc<bs){bs=sc;b=e}}
+    T.cd-=dt;if(!b){T.sw+=dt;T.a=suAd(T.a+Math.sin(T.sw*.7)*dt*.9);continue}
+    const want=Math.atan2(b.y-T.y,b.x-T.x),da=suAd(want-T.a),m=3.2*dt;T.a=suAd(T.a+Math.max(-m,Math.min(m,da)));
+    if(T.cd<=0&&Math.abs(da)<.35){T.cd=SUU.CD;for(const o of [-.5,.5]){const a=T.a+o;G.suMs.push({x:T.x+Math.cos(a)*34,y:T.y-78+Math.sin(a)*14,a:T.a+o*1.6,v:150,tg:b,l:2.6,D})}if(!G.bot)SND.p('pop')}}
+  const M=G.suMs;for(let i=M.length-1;i>=0;i--){const o=M[i];o.l-=dt;let e=o.tg;if(!e||e.dead){e=null;let bd=260*260;for(const q of G.enemies){if(q.dead)continue;const d2=(q.x-o.x)**2+(q.y-o.y)**2;if(d2<bd){bd=d2;e=q}}o.tg=e}
+    o.v=Math.min(430,o.v+520*dt);if(e){const want=Math.atan2(e.y-o.y,e.x-o.x),da=suAd(want-o.a),m=7*dt;o.a+=Math.max(-m,Math.min(m,da))}
+    o.x+=Math.cos(o.a)*o.v*dt;o.y+=Math.sin(o.a)*o.v*dt;if(!G.bot&&Math.random()<.6)px(o.x,o.y,rnd(-12,12),rnd(-12,12),.35,pick(['#ffffff','#ffc8e6','#bfeaff']),2,1,1);
+    if((e&&(e.x-o.x)**2+(e.y-o.y)**2<(e.r+12)**2)||o.l<=0){for(const q of G.enemies){if(q.dead)continue;const R=50+q.r*.6;if((q.x-o.x)**2+(q.y-o.y)**2<R*R)hurt(q,q.boss?Math.min(o.D,q.max*.0005):o.D,'fmsup',{kb:q.boss?0:6})}
+      if(!G.bot){sparks(o.x,o.y,9,['#ffffff','#ffc8e6','#9fe8ff'],170,.35,3);(G.suBm=G.suBm||[]).push({x:o.x,y:o.y,t:0})}M.splice(i,1)}}
+  if(G.suBm){for(const b of G.suBm)b.t+=dt;G.suBm=G.suBm.filter(b=>b.t<.3)}}
+function suTuDraw(front){const L=G.suTu;if(!L)return;const im=suIm2('turret'),p=G.p,C=SUU.C,K=SUU.K;if(!im.complete||!im.width)return;
+  for(const T of L){if((T.y>p.y+12)!==!!front)continue;if(Math.abs(T.x-p.x)>VW/2+140||Math.abs(T.y-p.y)>VH/2+200)continue;
+    ctx.save();ctx.globalAlpha=.3;ctx.fillStyle='#2a1c0c';ctx.beginPath();ctx.ellipse(T.x,T.y+4,56,19,0,0,7);ctx.fill();ctx.restore();
+    let f=0,bd=9;for(let i=0;i<24;i++){const d=Math.abs(suAd(SUT.PHI[i]-T.a));if(d<bd){bd=d;f=i}}
+    const dx=T.x-100*K,dy=T.y-140*K;ctx.drawImage(im,0,0,C,C,dx,dy,C*K,C*K);
+    ctx.save();ctx.globalAlpha=.5+.5*T.k;const g=f+1;ctx.drawImage(im,(g%5)*C,Math.floor(g/5)*C,C,C,dx,dy,C*K,C*K);ctx.restore();
+    if(T.k<.6){ctx.save();ctx.globalAlpha=.28*(1-T.k);ctx.fillStyle='#283444';ctx.beginPath();ctx.ellipse(T.x,T.y-52,40,60,0,0,7);ctx.fill();ctx.restore()}
+    if(T.gi<0){ctx.save();ctx.lineWidth=4;ctx.lineCap='round';
+      if(T.on){ctx.globalAlpha=.75;ctx.strokeStyle='#8fe6ff';ctx.beginPath();ctx.ellipse(T.x,T.y+4,66,24,0,-1.57,-1.57+6.2832*(T.t/SUU.ON));ctx.stroke()}
+      else{ctx.globalAlpha=.35;ctx.strokeStyle='#ffffff';ctx.setLineDash([6,8]);ctx.beginPath();ctx.ellipse(T.x,T.y+4,SUU.NEAR,SUU.NEAR*.4,0,0,7);ctx.stroke();ctx.setLineDash([]);
+        if(T.pr>0){ctx.globalAlpha=.95;ctx.strokeStyle='#ffc8e6';ctx.beginPath();ctx.ellipse(T.x,T.y+4,66,24,0,-1.57,-1.57+6.2832*(T.pr/SUU.ACT));ctx.stroke();ctx.fillStyle='#ffffff';ctx.font='700 13px sans-serif';ctx.textAlign='center';ctx.fillText('동기화 '+Math.ceil(SUU.ACT-T.pr)+'초',T.x,T.y+44)}}
+      ctx.restore()}}
+  if(front){ctx.save();ctx.globalCompositeOperation='lighter';for(const o of G.suMs||[]){const g=ctx.createRadialGradient(o.x,o.y,0,o.x,o.y,11);g.addColorStop(0,'rgba(255,255,255,1)');g.addColorStop(.4,'rgba(255,190,230,.8)');g.addColorStop(1,'rgba(140,220,255,0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(o.x,o.y,11,0,7);ctx.fill()}
+    for(const b of G.suBm||[]){const u=b.t/.3;ctx.globalAlpha=1-u;ctx.strokeStyle='#ffd6ee';ctx.lineWidth=4*(1-u)+1;ctx.beginPath();ctx.arc(b.x,b.y,14+44*u,0,7);ctx.stroke()}ctx.restore()}}
+window.__suTuOn=()=>{for(const T of G.suTu||[]){T.on=true;T.t=SUU.ON}};
 /* ---- 수원 함선 (11-18): 탈로스 = 패드에 착지해 ㄷ자 레일건 전개 → 충전 3초·관통 한 발 / 다이달로스 = 게이트 위에서 수리 연출 ----
    그림 ag/talos_tf(비행→착지→전개 24장) · talos_hull(선체) · talos_gun(레일건 24방향) · daedalus(12장), 칸 320px.
    SUT.PHI = 레일건 각 장이 화면에서 가리키는 각도(구운 그림에서 잰 값), SUT.L = 회전 중심~포구 거리(px).

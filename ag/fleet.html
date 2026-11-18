@@ -239,6 +239,7 @@ for(const z of [-1,1]){const mz=p=>[p[0],p[1],p[2]*z];
  box(1.5,.45,2.8,WH2,TR(-.8,-.7,z*4.2));box(1.52,.08,2.4,NE,TR(-.8,-.44,z*4.2),1);box(1.9,.9,1.0,BZ,TR(-.8,-.7,z*5.4))}
 box(2.2,1.0,2.6,WH,TR(-7.4,2.2,0));box(.3,.45,2.2,GLS,TR(-6.3,2.35,0),1);for(const z of [-.8,.8])box(.24,.2,.24,[1,.35,.4],TR(-8.0,2.8,z),2);
 loft([[-10.6,.8,.7,0],[-9.6,1.0,.9,0],[-8,.9,.8,0],[-7,0,0,0]],14,half(14),TR(0,-.1,0));torus(.85,.14,20,6,BZ,cmp(back,TR(-10.62,-.1,0)));disc(.74,NE2,cmp(back,TR(-10.66,-.1,0)));
+for(const z of [-1.5,1.5]){box(13.5,.28,.5,BK,TR(-.6,-1.84,z));box(13.5,.08,.52,BZ,TR(-.6,-1.68,z))}
 const TP=[[-6.4,1.5,6.6],[-6.4,1.5,-6.6],[-1.0,-.7,6.7],[-1.0,-.7,-6.7]];
 const pod=(M)=>{loft([[-3.2,0,0,0],[-2.8,.8,.75,0],[-.4,1.0,.9,0],[2.2,.75,.65,0],[3.2,.35,.3,0],[3.4,0,0,0]],16,half(16),M,null,4);
  torus(.72,.13,18,6,BZ,cmp(back,TR(-3.0,0,0),M));disc(.6,NE2,cmp(back,TR(-3.05,0,0),M));box(2.6,.08,.08,NE,cmp(TR(.2,.92,0),M),1);box(.5,.5,1.3,GLS,cmp(TR(2.6,0,0),M),1);
@@ -301,14 +302,28 @@ mark(6);
  for(const [x,z] of [[4.3,3.2],[4.3,-3.2],[-6.9,3.2],[-6.9,-3.2]]){const d=[-1.5+(x>0?2.2:-2.2)-x,-9.6-(-5.6),-z],L=Math.hypot(...d);
   box(.09,L,.09,NE2,cmp(TR(0,L/2,0),RX(Math.atan2(d[2],Math.hypot(d[0],d[1]))),RZ(-Math.atan2(d[0],d[1])),TR(x,-5.6,z)),1)}}
 endM('게이트수리함',1.05,2.6,2.3,{label:'🔧 수리 전개',label2:'🔧 수리 종료',toggle:1});
+/* ---------- 7. 미사일 포탑 (시즌5 수원, 패드 8곳) : g1 = 도는 머리(Y축, 중심 0) ---------- */
+begin();
+lathe([[0,-2.2],[3.4,-2.2],[3.6,-2.0],[3.6,-1.5],[3.0,-1.1],[2.4,-1.0],[2.4,-.2],[2.0,.1],[0,.1]],8,(i)=>i===2?NE:i===1||i===3?DK:i===5?WH2:WH,RY(PI/8),(i)=>i===2?1:0,true);
+for(let k=0;k<8;k++){const R=RY(k*PI/4+PI/8);box(.9,.5,1.5,k%2?WH2:GR,cmp(TR(2.75,-1.25,0),R));if(k%2===0)box(.3,.3,.3,[1,.35,.4],cmp(TR(3.3,-1.2,0),R),2)}
+torus(2.05,.12,32,6,BZ,TR(0,.12,0));torus(2.05,.05,32,4,NE,TR(0,.28,0),1);
+mark(1);
+lathe([[0,.2],[1.7,.2],[1.9,.5],[1.9,1.0],[1.3,1.5],[0,1.5]],8,(i)=>i===2?WH2:WH,RY(PI/8),null,true);
+box(1.5,2.3,1.9,WH,TR(-.2,2.4,0));box(1.52,.12,1.92,NE,TR(-.2,3.2,0),1);box(.5,1.2,1.5,GLS,TR(.62,2.5,0),1);box(.9,.6,1.3,WH2,TR(-.5,3.75,0));
+lathe([[0,0],[.5,.12],[.85,.5],[.9,.62]],16,()=>WH,cmp(RZ(-.5),TR(-.7,4.1,0)));lathe([[0,.1],[.06,.9],[0,1.0]],6,()=>NE,cmp(RZ(-.5),TR(-.7,4.1,0)),()=>1);box(.22,.22,.22,[1,.35,.4],TR(-1.0,4.2,.7),2);
+for(const z of [-1,1]){box(.7,.7,1.0,BZ,TR(-.2,2.5,z*1.4));
+ box(3.4,1.9,1.5,WH,TR(.5,2.5,z*2.55));box(3.42,.12,1.52,NE,TR(.5,3.5,z*2.55),1);box(3.0,.5,.1,DK,TR(.5,2.5,z*3.32));box(2.6,.1,.12,NE,TR(.5,2.5,z*3.34),1);
+ for(const [y,q] of [[2.95,-.36],[2.95,.36],[2.05,-.36],[2.05,.36]]){const T=cmp(toX,TR(2.2,y,z*2.55+q));lathe([[.3,0],[.34,0],[.34,.3],[.3,.3]],10,()=>DK,T);lathe([[0,.05],[.24,.05],[.24,.2],[.1,.42],[0,.46]],10,(i)=>i>=2?OR:WH2,T,(i)=>i>=2?1:0)}
+ box(.5,1.5,1.3,GR,TR(-1.35,2.5,z*2.55));for(const y of [2.1,2.9])lathe([[0,0],[.3,.0],[.36,.15],[0,.15]],10,()=>NE2,cmp(back,TR(-1.6,y,z*2.55)),()=>1)}
+endM('미사일포탑',2.6,-.6,2.3,{label:'🚀 조준 회전',toggle:1});
 const NV=POS.length/3;
 
 /* ================= GL ================= */
 const dExt=gl.getExtension('OES_standard_derivatives');
-const vs=`attribute vec3 p,n,c;attribute float e;uniform mat4 M,P;uniform mat3 N;uniform vec3 off,lx,ly,lz,lc,gp;uniform float mode,lr,ga,gx;varying vec3 vn,vc,vp,vm,vw,vl;varying float ve;
-void main(){float cg=cos(ga),sg=sin(ga);vec3 q0,pr,nr;if(gx<.5){q0=p+vec3(off.x,0.,off.z)-gp;pr=vec3(q0.x*cg+q0.z*sg,q0.y,-q0.x*sg+q0.z*cg)+gp+vec3(0.,off.y,0.);nr=vec3(n.x*cg+n.z*sg,n.y,-n.x*sg+n.z*cg);}else{q0=p-gp;pr=vec3(q0.x*cg-q0.y*sg,q0.x*sg+q0.y*cg,q0.z)+gp+off;nr=vec3(n.x*cg-n.y*sg,n.x*sg+n.y*cg,n.z);}vec4 w=M*vec4(pr,1.);vw=w.xyz;vn=N*nr;vm=n;vc=c;ve=e;vp=p;vec3 q=w.xyz-lc;vl=vec3(dot(q,lx),dot(q,ly),dot(q,lz))/lr;
+const vs=`attribute vec3 p,n,c;attribute float e;uniform mat4 M,P;uniform mat3 N;uniform vec3 off,lx,ly,lz,lc,gp;uniform float mode,lr,ga,gx;varying vec3 vn,vc,vp,vm,vw,vl;varying float ve,vy;
+void main(){float cg=cos(ga),sg=sin(ga);vec3 q0,pr,nr;if(gx<.5){q0=p+vec3(off.x,0.,off.z)-gp;pr=vec3(q0.x*cg+q0.z*sg,q0.y,-q0.x*sg+q0.z*cg)+gp+vec3(0.,off.y,0.);nr=vec3(n.x*cg+n.z*sg,n.y,-n.x*sg+n.z*cg);}else{q0=p-gp;pr=vec3(q0.x*cg-q0.y*sg,q0.x*sg+q0.y*cg,q0.z)+gp+off;nr=vec3(n.x*cg-n.y*sg,n.x*sg+n.y*cg,n.z);}vy=pr.y;vec4 w=M*vec4(pr,1.);vw=w.xyz;vn=N*nr;vm=n;vc=c;ve=e;vp=p;vec3 q=w.xyz-lc;vl=vec3(dot(q,lx),dot(q,ly),dot(q,lz))/lr;
  if(mode>2.5)gl_Position=vec4(vl.x,vl.y,-vl.z,1.);else gl_Position=P*w;}`;
-const fs=(dExt?'#extension GL_OES_standard_derivatives : enable\n':'')+`precision highp float;varying vec3 vn,vc,vp,vm,vw,vl;varying float ve;uniform float mode,t,pulse,dn,dr,lite;uniform sampler2D ts;
+const fs=(dExt?'#extension GL_OES_standard_derivatives : enable\n':'')+`precision highp float;varying vec3 vn,vc,vp,vm,vw,vl;varying float ve,vy;uniform float mode,t,pulse,dn,dr,lite,cy;uniform sampler2D ts;
 float h1(vec2 q){return fract(sin(dot(q,vec2(127.1,311.7)))*43758.5453);}
 float vnz(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(h1(i),h1(i+vec2(1.,0.)),f.x),mix(h1(i+vec2(0.,1.)),h1(i+vec2(1.,1.)),f.x),f.y);}
 float fw(float x){${dExt?'return max(fwidth(x),1e-4);':'return .02;'}}
@@ -333,6 +348,7 @@ void panel(vec2 uv,out vec3 col,out float glow,out float bev,out float seamo){
 float shd(float ndl){vec2 uv=vl.xy*.5+.5;float z=vl.z*.5+.5,b=.004+.012*(1.-ndl),s=0.;
  for(int i=-1;i<=1;i++)for(int j=-1;j<=1;j++){vec4 q=texture2D(ts,uv+vec2(float(i),float(j))/1024.);s+=step(q.r+q.g/255.,z+b);}return s/9.;}
 void main(){
+ if(vy<cy)discard;
  float bl=ve>1.5?step(0.,sin(t*5.+vp.x*3.)):1.;vec3 ec=vc*(1.+pulse*1.2)*bl;
  vec3 N=normalize(vn);
  if(mode>2.5){float d=clamp(vl.z*.5+.5,0.,1.)*255.;gl_FragColor=vec4(floor(d)/255.,fract(d),0.,1.);return;}
@@ -372,7 +388,7 @@ const pg=prog(vs,fs),pq=prog(vq,fq);
 const mk=(arr)=>{const b=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(arr),gl.STATIC_DRAW);return b};
 const BP=mk(POS),BN=mk(NOR),BC=mk(COL),BE=mk(EM),BQ=mk([-1,-1,1,-1,-1,1,-1,1,1,-1,1,1]);
 const att=(p,name,b,sz)=>{const l=gl.getAttribLocation(p,name);if(l<0)return;gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.enableVertexAttribArray(l);gl.vertexAttribPointer(l,sz,gl.FLOAT,false,0,0)};
-const U=n=>gl.getUniformLocation(pg,n),uM=U('M'),uP=U('P'),uN=U('N'),uMo=U('mode'),uT=U('t'),uPu=U('pulse'),uDn=U('dn'),uDr=U('dr'),uOff=U('off'),uGa=U('ga'),uGp=U('gp'),uGx=U('gx'),uLx=U('lx'),uLy=U('ly'),uLz=U('lz'),uLc=U('lc'),uLr=U('lr'),uTs=U('ts'),uLi=U('lite');
+const U=n=>gl.getUniformLocation(pg,n),uM=U('M'),uP=U('P'),uN=U('N'),uMo=U('mode'),uT=U('t'),uPu=U('pulse'),uDn=U('dn'),uDr=U('dr'),uOff=U('off'),uGa=U('ga'),uGp=U('gp'),uGx=U('gx'),uCy=U('cy'),uLx=U('lx'),uLy=U('ly'),uLz=U('lz'),uLc=U('lc'),uLr=U('lr'),uTs=U('ts'),uLi=U('lite');
 const Q={tc:gl.getUniformLocation(pq,'tc'),tn:gl.getUniformLocation(pq,'tn'),px:gl.getUniformLocation(pq,'px'),dr:gl.getUniformLocation(pq,'dr')};
 const mul=(a,b)=>{const o=new Float32Array(16);for(let i=0;i<4;i++)for(let j=0;j<4;j++){let s=0;for(let k=0;k<4;k++)s+=a[k*4+j]*b[i*4+k];o[i*4+j]=s}return o};
 const persp=(f,a,n,fa)=>{const t=1/Math.tan(f/2);return new Float32Array([t/a,0,0,0,0,t,0,0,0,0,(fa+n)/(n-fa),-1,0,0,2*fa*n/(n-fa),0])};
@@ -398,6 +414,7 @@ function offs(m,g){const k=MI.k;if(g===0)return[0,0,0];
  if(m.name==='착륙포탑함'){const cl=(v)=>Math.max(0,Math.min(1,v)),sm=(v)=>{v=cl(v);return v*v*(3-2*v)},rise=3.1*sm((k-.42)/.3),ga=window.__ga!==undefined?window.__ga:(k>.97?S(performance.now()/1000*.55)*2.2:0);
   if(g>=11){const q=TP[g-11],kk=sm(k/.4);return[0,(-1.75-q[1])*kk,0,kk*PI/2,1,q[0],q[1],q[2]]}
   if(g===4||g===5)return[0,0,(g===4?1:-1)*1.75*sm((k-.28)/.2)];if(g===2)return[0,rise,0,k>.97?ga:0];if(g===6)return[6.6*sm((k-.7)/.3),rise,0,k>.97?ga:0];return[0,0,0]}
+ if(m.name==='미사일포탑'){const ga=window.__ga!==undefined?window.__ga:(k>.5?performance.now()/1000*.9:0);return g===1?[0,0,0,ga,0,0,0,0]:[0,0,0]}
  if(m.name==='게이트수리함'){if(g===1)return[0,-5.2*k,0];if(g>=2&&g<=5){const sx=g<4?1:-1,sz=g%2?-1:1;return[sx*.9*k,-2.3*k,sz*1.3*k]}return k>.5?[0,0,0]:null}
  return k>.5?[0,0,0]:null}
 const LD=nrm([-.55,.65,.55]),LX=nrm(crs([0,1,0],LD)),LY=crs(LD,LX);
@@ -406,10 +423,10 @@ function scene(mode,t,F,vw_,vh_){gl.bindFramebuffer(gl.FRAMEBUFFER,F?F.fb:null);
  const m=MODELS[MI.i],asp=w/h,fov=35*PI/180,tf=Math.tan(fov/2),dist=Math.max(17.5/tf,20/(tf*asp))/VW.zoom*(1-VW.push*.12);
  const R=mul(rx(VW.pitch),ry(VW.yaw)),M=mul(tr(0,0,-dist),mul(R,mul(scm(m.scale),tr(0,m.cy,0))));
  gl.uniformMatrix4fv(uM,false,M);gl.uniformMatrix4fv(uP,false,persp(fov,asp,1,400));gl.uniformMatrix3fv(uN,false,new Float32Array([R[0],R[1],R[2],R[4],R[5],R[6],R[8],R[9],R[10]]));
- gl.uniform1f(uMo,mode);gl.uniform1f(uLi,LITE?1:0);gl.uniform1f(uT,t);gl.uniform1f(uPu,pulse);gl.uniform1f(uDn,dist-30);gl.uniform1f(uDr,60);
+ gl.uniform1f(uMo,mode);gl.uniform1f(uCy,m.name==='착륙포탑함'&&MI.k>.02?-1.98:-1e3);gl.uniform1f(uLi,LITE?1:0);gl.uniform1f(uT,t);gl.uniform1f(uPu,pulse);gl.uniform1f(uDn,dist-30);gl.uniform1f(uDr,60);
  gl.uniform3fv(uLx,LX);gl.uniform3fv(uLy,LY);gl.uniform3fv(uLz,LD);gl.uniform3f(uLc,0,0,-dist);gl.uniform1f(uLr,23);
  gl.activeTexture(gl.TEXTURE2);gl.bindTexture(gl.TEXTURE_2D,mode===0?FS.tx:null);gl.uniform1i(uTs,2);
- for(const r of m.rng){if(ONLY&&!ONLY(r.g))continue;const o=offs(m,r.g);if(!o||!r.n)continue;gl.uniform3f(uOff,o[0],o[1],o[2]);gl.uniform1f(uGa,o[3]||0);gl.uniform1f(uGx,o[4]||0);gl.uniform3f(uGp,o[4]?o[5]:-1,o[4]?o[6]:0,o[4]?o[7]:0);gl.drawArrays(gl.TRIANGLES,r.s,r.n)}}
+ for(const r of m.rng){if(ONLY&&!ONLY(r.g))continue;const o=offs(m,r.g);if(!o||!r.n)continue;gl.uniform3f(uOff,o[0],o[1],o[2]);gl.uniform1f(uGa,o[3]||0);gl.uniform1f(uGx,o[4]||0);gl.uniform3f(uGp,o.length>5?o[5]:-1,o.length>5?o[6]:0,o.length>5?o[7]:0);gl.drawArrays(gl.TRIANGLES,r.s,r.n)}}
 function composite(){gl.bindFramebuffer(gl.FRAMEBUFFER,null);gl.viewport(0,0,w,h);gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.disable(gl.DEPTH_TEST);
  gl.useProgram(pq);att(pq,'q',BQ,2);gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,FC.tx);gl.uniform1i(Q.tc,0);gl.activeTexture(gl.TEXTURE1);gl.bindTexture(gl.TEXTURE_2D,FN.tx);gl.uniform1i(Q.tn,1);
  gl.uniform2f(Q.px,dpr/w,dpr/h);gl.uniform1f(Q.dr,60);gl.drawArrays(gl.TRIANGLES,0,6)}

@@ -5392,12 +5392,80 @@ function glTick(w,dt){const S=G.S,st=w.st,p=G.p;
     // 끝: 깨지면서 쌓인 피해가 한 번에
     if(c.t>=c.life){c.done=1;for(const e of G.enemies){if(e.dead||e.glC!==c)continue;const d=(e.glA||0)*(e.boss?.5:1);e.glA=0;e.glC=null;if(d>0)hurt(e,d,'glass',{force:1})}
       if(!G.bot){SND.p('boom');for(let k=0;k<4;k++)chunks(c.x+rnd(-c.h,c.h)*.6,c.y+rnd(-c.h,c.h)*.6,8,['#ffffff','#d8f4ff','#9bdcff'],260);sparks(c.x,c.y,40,['#ffffff','#d8f4ff','#ffd6f5'],380,.6,3);pring(c.x,c.y,c.h*1.3,['#ffffff','#d8f4ff'],40,.4)}}}
-  st.c=st.c.filter(c=>!c.done)}
+  st.c=st.c.filter(c=>!c.done);
+  // V267 🌙 피날레 「셀레네 테라리움」: 60초마다
+  st.ft=(st.ft===undefined?GLC.FIN:st.ft)-dt;if(!st.fin&&st.ft<=0&&G.enemies.some(hxVis)){st.ft=GLC.FIN;st.fin={t:0,tk:[],fl:0};if(!G.bot)SND.p('boss')}
+  if(st.fin)glFinTick(st,dt)}
+/* ===== 🌙 「셀레네 테라리움」 (V267, 사용자 그림 컨셉: 해·달 천구 문장 + 바닥 마법진 + 꽃 요정 빛) =====
+   밤이 내리고 → 발밑 마법진 → 머리 위 천구 문장 → 「찰칵」 모든 적이 유리에 갇힘 → 두 초승달이 보름달로, 빛기둥 3번 → 유리가 한꺼번에 깨짐.
+   그림은 코드로 그리고 빛 번짐·굴절은 셰이더(stLightInit·dmShaderInit 재사용). 히든이라 패치내역에 쓰지 않아요 */
+const GLC={FIN:60,P:150,S:700};
+function glFinTick(st,dt){const F=st.fin,T=F.t+=dt,S=G.S,vis=G.enemies.filter(hxVis);if(F.fl>0)F.fl-=dt;
+  if(T>=5.5&&!F.snap){F.snap=1;F.fl=.35;if(G.eb)for(const b of G.eb)b.life=0;if(!G.bot){SND.p('shutter');G.shk=Math.max(G.shk||0,.25)}}
+  if(F.snap&&T<8.5)for(const e of vis){if(e.boss)e.slow=Math.max(e.slow||0,.6);else{e.stun=Math.max(e.stun||0,.15);e.kx=0;e.ky=0}e.glZ=G.t+.2}
+  [6.3,7.1,7.9].forEach((tt,i)=>{if(!F.tk[i]&&T>=tt){F.tk[i]=1;F.pr=G.t;for(const e of vis)hurt(e,GLC.P*S.might*(e.boss?.5:1),'glass',{kb:0});if(!G.bot)SND.p('zap')}});
+  if(T>=8.5&&!F.boom){F.boom=1;F.fl=.4;let n=0;for(const e of vis){if(!G.bot&&n++<30)chunks(e.x,e.y,5,['#ffffff','#d8f4ff','#fff3d0'],240);hurt(e,GLC.S*S.might*(e.boss?.5:1),'glass',{force:1})}if(!G.bot){SND.p('glass');SND.p('boom');G.shk=Math.max(G.shk||0,.5)}}
+  if(T>10.4)st.fin=null}
+const glH=(i,k)=>{const x=Math.sin(i*127.1+k*311.7)*43758.5453;return x-Math.floor(x)};
+function glCres(g,x,y,r,flip,fill){const d=r*.42,r2=r*.86,x0=(d*d+r*r-r2*r2)/(2*d),y0=Math.sqrt(Math.max(0,r*r-x0*x0)),a=Math.atan2(y0,x0),b=Math.atan2(y0,x0-d);g.save();g.translate(x,y);if(flip)g.scale(-1,1);g.beginPath();g.arc(0,0,r,a,6.283-a,false);g.arc(d,0,r2,6.283-b,b,true);g.closePath();fill?g.fill():g.stroke();g.restore()}
+function glFlower(g,x,y,s,rot){for(let i=0;i<8;i++){const a=rot+i*.7854,l=i%2?s*.6:s;g.beginPath();g.ellipse(x+Math.cos(a)*l*.5,y+Math.sin(a)*l*.5,l*.5,l*.17,a,0,6.283);g.fill()}g.beginPath();g.arc(x,y,s*.16,0,6.283);g.fill()}
+function glFinPaint(g,F,al,col,lw){const p=G.p,T=F.t,U=Math.min(VW,VH),cl=(x)=>Math.max(0,Math.min(1,x)),ez=x=>x*x*(3-2*x);
+  const kf=cl((T-1.2)/1.8),ke=cl((T-3.2)/2),km=ez(cl((T-5.6)/1.6)),fx=p.x,fy=p.y+14,rx=U*.33,R=U*.12,ex=p.x,ey=p.y-U*(.17+.12*ez(ke));
+  g.strokeStyle=col;g.fillStyle=col;g.lineWidth=lw;g.lineCap='round';
+  // 떠오르는 별가루
+  if(T<3){g.globalAlpha=al*cl(T/.5)*cl((3-T)/.8);for(let i=0;i<46;i++){const u=(T*.35+glH(i,1))%1,x=p.x+(glH(i,2)-.5)*VW*.9,y=p.y+VH*.42-u*VH*.8,z=1+glH(i,3)*1.6;g.fillRect(x-z,y-.5,z*2,1);g.fillRect(x-.5,y-z,1,z*2)}}
+  // 바닥 마법진
+  if(kf>0){g.save();g.translate(fx,fy);g.scale(1,.36);g.globalAlpha=al;const sw=6.283*ez(kf);
+    for(const r of [1,.93,.5,.2]){g.beginPath();g.arc(0,0,rx*r,-1.57,-1.57+sw);g.stroke()}
+    g.globalAlpha=al*kf;for(let i=0;i<40;i++){const a=G.t*.25+i*.157;if(i/40>kf)break;g.beginPath();g.moveTo(Math.cos(a)*rx*.945,Math.sin(a)*rx*.945);g.lineTo(Math.cos(a+.05)*rx*.99,Math.sin(a+.05)*rx*.99);g.stroke()}
+    for(let i=0;i<8;i++){const a=-G.t*.15+i*.7854;g.beginPath();g.moveTo(Math.cos(a)*rx*.2,Math.sin(a)*rx*.2);g.lineTo(Math.cos(a)*rx*(.2+.73*kf),Math.sin(a)*rx*(.2+.73*kf));g.stroke()}
+    g.beginPath();g.moveTo(-rx*.5,-rx*.5);g.lineTo(rx*.5,-rx*.5);g.lineTo(rx*.5,rx*.5);g.lineTo(-rx*.5,rx*.5);g.closePath();g.globalAlpha=al*kf*.5;g.stroke();g.globalAlpha=al*kf;
+    glCres(g,-rx*.62,0,rx*.24,false,true);glCres(g,rx*.62,0,rx*.24,true,false);g.beginPath();g.arc(rx*.36,0,rx*.08,0,6.283);g.stroke();g.beginPath();g.arc(0,0,rx*.1,0,6.283);g.fill();g.restore();
+    // 꽃 요정 빛 8 + 별먼지 고리
+    g.globalAlpha=al*kf;for(let i=0;i<8;i++){const a=G.t*.5+i*.7854,x=fx+Math.cos(a)*rx*1.42,y=fy+Math.sin(a)*rx*1.42*.36-6-Math.sin(G.t*3+i)*4;glFlower(g,x,y,U*.03*(.85+.15*Math.sin(G.t*5+i)),G.t*.6+i);g.beginPath();g.arc(x-U*.034,y,U*.008,1.2,5.1);g.stroke();g.beginPath();g.arc(x+U*.034,y,U*.008,-1.95,1.95);g.stroke()}
+    for(let i=0;i<70;i++){const a=glH(i,5)*6.283+G.t*.08,rr=rx*(1.15+glH(i,6)*.6),tw=.5+.5*Math.sin(G.t*4+i);g.globalAlpha=al*kf*tw*.8;g.fillRect(fx+Math.cos(a)*rr-.8,fy+Math.sin(a)*rr*.36-.8-glH(i,7)*20,1.6,1.6)}}
+  // 천구 문장
+  if(ke>0){const a1=al*ke;g.globalAlpha=a1;const sw=6.283*ez(ke);
+    for(const r of [1,.93]){g.beginPath();g.arc(ex,ey,R*r,-1.57,-1.57+sw);g.stroke()}
+    for(let i=0;i<56;i++){if(i/56>ke)break;const a=-1.57+i*.1122;g.beginPath();g.moveTo(ex+Math.cos(a)*R*1.01,ey+Math.sin(a)*R*1.01);g.lineTo(ex+Math.cos(a+.07)*R*1.08,ey+Math.sin(a+.07)*R*1.08);g.stroke()}
+    g.beginPath();g.moveTo(ex,ey-R*1.08);g.lineTo(ex-R*.04,ey-R*1.16);g.lineTo(ex,ey-R*1.3);g.lineTo(ex+R*.04,ey-R*1.16);g.closePath();g.fill();
+    const k2=cl((ke-.3)/.7);if(k2>0){g.globalAlpha=a1*k2*.55;const ro=G.t*.1;for(let i=0;i<6;i++){const a=ro+i*1.0472;g.beginPath();g.arc(ex+Math.cos(a)*R*.46,ey+Math.sin(a)*R*.46,R*.46,0,6.283);g.stroke()}
+      for(let t2=0;t2<2;t2++){g.beginPath();for(let i=0;i<=3;i++){const a=-ro+t2*1.0472+i*2.0944;g[i?'lineTo':'moveTo'](ex+Math.cos(a)*R*.92,ey+Math.sin(a)*R*.92)}g.stroke()}
+      g.globalAlpha=a1*k2;const mo=R*.52*(1-km);glCres(g,ex-mo,ey,R*.37,true,false);glCres(g,ex+mo,ey,R*.37,false,true);
+      if(km>0){g.globalAlpha=a1*km;g.beginPath();g.arc(ex,ey,R*.37*(.5+.5*km),0,6.283);g.fill()}
+      g.globalAlpha=a1*k2*(1-km*.7);for(let i=0;i<4;i++){const a=.7854+i*1.5708;g.beginPath();g.ellipse(ex+Math.cos(a)*R*.17,ey+Math.sin(a)*R*.17,R*.17,R*.055,a,0,6.283);g.fill()}g.beginPath();g.arc(ex,ey,R*.05,0,6.283);g.fill();
+      // 작은 문장 셋 + 실 + 펜던트
+      g.globalAlpha=a1*k2;const sat=[[ex-R*1.2,ey-R*.6],[ex+R*1.2,ey-R*.6],[ex,ey+R*1.32]];for(const [sx,sy] of sat){g.beginPath();g.arc(sx,sy,R*.2,0,6.283);g.stroke();g.beginPath();g.arc(sx,sy,R*.12,0,6.283);g.stroke();for(let i=0;i<8;i++){const a=G.t*.3+i*.7854;g.beginPath();g.ellipse(sx+Math.cos(a)*R*.09,sy+Math.sin(a)*R*.09,R*.09,R*.035,a,0,6.283);g.stroke()}}
+      g.globalAlpha=a1*k2*.6;g.beginPath();g.moveTo(sat[0][0]-R*.2,sat[0][1]-R*.06);g.lineTo(ex-R*2,ey-R*.95);g.moveTo(sat[1][0]+R*.2,sat[1][1]-R*.06);g.lineTo(ex+R*2,ey-R*.95);g.moveTo(ex,ey+R*1.08);g.lineTo(ex,ey+R*1.12);g.moveTo(ex,ey+R*1.52);g.lineTo(ex,fy-rx*.08);
+      for(const sd of [-1,1]){g.moveTo(ex+sd*R*.48,ey+R*.9);g.lineTo(ex+sd*R*.48,ey+R*1.6);g.moveTo(sat[2][0]+sd*R*.2,sat[2][1]);g.lineTo(ex+sd*R*.48,ey+R*1.6)}g.stroke();
+      for(const sd of [-1,1]){const qx=ex+sd*R*.48,qy=ey+R*1.72;g.beginPath();g.arc(qx,qy,R*.11,0,6.283);g.stroke();g.beginPath();g.moveTo(qx,qy+R*.11);g.lineTo(qx-R*.03,qy+R*.3);g.lineTo(qx,qy+R*.48);g.lineTo(qx+R*.03,qy+R*.3);g.closePath();g.fill()}}}
+  // 빛기둥 (찰칵 뒤)
+  if(F.snap&&T<8.8){const pu=F.pr?Math.max(0,1-(G.t-F.pr)/.35):0,w=R*(.3+.45*pu+.05*Math.sin(G.t*20)),y0=ey+R*.4,y1=fy,gr=g.createLinearGradient(ex-w,0,ex+w,0);gr.addColorStop(0,'rgba(255,255,255,0)');gr.addColorStop(.5,col);gr.addColorStop(1,'rgba(255,255,255,0)');g.globalAlpha=al*cl((T-5.5)/.3)*cl((8.8-T)/.3)*(.3+.5*pu);g.fillStyle=gr;g.fillRect(ex-w,y0,w*2,y1-y0);g.fillStyle=col;
+    if(pu>0){g.save();g.translate(fx,fy);g.scale(1,.36);g.globalAlpha=al*pu;g.lineWidth=lw*2.5;g.beginPath();g.arc(0,0,rx*(.2+1.5*(1-pu)),0,6.283);g.stroke();g.restore();g.lineWidth=lw}}
+  g.globalAlpha=1}
+function glFinDraw(st,F){const p=G.p,T=F.t,X0=p.x-VW/2,Y0=p.y-VH/2,al=Math.min(1,T/1.2)*(T>9.2?Math.max(0,1-(T-9.2)/1.1):1);
+  ctx.save();ctx.globalAlpha=.66*al;ctx.fillStyle='#03040e';ctx.fillRect(X0-20,Y0-20,VW+40,VH+40);ctx.restore();
+  // 유리에 갇힌 적
+  if(F.snap&&!F.boom){ctx.save();ctx.globalCompositeOperation='lighter';let n=0;for(const e of G.enemies){if(e.dead||!(e.glZ>G.t)||n++>90)continue;const r=(e.r||8)*1.25+3,x=e.x,y=e.y;ctx.beginPath();ctx.moveTo(x,y-r*1.7);ctx.lineTo(x+r,y-r*.6);ctx.lineTo(x+r,y+r*.7);ctx.lineTo(x,y+r*1.25);ctx.lineTo(x-r,y+r*.7);ctx.lineTo(x-r,y-r*.6);ctx.closePath();ctx.globalAlpha=.3;ctx.fillStyle='#bfe6ff';ctx.fill();ctx.globalAlpha=.8;ctx.strokeStyle='#f4fbff';ctx.lineWidth=1;ctx.stroke();ctx.beginPath();ctx.moveTo(x,y-r*1.7);ctx.lineTo(x,y+r*1.25);ctx.moveTo(x-r*.5,y-r*.9);ctx.lineTo(x-r*.5,y+r*.2);ctx.globalAlpha=.45;ctx.stroke()}ctx.restore()}
+  ctx.save();ctx.globalCompositeOperation='lighter';glFinPaint(ctx,F,al,'#fff3d0',1.3);ctx.restore();
+  let q=.5;try{q=fxgQ()}catch(_){}
+  if(q>0){const L=stLightInit();if(L){const cw=Math.min(480,Math.ceil(VW/2)),chh=Math.max(1,Math.round(cw*VH/VW)),k=cw/VW;for(const cc of [L.cv,L.M])if(cc.width!==cw||cc.height!==chh){cc.width=cw;cc.height=chh}
+    const m=L.M.getContext('2d');m.setTransform(1,0,0,1,0,0);m.globalAlpha=1;m.globalCompositeOperation='source-over';m.fillStyle='#000';m.fillRect(0,0,cw,chh);m.setTransform(k,0,0,k,-X0*k,-Y0*k);m.globalCompositeOperation='lighter';glFinPaint(m,F,al,'#8f9eff',2.2);m.globalAlpha=1;
+    const sc=L.Sm.getContext('2d');sc.globalCompositeOperation='source-over';sc.fillStyle='#000';sc.fillRect(0,0,64,36);sc.globalCompositeOperation='lighter';sc.filter='blur(4px)';for(let i=0;i<3;i++)sc.drawImage(L.M,0,0,64,36);sc.filter='none';
+    const gl=L.gl,U=L.U;gl.viewport(0,0,cw,chh);L.up(0,L.M);L.up(1,L.Sm);gl.uniform2f(U.res,cw,chh);gl.uniform2f(U.vw,VW,VH);gl.uniform2f(U.off,0,0);gl.uniform1f(U.t,G.t);gl.uniform1f(U.neb,0);gl.uniform1f(U.glo,.5);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
+    ctx.save();ctx.globalCompositeOperation='lighter';ctx.imageSmoothingEnabled=true;ctx.drawImage(L.cv,X0,Y0,VW,VH);ctx.restore()}}
+  if(F.fl>0){ctx.save();ctx.globalAlpha=Math.min(.7,F.fl/.35*.7);ctx.fillStyle='#fbfdff';ctx.fillRect(X0,Y0,VW,VH);ctx.restore()}
+  // 굴절: 찰칵 순간 안으로 당겨지고, 깨질 때 고리가 퍼져요
+  if(q>0){const imp=T>=5.5&&T<5.95?1-(T-5.5)/.45:0,v=T-8.5;if(imp>0||(v>=0&&v<1.2)){const D=dmShaderInit();if(D){const cvs=ctx.canvas,sw=Math.min(960,cvs.width),shh=Math.max(1,Math.round(sw*cvs.height/cvs.width));if(D.src.width!==sw||D.src.height!==shh){D.src.width=sw;D.src.height=shh;D.cv.width=sw;D.cv.height=shh}
+    D.src.getContext('2d').drawImage(cvs,0,0,sw,shh);const gl=D.gl,U=D.U,M=Math.max(VW,VH);gl.viewport(0,0,sw,shh);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,D.src);
+    gl.uniform2f(U.res,sw,shh);gl.uniform2f(U.vw,VW,VH);gl.uniform2f(U.c,VW/2,VH/2);gl.uniform1f(U.t,G.t);gl.uniform1f(U.R,v>=0?M*.9*v/1.2:0);gl.uniform1f(U.amp,v>=0?1-v/1.2:0);gl.uniform1f(U.imp,imp>0?imp*M*.45:0);gl.uniform1f(U.heat,0);gl.uniform1f(U.asp,VW/VH);
+    gl.drawArrays(gl.TRIANGLE_STRIP,0,4);ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.drawImage(D.cv,0,0,cvs.width,cvs.height);ctx.restore()}}}}
 function glDraw(w){const st=w.st;const sf=st.sub&&st.sub.fairy.st.f;if(sf)sf.forEach(([x,y])=>drawEmo(HW('fairy')?'😈':wfxOn('fairy')?'🦇':'🧚',x,y+Math.sin(G.t*6+x)*2,16));
   for(const c of st.c||[]){const k=Math.min(1,c.t/.25),out=Math.min(1,(c.life-c.t)/.3),al=.85*Math.min(k,out);
     {const S2=HXI.cubeB,R=c.h*1.15*(.6+.4*k),y0=c.y+c.h*.45,sc=R/40;ctx.save();ctx.globalAlpha=al*.5;ctx.strokeStyle='#d0d8e6';ctx.lineWidth=1.5;ctx.beginPath();ctx.ellipse(c.x,y0,R,R*.22,0,0,7);ctx.stroke();ctx.globalAlpha=al*.12;ctx.fillStyle='#9aa6ba';ctx.fill();ctx.restore();
       if(S2&&S2.im.complete&&S2.im.naturalWidth){const f=(G.t*15%36)|0;ctx.save();ctx.imageSmoothingEnabled=false;ctx.globalAlpha=al;ctx.drawImage(S2.im,f*116,0,116,60,c.x-58*sc,y0-58.5*sc,116*sc,60*sc);ctx.restore()}}
-    for(let i=0;i<5;i++){const a=c.a+i*1.2566;drawEmo('🧚',c.x+Math.cos(a)*c.h*.6,c.y+c.h*.05+Math.sin(a)*c.h*.3,14)}}}
+    for(let i=0;i<5;i++){const a=c.a+i*1.2566;drawEmo('🧚',c.x+Math.cos(a)*c.h*.6,c.y+c.h*.05+Math.sin(a)*c.h*.3,14)}}
+  if(st.fin&&!G.bot)glFinDraw(st,st.fin)}
 Object.assign(WU,{glass(w,dt){glTick(w,dt)}});
 
 // ---- 레이디 로드스터 ----

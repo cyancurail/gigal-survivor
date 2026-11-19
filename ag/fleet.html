@@ -406,6 +406,15 @@ function mkElevB(){
  torus(4.55,.12,40,6,NE,TR(0,1.95,0),1);torus(ELR+.5,.28,24,6,WH,TR(0,9.0,0));
  elevShaft(9.0,30)}
 begin();mkElevB();endM('elevB',1,0,0,{label:'elevB'});begin();elevShaft(0,12);endM('elevS',1,0,0,{label:'elevS'});
+/* ---------- 19. 수원 착륙 패드 (11-19): 두께 있는 강판 갑판 + 유도등 + 착륙 표식 + 경사로. 반지름 10 ---------- */
+function mkPad(){const YL=[1,.72,.2];
+ lathe([[0,0],[10.6,0],[10.6,.3],[10.2,.3],[10.2,.75],[9.7,.75],[9.7,.62],[0,.62]],16,(i)=>i===1?DK:i===3?WH2:i===4?WH:GR,RY(PI/16),null,true);
+ torus(7.2,.09,48,4,NE,TR(0,.64,0),1);torus(3.1,.07,32,4,WH,TR(0,.64,0));torus(9.0,.05,48,4,WH,TR(0,.64,0));
+ box(3.6,.05,.5,WH,TR(0,.65,0));box(.5,.05,2.6,WH,TR(-1.55,.65,0));box(.5,.05,2.6,WH,TR(1.55,.65,0));
+ for(let i=0;i<16;i++){const a=i/16*2*PI;box(.34,.22,.34,i%2?NE2:YL,cmp(TR(0,.86,9.95),RY(a)),i%2?1:0)}
+ for(let i=0;i<4;i++){const a=i/4*2*PI+PI/4;box(1.6,.05,.5,YL,cmp(TR(0,.65,8.1),RY(a)));box(2.6,.3,1.6,WH2,cmp(RX(.32),TR(0,.2,11.1),RY(a)));box(2.2,.06,.3,NE,cmp(TR(0,.5,10.75),RY(a)),1)}
+ for(let i=0;i<4;i++){const a=i/4*2*PI;box(.5,.05,1.6,NE,cmp(TR(0,.65,5.2),RY(a)),1);box(1.3,.5,.9,DK,cmp(TR(0,.25,10.9),RY(a+.39)));box(.9,.9,.6,WH2,cmp(TR(0,.45,11.0),RY(a-.39)))}}
+begin();mkPad();endM('padS',1,0,0,{label:'padS'});
 const NV=POS.length/3;
 
 /* ================= GL ================= */
@@ -560,7 +569,7 @@ $('lite').onclick=()=>{AUTO.done=1;setLite(!LITE)};$('v0').onclick=()=>{VW.tgt=.
 const stp=$('stamp'),act=$('act'),tabs=[];
 function actLabel(){const a=MODELS[MI.i].act;act.textContent=a.toggle&&MI.K?a.label2:a.label;act.setAttribute('aria-pressed',!!(a.toggle&&MI.K))}
 function pick(i){MI.i=i;MI.K=0;MI.k=0;VW.yaw=MODELS[i].yaw;VW.tgt=i?.5:.28;VW.zoom=1;tabs.forEach((b,j)=>b.setAttribute('aria-pressed',j===i));actLabel()}
-MODELS.forEach((m,i)=>{const b=document.createElement('button');b.textContent=m.name;b.onclick=()=>pick(i);if(/^(gate|wall|elev)/.test(m.name))b.style.display='none';$('tabs').appendChild(b);tabs.push(b)});
+MODELS.forEach((m,i)=>{const b=document.createElement('button');b.textContent=m.name;b.onclick=()=>pick(i);if(/^(gate|wall|elev|pad)/.test(m.name))b.style.display='none';$('tabs').appendChild(b);tabs.push(b)});
 act.onclick=()=>{const a=MODELS[MI.i].act;if(a.toggle){MI.K=MI.K?0:1;actLabel();return}pulse=1;
  if(a.stamp){$('stampT').textContent=a.stamp;stp.animate([{opacity:0,transform:'translate(-50%,-50%) scale(1.9)'},{opacity:1,transform:'translate(-50%,-50%) scale(1)',offset:.12},{opacity:1,transform:'translate(-50%,-50%) scale(1)',offset:.8},{opacity:0,transform:'translate(-50%,-50%) scale(1)'}],{duration:2300,easing:'ease-out',fill:'forwards'})}};
 pick(0);window.__pick=pick;

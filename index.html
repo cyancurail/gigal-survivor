@@ -2050,7 +2050,7 @@ function suDraw(front){const p=G.p,H=SU.H,ER=SU.ER,vx0=p.x-VW/2-60,vx1=p.x+VW/2+
     if(Math.abs(p.x)<VW/2+200&&Math.abs(p.y)<VH/2+200)suElev(0);
   }else{
     suHexDraw(0);suElev(1);suHexDraw(1);suHexFx(1);
-    suWalls(1);suDefDraw(1);suTuDraw(1);suAidDraw(1);suShipDraw();suFxDraw();suWaveDraw();try{fmSupDraw()}catch(e){}
+    suWalls(1);suDefDraw(1);suTuDraw(1);suAidDraw(1);suShipDraw();suFxDraw();suHexBarDraw();suWaveDraw();try{fmSupDraw()}catch(e){}
   }
   ctx.imageSmoothingEnabled=sm}
 /* ---- 수원 보스 3 「옥타르트 옥산느」 (11-18, 그림 = 언니가 그록으로 뽑아 온 시트 su/oks_a·oks_b·oks_drone) ----
@@ -2323,19 +2323,29 @@ const SUX={N:190,HPB:20000,sp:null};
 function suHexBlob(){if(SUX.sp)return SUX.sp;const c=document.createElement('canvas');c.width=c.height=128;const x=c.getContext('2d'),g=x.createRadialGradient(64,64,4,64,64,64);g.addColorStop(0,'#04020c');g.addColorStop(.55,'#120830');g.addColorStop(.82,'rgba(64,36,150,.92)');g.addColorStop(1,'rgba(110,70,230,0)');x.fillStyle=g;x.fillRect(0,0,128,128);return SUX.sp=c}
 function suHexSpawn(){if(G.map!=='su')return null;suReg();const e=mkEnemy('su_hex',0,330,{boss:1,hp:SUX.HPB,max:SUX.HPB,name:'헥스터'});e.spd=.001;e.hx={ph:1,th:0,a:1.57,in:0};if(G.suW)G.suW.next=1e9;if(!G.bot){SND.p('boss');G.rflash=.8;toast('⚠ 헥스터','끝없는 밤이 엘리베이터를 감았어요')}return e}
 /* 1페이즈 공격(11-19 승인): 0 별똥 숨결 · 3 머리 강하 · 1 삼킴 · 2 몸통 쓸기 순으로 돎. 머리는 평소 무적, 입이 벌어졌을 때와 강하 뒤 땅에 박힌 동안만 맞음. 수치 임시 */
-/* 헥스터전 함선 자폭 (11-20 사용자): 헥스터 체력이 구간에 닿으면 함선이 스스로 날아와 자폭해 체력을 깎음. 순서 = 아르고 → 다이달로스 → 탈로스 → 파나케이아+테미스(함께) → 팔라스(가장 먼저 해금되는 함선이 마지막).
-   [발동 체력, 깎인 뒤 체력, 함선(SUBS 번호), 아리아드네 대사]. 다이달로스·탈로스의 자리와 수치·대사는 임시(확인 필요). 해금 여부와 상관없이 등장, 그 판에서만 사라짐(임시). */
-const SUXS=[[.85,.80,[2],'언니, 이 방법밖에 없어요. 아르고의 자율 인공지능이 언니를 돕기 위해 스스로 선택했어요.'],
- [.68,.63,[5],'다이달로스가… 고칠 수 없는 건 처음이래요. 그래서 대신 부수러 가겠대요.'],
- [.52,.47,[4],'탈로스가 마지막 한 발은 자기 몸으로 쏘겠대요. 말릴 수가 없어요, 언니.'],
- [.32,.22,[1,3],'파나케이아와 테미스가 같이 가겠대요. 지키는 일은 끝까지 둘이 함께래요.'],
- [.12,.05,[0],'…팔라스예요. 언니 곁에 제일 먼저 온 아이. 마지막도 자기 몫이래요. 눈 감지 말고 봐 주세요, 언니.']];
+/* 헥스터전 함선 자폭 (11-20 사용자): 헥스터 체력이 구간에 닿으면 함선이 스스로 날아와 자폭. ★ 실제 체력은 안 깎음 — 화면의 체력통에만 함선 몫 「보너스 칸」이 얹혀 있다가 자폭 때 그만큼 줄어드는 연출. 해금한 함선만 나옴(해금을 많이 할수록 유리). 원래 설명: 순서 = 아르고 → 다이달로스 → 탈로스 → 파나케이아+테미스(함께) → 팔라스(가장 먼저 해금되는 함선이 마지막).
+   [발동 체력(실제 체력 기준), 보너스 칸 크기(최대 체력 대비, 원래 「깎인 뒤」 값과의 차), 함선(SUBS 번호), 아리아드네 대사]. 수치·대사 임시. */
+const SUXS=[[.85,.05,[2],'언니, 이 방법밖에 없어요. 아르고의 자율 인공지능이 언니를 돕기 위해 스스로 선택했어요.'],
+ [.68,.05,[5],'다이달로스가… 고칠 수 없는 건 처음이래요. 그래서 대신 부수러 가겠대요.'],
+ [.52,.05,[4],'탈로스가 마지막 한 발은 자기 몸으로 쏘겠대요. 말릴 수가 없어요, 언니.'],
+ [.32,.10,[1,3],'파나케이아와 테미스가 같이 가겠대요. 지키는 일은 끝까지 둘이 함께래요.','파나케이아가 가겠대요. 언니를 고치던 손으로, 이번엔 길을 열겠대요.','테미스가 가겠대요. 마지막 방벽은 자기 몸으로 치겠대요.'],
+ [.12,.07,[0],'…팔라스예요. 언니 곁에 제일 먼저 온 아이. 마지막도 자기 몫이래요. 눈 감지 말고 봐 주세요, 언니.']];
+/* 해금 확인: 아이기스 4척 = SAVE.agU(1 팔라스 · 2 파나케이아 · 3 아르고 · 4 테미스), 탈로스·다이달로스 = 동기화(suSN 1·2). 테스트 페이지(__devAll)는 전부 해금 */
+function suShipOwn(si){if(window.__devAll)return true;const u=Math.max(0,Math.min(4,(SAVE&&SAVE.agU)|0));return si<4?u>=[1,2,3,4][si]:suSN()>=(si===4?1:2)}
+function suHexBonus(e){const S=e.hx;if(!S.bon){S.bon=[];for(const ev of SUXS){const sh=ev[2].filter(suShipOwn);if(!sh.length)continue;const k=ev[1]*sh.length/ev[2].length,line=sh.length<ev[2].length&&ev.length>4?(sh[0]===1?ev[4]:ev[5]):ev[3];S.bon.push({at:ev[0],k,sh,line})}S.bt=S.bon.reduce((a,b)=>a+b.k,0);S.bl=S.bt}return S.bon}
+function suHexBarDraw(){const e=G.enemies.find(q=>!q.dead&&q.type==='su_hex');if(!e)return;const S=e.hx;suHexBonus(e);const W=Math.min(VW*.62,640),x0=G.p.x-W/2,y0=G.p.y-VH/2+88,real=Math.max(0,e.hp/e.max),T=1+S.bt,fr=(real+S.bl)/T,rw=real/T;
+  ctx.save();ctx.fillStyle='rgba(8,4,20,.82)';ctx.fillRect(x0-4,y0-4,W+8,22);ctx.fillStyle='#3a1a5a';ctx.fillRect(x0,y0,W,14);
+  const g=ctx.createLinearGradient(x0,0,x0+W,0);g.addColorStop(0,'#7a3aff');g.addColorStop(1,'#ff4ad0');ctx.fillStyle=g;ctx.fillRect(x0,y0,W*rw,14);
+  if(S.bl>0){ctx.fillStyle='#ffe08a';ctx.fillRect(x0+W*rw,y0,W*(fr-rw),14);ctx.fillStyle='rgba(255,255,255,.55)';let a=rw;for(const b of S.bon){if(b.done)continue;a+=b.k/T;ctx.fillRect(x0+W*a-1,y0,2,14)}}
+  if(S.flash>0){ctx.globalCompositeOperation='lighter';ctx.globalAlpha=S.flash;ctx.fillStyle='#ffffff';ctx.fillRect(x0+W*fr,y0,W*S.fw,14);ctx.globalCompositeOperation='source-over';ctx.globalAlpha=1}
+  ctx.strokeStyle='#d8c0ff';ctx.lineWidth=1.5;ctx.strokeRect(x0-.5,y0-.5,W+1,15);ctx.font='800 14px "Noto Sans KR",sans-serif';ctx.textAlign='center';ctx.lineWidth=4;ctx.strokeStyle='#0a0418';ctx.fillStyle='#f0e6ff';ctx.strokeText('헥스터 — 끝없는 밤',G.p.x,y0-8);ctx.fillText('헥스터 — 끝없는 밤',G.p.x,y0-8);ctx.restore()}
 function suHexTick(dt){for(const e of G.enemies){if(e.dead||e.type!=='su_hex')continue;const S=e.hx,p=G.p;S.th+=dt*.4;S.in=Math.min(1,S.in+dt*.35);if(G.suW)G.suW.next=1e9;
   if(S.sd){const D=S.sd;D.t+=dt;e.fmInv=1;S.act=null;S.op=(S.op||0)*(1-Math.min(1,dt*4));S.hz=(S.hz||0)*(1-Math.min(1,dt*5));
-    if(D.t>=3.6+(D.n-1)*.3&&!D.ap){D.ap=1;e.hp=Math.min(e.hp,e.max*D.to);e.flash=.5;if(!G.bot)G.texts.push({x:e.x,y:e.y-170,v:'−'+Math.round((D.from-D.to)*100)+'%',life:1.8,big:1,col:'#ffe08a'})}
+    if(D.t>=3.6+(D.n-1)*.3&&!D.ap){D.ap=1;D.b.done=1;S.bl=Math.max(0,S.bl-D.b.k);S.flash=1;S.fw=D.b.k/(1+S.bt);e.flash=.5;if(!G.bot)G.texts.push({x:e.x,y:e.y-170,v:'−'+Math.round(D.b.k/(1+S.bt)*100)+'%',life:1.8,big:1,col:'#ffe08a'})}
     if(D.t>=5.2+(D.n-1)*.3){S.sd=null;S.cd=1.5}continue}
-  {const ev=SUXS[S.si||0];if(ev&&e.hp<=e.max*ev[0]){S.si=(S.si||0)+1;e.hp=Math.max(e.hp,e.max*ev[1]+1);S.sd={t:0,to:ev[1],from:ev[0],n:ev[2].length};const hy=e.y-78;ev[2].forEach((si,k)=>{suIm(SUBS[si][0]);(G.suSd=G.suSd||[]).push({i:si,x:0,y:0,t:-2.3-k*.3,alt:0,dn:0,fly:{T:2.3+k*.3,x0:e.x-(k?-1:1)*1000,y0:hy-260-k*80,x1:e.x+(k?70:-70)*(ev[2].length>1?1:0),y1:hy+(k?30:-10)}})});
-      if(!G.bot){SND.p('boss');toast('📡 아리아드네',ev[3],true)}continue}}
+  S.flash=Math.max(0,(S.flash||0)-dt*1.2);
+  {const B=suHexBonus(e),ev=B[S.si||0];if(ev&&e.hp<=e.max*ev.at){S.si=(S.si||0)+1;S.sd={t:0,b:ev,n:ev.sh.length};const hy=e.y-78,L=ev.sh.length;ev.sh.forEach((si,k)=>{suIm(SUBS[si][0]);(G.suSd=G.suSd||[]).push({i:si,x:0,y:0,t:-2.3-k*.3,alt:0,dn:0,fly:{T:2.3+k*.3,x0:e.x-(k?-1:1)*1000,y0:hy-260-k*80,x1:e.x+(k?70:-70)*(L>1?1:0),y1:hy+(k?30:-10)}})});
+      if(!G.bot){SND.p('boss');toast('📡 아리아드네',ev.line,true)}continue}}
   const A=S.act;let opT=0,mv=1,hzT=0;const end=()=>{S.act=null;S.cd=2.4;S.pat=((S.pat||0)+1)%4};
   if(A){A.t+=dt;
     if(A.k===0){opT=1;const hy=e.y-78,aim=Math.atan2(p.y-20-hy,p.x-e.x);if(A.a===undefined)A.a=aim;let da=aim-A.a;da=Math.atan2(Math.sin(da),Math.cos(da));A.a+=Math.max(-1.1*dt,Math.min(1.1*dt,da));
@@ -4404,7 +4414,7 @@ function draw(){
     const _dk=e.dsSk>G.t?1-(e.dsSk-G.t)/.7:e.dsEm>G.t?1-(e.dsEm-G.t)/.45:-1;if(e.dsSk>G.t&&_dk>.92)continue;const _dm=_dk>=0;if(_dm){const fy=e.y+e.r*.9;ctx.save();ctx.translate(0,fy);ctx.scale(1,e.dsSk>G.t?Math.max(.05,1-_dk*1.05):Math.max(.05,_dk));ctx.translate(0,-fy)}
     if(S2D[e.type]&&!(e.frog>0))S2D[e.type](e);else{const tpl=e.frog>0?(HW('fairy')?'mummy':'frog'):(e.tpl||e.type);const img=ecanvas(tpl,e.flash>0?'rgba(255,255,255,.8)':null);
     const s=e.r*(e.type.slice(0,3)==='sb_'?3.4:2.4);ctx.globalAlpha=e.type==='ghost'&&!e.boss?.85:1;ctx.drawImage(img,e.x-s/2,e.y-s/2,s,s);ctx.globalAlpha=1;if(e.conf>0&&!e.boss){ctx.fillStyle='#ffd34d';for(let k=0;k<3;k++){const an=G.t*5+k*2.09;ctx.fillRect(Math.round(e.x+Math.cos(an)*e.r*.8)-1,Math.round(e.y-e.r-6+Math.sin(an)*3)-1,3,3)}}if(e.frz>0&&!(e.plF>G.t)){ctx.globalAlpha=.45;ctx.fillStyle='#bfefff';ctx.fillRect(e.x-s/2,e.y-s/2,s,s);ctx.globalAlpha=.9;ctx.strokeStyle='#e8fbff';ctx.lineWidth=1.5;ctx.strokeRect(e.x-s/2,e.y-s/2,s,s);ctx.globalAlpha=1}if(e.drag&&e.drag.t>0&&!e.boss){const h=handCv();ctx.imageSmoothingEnabled=false;ctx.drawImage(h,snapPx(e.x-7),snapPx(e.y+e.r-6),14,14);ctx.fillStyle='#07070d';ctx.fillRect(snapPx(e.x-5),snapPx(e.y+e.r+6),2,6);ctx.fillRect(snapPx(e.x+3),snapPx(e.y+e.r+6),2,5)}}
-    if(e.elite||e.boss){ctx.fillStyle='#000';ctx.fillRect(e.x-e.r,e.y-(e.hb||e.r)-10,e.r*2,4);ctx.fillStyle=e.boss?'#ff4d5e':'#ffd34d';ctx.fillRect(e.x-e.r,e.y-(e.hb||e.r)-10,e.r*2*Math.max(0,e.hp/e.max),4);if(e.boss){ctx.font='bold 11px sans-serif';ctx.fillStyle='#fff';ctx.fillText(e.name,e.x,e.y-(e.hb||e.r)-18)}}
+    if((e.elite||e.boss)&&!e.hx){ctx.fillStyle='#000';ctx.fillRect(e.x-e.r,e.y-(e.hb||e.r)-10,e.r*2,4);ctx.fillStyle=e.boss?'#ff4d5e':'#ffd34d';ctx.fillRect(e.x-e.r,e.y-(e.hb||e.r)-10,e.r*2*Math.max(0,e.hp/e.max),4);if(e.boss){ctx.font='bold 11px sans-serif';ctx.fillStyle='#fff';ctx.fillText(e.name,e.x,e.y-(e.hb||e.r)-18)}}
     if(_dm)ctx.restore();
   }
   const dP=()=>{
@@ -12113,7 +12123,19 @@ function menu(){const u=agU();
   const cds=[...ov.querySelectorAll('[data-cd]')];anims.push(()=>{for(const e of cds){const r=Math.ceil(cdLeft(e.dataset.cd)*60);e.textContent=Math.floor(r/60)+':'+String(r%60).padStart(2,'0')}});
   ov.querySelectorAll('.agC').forEach(b=>{const i=+b.dataset.i;turn(b.querySelector('canvas'),'t_'+SHIPS[i].k,8);if(!b.disabled)b.onclick=()=>{try{SND.p('click')}catch(e){}approve(i)}});
   ov.querySelector('[data-x=sup]').onclick=()=>{close();ORIG.sup()}}
+/* 11-20 사용자: 수원에서는 지휘본부가 바로 위에 있으니 [지휘본부 출격] 승인 패널 없이 바로 출격 — 중계 창처럼 화면 왼쪽 아래에 작게 보여 줌 */
+function suPip(s){let d=document.getElementById('agPip');if(d)d.remove();d=document.createElement('div');d.id='agPip';
+  d.style.cssText='position:fixed;left:10px;bottom:calc(env(safe-area-inset-bottom,0px) + 12px);width:min(46vw,300px);aspect-ratio:16/9;z-index:29;border:2px solid #8fe6ff;border-radius:10px;overflow:hidden;box-shadow:0 0 16px #58c8ff99;background:#06142a;pointer-events:none;transition:opacity .4s';
+  const cv=document.createElement('canvas');cv.width=640;cv.height=360;cv.style.cssText='width:100%;height:100%;display:block';d.appendChild(cv);document.body.appendChild(d);
+  const c=cv.getContext('2d'),hq=img('hq'),sh=img('t_'+s.k),t0=performance.now(),F='"Noto Sans KR",sans-serif';
+  const L=()=>{const t=(performance.now()-t0)/1000;if(!d.isConnected)return;const g=c.createLinearGradient(0,0,0,360);g.addColorStop(0,'#1a4a86');g.addColorStop(1,'#061428');c.fillStyle=g;c.fillRect(0,0,640,360);
+    if(hq.width){const n=Math.floor(t*7)%24;c.globalAlpha=.9;c.drawImage(hq,(n%6)*256,((n/6)|0)*224,256,224,40,40,300,262);c.globalAlpha=1}
+    if(sh.width){const n=Math.floor(t*8)%16,u=Math.min(1,Math.max(0,(t-.3)/2.4)),e=u*u*(3-2*u),x=220+e*500,y=200-e*150,k=1.15-e*.5;c.globalCompositeOperation='lighter';c.fillStyle='rgba(120,220,255,.45)';c.beginPath();c.ellipse(x-95*k,y+4,44*k,12*k,0,0,7);c.fill();c.globalCompositeOperation='source-over';c.drawImage(sh,(n%4)*128,((n/4)|0)*96,128,96,x-110*k,y-82*k,220*k,165*k)}
+    c.fillStyle='rgba(4,16,34,.82)';c.fillRect(0,0,640,40);c.fillRect(0,300,640,60);c.font='800 20px '+F;c.textBaseline='middle';c.fillStyle='#5fff9a';c.fillText('●',14,21);c.fillStyle='#ffffff';c.fillText('AEGIS HQ · '+s.c+' 출격',38,21);
+    c.font='800 21px '+F;c.fillStyle='#8fe6ff';c.fillText('아리아드네',14,330);c.fillStyle='#e8f8ff';c.font='700 19px '+F;const w=c.measureText('아리아드네  ').width;let tx=s.line;while(c.measureText(tx).width>620-w&&tx.length>4)tx=tx.slice(0,-2);c.font='800 21px '+F;const w2=c.measureText('아리아드네 ').width;c.font='700 19px '+F;c.fillText(tx===s.line?tx:tx+'…',14+w2+6,330);
+    if(t>3.6)d.style.opacity='0';if(t>4.1){d.remove();return}requestAnimationFrame(L)};requestAnimationFrame(L);try{SND.p('radio')}catch(e){}}
 function approve(i,o){o=o||{};const s=SHIPS[i];
+  if(G&&G.map==='su'&&!o.unlock){close();suPip(s);launch(s.k);return}
   open(`<div class="agW">${o.unlock?`<div class="agUn">🛰️ 아이기스 ${s.n} 귀환!</div>`:''}<div class="agHQ"><div class="agHd">AEGIS HQ · LINK ESTABLISHED<small>SIGNAL 100% · ARIADNE ONLINE</small></div><canvas width="512" height="448"></canvas>
   <div class="agP"><div class="l">LAUNCH AUTHORIZATION · ${s.c}</div><div class="r">VERIFYING</div><div class="s">출격</div><div class="bar"></div></div></div>
   <div class="agL"><b>아리아드네</b><span></span></div></div>`);

@@ -2014,10 +2014,10 @@ function suElev(front){const p=G.p,B=SUEL.elevB,T=SUEL.elevS,ib=suIm2('elevB'),i
   if(!front){ctx.drawImage(ib,0,cutR,B.w,B.h-cutR,x0,y0+cutR,B.w,B.h-cutR);ctx.imageSmoothingEnabled=sm;return}
   if(Math.abs(p.x)>VW/2+160||top>SUEL_Y-SUEL_CUT)return;
   const hid=Math.abs(p.x)<110&&p.y<SUEL_Y-SUEL_CUT+10&&p.y>top;ctx.save();ctx.globalAlpha=hid?.42:1;
-  ctx.drawImage(ib,0,0,B.w,cutR,x0,y0,B.w,cutR);{const A0=ctx.globalAlpha;let n=0;for(let y=y0-T.h;y+T.h>top&&n<6;y-=T.h,n++){ctx.globalAlpha=A0*(n<2?1:1-(n-1)/5);ctx.drawImage(it,-T.ox,y,T.w,T.h)}ctx.globalAlpha=A0}
+  ctx.drawImage(ib,0,0,B.w,cutR,x0,y0,B.w,cutR);{const A0=ctx.globalAlpha;let n=0;for(let y=y0-T.h;y+T.h>top&&n<3;y-=T.h,n++){ctx.globalAlpha=A0*(1-n/3);ctx.drawImage(it,-T.ox,y,T.w,T.h)}ctx.globalAlpha=A0}
   /* 빛 캡슐: 앞쪽 빛 궤도(오른쪽 12px)와 왼쪽 가장자리 궤도를 타고 올라감 */
   ctx.globalCompositeOperation='lighter';const yb=SUEL_Y-SUEL_CUT-56;
-  for(const [lx,a,sp] of [[17,1,260],[-64,.45,190]])for(let k=0;k<6;k++){const y=yb-((G.t*sp+k*170)%1020);if(y<top||y<yb-900)continue;const g=ctx.createLinearGradient(0,y-30,0,y+12);g.addColorStop(0,'rgba(140,240,255,0)');g.addColorStop(.7,'rgba(190,250,255,'+(.85*a)+')');g.addColorStop(1,'rgba(255,255,255,'+a+')');ctx.fillStyle=g;ctx.fillRect(lx-3,y-30,6,42)}
+  for(const [lx,a,sp] of [[17,1,260],[-64,.45,190]])for(let k=0;k<6;k++){const y=yb-((G.t*sp+k*170)%1020);if(y<top||y<yb-560)continue;const g=ctx.createLinearGradient(0,y-30,0,y+12);g.addColorStop(0,'rgba(140,240,255,0)');g.addColorStop(.7,'rgba(190,250,255,'+(.85*a)+')');g.addColorStop(1,'rgba(255,255,255,'+a+')');ctx.fillStyle=g;ctx.fillRect(lx-3,y-30,6,42)}
   /* 홀로 고리 두 겹: 기둥을 감싸고 천천히 돎 */
   for(const [ry,R,dir] of [[y0-210,130,1],[y0-430,165,-1]]){if(ry<top-60)continue;ctx.lineWidth=2;for(let q=0;q<2;q++){const ph=G.t*.6*dir+q*3.14;ctx.strokeStyle=q?'rgba(160,240,255,.55)':'rgba(120,220,255,.35)';ctx.beginPath();ctx.ellipse(0,ry,R,R*.32,0,ph,ph+2.4);ctx.stroke()}
     ctx.fillStyle='rgba(220,250,255,.8)';for(let q=0;q<3;q++){const a=G.t*.9*dir+q*2.09;ctx.beginPath();ctx.arc(Math.cos(a)*R,ry+Math.sin(a)*R*.32,2.4,0,7);ctx.fill()}}

@@ -5337,80 +5337,67 @@ function swTick(w,dt){const S=G.S,st=w.st,p=G.p;st.g=st.g||[];if(!S.swA){S.swA=1
   if(!G.bot){const k=pn(1.5);for(let i=0;i<k;i++){const a=rnd(0,6.283),rr=Math.sqrt(Math.random())*R;px(p.x+Math.cos(a)*rr,p.y+Math.sin(a)*rr,rnd(-10,10),-rnd(30,70),.8,pick(['#9b3dff','#ff3fd2','#e6c4ff']),2,1,1)}}
   st.ft=(st.ft===undefined?SWC.FIN:st.ft)-dt;if(!st.fin&&st.ft<=0&&G.enemies.some(hxVis)){st.ft=SWC.FIN;st.fin={t:0,fl:0};if(!G.bot)SND.p('boss')}
   if(st.fin)swFinTick(st,dt)}
-/* ===== 💒 영혼결혼식 혼불 셰이더 + 피날레 「죽어서도 함께」 (V272, 사용자 참고: 붉은 기운 소용돌이·바닥 불 고리·허공의 리본 → 보라 혼불 + 붉은 부적 띠) =====
-   평소: 오라 안 혼불 소용돌이 + 바닥 혼례 진(셰이더). 피날레 60초마다: 어두워짐 → 부적 띠가 적을 묶음(기절, 보스 둔화) → 혼불 기둥 → 6.5초 터짐.
-   밸런스 유지(사용자 결정): 피날레 피해는 200×위력 한 번뿐. WebGL 없음·fxgQ 대체 단계면 평소 그림만. 히든이라 패치내역에 쓰지 않아요 */
-const SWC={FIN:60,D:200};
+/* ===== 💒 영혼결혼식 피날레 「죽어서도 함께」 (V272, 사용자 기획) =====
+   평소 연출은 그대로(셰이더 없음). 60초마다: 어두워짐 → 발밑에서 붉은 균열이 퍼지며 지옥이 열림 → 쿼터뷰(y×.62) 회오리 돔 + 부적·유리 조각 →
+   영혼들이 가운데로 빨려 들어와 갇혀 빠르게 돎 → 6.5초 펑 → 회오리가 풀리며 바깥으로 흩어짐.
+   밸런스 유지(사용자 결정): 피해는 200×위력 한 번, 묶기 없음. WebGL 없음·fxgQ 대체 단계면 균열·조각·영혼만. 히든이라 패치내역에 쓰지 않아요 */
+const SWC={FIN:60,D:200,YS:.62};
 let SWS;function swShader(){if(SWS!==undefined)return SWS;SWS=null;try{const cv=document.createElement('canvas');cv.width=480;cv.height=270;const gl=cv.getContext('webgl',{premultipliedAlpha:true,preserveDrawingBuffer:true,antialias:false});if(!gl)return null;
-  const FS='precision highp float;uniform vec2 res,vw,c;uniform float t,R,amp,vor,ring,dome,sp,dw;'+
-  'float h(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}float vn(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(h(i),h(i+vec2(1,0)),f.x),mix(h(i+vec2(0,1)),h(i+vec2(1,1)),f.x),f.y);}'+
-  'float fbm(vec2 p){float s=0.,a=.5;for(int i=0;i<4;i++){s+=a*vn(p);p*=2.03;a*=.5;}return s;}'+
-  'vec3 ramp(float x){vec3 k=mix(vec3(.18,.02,.35),vec3(.55,.15,1.),smoothstep(0.,.4,x));k=mix(k,vec3(.78,.3,1.),smoothstep(.4,.75,x));k=mix(k,vec3(.95,.88,1.),smoothstep(.8,1.,x));return k*x;}'+
-  'void main(){vec2 uv=gl_FragCoord.xy/res;uv.y=1.-uv.y;vec2 q=uv*vw-c;vec3 o=vec3(0.);'+
-  'if(ring>0.||amp>0.){vec2 f=vec2(q.x,q.y/.6);float e=length(f),an=atan(f.y,f.x);'+
-  'float s1=sin(an),c1=cos(an);float rn=fbm(vec2(c1*2.4+t*.9,s1*2.4-t*1.3)+e*.02);'+
-  'float rg=exp(-pow((e-R)/(R*.09+2.),2.))*(.35+1.1*rn)*ring;o+=ramp(clamp(rg,0.,1.));'+
-  'o+=vec3(1.,.12,.15)*exp(-pow((e-R*1.07)/(R*.05+1.5),2.))*pow(fbm(vec2(c1*5.-t*1.1,s1*5.+t*.8)),3.)*2.4*ring;'+
-  'float tw=log(e+8.)*2.2-t*1.6;vec2 sw=vec2(cos(an*2.+tw),sin(an*2.+tw))*1.6;float sp=fbm(sw+vec2(e*.03,-t*.5));'+
-  'float ins=smoothstep(R*1.02,R*.3,e)*smoothstep(R*.06,R*.28,e);o+=ramp(clamp(ins*smoothstep(.45,.8,sp)*amp,0.,1.))*.9;}'+
-  'if(vor>0.){float hg=-q.y;float hh=vw.y*.78*vor;float wv=R*(.28+.55*clamp(hg/max(hh,1.),0.,1.))*(.8+.4*vor);'+
-  'float tx=sin(hg*.05-t*7.)*wv*.45+sin(hg*.021+t*3.)*wv*.25;float bx=abs(q.x-tx);float n2=fbm(vec2(q.x*.03+t*.4,hg*.02-t*3.));'+
-  'float cm=smoothstep(wv,wv*.15,bx+(n2-.5)*wv*.8)*smoothstep(-10.,20.,hg)*smoothstep(hh,hh*.4,hg);'+
-  'float cr=smoothstep(wv*.3,0.,bx)*smoothstep(hh*.9,0.,hg)*step(0.,hg);'+
-  'o+=ramp(clamp(cm*(.5+.8*n2),0.,1.))*vor+vec3(1.,.85,1.)*cr*.55*vor+vec3(.5,.1,.9)*exp(-length(q*vec2(1.,.6))/(R*1.6))*.35*vor;}'+
-  'if(dome>0.){vec2 d=vec2(q.x/dw,(dw*.28+6.-q.y)/(dw*.8));float rr=dot(d,d);float m=smoothstep(1.,.78,rr)*smoothstep(-.1,.03,d.y);float wd=sqrt(max(1.-d.y*d.y,.03));float ph=asin(clamp(d.x/wd,-1.,1.));'+
-  'float a1=ph+sp*(1.+.5*d.y),a2=-ph+sp*(1.+.5*d.y)+2.;float s1=smoothstep(.5,.9,vn(vec2(a1*1.3,d.y*11.+a1*.9)));float s2=smoothstep(.58,.92,vn(vec2(a2*1.3,d.y*9.-a2*.7+5.)));'+
-  'vec3 dc=vec3(.3,.1,.7)*.3+mix(vec3(.6,.2,1.),vec3(1.,.4,.85),s1)*s1+vec3(1.)*pow(s1,5.)*.8+mix(vec3(.45,.15,.9),vec3(.9,.35,.9),s2)*s2*.55;'+
-  'o+=dc*m*dome*(.75+.25*smoothstep(.2,1.,rr));}'+
-  'gl_FragColor=vec4(o,1.);}';
+  const FS='precision highp float;uniform vec2 res,vw,c;uniform float dw,dome,sp,un;'+
+  'void main(){vec2 uv=gl_FragCoord.xy/res;uv.y=1.-uv.y;vec2 q=uv*vw-c;vec3 o=vec3(0.);float grow=(1.+1.5*un)*(.35+.65*dome);'+
+  'for(int i=0;i<8;i++){float fi=float(i)/7.;float r=dw*sqrt(1.-fi*fi*.85)*grow;float hh=dw*.62*fi*(1.-.5*un);'+
+  'vec2 f=vec2(q.x,(q.y+hh)/.62);float e=length(f),an=atan(f.y,f.x);float w=dw*(.04+.02*sin(fi*9.))*(1.-.45*un);float band=exp(-pow((e-r)/w,2.));'+
+  'float ph=an*2.+sp*(1.+.35*fi)+fi*5.3;float arc=smoothstep(.1,.95,sin(ph))*(.55+.45*sin(an*3.-sp*1.7+fi*11.));arc*=mix(1.,smoothstep(.2,.9,sin(ph*.5+1.)),un);'+
+  'vec3 cc=mix(vec3(.5,.18,1.),vec3(1.,.38,.85),.5+.5*sin(fi*7.+1.));o+=(cc*band*arc*1.35+vec3(1.)*pow(band*arc,3.)*.9+cc*band*.1)*(1.-.35*fi);}'+
+  'o+=vec3(.3,.08,.6)*exp(-length(vec2(q.x,q.y/.62))/(dw*.7))*.3;gl_FragColor=vec4(o*dome*pow(1.-un,1.3),1.);}';
   const sh=(tp,src)=>{const x=gl.createShader(tp);gl.shaderSource(x,src);gl.compileShader(x);if(!gl.getShaderParameter(x,gl.COMPILE_STATUS))throw 0;return x};
   const pg=gl.createProgram();gl.attachShader(pg,sh(gl.VERTEX_SHADER,'attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}'));gl.attachShader(pg,sh(gl.FRAGMENT_SHADER,FS));gl.linkProgram(pg);if(!gl.getProgramParameter(pg,gl.LINK_STATUS))return null;gl.useProgram(pg);
   gl.bindBuffer(gl.ARRAY_BUFFER,gl.createBuffer());gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);const lo=gl.getAttribLocation(pg,'p');gl.enableVertexAttribArray(lo);gl.vertexAttribPointer(lo,2,gl.FLOAT,false,0,0);
-  const U={};['res','vw','c','t','R','amp','vor','ring','dome','sp','dw'].forEach(k=>U[k]=gl.getUniformLocation(pg,k));
+  const U={};['res','vw','c','dw','dome','sp','un'].forEach(k=>U[k]=gl.getUniformLocation(pg,k));
   SWS={draw(o){const cw=Math.min(480,Math.ceil(VW/2)),chh=Math.max(1,Math.round(cw*VH/VW));if(cv.width!==cw||cv.height!==chh){cv.width=cw;cv.height=chh}gl.viewport(0,0,cw,chh);
-    gl.uniform2f(U.res,cw,chh);gl.uniform2f(U.vw,VW,VH);gl.uniform2f(U.c,VW/2,VH/2+6);gl.uniform1f(U.t,G.t);gl.uniform1f(U.R,o.R);gl.uniform1f(U.amp,o.amp||0);gl.uniform1f(U.vor,o.vor||0);gl.uniform1f(U.ring,o.ring||0);gl.uniform1f(U.dome,o.dome||0);gl.uniform1f(U.sp,o.sp||0);gl.uniform1f(U.dw,o.dw||1);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
+    gl.uniform2f(U.res,cw,chh);gl.uniform2f(U.vw,VW,VH);gl.uniform2f(U.c,VW/2,VH/2+10);gl.uniform1f(U.dw,o.dw);gl.uniform1f(U.dome,o.dome);gl.uniform1f(U.sp,o.sp);gl.uniform1f(U.un,o.un);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
     const p=G.p;ctx.save();ctx.globalCompositeOperation='lighter';ctx.imageSmoothingEnabled=true;ctx.drawImage(cv,p.x-VW/2,p.y-VH/2,VW,VH);ctx.restore()}}}catch(_){SWS=null}return SWS}
 const swEz=x=>{x=Math.max(0,Math.min(1,x));return x*x*(3-2*x)};
-function swFinTick(st,dt){const F=st.fin,T=F.t+=dt,p=G.p,S=G.S;if(F.fl>0)F.fl-=dt;F.w=T<5.5?2+T*1.3:15;F.sp=(F.sp||0)+dt*F.w;
-  if(T>=1.2&&!F.rb){F.rb=G.enemies.filter(hxVis).sort((a,b)=>(((b.boss||b.elite)?1:0)-((a.boss||a.elite)?1:0))||(((a.x-p.x)**2+(a.y-p.y)**2)-((b.x-p.x)**2+(b.y-p.y)**2))).slice(0,14).map((e,i)=>({e,ph:rnd(0,6.283),s:Math.random()<.5?1:-1,i}));if(!G.bot)SND.p('paper')}
-  if(F.rb&&T>=2&&T<6.5)for(const r of F.rb){const e=r.e;if(e.dead)continue;if(e.boss)e.slow=Math.max(e.slow||0,.5);else{e.stun=Math.max(e.stun||0,.15);e.kx=0;e.ky=0}}
+const swDome=T=>T<1.6?0:swEz((T-1.6)/1.2),swUn=T=>T<6.5?0:Math.min(1,(T-6.5)/1.8);
+function swFinTick(st,dt){const F=st.fin,T=F.t+=dt,p=G.p,S=G.S;if(F.fl>0)F.fl-=dt;F.w=T<5.5?2+T*1.3:T<6.5?15:15*(1-.8*swUn(T));F.sp=(F.sp||0)+dt*F.w;
+  if(T>=.5&&!F.cr){F.cr=[];const L=Math.max(VW,VH)*.5;for(let i=0;i<9;i++){let a=i/9*6.283+rnd(-.2,.2),x=0,y=0;const P=[0,0],n=11;for(let j=0;j<n;j++){a+=rnd(-.5,.5);x+=Math.cos(a)*L/n;y+=Math.sin(a)*L/n;P.push(x,y*SWC.YS);
+      if(j>2&&Math.random()<.3){let ba=a+(Math.random()<.5?1:-1)*rnd(.6,1.1),bx=x,by=y;const B=[bx,by*SWC.YS];for(let q=0;q<4;q++){ba+=rnd(-.4,.4);bx+=Math.cos(ba)*L/n*.7;by+=Math.sin(ba)*L/n*.7;B.push(bx,by*SWC.YS)}F.cr.push({P:B,d:.05*i+j/n*.9,br:1})}}F.cr.push({P,d:.05*i,br:0})}if(!G.bot){SND.p('boom');G.shk=Math.max(G.shk||0,.3)}}
+  if(F.cr&&!G.bot&&T<6.5&&Math.random()<.6){const c=pick(F.cr),j=(Math.random()*(c.P.length/2))|0;px(p.x+c.P[j*2],p.y+10+c.P[j*2+1],rnd(-12,12),-rnd(40,110),rnd(.5,1),pick(['#ff2030','#ff7a4a','#ffd08a']),2,1,1)}
   if(T>=5.3&&!F.say){F.say=1;if(!G.bot)G.texts.push({x:p.x,y:p.y-86,v:'죽어서도 함께하시겠습니까?',life:2.2,big:1,col:'#e6c4ff'})}
-  if(T>=6.5&&!F.boom){F.boom=1;F.bt=G.t;F.fl=.45;for(const e of G.enemies.filter(hxVis))hurt(e,SWC.D*S.might*(e.boss?.5:1),'soulwed',{kb:e.boss?0:10});
-    if(!G.bot){for(const r of F.rb||[])if(!r.e.dead)sparks(r.e.x,r.e.y,10,['#ff2a3a','#ffd87a','#c07bff'],220,.5,2);sparks(p.x,p.y-10,40,['#ffffff','#e6c4ff','#ff3fd2'],380,.6,3);SND.p('boom');SND.p('evo');G.shk=Math.max(G.shk||0,.5)}}
-  if(T>9)st.fin=null}
-// 바닥층: 어둠 + 혼불 소용돌이 + 혼례 진
-function swSoul(w){if(G.bot)return;const st=w.st,F=st.fin,p=G.p,R0=st.R||100;let al=0,grow=1;
-  if(F){const T=F.t;al=Math.min(1,T/1.2)*(T>7.8?Math.max(0,1-(T-7.8)/1.2):1);grow=1+.6*swEz(T/2)*(T>6.5?Math.max(0,1-(T-6.5)/1.5):1);ctx.save();ctx.globalAlpha=.58*al;ctx.fillStyle='#12041f';ctx.fillRect(p.x-VW/2-20,p.y-VH/2-20,VW+40,VH+40);ctx.restore()}
-  let q=.5;try{q=fxgQ()}catch(_){}if(q<=0)return;const S=swShader();if(S)S.draw({R:R0*grow,amp:.75+.6*al,ring:1})}
-function swRibPaint(g,st,F,k,col,tag){const p=G.p,T=F.t,t=G.t,out=F.boom?Math.max(0,1-(G.t-F.bt)/.5):1;if(out<=0)return;g.lineCap='round';g.lineJoin='round';
-  for(const r of F.rb||[]){const e=r.e;if(e.dead)continue;const pr=swEz((T-1.2-r.i*.04)/.6);if(pr<=0)continue;const x0=p.x,y0=p.y-10,x1=e.x,y1=e.y,dx=x1-x0,dy=y1-y0,d=Math.hypot(dx,dy)||1,nx=-dy/d,ny=dx/d,N=18,m=Math.ceil(N*pr);
-    g.strokeStyle=col;g.lineWidth=3.2*k;g.globalAlpha=out;g.beginPath();const P=[];for(let j=0;j<=m;j++){const u=j/N,wv=Math.sin(u*3.1416)*(Math.sin(u*7+t*4+r.ph)*14+r.s*Math.min(60,d*.22)*Math.sin(t*1.3+r.ph)),x=x0+dx*u+nx*wv,y=y0+dy*u+ny*wv-Math.sin(u*3.1416)*18;P.push(x,y);j?g.lineTo(x,y):g.moveTo(x,y)}g.stroke();
-    if(tag){g.fillStyle=tag;for(let j=3;j<P.length/2;j+=4){const x=P[j*2],y=P[j*2+1];g.globalAlpha=out;g.fillRect(x-2.5*k,y,5*k,9*k)}}
-    if(pr>=1){g.globalAlpha=out;g.lineWidth=2.4*k;g.beginPath();g.ellipse(e.x,e.y,(e.r||8)+6,((e.r||8)+6)*.5,0,0,6.283);g.stroke()}}
+  if(T>=6.5&&!F.boom){F.boom=1;F.bt=G.t;F.fl=.4;for(const e of G.enemies.filter(hxVis))hurt(e,SWC.D*S.might*(e.boss?.5:1),'soulwed',{kb:e.boss?0:10});
+    if(!G.bot){sparks(p.x,p.y-10,40,['#ffffff','#e6c4ff','#ff3fd2'],380,.6,3);SND.p('boom');SND.p('evo');G.shk=Math.max(G.shk||0,.5)}}
+  if(T>8.6)st.fin=null}
+// 지옥 균열 (바닥, 쿼터뷰)
+function swHellPaint(g,F,k,mask){if(!F.cr)return;const p=G.p,T=F.t,out=Math.pow(1-swUn(T),1.5),open=.4+.6*swEz((T-1)/2),fk=.82+.18*Math.sin(G.t*23),ox=p.x,oy=p.y+10;if(out<=0)return;g.lineCap='round';g.lineJoin='round';
+  if(!mask){g.globalAlpha=.3*out*swEz((T-.5)/1.5);const R=150*open,gr=g.createRadialGradient(ox,oy,0,ox,oy,R*1.6);gr.addColorStop(0,'rgba(255,40,50,1)');gr.addColorStop(1,'rgba(120,0,10,0)');g.fillStyle=gr;g.save();g.translate(ox,oy);g.scale(1,SWC.YS);g.translate(-ox,-oy);g.beginPath();g.arc(ox,oy,R*1.6,0,6.283);g.fill();g.restore()}
+  const lay=mask?[['#ff1020',6*k]]:[['#2a0006',10*open*k],['#ff2030',4.2*open*k],['#ffc0a0',1.3*k]];
+  for(const [col,lw] of lay){g.strokeStyle=col;for(const c of F.cr){const pr=swEz((T-.5-c.d)/.9);if(pr<=0)continue;const n=c.P.length/2,m=(n-1)*pr;g.globalAlpha=out*(col==='#2a0006'?.9:fk);g.lineWidth=lw*(c.br?.6:1);g.beginPath();g.moveTo(ox+c.P[0],oy+c.P[1]);for(let j=1;j<n;j++){if(j>m+1)break;const u=Math.min(1,m-(j-1));g.lineTo(ox+c.P[j*2-2]+(c.P[j*2]-c.P[j*2-2])*u,oy+c.P[j*2-1]+(c.P[j*2+1]-c.P[j*2-1])*u)}g.stroke()}}
   g.globalAlpha=1}
-// 회오리 돔 (사용자 참고 그림: 보라·분홍 빛줄기가 감아 도는 돔) 위를 도는 부적·유리 조각 + 가운데로 빨려 들어가 갇혀 도는 영혼들
-const swDome=T=>T<1.2?0:T<6.5?swEz((T-1.2)/1.3):Math.max(0,1-(T-6.5)/.25);
-function swSwirlPaint(g,st,F,k,mask){const p=G.p,T=F.t,dm=swDome(T);if(dm<=0)return;const R=st.R||100,DW=R*3.6*(.6+.4*dm),DH=DW*.8,gy=p.y+12+DW*.28,sp=F.sp||0,w=F.w||2;
-  for(let i=0;i<96;i++){const y=glH(i,1)*.92,wd=Math.sqrt(1-y*y),rad=DW*wd*(.45+.55*glH(i,2)),a=glH(i,3)*6.283+sp*(1+.5*y)*(.7+.6*glH(i,4)),dp=Math.sin(a),x=p.x+Math.cos(a)*rad,yy=gy-y*DH+dp*rad*.16,nr=dp*.5+.5,red=i%3===0;
-    g.globalAlpha=dm*(.4+.6*nr);g.fillStyle=mask?(red?'#ff2030':'#a060ff'):(red?'#ff3a4a':i%3===1?'#f6eeff':'#d9a8ff');const s=(red?5:3.4)*k*(.7+.5*nr),len=s*(1.2+Math.min(5,w*.3));g.save();g.translate(x,yy);g.rotate(-dp*.22);g.fillRect(-len/2,-s*(red?.55:.3),len,s*(red?1.1:.6));g.restore()}
+// 부적·유리 조각 + 영혼 (쿼터뷰 타원 궤도)
+function swSwirlPaint(g,st,F,k,mask){const p=G.p,T=F.t,dm=swDome(T),un=swUn(T),al0=dm*Math.pow(1-un,1.3);if(al0<=0)return;const DW=(st.R||100)*3.2,gy=p.y+10,sp=F.sp||0,w=F.w||2,grow=(1+1.5*un)*(.35+.65*dm),YS=SWC.YS;
+  for(let i=0;i<96;i++){const fi=glH(i,1)*.95,r=DW*Math.sqrt(1-fi*fi*.85)*(.5+.5*glH(i,2))*grow,hh=DW*.62*fi*(1-.5*un),a=glH(i,3)*6.283+sp*(1+.35*fi)*(.7+.6*glH(i,4)),ca=Math.cos(a),sa=Math.sin(a),x=p.x+ca*r,y=gy+sa*r*YS-hh,nr=sa*.5+.5,red=i%3===0;
+    g.globalAlpha=al0*(.45+.55*nr);g.fillStyle=mask?(red?'#ff2030':'#a060ff'):(red?'#ff3a4a':i%3===1?'#f6eeff':'#d9a8ff');const s=(red?5:3.4)*k*(.75+.4*nr),len=s*(1.2+Math.min(5,w*.3));g.save();g.translate(x,y);g.rotate(Math.atan2(ca*YS,-sa));g.fillRect(-len/2,-s*(red?.55:.3),len,s*(red?1.1:.6));g.restore()}
   const k2=swEz((T-2)/3.5),n=14;g.lineCap='round';
-  for(let i=0;i<n;i++){const r0=DW*(1-k2)*(.55+.45*glH(i,7))+16+5*(i%3),yb=.12+.45*glH(i,8)*(1-k2)+.12*k2,a0=i*6.283/n+sp*(1.1+1.5*k2);
-    const P=(a)=>{const dp=Math.sin(a);return[p.x+Math.cos(a)*r0,gy-yb*DH+dp*r0*.2,dp]};
-    g.strokeStyle=mask?'#ff4a9a':'#ffd0ea';for(let j=0;j<9;j++){const A=P(a0-j*.07*(1+2.5*k2)),B=P(a0-(j+1)*.07*(1+2.5*k2));g.globalAlpha=dm*(1-j/9)*.8;g.lineWidth=(4-j*.35)*k;g.beginPath();g.moveTo(A[0],A[1]);g.lineTo(B[0],B[1]);g.stroke()}
-    const H=P(a0);if(mask){g.globalAlpha=dm;g.fillStyle='#d080ff';g.beginPath();g.arc(H[0],H[1]-6,7*k,0,6.283);g.fill()}else{g.globalAlpha=1;hxFrame('ghost',((G.t*8+i)|0)%4,H[0],H[1]-8,.6,dm*(.65+.35*(H[2]*.5+.5)),Math.cos(a0+1.57)<0)}}
+  for(let i=0;i<n;i++){const r0=(DW*(1-k2)*(.55+.45*glH(i,7))+18+5*(i%3))+DW*1.6*un*(.6+.8*glH(i,9)),hh=DW*(.08+.3*glH(i,8)*(1-k2))*(1-.6*un),a0=i*6.283/n+sp*(1.1+1.5*k2);
+    const P=a=>[p.x+Math.cos(a)*r0,gy+Math.sin(a)*r0*YS-hh,Math.sin(a)];const st2=.07*(1+2.5*k2)*(1-.6*un);
+    g.strokeStyle=mask?'#ff4a9a':'#ffd0ea';for(let j=0;j<9;j++){const A=P(a0-j*st2),B=P(a0-(j+1)*st2);g.globalAlpha=al0*(1-j/9)*.8;g.lineWidth=(4-j*.35)*k;g.beginPath();g.moveTo(A[0],A[1]);g.lineTo(B[0],B[1]);g.stroke()}
+    const H=P(a0);if(mask){g.globalAlpha=al0;g.fillStyle='#d080ff';g.beginPath();g.arc(H[0],H[1]-6,7*k,0,6.283);g.fill()}else{g.globalAlpha=1;hxFrame('ghost',((G.t*8+i)|0)%4,H[0],H[1]-8,.6,al0*(.65+.35*(H[2]*.5+.5)),Math.sin(a0)>0)}}
   g.globalAlpha=1}
-// 위층: 회오리 돔 + 부적 띠 + 조각·영혼 회오리 + 섬광 + 굴절
+// 바닥층: 어둠 + 지옥 균열
+function swSoul(w){const st=w.st,F=st.fin;if(!F||G.bot)return;const p=G.p,T=F.t,al=Math.min(1,T/1.2)*(T>7.3?Math.max(0,1-(T-7.3)/1.3):1);
+  ctx.save();ctx.globalAlpha=.6*al;ctx.fillStyle='#12041f';ctx.fillRect(p.x-VW/2-20,p.y-VH/2-20,VW+40,VH+40);ctx.restore();
+  ctx.save();swHellPaint(ctx,F,1,0);ctx.restore()}
+// 위층: 회오리 돔 + 조각·영혼 + 빛 번짐 + 섬광 + 굴절
 function swFinTop(st){const F=st.fin;if(!F||G.bot)return;const p=G.p,T=F.t,X0=p.x-VW/2,Y0=p.y-VH/2;let q=.5;try{q=fxgQ()}catch(_){}
-  const dm=swDome(T);
-  if(q>0&&dm>0){const S=swShader();if(S)S.draw({R:(st.R||100),dome:dm,sp:F.sp||0,dw:(st.R||100)*3.6*(.6+.4*dm)})}
-  ctx.save();ctx.globalCompositeOperation='source-over';swRibPaint(ctx,st,F,1,'#7a0014',null);swRibPaint(ctx,st,F,.62,'#ff2a3a','#ffd87a');ctx.restore();
+  const dm=swDome(T),un=swUn(T);
+  if(q>0&&dm>0&&un<1){const S=swShader();if(S)S.draw({dw:(st.R||100)*3.2,dome:dm,sp:F.sp||0,un})}
   swSwirlPaint(ctx,st,F,1,0);
   if(q>0){const L=stLightInit();if(L){const cw=Math.min(480,Math.ceil(VW/2)),chh=Math.max(1,Math.round(cw*VH/VW)),k=cw/VW;for(const cc of [L.cv,L.M])if(cc.width!==cw||cc.height!==chh){cc.width=cw;cc.height=chh}
-    const m=L.M.getContext('2d');m.setTransform(1,0,0,1,0,0);m.globalAlpha=1;m.globalCompositeOperation='source-over';m.fillStyle='#000';m.fillRect(0,0,cw,chh);m.setTransform(k,0,0,k,-X0*k,-Y0*k);m.globalCompositeOperation='lighter';swRibPaint(m,st,F,1.3,'#ff2030',null);swSwirlPaint(m,st,F,1.3,1);m.globalAlpha=1;
+    const m=L.M.getContext('2d');m.setTransform(1,0,0,1,0,0);m.globalAlpha=1;m.globalCompositeOperation='source-over';m.fillStyle='#000';m.fillRect(0,0,cw,chh);m.setTransform(k,0,0,k,-X0*k,-Y0*k);m.globalCompositeOperation='lighter';swHellPaint(m,F,1.2,1);swSwirlPaint(m,st,F,1.3,1);m.globalAlpha=1;
     const sc=L.Sm.getContext('2d');sc.globalCompositeOperation='source-over';sc.fillStyle='#000';sc.fillRect(0,0,64,36);sc.globalCompositeOperation='lighter';sc.filter='blur(4px)';for(let i=0;i<3;i++)sc.drawImage(L.M,0,0,64,36);sc.filter='none';
     const gl=L.gl,U=L.U;gl.viewport(0,0,cw,chh);L.up(0,L.M);L.up(1,L.Sm);gl.uniform2f(U.res,cw,chh);gl.uniform2f(U.vw,VW,VH);gl.uniform2f(U.off,0,0);gl.uniform1f(U.t,G.t);gl.uniform1f(U.neb,0);gl.uniform1f(U.glo,.8);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
     ctx.save();ctx.globalCompositeOperation='lighter';ctx.imageSmoothingEnabled=true;ctx.drawImage(L.cv,X0,Y0,VW,VH);ctx.restore()}}
-  if(F.fl>0){ctx.save();ctx.globalAlpha=Math.min(.6,F.fl/.45*.6);ctx.fillStyle='#f0d8ff';ctx.fillRect(X0,Y0,VW,VH);ctx.restore()}
+  if(F.fl>0){ctx.save();ctx.globalAlpha=Math.min(.55,F.fl/.4*.55);ctx.fillStyle='#f0d8ff';ctx.fillRect(X0,Y0,VW,VH);ctx.restore()}
   if(q>0&&F.boom){const v=(G.t-F.bt)/1.2;if(v<1){const D=dmShaderInit();if(D){const cvs=ctx.canvas,sw=Math.min(960,cvs.width),shh=Math.max(1,Math.round(sw*cvs.height/cvs.width));if(D.src.width!==sw||D.src.height!==shh){D.src.width=sw;D.src.height=shh;D.cv.width=sw;D.cv.height=shh}
     D.src.getContext('2d').drawImage(cvs,0,0,sw,shh);const gl=D.gl,U=D.U;gl.viewport(0,0,sw,shh);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,D.src);
     gl.uniform2f(U.res,sw,shh);gl.uniform2f(U.vw,VW,VH);gl.uniform2f(U.c,VW/2,VH/2);gl.uniform1f(U.t,G.t);gl.uniform1f(U.R,Math.max(VW,VH)*.9*v);gl.uniform1f(U.amp,1-v);gl.uniform1f(U.imp,0);gl.uniform1f(U.heat,0);gl.uniform1f(U.asp,VW/VH);gl.uniform1f(U.tint,0);

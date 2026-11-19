@@ -5367,7 +5367,7 @@ let SWS;function swShader(){if(SWS!==undefined)return SWS;SWS=null;try{const cv=
     gl.uniform2f(U.res,cw,chh);gl.uniform2f(U.vw,VW,VH);gl.uniform2f(U.c,VW/2,VH/2+6);gl.uniform1f(U.t,G.t);gl.uniform1f(U.R,o.R);gl.uniform1f(U.amp,o.amp||0);gl.uniform1f(U.vor,o.vor||0);gl.uniform1f(U.ring,o.ring||0);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
     const p=G.p;ctx.save();ctx.globalCompositeOperation='lighter';ctx.imageSmoothingEnabled=true;ctx.drawImage(cv,p.x-VW/2,p.y-VH/2,VW,VH);ctx.restore()}}}catch(_){SWS=null}return SWS}
 const swEz=x=>{x=Math.max(0,Math.min(1,x));return x*x*(3-2*x)};
-function swFinTick(st,dt){const F=st.fin,T=F.t+=dt,p=G.p,S=G.S;if(F.fl>0)F.fl-=dt;
+function swFinTick(st,dt){const F=st.fin,T=F.t+=dt,p=G.p,S=G.S;if(F.fl>0)F.fl-=dt;swRainTick(F,dt);
   if(T>=1.2&&!F.rb){F.rb=G.enemies.filter(hxVis).sort((a,b)=>(((b.boss||b.elite)?1:0)-((a.boss||a.elite)?1:0))||(((a.x-p.x)**2+(a.y-p.y)**2)-((b.x-p.x)**2+(b.y-p.y)**2))).slice(0,14).map((e,i)=>({e,ph:rnd(0,6.283),s:Math.random()<.5?1:-1,i}));if(!G.bot)SND.p('paper')}
   if(F.rb&&T>=2&&T<6.5)for(const r of F.rb){const e=r.e;if(e.dead)continue;if(e.boss)e.slow=Math.max(e.slow||0,.5);else{e.stun=Math.max(e.stun||0,.15);e.kx=0;e.ky=0}}
   if(T>=5.3&&!F.say){F.say=1;if(!G.bot)G.texts.push({x:p.x,y:p.y-86,v:'죽어서도 함께하시겠습니까?',life:2.2,big:1,col:'#e6c4ff'})}
@@ -5386,13 +5386,30 @@ function swRibPaint(g,st,F,k,col,tag){const p=G.p,T=F.t,t=G.t,out=F.boom?Math.ma
   // 허공을 감아 오르는 부적 띠 4줄
   const vo=T<2?0:T<6.5?swEz((T-2)/2.5):out,R=(st.R||100);if(vo>0){g.strokeStyle=col;g.lineWidth=3*k;for(let i=0;i<4;i++){g.globalAlpha=out*.9*vo;g.beginPath();for(let j=0;j<=26;j++){const u=j/26,a=t*2.4+i*1.5708+u*5.5,rr=R*(.5+.75*u),x=p.x+Math.cos(a)*rr,y=p.y-8+Math.sin(a)*rr*.38-u*VH*.5*vo;j?g.lineTo(x,y):g.moveTo(x,y)}g.stroke()}}
   g.globalAlpha=1}
-// 위층: 혼불 기둥 + 부적 띠 + 섬광 + 굴절
+// 영혼 칼비 (사용자 참고 그림: 진분홍·흰 심 네온, 십자 반짝임, 반투명 분홍 구슬) — 연출만, 피해 없음
+function swRainTick(F,dt){if(G.bot)return;const T=F.t,p=G.p;F.sb=F.sb||[];F.ob=F.ob||[];if(F.sd===undefined){F.sd=Math.random()<.5?1:-1;F.sn=0}
+  if(T>=2&&T<6.4){F.sn+=dt*18;while(F.sn>=1){F.sn--;if(F.sb.length>70)break;let tx,ty;const al=(F.rb||[]).filter(r=>!r.e.dead);if(al.length&&Math.random()<.55){const e=pick(al).e;tx=e.x+rnd(-10,10);ty=e.y+rnd(-8,8)}else{tx=p.x+rnd(-.5,.5)*VW;ty=p.y+rnd(-.45,.48)*VH}
+    const a=1.12+rnd(-.16,.16),dx=Math.cos(a)*F.sd,dy=Math.sin(a),L=rnd(520,820);F.sb.push({tx,ty,dx,dy,L,t:0,T:L/1700,z:rnd(.7,1.25)})}}
+  for(const b of F.sb){b.t+=dt;if(b.t>=b.T&&!b.hit){b.hit=1;if(F.ob.length<50)F.ob.push({x:b.tx,y:b.ty,t:0,z:b.z,s:Math.random()*90})}}
+  F.sb=F.sb.filter(b=>b.t<b.T+.18);for(const o of F.ob)o.t+=dt;F.ob=F.ob.filter(o=>o.t<.55)}
+function swStar(g,x,y,r,a){g.globalAlpha=a;g.beginPath();g.moveTo(x-r,y);g.lineTo(x-r*.12,y-r*.12);g.lineTo(x,y-r*1.25);g.lineTo(x+r*.12,y-r*.12);g.lineTo(x+r,y);g.lineTo(x+r*.12,y+r*.12);g.lineTo(x,y+r*1.25);g.lineTo(x-r*.12,y+r*.12);g.closePath();g.fill()}
+function swRainPaint(g,F,k,mask){if(!F.sb)return;g.lineCap='round';
+  for(const b of F.sb){const u=Math.min(1,b.t/b.T),fade=b.t>b.T?Math.max(0,1-(b.t-b.T)/.18):1,d=b.L*(1-u),hx=b.tx-b.dx*d,hy=b.ty-b.dy*d,tl=Math.min(210*b.z,b.L*u+20)*(b.t>b.T?fade:1),x2=hx-b.dx*tl,y2=hy-b.dy*tl;
+    const gr=g.createLinearGradient(hx,hy,x2,y2);gr.addColorStop(0,mask?'#ff5a96':'rgba(255,70,130,.95)');gr.addColorStop(.5,mask?'#c0204a':'rgba(230,30,90,.5)');gr.addColorStop(1,'rgba(120,0,40,0)');g.strokeStyle=gr;g.globalAlpha=fade;g.lineWidth=7*b.z*k;g.beginPath();g.moveTo(hx,hy);g.lineTo(x2,y2);g.stroke();
+    if(!mask){const g2=g.createLinearGradient(hx,hy,x2,y2);g2.addColorStop(0,'#ffffff');g2.addColorStop(.6,'rgba(255,220,235,.6)');g2.addColorStop(1,'rgba(255,255,255,0)');g.strokeStyle=g2;g.lineWidth=2.2*b.z*k;g.beginPath();g.moveTo(hx,hy);g.lineTo(hx-b.dx*tl*.7,hy-b.dy*tl*.7);g.stroke();g.fillStyle='#ffffff';swStar(g,hx,hy,9*b.z,fade)}}
+  for(const o of F.ob){const u=o.t/.55,r=30*o.z*(.45+.55*Math.min(1,o.t/.12)),a=1-u;if(mask){g.globalAlpha=a;g.strokeStyle='#ff4a8a';g.lineWidth=5*k;g.beginPath();g.arc(o.x,o.y,r,0,6.283);g.stroke();g.globalAlpha=a*.5;g.fillStyle='#ff2a6a';g.beginPath();g.arc(o.x,o.y,r,0,6.283);g.fill();continue}
+    g.globalAlpha=a*.28;g.fillStyle='#ff5a8c';g.beginPath();g.arc(o.x,o.y,r,0,6.283);g.fill();g.globalAlpha=a;g.strokeStyle='#ffffff';g.lineWidth=2.2*(1-u*.5);g.beginPath();g.arc(o.x,o.y,r,0,6.283);g.stroke();
+    g.fillStyle='#ffffff';for(let i=0;i<7;i++){const an=glH(i,o.s)*6.283,rr=r*(.2+.7*glH(i+9,o.s)),z=1+1.4*glH(i+3,o.s);g.globalAlpha=a*(.5+.5*Math.sin(G.t*18+i));g.fillRect(o.x+Math.cos(an)*rr-z,o.y+Math.sin(an)*rr-z,z*2,z*2)}
+    if(u<.5)swStar(g,o.x,o.y,r*.9*(1-u),a)}
+  g.globalAlpha=1}
+// 위층: 혼불 기둥 + 부적 띠 + 영혼 칼비 + 섬광 + 굴절
 function swFinTop(st){const F=st.fin;if(!F||G.bot)return;const p=G.p,T=F.t,X0=p.x-VW/2,Y0=p.y-VH/2;let q=.5;try{q=fxgQ()}catch(_){}
   const vor=T<2?0:T<6.5?swEz((T-2)/3):Math.max(0,1-(T-6.5)/.6);
   if(q>0&&vor>0){const S=swShader();if(S)S.draw({R:(st.R||100),vor})}
   ctx.save();ctx.globalCompositeOperation='source-over';swRibPaint(ctx,st,F,1,'#7a0014',null);swRibPaint(ctx,st,F,.62,'#ff2a3a','#ffd87a');ctx.restore();
+  ctx.save();ctx.globalCompositeOperation='lighter';swRainPaint(ctx,F,1,0);ctx.restore();
   if(q>0){const L=stLightInit();if(L){const cw=Math.min(480,Math.ceil(VW/2)),chh=Math.max(1,Math.round(cw*VH/VW)),k=cw/VW;for(const cc of [L.cv,L.M])if(cc.width!==cw||cc.height!==chh){cc.width=cw;cc.height=chh}
-    const m=L.M.getContext('2d');m.setTransform(1,0,0,1,0,0);m.globalAlpha=1;m.globalCompositeOperation='source-over';m.fillStyle='#000';m.fillRect(0,0,cw,chh);m.setTransform(k,0,0,k,-X0*k,-Y0*k);m.globalCompositeOperation='lighter';swRibPaint(m,st,F,1.3,'#ff2030',null);m.globalAlpha=1;
+    const m=L.M.getContext('2d');m.setTransform(1,0,0,1,0,0);m.globalAlpha=1;m.globalCompositeOperation='source-over';m.fillStyle='#000';m.fillRect(0,0,cw,chh);m.setTransform(k,0,0,k,-X0*k,-Y0*k);m.globalCompositeOperation='lighter';swRibPaint(m,st,F,1.3,'#ff2030',null);swRainPaint(m,F,1.2,1);m.globalAlpha=1;
     const sc=L.Sm.getContext('2d');sc.globalCompositeOperation='source-over';sc.fillStyle='#000';sc.fillRect(0,0,64,36);sc.globalCompositeOperation='lighter';sc.filter='blur(4px)';for(let i=0;i<3;i++)sc.drawImage(L.M,0,0,64,36);sc.filter='none';
     const gl=L.gl,U=L.U;gl.viewport(0,0,cw,chh);L.up(0,L.M);L.up(1,L.Sm);gl.uniform2f(U.res,cw,chh);gl.uniform2f(U.vw,VW,VH);gl.uniform2f(U.off,0,0);gl.uniform1f(U.t,G.t);gl.uniform1f(U.neb,0);gl.uniform1f(U.glo,.8);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
     ctx.save();ctx.globalCompositeOperation='lighter';ctx.imageSmoothingEnabled=true;ctx.drawImage(L.cv,X0,Y0,VW,VH);ctx.restore()}}

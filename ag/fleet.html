@@ -523,7 +523,7 @@ function offs(m,g){const k=MI.k;if(g===0)return[0,0,0];
   if(g>=11){const q=TP[g-11],kk=sm(k/.4);return[0,(-1.75-q[1])*kk,0,kk*PI/2,1,q[0],q[1],q[2]]}
   if(g===4||g===5)return[0,0,(g===4?1:-1)*1.75*sm((k-.28)/.2)];if(g===2)return[0,rise,0,k>.97?ga:0];if(g===6)return[6.6*sm((k-.7)/.3),rise,0,k>.97?ga:0];return[0,0,0]}
  if(m.name==='미사일포탑'){const ga=window.__ga!==undefined?window.__ga:(k>.5?performance.now()/1000*.9:0);return g===1?[0,0,0,ga,0,0,0,0]:[0,0,0]}
- if(m.name==='게이트수리함'){if(g===1)return[0,-5.2*k,0];if(g>=2&&g<=5){const sx=g<4?1:-1,sz=g%2?-1:1;return[sx*.9*k,-2.3*k,sz*1.3*k]}return k>.5?[0,0,0]:null}
+ if(m.name==='게이트수리함'){if(g===1)return[0,-5.2*k,0];if(g>=2&&g<=5){const sx=g<4?1:-1,sz=g%2?-1:1,e=k*k*(3-2*k),dw=window.__dw;/* 11-20: 수리 팔이 접혀 있다가(앞뒤로 눕힘) 내려오며 세워지고, 수리 중엔 번갈아 흔들림(__dw) */return[sx*.9*k,-2.3*k,sz*1.3*k,sx*1.25*(1-e)+(dw!==undefined?Math.sin(dw+g*1.57)*.32:0),1,sx>0?3.4:-6.0,.3,sz*1.9]}return k>.5?[0,0,0]:null}
  return k>.5?[0,0,0]:null}
 const LD=nrm([-.55,.65,.55]),LX=nrm(crs([0,1,0],LD)),LY=crs(LD,LX);
 function scene(mode,t,F,vw_,vh_){gl.bindFramebuffer(gl.FRAMEBUFFER,F?F.fb:null);gl.viewport(0,0,vw_||w,vh_||h);gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.enable(gl.DEPTH_TEST);
@@ -574,7 +574,7 @@ act.onclick=()=>{const a=MODELS[MI.i].act;if(a.toggle){MI.K=MI.K?0:1;actLabel();
  if(a.stamp){$('stampT').textContent=a.stamp;stp.animate([{opacity:0,transform:'translate(-50%,-50%) scale(1.9)'},{opacity:1,transform:'translate(-50%,-50%) scale(1)',offset:.12},{opacity:1,transform:'translate(-50%,-50%) scale(1)',offset:.8},{opacity:0,transform:'translate(-50%,-50%) scale(1)'}],{duration:2300,easing:'ease-out',fill:'forwards'})}};
 pick(0);window.__pick=pick;
 /* 프레임 굽기: __bake({i,k,yaw,pitch,ga,zoom,size,only:[그룹…]|null,skip:[…]}) → 투명 배경 PNG dataURL */
-window.__bake=(o)=>{BAKE=true;MI.i=o.i;MI.k=MI.K=o.k;VW.yaw=o.yaw;VW.pitch=VW.tgt=o.pitch;VW.zoom=o.zoom||1;VW.push=0;pulse=o.pulse||0;window.__ga=o.ga||0;
+window.__bake=(o)=>{BAKE=true;MI.i=o.i;MI.k=MI.K=o.k;VW.yaw=o.yaw;VW.pitch=VW.tgt=o.pitch;VW.zoom=o.zoom||1;VW.push=0;pulse=o.pulse||0;window.__ga=o.ga||0;window.__dw=o.dw;
  ONLY=o.only?(g=>o.only.includes(g)):o.skip?(g=>!o.skip.includes(g)):null;LITE=false;w=h=glc.width=glc.height=o.size;dpr=1;
  sizeF(FC,w,h);sizeF(FN,w,h);sizeF(FS,1024,1024);HQ=o.hq?1:0;scene(3,o.t||0,FS,1024,1024);scene(2,o.t||0,FN);scene(0,o.t||0,FC);composite();let u;
  if(HQ){const oc=document.createElement('canvas');oc.width=oc.height=w;const ox=oc.getContext('2d');ox.drawImage(glc,0,0);scene(1,o.t||0,null);const gc2=document.createElement('canvas');gc2.width=gc2.height=w;gc2.getContext('2d').drawImage(glc,0,0);
@@ -582,6 +582,6 @@ window.__bake=(o)=>{BAKE=true;MI.i=o.i;MI.k=MI.K=o.k;VW.yaw=o.yaw;VW.pitch=VW.tg
  else u=glc.toDataURL('image/png');HQ=0;ONLY=null;return u};
 window.__proj=(o,pts)=>{const asp=1,fov=35*PI/180,tf=Math.tan(fov/2),dist=Math.max(17.5/tf,20/(tf*asp))/(o.zoom||1),R=mul(rx(o.pitch),ry(o.yaw)),m=MODELS[o.i],M=mul(tr(0,0,-dist),mul(R,mul(tr(0,m.cy*m.scale,0),scm(m.scale)))),P=persp(fov,asp,1,400),PM=mul(P,M);
  return pts.map(p=>{const v=[0,0,0,0];for(let r=0;r<4;r++)v[r]=PM[r]*p[0]+PM[4+r]*p[1]+PM[8+r]*p[2]+PM[12+r];return[(v[0]/v[3]*.5+.5)*o.size,(1-(v[1]/v[3]*.5+.5))*o.size]})};
-window.__bakeEnd=()=>{BAKE=false;window.__ga=undefined;fit()};window.__lite=setLite;window.__auto=AUTO;
+window.__bakeEnd=()=>{BAKE=false;window.__ga=undefined;window.__dw=undefined;fit()};window.__lite=setLite;window.__auto=AUTO;
 })();
 </script></body></html>

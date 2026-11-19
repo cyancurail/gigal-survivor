@@ -1430,7 +1430,7 @@ function newGame(ci,fancy,hard,hell,tw){try{FXG.lv=0;FXG.ema=0;FXG.n=0}catch(e){
      p:{x:0,y:0,hp:100,fx:1,fy:0,inv:0,walk:0,frame:0},spawnAcc:0,eliteT:45,bossIdx:0,swarms:[260,560,820,1040,1320,1560,1760],ult:null,ultReady:false,ultCd:0,energy:30,xpMul:1,xpMulT:0,
      stats:{dmg:0},unlockedNow:[]};
   recalc();G.p.hp=G.S.maxHp;pxClear();G.pcol=(CHAR[ci].bg.match(/#[0-9a-f]{6}/i)||['#ffffff'])[0];
-  addWeapon(CHAR[ci].w);
+  addWeapon(CHAR[ci].w);if(G.map==='su')suStart();
   G.ultReady=!!(fancy&&SAVE.ult[G.id])||G.id==='쥬은';
   if(G.tw)twSetup();
   {const mt=$('#modeTag'),k=G.tw?3:G.hell?2:G.hard?1:0;mt.className='modetag m'+k;mt.textContent=['보통 모드','🔥 어려움 모드','💀 헬 모드','🌙 트와일라잇'][k]+(fancy?' · 👗':'')+(G.map==='sangbong'?' · 🎡 상봉':G.map==='farm'?' · 🍅 장수':'')}
@@ -1481,7 +1481,7 @@ function kill(e,key){if(e.hunt)return;if((G.map==='mg'||G.map==='su')&&e.type&&e
   if(MPKILL&&MPKILL(e,key))return;e.dead=true;G.kills++;if(e.boss&&!G.bot)G.spB=(G.spB||0)+1;if(e.tal>G.t)swGuest(e);if(key==='soulwed')healP(.6);if(!G.bot)SND.p(e.boss?'bosskill':'kill');
   const xpv=e.xp;
   if(!G.tw){const gv=xpv*XPV*(G.hell?1.3:1);if(!(MPXP&&MPXP(gv)))G.gems.push({x:e.x,y:e.y,v:gv,big:xpv>=10})}
-  if(e.boss||e.elite){if(!(MPCHEST&&MPCHEST()))G.pickups.push({x:clamp(e.x+10,G.p.x-VW/2+40,G.p.x+VW/2-40),y:clamp(e.y,G.p.y-VH/2+50,G.p.y+VH/2-40),k:'chest'})}
+  if(e.boss||(e.elite&&!e.suEl)){if(!(MPCHEST&&MPCHEST()))G.pickups.push({x:clamp(e.x+10,G.p.x-VW/2+40,G.p.x+VW/2-40),y:clamp(e.y,G.p.y-VH/2+50,G.p.y+VH/2-40),k:'chest'})}
   else if(Math.random()<.008*(G.hard?HARD.heal:1)*(G.map==='farm'&&G.hard?3.5:1))G.pickups.push({x:e.x,y:e.y,k:'gukbap'});
   else if(Math.random()<.0025)G.pickups.push({x:e.x,y:e.y,k:'magnet'});
   if(key==='pillar'&&W('pillar')?.evo&&Math.random()<.08)G.pickups.push({x:e.x,y:e.y,k:'orb'});
@@ -1957,7 +1957,10 @@ function drawChestGuide(){const p=G.p;for(const k of G.pickups){if(k.k!=='chest'
    닫힌 정사각 광장(±SU.H) · 한가운데 궤도 엘리베이터(통과 불가) · 동서남북 게이트 4곳(아직 그림만) · 헬 전용.
    15분 압축: ET()×5/3(25분 곡선을 15분에) + 경험치 ×SU_XP. 적 = 장수 무수리 → 5분부터 인천 무수리 합류.
    아직 없음: 방향 웨이브·게이트 내구(③) · 우주선(④) · 보스(⑤) · 지원 기믹·함선(⑥) · 헥스터(⑦). SU_OPEN=0이면 테스트 페이지(__devAll)에서만 보임. */
-const SU_OPEN=0,SU_XP=1.7,SU_LEN=900;
+/* 11-19 사용자: 수원 = 물량전. 기본 무기 만렙+진화 상태로 레벨 1 시작, 평소 스폰 ×SU_SP(1.3과 1.5를 비교 중 — 테스트 콘솔 __suSp(1.5)), 시작 물량 = 다른 맵 5분대,
+   대군 ×1.5 + 엘리트(상자 없음, 경험치 평범, 게이트 판정에서 5마리 몫) 게이트당 6마리·10분 뒤 8마리, 동시 적 상한 PC 700 · 모바일 560, 경험치 ×1.3 */
+const SU_OPEN=0,SU_XP=1.3,SU_LEN=900;let SU_SP=1.3;window.__suSp=v=>{SU_SP=+v||1.3;return SU_SP};const suCap=()=>isPCDev()?700:560;
+function suStart(){const w=G.weapons[0];if(!w||!WP[w.k])return;w.lvl=8;const it=WP[w.k].evo;if(it&&IT[it]){G.items[it]=IT[it].max||5;if(!(WP[w.k].ju&&!(SAVE.juEvo||{})[w.k]))w.evo=true}recalc();G.p.hp=G.S.maxHp}
 function suU(){if(window.__devAll)return true;if(!SU_OPEN)return false;return !!(SAVE.suU||(SAVE.ach&&SAVE.ach.mgX))}
 const SU={H:1500,ER:165,GW:280,im:null,pat:null,k:0,pad:null,
   pads:[[0,-1250,1.5],[0,1250,1.5],[-1250,0,1.5],[1250,0,1.5],[-1250,-1250,1.1],[1250,-1250,1.1],[-1250,1250,1.1],[1250,1250,1.1]]};
@@ -2271,9 +2274,10 @@ function suWaveTick(dt){if(!G.suGH)G.suGH=[3,3,3,3];const W=G.suW||(G.suW={next:
   if(!W.cur){if(G.t>=W.next&&G.t<SU_LEN-25){const t=G.t,ord=[0,1,2,3].sort(()=>Math.random()-.5),gs=(t>=780?ord:t>=600?ord.slice(0,2):ord.slice(0,1)).map((gi,k)=>({gi,off:t>=780?k*6:0,sp:0,acc:0}));
       W.cur={gs,t:-8,id:++W.n};suRelay(gs[0].gi);if(!G.bot){SND.p('boss');toast('📡 아리아드네','사령관님, '+gs.map(g=>SUW.GN[g.gi]).join('·')+'쪽 게이트에 대군이 몰려옵니다.',true)}}return}
   const C=W.cur;C.t+=dt;let last=0;const m=em();
-  for(const g of C.gs){const lt=C.t-g.off;last=Math.max(last,g.off);if(lt<0||lt>=15)continue;const open=GH[g.gi]<=0;g.acc+=dt*(8+m*.5)*(open?1.3:suHold(g.gi)?.4:.6);const P=suGP(g.gi),hz=g.gi<2;
-    while(g.acc>=1){g.acc--;if(G.enemies.length>560)continue;const o=rnd(-SU.GW*.45,SU.GW*.45),e=mkEnemy(pick(phaseTypes()),P[0]+(hz?o:rnd(-30,30)),P[1]+(hz?rnd(-30,30):o));e.suW=C.id*10+g.gi;g.sp++}}
-  if(C.t>=last+15+8){for(const g of C.gs){if(!g.sp)continue;const tag=C.id*10+g.gi;let al=0;for(const e of G.enemies)if(!e.dead&&e.suW===tag)al++;
+  for(const g of C.gs){const lt=C.t-g.off;last=Math.max(last,g.off);if(lt<0||lt>=15)continue;const open=GH[g.gi]<=0;g.acc+=dt*(8+m*.5)*1.5*(open?1.3:suHold(g.gi)?.4:.6);const P=suGP(g.gi),hz=g.gi<2,EN=G.t>=600?8:6;
+    if((g.el||0)<EN&&lt>=((g.el||0)+1)*14/(EN+1)){g.el=(g.el||0)+1;const tp=pick(phaseTypes()),o=rnd(-SU.GW*.4,SU.GW*.4),e=mkEnemy(tp,P[0]+(hz?o:0),P[1]+(hz?0:o),{elite:1,suEl:1,r:ENT[tp].r*1.7,hpMul:12,spd:ENT[tp].spd*.8,dmg:ENT[tp].dmg*1.1*(1+m*.1),name:'엘리트 '+ENT[tp].name});e.suW=C.id*10+g.gi;g.sp+=5}
+    while(g.acc>=1){g.acc--;if(G.enemies.length>suCap())continue;const o=rnd(-SU.GW*.45,SU.GW*.45),e=mkEnemy(pick(phaseTypes()),P[0]+(hz?o:rnd(-30,30)),P[1]+(hz?rnd(-30,30):o));e.suW=C.id*10+g.gi;g.sp++}}
+  if(C.t>=last+15+8){for(const g of C.gs){if(!g.sp)continue;const tag=C.id*10+g.gi;let al=0;for(const e of G.enemies)if(!e.dead&&e.suW===tag)al+=e.suEl?5:1;
       if(GH[g.gi]>0){if(al/g.sp>.35){GH[g.gi]--;if(GH[g.gi]===1)suOrb(g.gi);if(GH[g.gi]<=0)suCollapse(g.gi);else if(!G.bot)toast('⚠ '+SUW.GN[g.gi]+'쪽 게이트 손상','내구 '+GH[g.gi]+'칸 남았어요. 다이달로스로 수리할 수 있어요',true)}else suMorale(g.gi)}}
     W.cur=null;W.next=G.t+rnd(38,52)}}
 function suWaveGate(gi){const C=G.suW&&G.suW.cur;if(!C)return 0;for(const g of C.gs)if(g.gi===gi)return C.t-g.off<0?1:C.t-g.off<15?2:0;return 0}
@@ -4024,8 +4028,8 @@ function drawArena(){const A=G.arena;if(!A)return;const t=G.t,w=A.hw,h=A.hh,rr=2
   ctx.globalAlpha=1;ctx.restore();
   if(!G.bot&&Math.random()<.8){const q=arenaPt(A,Math.random()*4);px(q[0],q[1],0,-rnd(20,60),.7,pick([c1,c2,'#ffffff']),2,1,1)}}
 function spawnTick(dt){
-  const m=em(),hs=G.hard?HARD.spawn:1,target=Math.min((15+m*11)*hs,340*hs);
-  G.spawnAcc+=dt*Math.min(52,2+m*2)*hs*(G.map==='farm'&&G.hard?.24:G.map==='su'&&G.t>=SU_LEN?.2:1);
+  const SUm=G.map==='su',m=SUm?Math.max(em(),5):em(),hs=G.hard?HARD.spawn:1,target=SUm?Math.min((15+m*11)*hs*SU_SP,suCap()-120):Math.min((15+m*11)*hs,340*hs);
+  G.spawnAcc+=dt*Math.min(52,2+m*2)*hs*(G.map==='farm'&&G.hard?.24:SUm?(G.t>=SU_LEN?.2:SU_SP):1);
   if(G.arena){G.spawnAcc=0;arenaTick(dt);return}/* 11-14 사용자: 인천도 결계 안 잡몹 없음 */
   while(G.spawnAcc>=1){G.spawnAcc--;if(G.enemies.length<target){const [x,y]=spawnPos();if(G.map==='farm'){if(!(G.fmSil>0))fmSpawnOne(x,y)}else if(G.map==='mg'){if(!G.mgT){const q=mgSpawnPos();mgSpawnOne(q[0],q[1],q[2])}}else if(G.map==='su')suSpawnOne(x,y);else mkEnemy(G.hell&&Math.random()<.15?pick(G.map==='sangbong'?['sb_lamp','sb_germ','sb_trash']:['queen','kisoo']):pick(phaseTypes()),x,y)}}
   if(G.map!=='farm'&&G.map!=='su'&&G.swarms.length&&G.t>=G.swarms[0]){G.swarms.shift();if(G.map==='mg')mgRush(Math.round(20+m*2.2),m);else toast('알림 폭탄 러시!','📢 단톡방이 터진다');const n=G.map==='mg'?0:Math.round(20+m*2.2),gap=rnd(0,Math.PI*2);for(let i=0;i<n;i++){const a=gap+.6+i/n*(Math.PI*2-1.2);mkEnemy(G.map==='sangbong'?'sb_soju':G.map==='mg'?'mg_fly':'bell',G.p.x+Math.cos(a)*(VW*.62),G.p.y+Math.sin(a)*(VH*.62),{spd:80,dmg:ENT.bell.dmg*(1+m*.08)})}}

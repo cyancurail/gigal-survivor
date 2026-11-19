@@ -2403,7 +2403,7 @@ function suWaveDraw(){const C=G.suW&&G.suW.cur;if(!C)return;const p=G.p;ctx.save
     ctx.font='800 13px "Noto Sans KR",sans-serif';ctx.textAlign='center';ctx.fillStyle='#ffffff';ctx.strokeStyle='#5a1408';ctx.lineWidth=3;const tx=lt<0?'대군 '+Math.ceil(-lt)+'초':'대군!';ctx.strokeText(tx,x-Math.cos(a)*40,y-Math.sin(a)*40+4);ctx.fillText(tx,x-Math.cos(a)*40,y-Math.sin(a)*40+4)}
   ctx.restore()}
 /* ---- 연출 모음 (11-20 사용자): 함선 자폭(후반 연출용, 지금은 시험 훅 __suBoom) · 미션 실패 시 궤도 엘리베이터 붕괴 ---- */
-const SUBS=[['pallas',288,6,300],['panacea',440,5,300],['argo',600,5,340],['themis',512,4,320],['talos_tf',320,6,400],['daedalus',320,6,400]];
+const SUBS=[['pallas',144,12,230,0],['panacea',220,10,260,6],['argo',300,10,320,0],['themis',256,8,300,0],['talos_tf',320,6,440,0],['daedalus',320,6,420,0]];/* [그림, 칸 크기, 열 수, 그리는 폭, 프레임] */
 function suBoom(i,x,y,w){const q=SUBS[i];suIm(q[0]);(G.suSd=G.suSd||[]).push({i,x,y,t:-(w||0),alt:150,dn:0})}
 window.__suBoom=()=>{if(!G||G.map!=='su')return;const p=G.p;SUBS.forEach((q,i)=>{const a=i/6*6.283;suBoom(i,p.x+Math.cos(a)*330,p.y+40+Math.sin(a)*190,i*.7)})};
 function suFxTick(dt){const L=G.suSd;if(L)for(let i=L.length-1;i>=0;i--){const b=L[i];b.t+=dt;if(b.t<0)continue;
@@ -2422,8 +2422,8 @@ function suFallStart(){if(G.bot||!suSolo())return false;if(G.suFall)return !G.su
 window.__suFall=()=>{if(G&&G.map==='su'&&!G.suFall){G.p.hp=0}};
 function suFxDraw(){const X=G.suBx;if(X){ctx.save();ctx.globalCompositeOperation='lighter';for(const b of X){const T=b.big?.9:.35,u=b.t/T,R=b.R*(.35+.65*Math.sqrt(u)),g=ctx.createRadialGradient(b.x,b.y,0,b.x,b.y,R);g.addColorStop(0,'rgba(255,255,255,'+(1-u)+')');g.addColorStop(.35,'rgba(255,210,120,'+(.9*(1-u))+')');g.addColorStop(.7,'rgba(255,110,50,'+(.5*(1-u))+')');g.addColorStop(1,'rgba(120,40,20,0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(b.x,b.y,R,0,7);ctx.fill();
       if(b.big){ctx.globalAlpha=1-u;ctx.strokeStyle='#fff3d0';ctx.lineWidth=8*(1-u)+1;ctx.beginPath();ctx.ellipse(b.x,b.y+60,b.R*1.6*u+30,(b.R*1.6*u+30)*.4,0,0,7);ctx.stroke();ctx.globalAlpha=1}}ctx.restore()}
-  const L=G.suSd;if(L)for(const b of L){if(b.t<0||b.dn&&b.t>1.42)continue;const q=SUBS[b.i],im=suIm(q[0]);if(!im.complete||!im.width)continue;const C=q[1],W=q[3],sk=b.t<1.3?b.t*5:0,x=b.x+rnd(-sk,sk),y=b.y-b.alt+rnd(-sk,sk)+Math.sin(G.t*2+b.i)*5;
-    suShadow(b.x,b.y+6,W*.42,b.alt);ctx.drawImage(im,0,0,C,C,x-W/2,y-W/2,W,W);ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=Math.min(1,b.t<1.3?(.25+.25*Math.sin(G.t*30))*b.t:1);ctx.drawImage(im,0,0,C,C,x-W/2,y-W/2,W,W);if(b.t>1){ctx.globalAlpha=Math.min(1,(b.t-1)/.3);ctx.drawImage(im,0,0,C,C,x-W/2,y-W/2,W,W);ctx.drawImage(im,0,0,C,C,x-W/2,y-W/2,W,W)}ctx.restore()}}
+  const L=G.suSd;if(L)for(const b of L){if(b.t<0||b.dn&&b.t>1.42)continue;const q=SUBS[b.i],im=suIm(q[0]);if(!im.complete||!im.width)continue;const C=q[1],W=q[3],SX=(q[4]%q[2])*C,SY=Math.floor(q[4]/q[2])*C,sk=b.t<1.3?b.t*5:0,x=b.x+rnd(-sk,sk),y=b.y-b.alt+rnd(-sk,sk)+Math.sin(G.t*2+b.i)*5;
+    suShadow(b.x,b.y+6,W*.42,b.alt);ctx.drawImage(im,SX,SY,C,C,x-W/2,y-W/2,W,W);ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=Math.min(1,b.t<1.3?(.25+.25*Math.sin(G.t*30))*b.t:1);ctx.drawImage(im,SX,SY,C,C,x-W/2,y-W/2,W,W);if(b.t>1){ctx.globalAlpha=Math.min(1,(b.t-1)/.3);ctx.drawImage(im,SX,SY,C,C,x-W/2,y-W/2,W,W);ctx.drawImage(im,SX,SY,C,C,x-W/2,y-W/2,W,W)}ctx.restore()}}
 /* ---- 함께 막기 (11-19 사용자: 수원은 물량전, 「기지가 함께 싸우고 막는다」) ----
    ① 성벽 수비대: 게이트마다 성벽 위 6명. 게이트 앞 380 안의 적에게 사격(약함). 게이트가 무너지면 물러남.
    ② 게이트 사수: 대군 중 사령관이 그 게이트 430 안에 있으면 통과량 60% → 40%, 수비대 속사.

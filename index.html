@@ -2015,7 +2015,13 @@ const SUEL={"elevB":{"w":342,"h":555,"ox":171.0,"oy":449.0,"top":0},"elevS":{"w"
 function suElev(front){const p=G.p,B=SUEL.elevB,T=SUEL.elevS,ib=suIm2('elevB'),it=suIm2('elevS');if(!ib.complete||!ib.width||!it.complete||!it.width)return;
   const x0=-B.ox,y0=SUEL_Y-B.oy,cutR=B.oy-SUEL_CUT,top=p.y-VH/2-40,sm=ctx.imageSmoothingEnabled;ctx.imageSmoothingEnabled=true;
   if(!front){ctx.drawImage(ib,0,cutR,B.w,B.h-cutR,x0,y0+cutR,B.w,B.h-cutR);ctx.imageSmoothingEnabled=sm;return}
-  {const F=G.suFall;if(F){const py=y0+cutR,wob=F.t<1.3?Math.sin(F.t*26)*.012*F.t:0;ctx.save();ctx.translate(0,py);ctx.rotate(F.th+wob);ctx.translate(0,-py);ctx.drawImage(ib,0,0,B.w,cutR,x0,y0,B.w,cutR);for(let y=y0-T.h,n=0;n<Math.ceil(F.L/T.h);y-=T.h,n++)ctx.drawImage(it,-T.ox,y,T.w,T.h);ctx.restore();ctx.imageSmoothingEnabled=sm;return}}
+  {const F=G.suFall;if(F){const py=y0+cutR,wob=F.t<1.3?Math.sin(F.t*26)*.012*F.t:0;
+      for(let j=3;j>=0;j--){const P=F.pc[j],L=SUFP[j+1]-SUFP[j];ctx.save();ctx.translate(P.x,P.y);ctx.rotate(P.a+wob*(j+1));
+        if(j===0){ctx.drawImage(ib,0,0,B.w,cutR,x0,-cutR,B.w,cutR);for(let y=-cutR-T.h;y>-L-T.h;y-=T.h){const hh=Math.min(T.h,y+T.h+L);ctx.drawImage(it,0,T.h-hh,T.w,hh,-T.ox,y+T.h-hh,T.w,hh)}}
+        else for(let y=-T.h;y>-L-T.h;y-=T.h){const hh=Math.min(T.h,y+T.h+L);ctx.drawImage(it,0,T.h-hh,T.w,hh,-T.ox,y+T.h-hh,T.w,hh)}
+        if(F.brk){ctx.fillStyle='#1a2038';ctx.beginPath();ctx.moveTo(-T.ox+6,-L);for(let q=0;q<=6;q++)ctx.lineTo(-T.ox+6+q*(T.w-12)/6,-L+(q%2?16:-4)+(j*7+q*5)%9);ctx.lineTo(T.ox-6,-L+18);ctx.lineTo(-T.ox+6,-L+18);ctx.closePath();ctx.fill();if(j){ctx.beginPath();ctx.moveTo(-T.ox+6,0);for(let q=0;q<=6;q++)ctx.lineTo(-T.ox+6+q*(T.w-12)/6,(q%2?-14:6)-(j*5+q*3)%8);ctx.lineTo(T.ox-6,-18);ctx.lineTo(-T.ox+6,-18);ctx.closePath();ctx.fill()}}
+        ctx.restore()}
+      ctx.imageSmoothingEnabled=sm;return}}
   if(Math.abs(p.x)>VW/2+160||top>SUEL_Y-SUEL_CUT)return;
   const hid=Math.abs(p.x)<110&&p.y<SUEL_Y-SUEL_CUT+10&&p.y>top;ctx.save();ctx.globalAlpha=hid?.42:1;
   ctx.drawImage(ib,0,0,B.w,cutR,x0,y0,B.w,cutR);{const A0=ctx.globalAlpha;let n=0;for(let y=y0-T.h;y+T.h>top&&n<3;y-=T.h,n++){ctx.globalAlpha=A0*(1-n/3);ctx.drawImage(it,-T.ox,y,T.w,T.h)}ctx.globalAlpha=A0}
@@ -2413,12 +2419,18 @@ function suFxTick(dt){const L=G.suSd;if(L)for(let i=L.length-1;i>=0;i--){const b
     if(b.t>3.2)L.splice(i,1)}
   const X=G.suBx;if(X){for(const b of X)b.t+=dt;G.suBx=X.filter(b=>b.t<(b.big?.9:.35))}
   const F=G.suFall;if(F&&!F.done){F.t+=dt;const p=G.p;p.x=F.px;p.y=F.py;p.inv=1e9;p.hp=Math.max(p.hp,.001);
-    if(F.t<1.3){if(!G.bot&&Math.random()<.6){const y=-rnd(60,560);sparks(rnd(-60,60),y,6,['#ffffff','#ffd27a','#ff7a3a'],200,.4,3);(G.suBx=G.suBx||[]).push({x:rnd(-50,50),y,t:0,R:rnd(30,60)})}G.shk=Math.max(G.shk||0,.2)}
-    else if(F.t<3.1){F.th=F.thT*Math.pow((F.t-1.3)/1.8,2.6)}
-    else{F.th=F.thT;if(!F.hit){F.hit=1;if(!G.bot){SND.p('boom');G.shk=1.2;G.rflash=1;const ux=Math.sin(F.thT),uy=-Math.cos(F.thT);for(let d=120;d<F.L;d+=28){const x=ux*d,y=-106+uy*d;for(let k=0;k<2;k++)px(x+rnd(-30,30),y+rnd(-20,20),rnd(-200,200),rnd(-260,-20),rnd(.7,1.5),pick(['#e8d2a6','#cdb488','#ffffff','#8a93ad']),pick([3,4,5]),1,1,400)}toast('궤도 엘리베이터 붕괴','최종 방어선이 무너졌어요',true)}
-        for(const e of G.enemies)if(!e.dead&&!e.boss)e.stun=Math.max(e.stun||0,2)}
-      if(F.t>=5){F.done=1;p.inv=0;p.hp=0}}}}
-function suFallStart(){if(G.bot||!suSolo())return false;if(G.suFall)return !G.suFall.done;const p=G.p,py=SUEL_Y-SUEL_CUT,dx=p.x,dy=p.y-py,d=Math.hypot(dx,dy);G.suFall={t:0,th:0,thT:d<60?1.5708:Math.atan2(dx,-dy),L:Math.max(1300,d+500),px:p.x,py:p.y};p.hp=.001;p.inv=1e9;if(G.suW)G.suW.next=1e9;if(!G.bot){SND.p('boss');toast('⚠ 방어선 붕괴','사령관님…! 엘리베이터가…!',true)}return true}
+    if(F.t<1.3){if(!G.bot&&Math.random()<.6){const y=-rnd(60,900);sparks(rnd(-60,60),y,6,['#ffffff','#ffd27a','#ff7a3a'],200,.4,3);(G.suBx=G.suBx||[]).push({x:rnd(-50,50),y,t:0,R:rnd(30,60)})}G.shk=Math.max(G.shk||0,.2)}
+    else{/* 11-20 사용자: 통째로가 아니라 네 조각으로 끊어져 차례로 쓰러짐. 조각 j = 높이 SUFP[j]~SUFP[j+1], 아래 조각부터 눕고 위 조각은 떨어지며 그 너머에 떨어짐 */
+      if(!F.brk){F.brk=1;if(!G.bot){SND.p('boom');G.shk=.7;G.rflash=.5;for(let j=1;j<4;j++){const y=F.py0-SUFP[j];sparks(0,y,30,['#ffffff','#ffd27a','#ff7a3a','#8fe6ff'],360,.7,4);(G.suBx=G.suBx||[]).push({x:0,y,t:0,R:150,big:1});for(let k=0;k<14;k++)px(rnd(-50,50),y+rnd(-30,30),rnd(-240,240),rnd(-200,160),rnd(.8,1.6),pick(['#e8eef4','#8a93ad','#3a56aa']),pick([3,4,5]),1,1,500)}}}
+      const ux=Math.sin(F.thT),uy=-Math.cos(F.thT);let all=1;
+      for(let j=0;j<4;j++){const u=Math.max(0,Math.min(1,(F.t-1.3-j*.22)/(1.7+j*.2))),e=Math.pow(u,2.5),d=j?SUFP[j]*.92+j*46:0,jit=[0,.2,-.26,.16][j],P=F.pc[j];
+        P.x=ux*d*e;P.y=(F.py0-SUFP[j])*(1-e)+(F.py0+uy*d)*e;P.a=(F.thT+jit)*e+(j?Math.sin(u*3.14)*jit*1.5:0);
+        if(u<1)all=0;else if(!P.hit){P.hit=1;if(!G.bot){SND.p('boom');G.shk=Math.max(G.shk||0,j===3?1.2:.8);if(j===3)G.rflash=1;const L=SUFP[j+1]-SUFP[j],ax=Math.sin(P.a),ay=-Math.cos(P.a);(G.suBx=G.suBx||[]).push({x:P.x+ax*L*.5,y:P.y+ay*L*.5,t:0,R:170,big:1});for(let q=0;q<L;q+=26)for(let k=0;k<2;k++)px(P.x+ax*q+rnd(-30,30),P.y+ay*q+rnd(-20,20),rnd(-200,200),rnd(-260,-20),rnd(.7,1.5),pick(['#e8d2a6','#cdb488','#ffffff','#8a93ad']),pick([3,4,5]),1,1,400)}
+          for(const en of G.enemies)if(!en.dead&&!en.boss)en.stun=Math.max(en.stun||0,2)}}
+      if(all&&!F.end){F.end=F.t;if(!G.bot)toast('궤도 엘리베이터 붕괴','최종 방어선이 무너졌어요',true)}
+      if(F.end&&F.t>=F.end+2){F.done=1;p.inv=0;p.hp=0}}}}
+const SUFP=[0,340,720,1120,1540];
+function suFallStart(){if(G.bot||!suSolo())return false;if(G.suFall)return !G.suFall.done;const p=G.p,py=SUEL_Y-SUEL_CUT,dx=p.x,dy=p.y-py,d=Math.hypot(dx,dy);G.suFall={t:0,th:0,thT:d<60?1.5708:Math.atan2(dx,-dy),L:1540,px:p.x,py:p.y,py0:py,pc:[0,1,2,3].map(j=>({x:0,y:py-SUFP[j],a:0,hit:0}))};p.hp=.001;p.inv=1e9;if(G.suW)G.suW.next=1e9;if(!G.bot){SND.p('boss');toast('⚠ 방어선 붕괴','사령관님…! 엘리베이터가…!',true)}return true}
 window.__suFall=()=>{if(G&&G.map==='su'&&!G.suFall){G.p.hp=0}};
 function suFxDraw(){const X=G.suBx;if(X){ctx.save();ctx.globalCompositeOperation='lighter';for(const b of X){const T=b.big?.9:.35,u=b.t/T,R=b.R*(.35+.65*Math.sqrt(u)),g=ctx.createRadialGradient(b.x,b.y,0,b.x,b.y,R);g.addColorStop(0,'rgba(255,255,255,'+(1-u)+')');g.addColorStop(.35,'rgba(255,210,120,'+(.9*(1-u))+')');g.addColorStop(.7,'rgba(255,110,50,'+(.5*(1-u))+')');g.addColorStop(1,'rgba(120,40,20,0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(b.x,b.y,R,0,7);ctx.fill();
       if(b.big){ctx.globalAlpha=1-u;ctx.strokeStyle='#fff3d0';ctx.lineWidth=8*(1-u)+1;ctx.beginPath();ctx.ellipse(b.x,b.y+60,b.R*1.6*u+30,(b.R*1.6*u+30)*.4,0,0,7);ctx.stroke();ctx.globalAlpha=1}}ctx.restore()}

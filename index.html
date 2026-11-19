@@ -5335,7 +5335,7 @@ function swTick(w,dt){const S=G.S,st=w.st,p=G.p;st.g=st.g||[];if(!S.swA){S.swA=1
     else if(q.m==='gather'){const dx=p.x-q.x,dy=p.y-8-q.y,d=Math.hypot(dx,dy)||1,v=520*dt;q.dir=dx<0?-1:1;if(d<=14||d<v){q.x=p.x;q.y=p.y-8;q.m='die';q.t=0}else{q.x+=dx/d*v;q.y+=dy/d*v}}}
   st.g=g.filter(q=>!(q.m==='die'&&q.t>.55));
   if(!G.bot){const k=pn(1.5);for(let i=0;i<k;i++){const a=rnd(0,6.283),rr=Math.sqrt(Math.random())*R;px(p.x+Math.cos(a)*rr,p.y+Math.sin(a)*rr,rnd(-10,10),-rnd(30,70),.8,pick(['#9b3dff','#ff3fd2','#e6c4ff']),2,1,1)}}
-  st.ft=(st.ft===undefined?SWC.FIN:st.ft)-dt;if(!st.fin&&st.ft<=0&&G.enemies.some(hxVis)){st.ft=SWC.FIN;st.fin={t:0,fl:0};if(!G.bot)SND.p('boss')}
+  st.ft=(st.ft===undefined?SWC.FIN:st.ft)-dt;if(!st.fin&&st.ft<=0&&G.enemies.some(hxVis)){st.ft=SWC.FIN;st.fin={t:0,fl:0,R:st.R||100};if(!G.bot)SND.p('boss')}
   if(st.fin)swFinTick(st,dt)}
 /* ===== 💒 영혼결혼식 피날레 「죽어서도 함께」 (V272, 사용자 기획) =====
    평소 연출은 그대로(셰이더 없음). 60초마다: 어두워짐 → 발밑에서 붉은 균열이 퍼지며 지옥이 열림 → 쿼터뷰(y×.62) 회오리 돔 + 부적·유리 조각 →
@@ -5361,14 +5361,13 @@ const swEz=x=>{x=Math.max(0,Math.min(1,x));return x*x*(3-2*x)};
 const swDome=T=>T<1.6?0:swEz((T-1.6)/1.2),swUn=T=>T<6.5?0:Math.min(1,(T-6.5)/1.8);
 function swFinTick(st,dt){const F=st.fin,T=F.t+=dt,p=G.p,S=G.S;if(F.fl>0)F.fl-=dt;F.w=T<5.5?2+T*1.3:T<6.5?15:15*(1-.8*swUn(T));F.sp=(F.sp||0)+dt*F.w;
   if(T>=.5&&!F.hs){F.hs=1;if(!G.bot){SND.p('boom');G.shk=Math.max(G.shk||0,.3)}}
-  if(!G.bot&&T>.8&&T<6.5&&Math.random()<.6){const ea=rnd(0,6.283),er=(st.R||100)*rnd(.4,2.4),q=[Math.cos(ea)*er,Math.sin(ea)*er*SWC.YS];px(p.x+q[0],p.y+10+q[1],rnd(-12,12),-rnd(40,110),rnd(.5,1),pick(['#ff2030','#ff7a4a','#ffd08a']),2,1,1)}
-  if(T>=5.3&&!F.say){F.say=1;if(!G.bot)G.texts.push({x:p.x,y:p.y-86,v:'죽어서도 함께하시겠습니까?',life:2.2,big:1,col:'#e6c4ff'})}
+  if(!G.bot&&T>.8&&T<6.5&&Math.random()<.6){const ea=rnd(0,6.283),er=(F.R||st.R||100)*rnd(.4,2.4),q=[Math.cos(ea)*er,Math.sin(ea)*er*SWC.YS];px(p.x+q[0],p.y+10+q[1],rnd(-12,12),-rnd(40,110),rnd(.5,1),pick(['#ff2030','#ff7a4a','#ffd08a']),2,1,1)}
   if(T>=6.5&&!F.boom){F.boom=1;F.bt=G.t;F.fl=.4;for(const e of G.enemies.filter(hxVis))hurt(e,SWC.D*S.might*(e.boss?.5:1),'soulwed',{kb:e.boss?0:10});
     if(!G.bot){sparks(p.x,p.y-10,40,['#ffffff','#e6c4ff','#ff3fd2'],380,.6,3);SND.p('boom');SND.p('evo');G.shk=Math.max(G.shk||0,.5)}}
   if(T>8.6)st.fin=null}
 // 붉은 별빛 고리: 보라 돔과 같은 쿼터뷰 타원 궤도(고리 사이사이)를 반대 방향으로 돌아요. 색감은 그대로(검붉은 테두리·붉은 몸·달궈진 심·깜빡임)
 function swHellGlow(F){const p=G.p,T=F.t,out=Math.pow(1-swUn(T),1.5);if(T<.5||out<=0)return;const ox=p.x,oy=p.y+10,R=240*(.4+.6*swEz((T-1)/2));ctx.save();ctx.globalAlpha=.3*out*swEz((T-.5)/1.5);const gr=ctx.createRadialGradient(ox,oy,0,ox,oy,R);gr.addColorStop(0,'rgba(255,40,50,1)');gr.addColorStop(1,'rgba(120,0,10,0)');ctx.fillStyle=gr;ctx.translate(ox,oy);ctx.scale(1,SWC.YS);ctx.translate(-ox,-oy);ctx.beginPath();ctx.arc(ox,oy,R,0,6.283);ctx.fill();ctx.restore()}
-function swRedPaint(g,st,F,k,mask){const p=G.p,T=F.t,dm=swDome(T),un=swUn(T),al0=dm*Math.pow(1-un,1.3);if(al0<=0)return;const DW=(st.R||100)*3.2,gy=p.y+10,sp=F.sp||0,grow=(1+1.5*un)*(.35+.65*dm),YS=SWC.YS,fk=.82+.18*Math.sin(G.t*23);g.lineCap='round';
+function swRedPaint(g,st,F,k,mask){const p=G.p,T=F.t,dm=swDome(T),un=swUn(T),al0=dm*Math.pow(1-un,1.3);if(al0<=0)return;const DW=(F.R||st.R||100)*3.2,gy=p.y+10,sp=F.sp||0,grow=(1+1.5*un)*(.35+.65*dm),YS=SWC.YS,fk=.82+.18*Math.sin(G.t*23);g.lineCap='round';
   for(let i=0;i<7;i++){const fi=(i+.5)/7.6,r=DW*Math.sqrt(1-fi*fi*.85)*grow*1.04,hh=DW*.62*fi*(1-.5*un),w0=-sp*(.55+.3*glH(i,21))+i*2.1;
     for(let s=0;s<2;s++){const a0=w0+s*3.1416+glH(i,22+s)*1.2,len=(1.5+1.1*glH(i,24+s))*(1-.5*un),N=Math.ceil(len/.055);
       if(!mask){for(const [col,lw,aa] of [['#2a0006',6*k,.6],['#ff2030',2.4*k,.85*fk]]){g.strokeStyle=col;g.lineWidth=lw;g.globalAlpha=al0*aa;g.beginPath();for(let j=0;j<=N;j+=2){const a=a0+j*.055,x=p.x+Math.cos(a)*r,y=gy+Math.sin(a)*r*YS-hh;j?g.lineTo(x,y):g.moveTo(x,y)}g.stroke()}}
@@ -5378,7 +5377,7 @@ function swRedPaint(g,st,F,k,mask){const p=G.p,T=F.t,dm=swDome(T),un=swUn(T),al0
           if(hsh>.8){const q=z*3.2*tw;g.fillStyle='#fff0e0';g.beginPath();g.moveTo(x-q,y);g.lineTo(x-q*.14,y-q*.14);g.lineTo(x,y-q*1.2);g.lineTo(x+q*.14,y-q*.14);g.lineTo(x+q,y);g.lineTo(x+q*.14,y+q*.14);g.lineTo(x,y+q*1.2);g.lineTo(x-q*.14,y+q*.14);g.closePath();g.fill()}}}}}
   g.globalAlpha=1}
 // 부적·유리 조각 + 영혼 (쿼터뷰 타원 궤도)
-function swSwirlPaint(g,st,F,k,mask){const p=G.p,T=F.t,dm=swDome(T),un=swUn(T),al0=dm*Math.pow(1-un,1.3);if(al0<=0)return;const DW=(st.R||100)*3.2,gy=p.y+10,sp=F.sp||0,w=F.w||2,grow=(1+1.5*un)*(.35+.65*dm),YS=SWC.YS;
+function swSwirlPaint(g,st,F,k,mask){const p=G.p,T=F.t,dm=swDome(T),un=swUn(T),al0=dm*Math.pow(1-un,1.3);if(al0<=0)return;const DW=(F.R||st.R||100)*3.2,gy=p.y+10,sp=F.sp||0,w=F.w||2,grow=(1+1.5*un)*(.35+.65*dm),YS=SWC.YS;
   for(let i=0;i<96;i++){const fi=glH(i,1)*.95,r=DW*Math.sqrt(1-fi*fi*.85)*(.5+.5*glH(i,2))*grow,hh=DW*.62*fi*(1-.5*un),a=glH(i,3)*6.283+sp*(1+.35*fi)*(.7+.6*glH(i,4)),ca=Math.cos(a),sa=Math.sin(a),x=p.x+ca*r,y=gy+sa*r*YS-hh,nr=sa*.5+.5,red=i%3===0;
     g.globalAlpha=al0*(.45+.55*nr);g.fillStyle=mask?(red?'#ff2030':'#a060ff'):(red?'#ff3a4a':i%3===1?'#f6eeff':'#d9a8ff');const s=(red?5:3.4)*k*(.75+.4*nr),len=s*(1.2+Math.min(5,w*.3));g.save();g.translate(x,y);g.rotate(Math.atan2(ca*YS,-sa));g.fillRect(-len/2,-s*(red?.55:.3),len,s*(red?1.1:.6));g.restore()}
   const k2=swEz((T-2)/3.5),n=14;g.lineCap='round';
@@ -5396,7 +5395,7 @@ function swSoul(w){const st=w.st,F=st.fin;if(!F||G.bot)return;const p=G.p,T=F.t,
 // 위층: 회오리 돔 + 조각·영혼 + 빛 번짐 + 섬광 + 굴절
 function swFinTop(st){const F=st.fin;if(!F||G.bot)return;const p=G.p,T=F.t,X0=p.x-VW/2,Y0=p.y-VH/2;let q=.5;try{q=fxgQ()}catch(_){}
   const dm=swDome(T),un=swUn(T);
-  if(q>0&&dm>0&&un<1){const S=swShader();if(S)S.draw({dw:(st.R||100)*3.2,dome:dm,sp:F.sp||0,un})}
+  if(q>0&&dm>0&&un<1){const S=swShader();if(S)S.draw({dw:(F.R||st.R||100)*3.2,dome:dm,sp:F.sp||0,un})}
   ctx.save();ctx.globalCompositeOperation='source-over';swRedPaint(ctx,st,F,1,0);ctx.restore();
   swSwirlPaint(ctx,st,F,1,0);
   if(q>0){const L=stLightInit();if(L){const cw=Math.min(480,Math.ceil(VW/2)),chh=Math.max(1,Math.round(cw*VH/VW)),k=cw/VW;for(const cc of [L.cv,L.M])if(cc.width!==cw||cc.height!==chh){cc.width=cw;cc.height=chh}

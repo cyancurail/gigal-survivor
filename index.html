@@ -2006,6 +2006,22 @@ function suWalls(front){const p=G.p,H=SU.H,x0=p.x-VW/2-140,x1=p.x+VW/2+140,y0=p.
   if(!front){if(y0<-H+40){const y=-H-22;for(let x=-H-100;x<=H+100;x+=200){if(Math.abs(x)<340||x<x0||x>x1)continue;suPc('wallH',x,y)}suGate(0,y,1,0)}
     for(const sx of [-1,1]){const x=sx*(H+24);if(sx<0?x0>x+60:x1<x-60)continue;for(let y=-H-80;y<=H+60;y+=116){if(Math.abs(y+20)<330||y<y0-80||y>y1)continue;suPc('wallV',x,y)}suGate(x,0,0,sx<0?2:3)}}
   else if(y1>H-20){const y=H+34;for(let x=-H-100;x<=H+100;x+=200){if(Math.abs(x)<340||x<x0||x>x1)continue;suPc('wallH',x,y)}suGate(0,y,1,1)}}
+/* ---- 궤도 엘리베이터 3D (11-19, 시즌3 배너 참고): su/elevB(받침+아랫기둥) + su/elevS(위로 이어 붙이는 기둥 토막). 1px = 월드 1.
+   뒤 층(front=0)에는 받침만, 앞 층(front=1)에는 그 위 기둥 전체 → 엘리베이터 뒤(북쪽)에 선 캐릭터는 기둥에 가려지고, 사령관이 뒤에 서면 기둥이 반투명. 빛 캡슐·홀로 고리는 코드로 움직임 */
+const SUEL={"elevB":{"w":244,"h":509,"ox":122.0,"oy":435.0,"top":0},"elevS":{"w":120,"h":131,"ox":60.0}},SUEL_Y=4,SUEL_CUT=80;
+function suElev(front){const p=G.p,B=SUEL.elevB,T=SUEL.elevS,ib=suIm2('elevB'),it=suIm2('elevS');if(!ib.complete||!ib.width||!it.complete||!it.width)return;
+  const x0=-B.ox,y0=SUEL_Y-B.oy,cutR=B.oy-SUEL_CUT,top=p.y-VH/2-40,sm=ctx.imageSmoothingEnabled;ctx.imageSmoothingEnabled=true;
+  if(!front){ctx.drawImage(ib,0,cutR,B.w,B.h-cutR,x0,y0+cutR,B.w,B.h-cutR);ctx.imageSmoothingEnabled=sm;return}
+  if(Math.abs(p.x)>VW/2+160||top>SUEL_Y-SUEL_CUT)return;
+  const hid=Math.abs(p.x)<80&&p.y<SUEL_Y-SUEL_CUT+10&&p.y>top;ctx.save();ctx.globalAlpha=hid?.42:1;
+  ctx.drawImage(ib,0,0,B.w,cutR,x0,y0,B.w,cutR);for(let y=y0-T.h;y+T.h>top;y-=T.h)ctx.drawImage(it,-T.ox,y,T.w,T.h);
+  /* 빛 캡슐: 앞쪽 빛 궤도(오른쪽 12px)와 왼쪽 가장자리 궤도를 타고 올라감 */
+  ctx.globalCompositeOperation='lighter';const yb=SUEL_Y-SUEL_CUT-40;
+  for(const [lx,a,sp] of [[12,1,260],[-46,.45,190]])for(let k=0;k<6;k++){const y=yb-((G.t*sp+k*170)%1020);if(y<top)continue;const g=ctx.createLinearGradient(0,y-30,0,y+12);g.addColorStop(0,'rgba(140,240,255,0)');g.addColorStop(.7,'rgba(190,250,255,'+(.85*a)+')');g.addColorStop(1,'rgba(255,255,255,'+a+')');ctx.fillStyle=g;ctx.fillRect(lx-3,y-30,6,42)}
+  /* 홀로 고리 두 겹: 기둥을 감싸고 천천히 돎 */
+  for(const [ry,R,dir] of [[y0-150,92,1],[y0-330,120,-1]]){if(ry<top-60)continue;ctx.lineWidth=2;for(let q=0;q<2;q++){const ph=G.t*.6*dir+q*3.14;ctx.strokeStyle=q?'rgba(160,240,255,.55)':'rgba(120,220,255,.35)';ctx.beginPath();ctx.ellipse(0,ry,R,R*.32,0,ph,ph+2.4);ctx.stroke()}
+    ctx.fillStyle='rgba(220,250,255,.8)';for(let q=0;q<3;q++){const a=G.t*.9*dir+q*2.09;ctx.beginPath();ctx.arc(Math.cos(a)*R,ry+Math.sin(a)*R*.32,2.4,0,7);ctx.fill()}}
+  ctx.restore();ctx.imageSmoothingEnabled=sm}
 function suDraw(front){const p=G.p,H=SU.H,ER=SU.ER,vx0=p.x-VW/2-60,vx1=p.x+VW/2+60,vy0=p.y-VH/2-120,vy1=p.y+VH/2+120;
   const sm=ctx.imageSmoothingEnabled;ctx.imageSmoothingEnabled=true;
   if(!front){
@@ -2013,12 +2029,9 @@ function suDraw(front){const p=G.p,H=SU.H,ER=SU.ER,vx0=p.x-VW/2-60,vx1=p.x+VW/2+
     const pd=SU.pad;if(pd&&pd.complete&&pd.width){for(const q of SU.pads){const w=pd.width*q[2],h=pd.height*q[2];if(q[0]+w/2<vx0||q[0]-w/2>vx1||q[1]+h/2<vy0||q[1]-h/2>vy1)continue;ctx.drawImage(pd,q[0]-w/2,q[1]-h/2,w,h)}
       if(Math.abs(p.x)<VW/2+420&&Math.abs(p.y)<VH/2+300){const s=2.5,w=pd.width*s,h=pd.height*s;ctx.drawImage(pd,-w/2,-h/2+6,w,h)}}
     suBurnDraw();suSyncDraw();suVBombDraw();suAidDraw(0);suWalls(0);suTuDraw(0);
-    if(Math.abs(p.x)<VW/2+200&&Math.abs(p.y)<VH/2+200){ctx.fillStyle='#8f9db8';ctx.beginPath();ctx.ellipse(0,10,ER,ER*.6,0,0,7);ctx.fill();ctx.fillStyle='#eef2f7';ctx.beginPath();ctx.ellipse(0,-6,ER,ER*.6,0,0,7);ctx.fill();ctx.strokeStyle='#18a8ea';ctx.lineWidth=4;ctx.beginPath();ctx.ellipse(0,-6,ER*.78,ER*.47,0,0,7);ctx.stroke()}
+    if(Math.abs(p.x)<VW/2+200&&Math.abs(p.y)<VH/2+200)suElev(0);
   }else{
-    if(Math.abs(p.x)<VW/2+80&&p.y-VH/2<0&&p.y+VH/2>-60){const top=p.y-VH/2-40,hid=Math.abs(p.x)<70&&p.y<-10;ctx.globalAlpha=hid?.4:1;
-      const g=ctx.createLinearGradient(-44,0,44,0);g.addColorStop(0,'#b9c4d6');g.addColorStop(.3,'#ffffff');g.addColorStop(.7,'#e6ecf4');g.addColorStop(1,'#9fadc6');ctx.fillStyle=g;ctx.fillRect(-44,top,88,-12-top);
-      ctx.fillStyle='#18a8ea';ctx.fillRect(-3,top,6,-12-top);ctx.fillStyle='#d8f6ff';for(let y=-12-((G.t*220)%90);y>top;y-=90)ctx.fillRect(-3,y-26,6,26);
-      ctx.fillStyle='#3a56aa';ctx.fillRect(-52,-34,104,10);ctx.fillRect(-52,-150,104,6);ctx.globalAlpha=1}
+    suElev(1);
     suWalls(1);suTuDraw(1);suAidDraw(1);suShipDraw();suWaveDraw();try{fmSupDraw()}catch(e){}
   }
   ctx.imageSmoothingEnabled=sm}
@@ -2028,7 +2041,7 @@ function suDraw(front){const p=G.p,H=SU.H,ER=SU.ER,vx0=p.x-VW/2-60,vx1=p.x+VW/2+
    아직 등장 일정 없음 — 시험은 window.__suBoss('oks'). */
 const SUO={C:240,K:.66,DR:92,HPB:36000};
 function suIm2(k){const M=SU.im2||(SU.im2={});let i=M[k];if(!i){i=M[k]=new Image();i.src='su/'+k+'.webp'}return i}
-function suReg(){if(window.__suReg)return;window.__suReg=1;ENT.su_oks={hp:SUO.HPB,spd:1,dmg:26,xp:300,r:34,name:'옥타르트 옥산느'};S2D.su_oks=suOksDraw;ENT.su_than={hp:SUH.HPB,spd:1,dmg:22,xp:200,r:36,name:'타나토스'};S2D.su_than=suThDraw;ENT.su_oct={hp:SUC.HPB,spd:1,dmg:24,xp:260,r:38,name:'옥타비아'};S2D.su_oct=suOctDraw;for(const k of ['oks_a','oks_b','oks_drone','than','than_b'])suIm2(k)}
+function suReg(){if(window.__suReg)return;window.__suReg=1;ENT.su_oks={hp:SUO.HPB,spd:1,dmg:26,xp:300,r:34,name:'옥타르트 옥산느'};S2D.su_oks=suOksDraw;ENT.su_than={hp:SUH.HPB,spd:1,dmg:22,xp:200,r:36,name:'타나토스'};S2D.su_than=suThDraw;ENT.su_oct={hp:SUC.HPB,spd:1,dmg:24,xp:260,r:38,name:'옥타비아'};S2D.su_oct=suOctDraw;for(const k of ['oks_a','oks_b','oks_drone','than','than_b','elevB','elevS'])suIm2(k)}
 function suSafe(x,y){const H=SU.H-120;x=clamp(x,-H,H);y=clamp(y,-H,H);const d=suEll(x,y,SU.ER+90);if(d<1){x/=Math.max(d,.05);y/=Math.max(d,.05)}return[x,y]}
 function suOksSpawn(){if(G.map!=='su')return null;suReg();const p=G.p,a=rnd(0,6.283),q=suSafe(p.x+Math.cos(a)*380,p.y+Math.sin(a)*300),e=mkEnemy('su_oks',q[0],q[1],{boss:1,hp:SUO.HPB,max:SUO.HPB,name:'옥타르트 옥산느'});
   e.spd=.001;e.so={act:null,cb:2.5,ct:6,cl:5,cs:8,cp:4,da:0,mv:0,st:1,en:0,fire:0,app:1};if(!G.bot){SND.p('boss');toast('⚠ 옥타르트 옥산느 등장','감시 드론을 거느린 아름다운 무수리');G.rflash=.5}return e}

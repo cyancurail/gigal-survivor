@@ -390,6 +390,22 @@ function mkGate(st,vert){const R=vert?RY(PI/2):ID,S=vert?24.1:14,hx=S/2+1.3,RD=[
  for(const sx of [-1,1]){prism([[sx*(hx+1.6),-1.3],[sx*(hx+3.4),-1.1],[sx*(hx+3.4),1.1],[sx*(hx+1.6),1.3]],0,st===2&&sx>0?1.2:4.2,WH2,R);box(1.4,.12,2.3,NE,cmp(TR(sx*(hx+2.5),2.0,0),R),st===2&&sx>0?0:1)}}
 for(const [nm,st,v] of [['gateH0',0,0],['gateH1',1,0],['gateH2',2,0],['gateV0',0,1],['gateV1',1,1],['gateV2',2,1]]){begin();seed=11+st*7;mkGate(st,v);endM(nm,1,0,0,{label:nm})}
 begin();mkWall(0);endM('wallH',1,0,0,{label:'wallH'});begin();mkWall(1);endM('wallV',1,0,0,{label:'wallV'});
+/* ---------- 17~18. 수원 궤도 엘리베이터 (11-19, 시즌3 배너 참고): elevB = 받침+아랫기둥 / elevS = 위로 이어 붙이는 기둥 한 토막(높이 6)
+   받침: 팔각 대좌 + 안으로 휘며 좁아지는 치마 + 둘레의 작은 첨탑 도시 + 버팀 날개. 기둥: 12면 유리 + 흰 세로 늑골 + 3마다 띠 + 앞뒤좌우 하늘색 빛 궤도 ---------- */
+const ELR=2.2;
+function elevShaft(y0,y1){const N=12;lathe([[ELR,y1],[ELR,y0]],N,()=>WH,RY(PI/N));
+ for(let i=0;i<N;i++){const a=i/N*2*PI;box(.26,y1-y0,.26,WH2,cmp(TR(0,(y0+y1)/2,ELR+.03),RY(a)))}
+ for(const a of [0,PI/2,PI,PI*1.5]){box(.95,y1-y0,.1,GLS,cmp(TR(0,(y0+y1)/2,ELR+.06),RY(a+PI/N)));box(.2,y1-y0,.12,NE,cmp(TR(0,(y0+y1)/2,ELR+.1),RY(a+PI/N)),1)}
+ for(let y=Math.ceil(y0/3)*3+1.5;y<y1;y+=3){torus(ELR+.18,.16,24,6,WH,TR(0,y,0));torus(ELR+.30,.05,24,4,NE2,TR(0,y+.28,0),1)}}
+function mkElevB(){
+ lathe([[0,0],[6.1,0],[6.1,.45],[5.8,.75],[5.7,1.25],[5.0,1.45],[4.8,1.9],[0,1.9]],16,(i)=>i===3?NE:i===2||i===5?WH2:WH,RY(PI/16),(i)=>i===3?1:0,true);
+ lathe([[4.4,1.9],[3.9,2.6],[3.3,3.7],[2.85,5.2],[2.55,7.2],[ELR,9.0]],16,(i)=>i%2?WH2:WH,RY(PI/16));
+ for(let i=0;i<8;i++){const a=i/8*2*PI+PI/8,R=3.2;prism([[-.18,0],[.18,0],[.18,1.2],[-.18,1.2]].map(p=>[p[0],p[1]]),1.9,7.4-i%2*1.2,WH,cmp(TR(0,0,R*.98),RY(a)))}
+ for(let i=0;i<16;i++){const a=i/16*2*PI,R=5.15+(i%2)*.35,h=1.4+((i*7)%5)*.55;lathe([[.32,0],[.30,h*.75],[.12,h],[0,h+.6]],6,(k)=>k===2?NE2:WH,cmp(TR(Math.sin(a)*R,1.9,Math.cos(a)*R),RY(a)),(k)=>k===2?1:0,true)}
+ for(let i=0;i<4;i++){const a=i/4*2*PI+PI/4;box(1.3,.9,.9,WH2,cmp(TR(0,2.35,4.25),RY(a)));box(.9,.18,.95,NE,cmp(TR(0,2.5,4.72),RY(a)),1)}
+ torus(4.55,.12,40,6,NE,TR(0,1.95,0),1);torus(ELR+.5,.28,24,6,WH,TR(0,9.0,0));
+ elevShaft(9.0,30)}
+begin();mkElevB();endM('elevB',1,0,0,{label:'elevB'});begin();elevShaft(0,12);endM('elevS',1,0,0,{label:'elevS'});
 const NV=POS.length/3;
 
 /* ================= GL ================= */
@@ -544,7 +560,7 @@ $('lite').onclick=()=>{AUTO.done=1;setLite(!LITE)};$('v0').onclick=()=>{VW.tgt=.
 const stp=$('stamp'),act=$('act'),tabs=[];
 function actLabel(){const a=MODELS[MI.i].act;act.textContent=a.toggle&&MI.K?a.label2:a.label;act.setAttribute('aria-pressed',!!(a.toggle&&MI.K))}
 function pick(i){MI.i=i;MI.K=0;MI.k=0;VW.yaw=MODELS[i].yaw;VW.tgt=i?.5:.28;VW.zoom=1;tabs.forEach((b,j)=>b.setAttribute('aria-pressed',j===i));actLabel()}
-MODELS.forEach((m,i)=>{const b=document.createElement('button');b.textContent=m.name;b.onclick=()=>pick(i);if(/^(gate|wall)/.test(m.name))b.style.display='none';$('tabs').appendChild(b);tabs.push(b)});
+MODELS.forEach((m,i)=>{const b=document.createElement('button');b.textContent=m.name;b.onclick=()=>pick(i);if(/^(gate|wall|elev)/.test(m.name))b.style.display='none';$('tabs').appendChild(b);tabs.push(b)});
 act.onclick=()=>{const a=MODELS[MI.i].act;if(a.toggle){MI.K=MI.K?0:1;actLabel();return}pulse=1;
  if(a.stamp){$('stampT').textContent=a.stamp;stp.animate([{opacity:0,transform:'translate(-50%,-50%) scale(1.9)'},{opacity:1,transform:'translate(-50%,-50%) scale(1)',offset:.12},{opacity:1,transform:'translate(-50%,-50%) scale(1)',offset:.8},{opacity:0,transform:'translate(-50%,-50%) scale(1)'}],{duration:2300,easing:'ease-out',fill:'forwards'})}};
 pick(0);window.__pick=pick;
@@ -555,6 +571,8 @@ window.__bake=(o)=>{BAKE=true;MI.i=o.i;MI.k=MI.K=o.k;VW.yaw=o.yaw;VW.pitch=VW.tg
  if(HQ){const oc=document.createElement('canvas');oc.width=oc.height=w;const ox=oc.getContext('2d');ox.drawImage(glc,0,0);scene(1,o.t||0,null);const gc2=document.createElement('canvas');gc2.width=gc2.height=w;gc2.getContext('2d').drawImage(glc,0,0);
    ox.globalCompositeOperation='lighter';ox.filter=`blur(${w/320}px)`;ox.globalAlpha=.22;ox.drawImage(gc2,0,0);ox.filter=`blur(${w/90}px)`;ox.globalAlpha=.38;ox.drawImage(gc2,0,0);ox.filter='none';u=oc.toDataURL('image/png')}
  else u=glc.toDataURL('image/png');HQ=0;ONLY=null;return u};
+window.__proj=(o,pts)=>{const asp=1,fov=35*PI/180,tf=Math.tan(fov/2),dist=Math.max(17.5/tf,20/(tf*asp))/(o.zoom||1),R=mul(rx(o.pitch),ry(o.yaw)),m=MODELS[o.i],M=mul(tr(0,0,-dist),mul(R,mul(tr(0,m.cy*m.scale,0),scm(m.scale)))),P=persp(fov,asp,1,400),PM=mul(P,M);
+ return pts.map(p=>{const v=[0,0,0,0];for(let r=0;r<4;r++)v[r]=PM[r]*p[0]+PM[4+r]*p[1]+PM[8+r]*p[2]+PM[12+r];return[(v[0]/v[3]*.5+.5)*o.size,(1-(v[1]/v[3]*.5+.5))*o.size]})};
 window.__bakeEnd=()=>{BAKE=false;window.__ga=undefined;fit()};window.__lite=setLite;window.__auto=AUTO;
 })();
 </script></body></html>

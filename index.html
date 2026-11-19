@@ -4176,6 +4176,10 @@ function wfxOn(k){return wsel(k)==='r'}
 function HW(k){return wsel(k)==='h'}
 /* ================= achievements ================= */
 const ACH=[
+ {id:'rw5',n:'런웨이 데뷔',c:'💃 련의 웨이에서 서로 다른 5곡 S 이상',r:'💰 1000G',gold:1000},
+ {id:'rw15',n:'런웨이 단골',c:'💃 련의 웨이에서 서로 다른 15곡 S 이상',r:'🎟️ 전설 확정 뽑기권 1장',tix:{L:1}},
+ {id:'rw30',n:'런웨이의 여왕',c:'💃 련의 웨이에서 서로 다른 30곡 S 이상',r:'👑 신화 확정 선택권 1장',tix:{S:1}},
+ {id:'rwH10',n:'지옥의 런웨이',c:'💃 련의 웨이 헬에서 서로 다른 10곡 S 이상',r:'💬 련의 웨이 아리아드네 특별 대사'},
  {id:'nfinal',n:'늙추천무 퇴치반',c:'보통 모드에서 「늙고 추하고 천박하고 무식한 련」 처치',r:'💰 1500G',gold:1500},
  {id:'hfinal',n:'진짜 기갈은 나야',c:'어려움 모드에서 「늙고 추하고 천박하고 무식한 련」 처치',r:'💰 3000G',gold:3000},
  {id:'fancy12',n:'단톡방 올스타',c:'12명 모두 화려한 모습 해금',r:'🎟️ 희귀 확정 뽑기권 2장 + 💰 1000G',gold:1000,tix:{R:2}},
@@ -4243,6 +4247,7 @@ function achCheck(){
   if((SAVE.pulls||0)>=50)achGet('pull50');
   if(XW5.every(k=>SAVE.xevo[k]))achGet('xevo');
   if(CH12().every(c=>hellUnlRaw(c.id)))achGet('hell12');
+  try{window.rwAch&&rwAch()}catch(e){}
 }
 let ACH_FROM='title';function openAch(from){
   if(from)ACH_FROM=from;hideAll();$('#ach').hidden=false;const n=ACHV().filter(a=>SAVE.ach[a.id]).length;
@@ -6897,7 +6902,7 @@ function rwGive(r){if(r.g)SAVE.gold+=r.g;SAVE.tix=SAVE.tix||{};for(const k in (r
 function spCanN(){const S=sp(),L=spLv();let n=0;for(let i=0;i<L;i++){if(!S.f[i+1])n++;if(S.prem&&!S.p[i+1])n++}return n}
 function spClaim(tr,lv){const S=sp();if(lv>spLv())return false;const box=tr==='p'?S.p:S.f;if(box[lv]||(tr==='p'&&!S.prem))return false;box[lv]=1;rwGive((tr==='p'?SPP:SPF)[lv-1]);return true}
 // ---- 미션 ----
-const MSD={surv10:{n:'아무 캐릭터로 10분 버티기',g:1},kill3k:{n:'적 3,000마리 처치',g:3000},boss2:{n:'보스 2마리 처치',g:2},sb1:{n:'🎡 상봉에서 3분 이상 한 판',g:1},gacha1:{n:'🎰 뽑기 1회',g:1},lv30:{n:'한 판에서 레벨 30 달성',g:1},play3:{n:'1분 이상 3판 플레이',g:3},bpsD:{n:'💄 한 판에서 BPS 1,000 넘기기',g:1000}};
+const MSD={rw1:{n:'💃 련의 웨이 1곡 끝까지 걷기',g:1},surv10:{n:'아무 캐릭터로 10분 버티기',g:1},kill3k:{n:'적 3,000마리 처치',g:3000},boss2:{n:'보스 2마리 처치',g:2},sb1:{n:'🎡 상봉에서 3분 이상 한 판',g:1},gacha1:{n:'🎰 뽑기 1회',g:1},lv30:{n:'한 판에서 레벨 30 달성',g:1},play3:{n:'1분 이상 3판 플레이',g:3},bpsD:{n:'💄 한 판에서 BPS 1,000 넘기기',g:1000}};
 const MSW={bossH10:{n:'🔥 어려움 이상에서 보스 10마리 처치',g:10},hellG:{n:'💀 기본 맵 헬 모드 끝까지 생존',g:1},hellS:{n:'💀 🎡 상봉 헬 모드 끝까지 생존',g:1},evoW:{n:q=>`🧬 ${wpN(q.w)}을(를) 진화시킨 채로 🎡 상봉 헬 모드 생존`,g:1}};
 const wpN=k=>WP[k]?`「${WP[k].icon} ${WP[k].name}」`:'「???」';
 MSD.evoD={n:q=>`🧬 오늘의 진화: ${wpN(q.w)} 진화시키기`,g:1};
@@ -11669,7 +11674,22 @@ const mskName=(id,s)=>{const p=PBY[mskSrc(id,s)];return p&&p.n?String(p.n).split
 const mskLook=(id,s)=>{const im=MSK[id+'|'+s];return im?{src:im.src,nick:nick(id),name:mskName(id,s)}:null};
 const pxLook=id=>{const f=!!(SAVE.fancy||{})[id];let px;try{px=[0,1,2,3].map(k=>id==='쥬은'?juFrame('ww'+k):f?skinSpr(id,curSkin(id),k):SPR.draw(id,'plain',k))}catch(e){px=[0,1,2,3].map(k=>SPR.draw(id,'plain',k))}return{px,nick:nick(id),name:f?'화려한 모습':'기본 모습'}};
 const mskSlots=id=>Object.keys(MSK_IMG).filter(k=>k.startsWith(id+'|')).map(k=>+k.split('|')[1]).filter(s=>s>0&&mskHas(id,s));
+/* V272 련의 웨이 보상: 곡 끝까지 → 랭크·난이도별 골드(하루 10곡) · 곡별 첫 A 300G · 헬 첫 S 희귀 확정 뽑기권 · S 곡 수 업적 · 일일 미션 */
+const RW_G={S:{n:100,h:150,x:200},A:{n:70,h:105,x:140},B:{n:40,h:60,x:80},C:{n:15,h:20,x:30}},RW_CAP=10;
+const rwGrp=rk=>/S/.test(rk)?'S':rk;const rwOrd={C:0,B:1,A:2,S:3};
+function rwSets(ids){const s=new Set(),hs=new Set();for(const r of (Array.isArray(SAVE.rw)?SAVE.rw:[]))if(!ids||ids.includes(r.song)){if(rwGrp(r.rk)==='S'){s.add(r.song);if(r.diff==='x')hs.add(r.song)}}return{s:s.size,hs:hs.size}}
+window.rwAch=function(ids){const c=rwSets(ids);if(c.s>=5)achGet('rw5');if(c.s>=15)achGet('rw15');if(c.s>=30)achGet('rw30');if(c.hs>=10)achGet('rwH10');return c};
+function rwDay(){const t=new Date(Date.now()-4*3600e3),d=t.getFullYear()+'-'+(t.getMonth()+1)+'-'+t.getDate();let R=SAVE.rwR;if(!R||R.d!==d)R=SAVE.rwR={d,n:0};return R}
 window.RW_HOST={
+  reward:(me,ids)=>{if(!me||!ids||!ids.includes(me.song))return null;const g=rwGrp(me.rk),items=[];let gold=0,note='';
+    const R=rwDay();if(R.n<RW_CAP){R.n++;gold+=(RW_G[g]||RW_G.C)[me.diff]||0;items.push('💰 +'+((RW_G[g]||RW_G.C)[me.diff]||0)+'G')}else note='오늘 곡 보상은 다 받았어요 (하루 '+RW_CAP+'곡) · 첫 클리어 보너스는 계속 받아요';
+    SAVE.rwF=SAVE.rwF||{};
+    if(rwOrd[g]>=2&&!SAVE.rwF[me.song+'|A']){SAVE.rwF[me.song+'|A']=1;gold+=300;items.push('✨ 첫 A 보너스 +300G')}
+    if(me.diff==='x'&&g==='S'&&!SAVE.rwF[me.song+'|xS']){SAVE.rwF[me.song+'|xS']=1;SAVE.tix=SAVE.tix||{};SAVE.tix.R=(SAVE.tix.R||0)+1;items.push('🎟️ 헬 첫 S · 희귀 확정 뽑기권 1장')}
+    SAVE.gold=(SAVE.gold||0)+gold;try{msBump('rw1',1)}catch(e){}persist();try{rwAch(ids)}catch(e){}
+    if(R.n>=RW_CAP&&!note&&items.length)note='오늘 곡 보상은 여기까지예요 · 첫 클리어 보너스는 계속 받아요';
+    return items.length||note?{items,note}:null},
+  rstat:ids=>{const R=rwDay(),c=rwSets(ids);const nx=c.s<5?'S '+c.s+'/5곡 → 1000G':c.s<15?'S '+c.s+'/15곡 → 전설 확정권':c.s<30?'S '+c.s+'/30곡 → 신화 선택권':c.hs<10?'헬 S '+c.hs+'/10곡 → 특별 대사':'';return{left:Math.max(0,RW_CAP-R.n),cap:RW_CAP,s:c.s,hs:c.hs,next:nx}},
   cast:()=>{const cid=(CHAR[selI]||CHAR[0]).id;const ms=mskCur(cid);const center=(ms&&mskLook(cid,ms))||pxLook(cid);
     const crew=CHAR.filter(c=>c.id!==cid).map(c=>{const own=mskSlots(c.id).filter(s=>mskOwn(c.id,s));return own.length?mskLook(c.id,own[(Math.random()*own.length)|0]):pxLook(c.id)}).filter(Boolean);
     const extra=[];CHAR.forEach(c=>mskSlots(c.id).forEach(s=>{const o=mskLook(c.id,s);if(o)extra.push(o)}));

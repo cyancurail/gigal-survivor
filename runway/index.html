@@ -10,6 +10,7 @@ canvas#cv{position:fixed;inset:0;width:100%;height:100%;display:block}
 .scr.on{display:flex}
 h1{font-size:30px;letter-spacing:2px;margin-top:6px;background:linear-gradient(90deg,#ffd6f5,#fff3b0,#b9f1ff);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:0 0 18px rgba(255,190,240,.25)}
 .sub{opacity:.75;font-size:13px;margin:4px 0 14px}
+.rwSt{max-width:560px;width:100%;font-size:12.5px;opacity:.85;margin:-6px 0 10px;text-align:center}.rwSt b{color:#fff3b0}.rwRew{max-width:560px;width:100%;display:none;flex-wrap:wrap;gap:6px;justify-content:center;margin:-4px 0 12px}.rwRew span{background:rgba(255,220,120,.14);border:1px solid rgba(255,220,120,.5);color:#fff3b0;border-radius:999px;padding:4px 10px;font-size:13px;font-weight:700}.rwRew small{width:100%;text-align:center;opacity:.6;font-size:11.5px}
 .ari{display:flex;gap:10px;align-items:flex-start;max-width:560px;width:100%;background:rgba(150,220,255,.08);border:1px solid rgba(150,220,255,.35);border-radius:14px;padding:10px 12px;margin-bottom:14px;font-size:14px;line-height:1.5}
 .ari b{color:#9fe4ff;white-space:nowrap}
 .lbl{align-self:center;max-width:560px;width:100%;font-size:13px;opacity:.8;margin:6px 0}
@@ -66,7 +67,8 @@ h1{font-size:30px;letter-spacing:2px;margin-top:6px;background:linear-gradient(9
 <section class="scr on" id="songs">
   <h1>련의 웨이</h1>
   <div class="sub">BPS 런웨이 · 오늘 걸을 곡을 골라 주세요</div>
-  <div class="ari"><b>아리아드네</b><span>어머, 사령관님. 곡마다 박자도 무대 분위기도 달라요. 마음에 드는 걸로 걸어 보세요. 💅</span></div>
+  <div class="ari"><b>아리아드네</b><span id="sgAri">어머, 사령관님. 곡마다 박자도 무대 분위기도 달라요. 마음에 드는 걸로 걸어 보세요. 💅</span></div>
+  <div id="rwSt" class="rwSt"></div>
   <div class="row" style="margin:2px 0 10px"><button class="btn" id="toLobby" style="display:none">◀ 로비로</button><button class="btn on" id="toRank">🏆 BPS 랭킹 보기</button></div>
   <div id="songList" style="width:100%;max-width:560px"></div>
   <div class="tip" id="recTip">기록(BPS · 랭크 · 정확도)은 이 기기에 저장돼요.</div>
@@ -104,6 +106,7 @@ h1{font-size:30px;letter-spacing:2px;margin-top:6px;background:linear-gradient(9
   <div id="sc" style="font-size:22px;font-weight:700"></div>
   <table id="tb"></table>
   <div class="ari"><b>아리아드네</b><span id="rl"></span></div>
+  <div id="rwRew" class="rwRew"></div>
   <div id="rkp" class="rkp"></div>
   <div class="row"><button class="btn on" id="again">다시 걷기</button><button class="btn" id="back">처음으로</button></div>
 </section>
@@ -160,7 +163,11 @@ function drawCover(cv,s){
   g.fillStyle='rgba(0,0,0,.35)';g.fillRect(0,N*.82,N,N*.18);g.fillStyle='#fff';g.font=`800 ${N*.095}px system-ui`;g.textAlign='center';g.fillText(Math.round(s.dm>1?s.bpm*2:s.bpm)+' BPM',c,N*.94);
   g.strokeStyle='rgba(255,255,255,.5)';g.lineWidth=2;g.strokeRect(1,1,N-2,N-2)}
 const fmt=t=>Math.floor(t/60)+':'+String(Math.floor(t%60)).padStart(2,'0');
-function renderSongs(){
+const ARI_SP=['오늘도 헬 무대에 서셨네요. 이젠 제가 언니 박자를 따라가요. 💅','헬 S를 열 곡이나… 무대 조명 담당이 언니 이름을 외웠대요.','언니 손끝은 메트로놈이에요. 아니, 메트로놈이 언니를 따라 해요.','관객석 맨 앞자리는 늘 비워 둬요. 언니가 걸어올 길이니까요.'];
+function rwStat(){try{if(!RWH||!RWH.rstat)return;const st=RWH.rstat(SONGS.map(q=>q.id));const e=$('#rwSt');
+  e.innerHTML=`🎁 오늘 보상 <b>${st.left}</b>/${st.cap}곡 남음 · S 이상 <b>${st.s}</b>곡 · 헬 S <b>${st.hs}</b>곡${st.next?' · 다음 도장: '+st.next:''}`;
+  if(st.hs>=10)$('#sgAri').textContent=ARI_SP[(Math.random()*ARI_SP.length)|0]}catch(e){}}
+function renderSongs(){rwStat();
   const box=$('#songList');box.innerHTML='';
   SONGS.forEach(s=>{
     const d=document.createElement('div');d.className='song';
@@ -277,6 +284,8 @@ function finish(){
   $('#rl').textContent=L[rk];
   const at=Date.now(),prevBest=best(CUR.id,diff);
   const me={song:CUR.id,diff,rk,score:S.score,acc:+(acc*100).toFixed(1),skin:SKINS[skinI].nick,at};addRec(me);
+  {const box=$('#rwRew');box.style.display='none';box.innerHTML='';
+    try{if(RWH&&RWH.reward){const r=RWH.reward(me,SONGS.map(q=>q.id));if(r&&r.items){box.innerHTML=r.items.map(t=>'<span>'+t+'</span>').join('')+(r.note?'<small>'+r.note+'</small>':'');box.style.display='flex'}}}catch(e){console.warn(e)}}
   showRank(me,!prevBest||me.score>prevBest.score);
   $('#res').classList.add('on');
 }

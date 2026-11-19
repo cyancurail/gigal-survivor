@@ -1960,7 +1960,7 @@ function drawChestGuide(){const p=G.p;for(const k of G.pickups){if(k.k!=='chest'
 /* 11-19 사용자: 수원 = 물량전. 기본 무기 만렙+진화 상태로 레벨 1 시작, 평소 스폰 ×SU_SP(1.3과 1.5를 비교 중 — 테스트 콘솔 __suSp(1.5)), 시작 물량 = 다른 맵 5분대,
    대군 ×1.5 + 엘리트(상자 없음, 경험치 평범, 게이트 판정에서 5마리 몫) 게이트당 6마리·10분 뒤 8마리, 동시 적 상한 PC 700 · 모바일 560, 경험치 ×1.3 */
 const SU_OPEN=0,SU_XP=1.3,SU_LEN=900;let SU_SP=1.3;window.__suSp=v=>{SU_SP=+v||1.3;return SU_SP};const suCap=()=>isPCDev()?700:560;
-function suStart(){const w=G.weapons[0];if(!w||!WP[w.k])return;w.lvl=8;const it=WP[w.k].evo;if(it&&IT[it]){G.items[it]=IT[it].max||5;if(!(WP[w.k].ju&&!(SAVE.juEvo||{})[w.k]))w.evo=true}recalc();G.p.hp=G.S.maxHp}
+function suStart(){const w=G.weapons[0];if(!w||!WP[w.k])return;w.lvl=8;const it=WP[w.k].evo;if(it&&IT[it]){G.items[it]=IT[it].max||5;w.evo=true/* 11-19 사용자: 쥬은 보석도 수원에서는 해금 여부와 상관없이 진화 */}recalc();G.p.hp=G.S.maxHp}
 function suU(){if(window.__devAll)return true;if(!SU_OPEN)return false;return !!(SAVE.suU||(SAVE.ach&&SAVE.ach.mgX))}
 const SU={H:1500,ER:165,GW:280,im:null,pat:null,k:0,pad:null,
   pads:[[0,-1250,1.5],[0,1250,1.5],[-1250,0,1.5],[1250,0,1.5],[-1250,-1250,1.1],[1250,-1250,1.1],[-1250,1250,1.1],[1250,1250,1.1]]};

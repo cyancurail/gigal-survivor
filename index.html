@@ -2069,7 +2069,7 @@ function suDraw(front){const p=G.p,H=SU.H,ER=SU.ER,vx0=p.x-VW/2-60,vx1=p.x+VW/2+
    아직 등장 일정 없음 — 시험은 window.__suBoss('oks'). */
 const SUO={C:240,K:.66,DR:92,HPB:36000};
 function suIm2(k){const M=SU.im2||(SU.im2={});let i=M[k];if(!i){i=M[k]=new Image();i.src='su/'+k+'.webp'}return i}
-function suReg(){if(window.__suReg)return;window.__suReg=1;ENT.su_oks={hp:SUO.HPB,spd:1,dmg:26,xp:300,r:34,name:'옥타르트 옥산느'};S2D.su_oks=suOksDraw;ENT.su_than={hp:SUH.HPB,spd:1,dmg:22,xp:200,r:36,name:'타나토스'};S2D.su_than=suThDraw;ENT.su_oct={hp:SUC.HPB,spd:1,dmg:24,xp:260,r:38,name:'옥타비아'};S2D.su_oct=suOctDraw;ENT.su_hex={hp:SUX.HPB,spd:1,dmg:28,xp:500,r:70,name:'헥스터'};S2D.su_hex=suHexS2D;for(const k of ['oks_a','oks_b','oks_drone','than','than_b','elevB','elevS','hex_body','hex_head','ship_a','ship_b','ship_c'])suIm2(k);suMsReg()}
+function suReg(){if(window.__suReg)return;window.__suReg=1;ENT.su_oks={hp:SUO.HPB,spd:1,dmg:26,xp:300,r:34,name:'옥타르트 옥산느'};S2D.su_oks=suOksDraw;ENT.su_than={hp:SUH.HPB,spd:1,dmg:22,xp:200,r:36,name:'타나토스'};S2D.su_than=suThDraw;ENT.su_oct={hp:SUC.HPB,spd:1,dmg:24,xp:260,r:38,name:'옥타비아'};S2D.su_oct=suOctDraw;ENT.su_hex={hp:SUX.HPB,spd:1,dmg:28,xp:500,r:70,name:'헥스터'};S2D.su_hex=suHexS2D;for(const k of ['oks_a','oks_b','oks_drone','than','than_b','elevB','elevS','hex_body','hex_head','hex_eye','ship_a','ship_b','ship_c'])suIm2(k);suMsReg()}
 function suSafe(x,y){const H=SU.H-120;x=clamp(x,-H,H);y=clamp(y,-H,H);const d=suEll(x,y,SU.ER+90);if(d<1){x/=Math.max(d,.05);y/=Math.max(d,.05)}return[x,y]}
 
 /* ---- 몬스터 함선 3종 (11-20 사용자): 랜덤 등장, 대사 없음. a=그림자 가오리(폭탄 투하) b=심연 고래(캡슐 소환) c=암흑 전함(포격) ---- */
@@ -2225,7 +2225,7 @@ function suAidDraw(front){const A=G.suA;if(!A)return;const t=G.t;
    모함 su_cv(8:00~, 동시에 1척): 느리고 단단함, 6초마다 무수리 3마리 사출. 모두 처치 가능. */
 const SUV={bm:{hp:260,r:22},dp:{hp:520,r:30},cv:{hp:1300,r:46}};
 function suShReg(){if(window.__suShR)return;window.__suShR=1;ENT.su_bm={hp:SUV.bm.hp,spd:1,dmg:10,xp:14,r:SUV.bm.r,name:'폭격정'};ENT.su_dp={hp:SUV.dp.hp,spd:1,dmg:10,xp:22,r:SUV.dp.r,name:'강하정'};ENT.su_cv={hp:SUV.cv.hp,spd:1,dmg:14,xp:90,r:SUV.cv.r,name:'무수리 모함'};S2D.su_bm=S2D.su_dp=S2D.su_cv=suVDraw}
-function suVTick(dt){if(G.t<170)return;suShReg();const V=G.suV||(G.suV={bm:180,dp:240,cv:480,B:[]}),p=G.p,H=SU.H-60,late=G.t>SU_LEN;
+function suVTick(dt){return;/* 11-20 사용자: 코드 우주선 3종은 빼고 그림 함선(suMs*)으로 교체 */if(G.t<170)return;suShReg();const V=G.suV||(G.suV={bm:180,dp:240,cv:480,B:[]}),p=G.p,H=SU.H-60,late=G.t>SU_LEN;
   if(G.t>=V.bm&&!late){V.bm=G.t+rnd(22,30);const a=rnd(0,6.283),x=clamp(p.x-Math.cos(a)*620,-H,H),y=clamp(p.y-Math.sin(a)*620,-H,H),e=mkEnemy('su_bm',x,y,{});e.spd=.001;e.sv={k:'bm',a:Math.atan2(p.y-y,p.x-x),t:0,n:0}}
   if(G.t>=V.dp&&!late){V.dp=G.t+rnd(30,40);const a=rnd(0,6.283),q=suSafe(p.x+Math.cos(a)*260,p.y+Math.sin(a)*200),e=mkEnemy('su_dp',clamp(q[0]+Math.cos(a)*500,-H,H),clamp(q[1]+Math.sin(a)*500,-H,H),{});e.spd=.001;e.sv={k:'dp',tx:q[0],ty:q[1],t:0,n:0,st:0,a}}
   if(G.t>=V.cv&&!late){V.cv=G.t+70;if(!G.enemies.some(e=>!e.dead&&e.type==='su_cv')){const q=suSpawnPos(),e=mkEnemy('su_cv',q[0],q[1],{elite:1});e.spd=.001;e.sv={k:'cv',t:0,cd:4}}}
@@ -2473,14 +2473,12 @@ function suHexSky(){const e=G.enemies.find(q=>!q.dead&&q.type==='su_hex'),p=G.p,
   if(e){const S=e.hx;if(false&&S.nt>0){/* 11-20 사용자: 어두워지는 연출 없음 */ctx.save();ctx.globalAlpha=.42*S.nt;ctx.fillStyle='#06031a';ctx.fillRect(p.x-VW,p.y-VH,VW*2,VH*2);ctx.restore()}
     if(S.ph>1&&S.ey>0){const ex=p.x,ey=p.y-VH/2+178,a=S.ey,HI=suIm2('hex_head'),g=S.ga;ctx.save();ctx.globalAlpha=a;
       if(g&&g.t>=1.1&&g.t<1.5){const w=1-(g.t-1.1)/.4;ctx.globalCompositeOperation='lighter';ctx.globalAlpha=w;ctx.fillStyle='#ffe08a';ctx.beginPath();ctx.moveTo(ex-10,ey+30);ctx.lineTo(ex+10,ey+30);ctx.lineTo(g.x+42,g.y);ctx.lineTo(g.x-42,g.y);ctx.closePath();ctx.fill();ctx.fillStyle='#ffffff';ctx.beginPath();ctx.moveTo(ex-3,ey+30);ctx.lineTo(ex+3,ey+30);ctx.lineTo(g.x+12,g.y);ctx.lineTo(g.x-12,g.y);ctx.closePath();ctx.fill();ctx.globalCompositeOperation='source-over';ctx.globalAlpha=a}
-      if(HI.complete&&HI.width){ctx.globalAlpha=a*.55;const D=250;ctx.drawImage(HI,2*560,0,560,560,ex-D/2,ey-D/2,D,D);ctx.globalAlpha=a}
-      for(let k=0;k<6;k++){const an=t*.5+k*1.0472;suHexHex(ex+Math.cos(an)*98,ey+Math.sin(an)*60,16,1);ctx.fillStyle='#14102a';ctx.fill();ctx.strokeStyle='#7a6ad8';ctx.lineWidth=1.5;ctx.stroke()}
-      ctx.beginPath();ctx.arc(ex,ey,54,0,7);ctx.fillStyle='#05030c';ctx.fill();ctx.lineWidth=6+2*Math.sin(t*3);ctx.strokeStyle='#f3d98a';ctx.shadowColor='#ffe08a';ctx.shadowBlur=18;ctx.stroke();ctx.shadowBlur=0;
-      ctx.lineWidth=1;ctx.strokeStyle='#7a6ad8';ctx.beginPath();ctx.arc(ex,ey,38,0,7);ctx.stroke();
-      const gz=g?Math.min(1,g.t/1.1):0;ctx.fillStyle='#c0243a';ctx.beginPath();ctx.arc(ex+(g?Math.max(-14,Math.min(14,(g.x-ex)*.02)):0),ey+(g?6:0),6+8*gz,0,7);ctx.fill();ctx.restore()}}
-  const D=G.suDawn;if(D){D.t+=1/60;const u=Math.min(1,D.t/2);ctx.save();ctx.globalAlpha=(D.t<4?u:Math.max(0,1-(D.t-4)/2))*.45;ctx.fillStyle='#ffd27a';ctx.fillRect(p.x-VW,p.y-VH,VW*2,VH*2);ctx.globalCompositeOperation='lighter';
+      const EI=suIm2('hex_eye');if(EI.complete&&EI.width){/* 11-20 사용자 그림: 4×2 칸(219×294) 0~2 대기 · 3 붉은 눈동자 · 4 충전 · 5 광선 · 6 금감 · 7 부서짐 */const f=g?(g.t<.7?3:4):(e.flash>0?6:Math.floor(t*4)%3),W=300,H2=W*294/219;ctx.drawImage(EI,(f%4)*219,Math.floor(f/4)*294,219,294,ex-W*108/219,ey-H2*123/294,W,H2)}
+      else{ctx.beginPath();ctx.arc(ex,ey,54,0,7);ctx.fillStyle='#05030c';ctx.fill();ctx.lineWidth=6;ctx.strokeStyle='#f3d98a';ctx.stroke()}
+      ctx.restore();S.eyP=[ex,ey]}}
+  const D=G.suDawn;if(D&&D.eye&&D.t<1.4){const EI=suIm2('hex_eye'),W=300,H2=W*294/219,ex=p.x,ey=p.y-VH/2+178;ctx.save();ctx.globalAlpha=Math.max(0,1-D.t/1.4);ctx.drawImage(EI,3*219,294,219,294,ex-W*108/219,ey-H2*123/294,W*(1+D.t*.3),H2*(1+D.t*.3));ctx.restore()}if(D){D.t+=1/60;const u=Math.min(1,D.t/2);ctx.save();ctx.globalAlpha=(D.t<4?u:Math.max(0,1-(D.t-4)/2))*.45;ctx.fillStyle='#ffd27a';ctx.fillRect(p.x-VW,p.y-VH,VW*2,VH*2);ctx.globalCompositeOperation='lighter';
     for(const q of D.pts){const y=q[1]-D.t*q[3]*60,al=Math.max(0,1-D.t/(2.5+q[3]));if(al<=0)continue;ctx.globalAlpha=al;ctx.fillStyle=q[2]?'#ffffff':'#c8a8ff';ctx.fillRect(q[0]+Math.sin(D.t*2+q[3]*9)*12,y,3,3)}ctx.restore();if(D.t>6)G.suDawn=null}}
-function suHexDie(e){const S=e.hx,pts=[];if(!S)return;for(let i=0;i<SUX.N;i+=2){const q=suHexSeg(e,i);for(let k=0;k<3;k++)pts.push([q[0]+rnd(-q[3],q[3]),q[1]+rnd(-q[3]*.5,q[3]*.5),Math.random()<.3,rnd(.6,2.2)])}G.suDawn={t:0,pts};
+function suHexDie(e){const S=e.hx,pts=[];if(!S)return;for(let i=0;i<SUX.N;i+=2){const q=suHexSeg(e,i);for(let k=0;k<3;k++)pts.push([q[0]+rnd(-q[3],q[3]),q[1]+rnd(-q[3]*.5,q[3]*.5),Math.random()<.3,rnd(.6,2.2)])}G.suDawn={t:0,pts,eye:S.ph>1};
   if(!G.bot){SND.p('clear');G.rflash=1;G.shk=.8;toast('🌅 끝없는 밤이 걷혔어요','헥스터 처치 — 새 대원 「응빈」이 사령관님 곁으로 와요',true);SAVE.suHx=1;SAVE.ungbin=1;try{persist()}catch(x){}}}
 function suHexFx(front){for(const e of G.enemies){if(e.dead||e.type!=='su_hex')continue;if(!front&&e.hx.ph>1)suHex2Ground(e);const A=e.hx.act;if(!A)continue;const t=G.t;ctx.save();
   if(!front){if(A.k===3&&!A.sl&&A.lx!==undefined){const u=Math.min(1,A.t/1.45);ctx.globalAlpha=.25+.3*u;ctx.fillStyle='#ff3a5a';ctx.beginPath();ctx.ellipse(A.lx,A.ly,128*u,96*u,0,0,7);ctx.fill();ctx.globalAlpha=.9;ctx.strokeStyle='#ff3a5a';ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(A.lx,A.ly,128,96,0,0,7);ctx.stroke()}

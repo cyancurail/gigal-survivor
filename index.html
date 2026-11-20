@@ -4472,10 +4472,10 @@ const SND=(()=>{
   return{p,tick,set,vol,once,unlock,bell,st:()=>[AC&&AC.state,cur,active.n,!!LB.src,!!LB.buf]};
 })();
 document.addEventListener('input',e=>{const r=e.target;if(!r||!r.dataset||!r.dataset.vol)return;const k=r.dataset.vol,v=+r.value;SND.vol(k,v/100);document.querySelectorAll(`[data-vol="${k}"]`).forEach(x=>{if(x!==r)x.value=v;const b=x.parentElement&&x.parentElement.querySelector('b');if(b)b.textContent=v+'%'})});
-function sndBtns(){return `<div class="sndrow"><button type="button" class="sndb" data-snd="m" aria-pressed="${SAVE.snd.m}">🎵 음악 ${SAVE.snd.m?'켜짐':'꺼짐'}</button><button type="button" class="sndb" data-snd="s" aria-pressed="${SAVE.snd.s}">🔊 효과음 ${SAVE.snd.s?'켜짐':'꺼짐'}</button></div><div class="volrow">${[["m","🎵 음악"],["s","🔊 효과음"]].map(([k,n])=>{const v=Math.round(VOL(k)*100);return `<label class="vol"><span class="vn">${n}</span><input type="range" min="0" max="100" step="10" value="${v}" data-vol="${k}" aria-label="${n} 볼륨"><b>${v}%</b></label>`}).join("")}</div>`}
+function sndBtns(){return `<div class="sndrow"><button type="button" class="sndb" data-snd="m" aria-pressed="${SAVE.snd.m}">🎵 음악 ${SAVE.snd.m?'켜짐':'꺼짐'}</button><button type="button" class="sndb" data-snd="s" aria-pressed="${SAVE.snd.s}">🔊 효과음 ${SAVE.snd.s?'켜짐':'꺼짐'}</button></div><div class="volrow">${[["m","🎵 음악"],["s","🔊 효과음"]].map(([k,n])=>{const v=Math.round(VOL(k)*100);return `<label class="vol"><span class="vn">${n}</span><input type="range" min="0" max="100" step="10" value="${v}" data-vol="${k}" aria-label="${n} 볼륨"><b>${v}%</b></label>`}).join("")}</div>${IS_PC?`<div class="sndrow">${[60,90,140].map(f=>`<button type="button" class="sndb" data-fcap="${f}" aria-pressed="${fcap()===f}">🖥️ ${f}프레임</button>`).join('')}</div>`:''}`}
 /* mp3 BGM(위기 곡·디펜스) 크기 = 예전 크기의 60% × 음악 볼륨(V132) */
 function bgmMv(){return .6*VOL('m')}
-document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const k=b.dataset.snd;if(k){SND.set(k,!SAVE.snd[k]);document.querySelectorAll(`[data-snd="${k}"]`).forEach(x=>{x.setAttribute('aria-pressed',SAVE.snd[k]);x.textContent=(k==='m'?'🎵 음악 ':'🔊 효과음 ')+(SAVE.snd[k]?'켜짐':'꺼짐')})}SND.p('click')});
+document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.fcap){SAVE.fcap=+b.dataset.fcap;try{persist()}catch(x){}document.querySelectorAll('[data-fcap]').forEach(x=>x.setAttribute('aria-pressed',+x.dataset.fcap===SAVE.fcap));SND.p('click');return}const k=b.dataset.snd;if(k){SND.set(k,!SAVE.snd[k]);document.querySelectorAll(`[data-snd="${k}"]`).forEach(x=>{x.setAttribute('aria-pressed',SAVE.snd[k]);x.textContent=(k==='m'?'🎵 음악 ':'🔊 효과음 ')+(SAVE.snd[k]?'켜짐':'꺼짐')})}SND.p('click')});
 
 /* ================= 저장 코드 (기기 간 이동) =================
    ※ POOL/ACH/AXN/WFX 순서가 코드 해석 순서예요. 새 항목은 반드시 "끝에" 추가하세요. */
@@ -6112,10 +6112,12 @@ function jgDraw2(){if(!G.weapons)return;const inv=juInv();for(const w of G.weapo
   if(w.k==='ruby')jrbDraw(w,inv);
   if(w.k==='amethyst')jaDraw(w,inv)}}
 /* ================= loop ================= */
-let FCAP_N=0;/* V263: 120Hz 등 고주사율 화면에서 게임 루프를 60fps로 제한(발열 제보, 갤럭시 S26) */
+let FCAP_N=0;/* V263: 120Hz 등 고주사율 화면에서 게임 루프를 60fps로 제한(발열 제보, 갤럭시 S26) · 11-20 사용자: PC는 140까지(설정에서 60/90/140) */
+const IS_PC=(()=>{try{return !matchMedia('(pointer:coarse)').matches&&!('ontouchstart' in window&&navigator.maxTouchPoints>0&&innerWidth<900)}catch(e){return false}})();
+function fcap(){if(!IS_PC)return 60;const v=SAVE&&SAVE.fcap;return v===60||v===90||v===140?v:140}
 function loop(now){
   requestAnimationFrame(loop);try{SND.tick()}catch(e){}
-  if(now<FCAP_N-4)return;FCAP_N+=1000/60;if(now-FCAP_N>1000/60)FCAP_N=now;
+  {const fi=1000/fcap();if(now<FCAP_N-Math.min(4,fi*.25))return;FCAP_N+=fi;if(now-FCAP_N>fi)FCAP_N=now}
   if(!G){ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,cv.width,cv.height);return}
   let dt=Math.max(0,Math.min(.05,(now-last)/1000));last=now;
   if(G&&G.running&&!G.paused&&!RM){fpsAcc+=dt;fpsN++;if(fpsAcc>2){const fps=fpsN/fpsAcc;FXQ=fps<40?Math.max(.35,FXQ-.15):fps>55?Math.min(1,FXQ+.1):FXQ;fpsAcc=0;fpsN=0}}

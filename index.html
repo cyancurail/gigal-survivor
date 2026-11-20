@@ -1980,9 +1980,14 @@ function suSpawnPos(){const H=SU.H-30,p=G.p;G.suSP=1;let q=null;
 function suSpawnOne(x,y){const m=em(),mkEnemy=(t,x,y)=>suClimbSet(window.mkEnemy(t,x,y));let t=pick(phaseTypes());if(m>=4&&Math.random()<.08)t=Math.random()<.5?'fm_mu_cannon':'fm_mu_jet';
   if(t==='fm_mu_spider'||t==='mg_egg'||t==='mg_fly'){G.suPk=(G.suPk||0)+1;if(G.suPk<4)return;G.suPk=0;for(let i=0;i<4;i++){const a=i/4*6.283+rnd(-.4,.4),r=rnd(8,34);mkEnemy(t,x+Math.cos(a)*r,y+Math.sin(a)*r)}return}
   mkEnemy(t,x,y)}
+/* 11-20 사용자: 사령관은 게이트 틈으로 성벽 밖에 나갈 수 있다(사정거리 짧은 진화무기용). 성벽은 틈 말고는 통과 불가 */
+function suPIn(x,y){const H=SU.H;return Math.abs(x)<=H-18&&y>=-H+34&&y<=H-14}
+function suPlayerClamp(p){const H=SU.H,gp=SU.GW/2-26,OB=H+640;p.x=clamp(p.x,-OB,OB);p.y=clamp(p.y,-OB,OB);
+  const out=(x,y)=>Math.abs(x)>H+52||y<-H-52||y>H+62,gap=(x,y)=>(Math.abs(x)<gp&&(y<-H+34||y>H-14))||(Math.abs(y)<gp&&Math.abs(x)>H-18),ok=(x,y)=>suPIn(x,y)||out(x,y)||gap(x,y),pv=G.suPv||(G.suPv={x:p.x,y:p.y});
+  if(!ok(p.x,p.y)){if(ok(pv.x,p.y))p.x=pv.x;else if(ok(p.x,pv.y))p.y=pv.y;else{p.x=pv.x;p.y=pv.y}}pv.x=p.x;pv.y=p.y}
 function suTick(dt){const p=G.p,H=SU.H;
   if(!G.suB){G.suB=1;if(!window.__mgReg){window.__mgReg=1;fmReg();const ai=new Image();ai.src='farm/m_ally.png';FM.img.m_ally=ai}p.x=0;p.y=280}
-  p.x=clamp(p.x,-H+18,H-18);p.y=clamp(p.y,-H+34,H-14);suPush(p,SU.ER+14);
+  suPlayerClamp(p);suPush(p,SU.ER+14);
   for(const e of G.enemies){if(e.dead||e.suOut||e.suCl)continue;if(e.x<-H)e.x=-H;else if(e.x>H)e.x=H;if(e.y<-H)e.y=-H;else if(e.y>H)e.y=H;if(!e.boss)suPush(e,SU.ER+e.r*.5)}
   fmRadioTick(dt);fmSupTick(dt);suShipTick(dt);suOksTick(dt);suThTick(dt);suOctTick(dt);suHexTick(dt);suRaidTick(dt);suVTick(dt);suAidTick(dt);suTuTick(dt);suOutTick(dt);suGateTick(dt);suWaveTick(dt);suDefTick(dt);suFxTick(dt);suBossTick(dt);suSyncTick(dt);suHud(dt)}
 function suFloor(){if(!SU.im){const im=new Image();im.src='su/floor.jpg';SU.im=im;const pd=new Image();pd.src='su/pad.png';SU.pad=pd}
@@ -2474,7 +2479,7 @@ function suGateTick(dt){if(!G.suGH)G.suGH=[3,3,3,3];if(!G.suGD)G.suGD=[0,0,0,0];
 function suOutTick(dt){const GH=G.suGH||[3,3,3,3],H=SU.H;
   for(const e of G.enemies){if(e.dead)continue;
     if(e.suOut){const gi=e.suOut-1,o=suGOut(gi),pp=[-o[1],o[0]],br=GH[gi]<=0,tl=e.tl||0,P=suGO(gi),lat=gi<2?e.x:e.y;let tx,ty;
-      if(!br){tx=P[0]+pp[0]*tl;ty=P[1]+pp[1]*tl;if(gi===0&&e.y>P[1])e.y=P[1];else if(gi===1&&e.y<P[1])e.y=P[1];else if(gi===2&&e.x>P[0])e.x=P[0];else if(gi===3&&e.x<P[0])e.x=P[0]}
+      if(!br){tx=P[0]+pp[0]*tl;ty=P[1]+pp[1]*tl;const pl=G.p,aggro=!suPIn(pl.x,pl.y)&&Math.hypot(pl.x-e.x,pl.y-e.y)<260;if(gi===0&&e.y>P[1])e.y=P[1];else if(gi===1&&e.y<P[1])e.y=P[1];else if(gi===2&&e.x>P[0])e.x=P[0];else if(gi===3&&e.x<P[0])e.x=P[0];if(aggro){e.tnt=null;e.tntT=0;continue}}
       else{const gl=tl*.7,out=gi===0?e.y<P[1]-4:gi===1?e.y>P[1]+4:gi===2?e.x<P[0]-4:e.x>P[0]+4;
         if(out&&Math.abs(lat-gl)>40){tx=P[0]*(gi<2?0:1)+(gi<2?gl:0);ty=P[1]*(gi<2?1:0)+(gi<2?0:gl)}else{const I=suGP(gi);tx=I[0]-o[0]*150+pp[0]*gl;ty=I[1]-o[1]*150+pp[1]*gl}
         if(gi===0?e.y>-H+20:gi===1?e.y<H-20:gi===2?e.x>-H+20:e.x<H-20){e.suOut=0;e.tnt=null;e.tntT=0;continue}}

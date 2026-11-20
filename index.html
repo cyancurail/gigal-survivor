@@ -11809,7 +11809,7 @@ function menu(){const u=agU();
   SHIPS.forEach((s,i)=>{if(i>=u)return;const lk=!s.ok,cd=cdLeft(s.k),act=isAct(s.k),busy=act||cd>0,tag=lk?'🛠️ 정비 중':act?'✈️ 출격 중':cd>0?(s.k==='argo'?'📦 이번 판 보급 완료':'🔧 재정비 중 <em data-cd="'+s.k+'"></em>'):'';h+=`<button type="button" class="agC ${lk?'lk':busy?'bz':'on'}" data-i="${i}" ${lk||busy?'disabled':''}><canvas width="256" height="192"></canvas><small>${s.d}</small><b>${s.n}</b>${tag?`<i>${tag}</i>`:''}</button>`});
   h+=`</div><button type="button" class="agB" data-x="sup">🛰️ 아이기스 전략특공함 화력 지원</button></div>`;open(h);
   const cds=[...ov.querySelectorAll('[data-cd]')];anims.push(()=>{for(const e of cds){const r=Math.ceil(cdLeft(e.dataset.cd)*60);e.textContent=Math.floor(r/60)+':'+String(r%60).padStart(2,'0')}});
-  ov.querySelectorAll('.agC').forEach(b=>{const i=+b.dataset.i;turn(b.querySelector('canvas'),'t_'+SHIPS[i].k,8);if(!b.disabled)b.onclick=()=>{try{SND.p('click')}catch(e){}approve(i)}});
+  ov.querySelectorAll('.agC').forEach(b=>{const i=+b.dataset.i;turn(b.querySelector('canvas'),'t_'+SHIPS[i].k,8);if(!b.disabled)b.onclick=()=>{try{SND.p('click')}catch(e){}/* 11-20 사용자: 인천에서는 지휘본부 연출 없이 바로 출격 */if(G.map==='mg'){close();launch(SHIPS[i].k)}else approve(i)}});
   ov.querySelector('[data-x=sup]').onclick=()=>{close();ORIG.sup()}}
 function approve(i,o){o=o||{};const s=SHIPS[i];
   open(`<div class="agW">${o.unlock?`<div class="agUn">🛰️ 아이기스 ${s.n} 귀환!</div>`:''}<div class="agHQ"><div class="agHd">AEGIS HQ · LINK ESTABLISHED<small>SIGNAL 100% · ARIADNE ONLINE</small></div><canvas width="512" height="448"></canvas>
@@ -11823,7 +11823,7 @@ function approve(i,o){o=o||{};const s=SHIPS[i];
   let fin=0;const done=()=>{if(fin)return;fin=1;close();launch(s.k)};ov.onclick=()=>{if(st>=(o.unlock?4:3))done()};try{SND.p('radio')}catch(e){}}
 
 /* ---------- 함선 출격 ---------- */
-function launch(k){(G.agCd||(G.agCd={}))[k]=em()+(CD[k]||5)+((k==='pallas'?(G.hell?20:25):k==='panacea'?13:k==='themis'?(G.hell?8:12)+6:0)*TSD/60);if(k==='pallas')palStart();else if(k==='panacea')panStart();else if(k==='themis')theStart();else if(k==='argo')argoStart()}
+function launch(k){(G.agCd||(G.agCd={}))[k]=em()+(CD[k]||5)+((k==='pallas'?(G.hell?30:40)/* V268 지속시간과 맞춤 */:k==='panacea'?13:k==='themis'?(G.hell?8:12)+6:0)*TSD/60);if(k==='pallas')palStart();else if(k==='panacea')panStart();else if(k==='themis')theStart();else if(k==='argo')argoStart()}
 const TSD=.8;/* 게임 초 → 화면 시계 초 (em과 같은 비율) */
 /* 팔라스 프레임: 0~23 피치 링, 24~47 뒤집힌 피치 링, 48~71 롤 링 (칸 144, 12열) */
 function frameOf(mp,mr){const n=a=>((a%TAU)+TAU)%TAU,id=a=>Math.round(n(a)/TAU*24)%24,near=(a,b)=>Math.min(Math.abs(a-b),TAU-Math.abs(a-b))<.12,r=n(mr),q=n(mp);

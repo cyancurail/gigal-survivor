@@ -11970,16 +11970,33 @@ function argoDraw(){const S=G.agArgo;if(!S)return;const p=G.p;
     ctx.drawImage(im,sx,sy,AC,AC,ox,oy,cd,cd);holoSay(S.gx,oy+cd*.22,S.sayT>0?S.say:'',cl(S.sayT/.4))}
   ctx.imageSmoothingEnabled=sm}
 /* 무기 보급: 갖지 않은 무기 7개 중 1개 · 칸이 가득 차면 가진 무기 1개와 교환(새 무기 Lv1) */
-function argoPick(done){if(G.bot){done();return}const BAN=G.ban||{};const pool=Object.keys(WP).filter(k=>!W(k)&&!(G.fmSW&&G.fmSW.w.k===k)&&!BAN[k]&&!WP[k].hid&&juAllow(k,G.id));
-  for(let i=pool.length-1;i>0;i--){const j=(Math.random()*(i+1))|0;[pool[i],pool[j]]=[pool[j],pool[i]]}const ops=pool.slice(0,7).map(k=>({t:'wnew',k}));if(!ops.length){done();return}
-  const full=G.weapons.length+(G.fmSW?1:0)>=6,M=$('#lvmodal'),O=$('#lvov');G.paused=true;G.agMenu=1;
-  const fin=()=>{O.hidden=true;G.agMenu=0;G.paused=false;try{renderHud()}catch(e){}done();checkLevel()};
-  M.innerHTML=`<h2>📦 아르고 보급 · 무기 1개 선택</h2><p style="text-align:center;margin:-4px 0 8px;color:#9fd8ff">${full?'무기 칸이 가득 찼어요. 고른 무기를 가진 무기 하나와 바꿔요 (새 무기는 Lv1)':'갖고 있지 않은 무기 중 하나를 골라요'}</p>`+ops.map((o,i)=>optHTML(o,i)).join('');O.hidden=false;
-  M.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{const k=ops[+b.dataset.i].k;if(!full){addWeapon(k);toast('📦 아르고 보급',WP[k].icon+' '+WP[k].name+' 획득!',true);fin();return}
-    let arm=-1;M.innerHTML=`<h2>🔁 바꿀 무기 고르기</h2><p style="text-align:center;margin:-4px 0 8px;color:#9fd8ff">${WP[k].icon} ${WP[k].name} (Lv1)와 바꿀 무기를 눌러요</p>`+G.weapons.map((w,i)=>`<button type="button" class="opt agSw" data-i="${i}" style="display:flex;gap:10px;align-items:center;width:100%"><span class="wi">${WP[w.k].icon}</span><b>${w.evo?'★ ':''}${w.evo&&WP[w.k].evoName?WP[w.k].evoName:WP[w.k].name}</b><small style="margin-left:auto">${w.evo?'진화':'Lv'+w.lvl}</small></button>`).join('')+`<button type="button" class="opt" data-x="no" style="width:100%;margin-top:6px">↩ 바꾸지 않고 그냥 닫기</button>`;
-    M.querySelector('[data-x=no]').onclick=fin;
-    M.querySelectorAll('.agSw').forEach(bb=>bb.onclick=()=>{const i=+bb.dataset.i,w=G.weapons[i];if(w.evo&&arm!==i){arm=i;bb.querySelector('small').textContent='진화 무기예요! 한 번 더 누르면 바꿔요';return}
-      G.weapons.splice(i,1);addWeapon(k);toast('📦 아르고 보급',WP[w.k].name+' → '+WP[k].icon+' '+WP[k].name,true);fin()})})}
+/* 11-20 사용자: [무기] [아이템] 탭 — 안 가진 무기 6개 / 안 가진 패시브 6개 중 1개. 칸이 가득이면 교체(패시브 교체가 핵심: 진화 끝난 재료를 바꿔 다른 무기 진화). 진화한 무기는 재료를 빼도 진화 유지 */
+function argoPick(done){if(G.bot){done();return}const BAN=G.ban||{};const sh=a=>{for(let i=a.length-1;i>0;i--){const j=(Math.random()*(i+1))|0;[a[i],a[j]]=[a[j],a[i]]}return a};
+  const wOps=sh(Object.keys(WP).filter(k=>!W(k)&&!(G.fmSW&&G.fmSW.w.k===k)&&!BAN[k]&&!WP[k].hid&&juAllow(k,G.id))).slice(0,6).map(k=>({t:'wnew',k}));
+  const iOps=sh(Object.keys(IT).filter(k=>!G.items[k]&&!IT[k].ju&&juAllow(k,G.id))).slice(0,6).map(k=>({t:'inew',k}));
+  if(!wOps.length&&!iOps.length){done();return}
+  if(!document.getElementById('agPkCss')){const st=document.createElement('style');st.id='agPkCss';st.textContent='#lvmodal.agP .opt{padding:6px 8px;gap:8px}#lvmodal.agP .opt .ic{width:40px;height:40px;font-size:21px}#lvmodal.agP .opt .ic canvas,#lvmodal.agP .opt .ic img{width:40px;height:40px}#lvmodal.agP .opt .tx b{font-size:14px}#lvmodal.agP .opt .tx small{font-size:11.5px;line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#lvmodal.agP .opt .tx small.pr2{display:none}#lvmodal.agP .opt+.opt{margin-top:6px}#lvmodal.agP h2{margin:0 0 8px;font-size:19px}';document.head.appendChild(st)}
+  const wFull=()=>G.weapons.length+(G.fmSW?1:0)>=6,iFull=()=>Object.keys(G.items).length>=6,M=$('#lvmodal'),O=$('#lvov');G.paused=true;G.agMenu=1;let tab=wOps.length?'w':'i';M.classList.add('agP');
+  const fin=()=>{O.hidden=true;M.classList.remove('agP');G.agMenu=0;G.paused=false;try{recalc();renderHud()}catch(e){}done();checkLevel()};
+  const wName=w=>(w.evo&&WP[w.k].evoName?WP[w.k].evoName:WP[w.k].name);
+  const tabs=()=>`<div style="display:flex;gap:8px;margin:0 0 8px">${[['w','⚔️ 무기',wFull()],['i','💍 아이템',iFull()]].map(([k,n,f])=>`<button type="button" class="opt agTab" data-tab="${k}" aria-pressed="${tab===k}" style="flex:1;text-align:center;padding:10px 6px;${tab===k?'border-color:#58c8ff;background:rgba(88,200,255,.18)':'opacity:.75'}"><b>${n}</b><br><small style="color:${f?'#ffb36a':'#9fd8ff'}">${f?'가득 · 교체':'칸 여유'}</small></button>`).join('')}</div>`;
+  const list=()=>{const ops=tab==='w'?wOps:iOps,f=tab==='w'?wFull():iFull();
+    M.innerHTML=`<h2>📦 아르고 보급 · 1개 선택</h2>`+tabs()+`<p style="text-align:center;margin:-2px 0 8px;color:#9fd8ff">${!ops.length?'고를 수 있는 게 없어요':f?(tab==='w'?'무기 칸이 가득 찼어요. 고른 무기를 가진 무기 하나와 바꿔요 (새 무기는 Lv1)':'아이템 칸이 가득 찼어요. 고른 아이템을 가진 아이템 하나와 바꿔요 (새 아이템은 Lv1)'):(tab==='w'?'갖고 있지 않은 무기 중 하나를 골라요':'갖고 있지 않은 아이템 중 하나를 골라요')}</p>`+ops.map((o,i)=>optHTML(o,i)).join('');O.hidden=false;
+    M.querySelectorAll('.agTab').forEach(b=>b.onclick=()=>{tab=b.dataset.tab;list()});
+    M.querySelectorAll('.opt:not(.agTab)').forEach(b=>b.onclick=()=>{const o=ops[+b.dataset.i];if(!o)return;const k=o.k;
+      if(tab==='w'){if(!wFull()){addWeapon(k);toast('📦 아르고 보급',WP[k].icon+' '+WP[k].name+' 획득!',true);fin();return}swapW(k)}
+      else{if(!iFull()){G.items[k]=1;recalc();toast('📦 아르고 보급',IT[k].icon+' '+IT[k].name+' 획득!',true);fin();return}swapI(k)}})};
+  const swapW=k=>{let arm=-1;M.innerHTML=`<h2>🔁 바꿀 무기 고르기</h2><p style="text-align:center;margin:-4px 0 8px;color:#9fd8ff">${WP[k].icon} ${WP[k].name} (Lv1)와 바꿀 무기를 눌러요</p>`+G.weapons.map((w,i)=>`<button type="button" class="opt agSw" data-i="${i}" style="display:flex;gap:10px;align-items:center;width:100%"><span class="wi">${WP[w.k].icon}</span><b>${w.evo?'★ ':''}${wName(w)}</b><small style="margin-left:auto">${w.evo?'진화':'Lv'+w.lvl}</small></button>`).join('')+`<button type="button" class="opt" data-x="back" style="width:100%;margin-top:6px">← 다시 고르기</button><button type="button" class="opt" data-x="no" style="width:100%;margin-top:6px">↩ 바꾸지 않고 그냥 닫기</button>`;
+    M.querySelector('[data-x=no]').onclick=fin;M.querySelector('[data-x=back]').onclick=list;
+    M.querySelectorAll('.agSw').forEach(bb=>bb.onclick=()=>{const i=+bb.dataset.i,w=G.weapons[i];if(w.evo&&arm!==i){arm=i;bb.style.borderColor='#ffd34d';bb.querySelector('small').textContent='진화 무기예요! 한 번 더 누르면 바꿔요';return}
+      G.weapons.splice(i,1);addWeapon(k);toast('📦 아르고 보급',WP[w.k].name+' → '+WP[k].icon+' '+WP[k].name,true);fin()})};
+  const swapI=k=>{let arm=null;const ks=Object.keys(G.items);
+    const tag=q=>{const us=G.weapons.filter(w=>WP[w.k].evo===q);if(!us.length)return'';const pend=us.filter(w=>!w.evo),done=us.filter(w=>w.evo);return pend.length?`<small style="display:block;color:#ffb36a">⚠️ 아직 진화 전 · 🧬 ${pend.map(w=>WP[w.k].name).join(', ')} 재료</small>`:`<small style="display:block;color:#9fe8b0">진화 완료 · 바꿔도 진화 유지 (🧬 ${done.map(wName).join(', ')})</small>`};
+    M.innerHTML=`<h2>🔁 바꿀 아이템 고르기</h2><p style="text-align:center;margin:-4px 0 8px;color:#9fd8ff">${IT[k].icon} ${IT[k].name} (Lv1)와 바꿀 아이템을 눌러요</p>`+ks.map(q=>`<button type="button" class="opt agSi" data-k="${q}" style="display:flex;gap:10px;align-items:center;width:100%;text-align:left"><span class="wi">${IT[q].icon}</span><span><b>${IT[q].name}</b>${tag(q)}</span><small class="lv" style="margin-left:auto;white-space:nowrap">Lv${G.items[q]}</small></button>`).join('')+`<button type="button" class="opt" data-x="back" style="width:100%;margin-top:6px">← 다시 고르기</button><button type="button" class="opt" data-x="no" style="width:100%;margin-top:6px">↩ 바꾸지 않고 그냥 닫기</button>`;
+    M.querySelector('[data-x=no]').onclick=fin;M.querySelector('[data-x=back]').onclick=list;
+    M.querySelectorAll('.agSi').forEach(bb=>bb.onclick=()=>{const q=bb.dataset.k,pend=G.weapons.some(w=>WP[w.k].evo===q&&!w.evo);if(pend&&arm!==q){arm=q;bb.style.borderColor='#ffd34d';const l=bb.querySelector('.lv');l.textContent='한 번 더 누르면 바꿔요';l.style.fontSize='11px';return}
+      delete G.items[q];G.items[k]=1;recalc();toast('📦 아르고 보급',IT[q].name+' → '+IT[k].icon+' '+IT[k].name,true);fin()})};
+  list()}
 const SILC={};function silOf(im,key){const c0=SILC[key];if(c0&&c0.w===im.width)return c0.c;const c=document.createElement('canvas');c.width=im.width;c.height=im.height;const x=c.getContext('2d');x.drawImage(im,0,0);x.globalCompositeOperation='source-in';x.fillStyle='#020812';x.fillRect(0,0,c.width,c.height);SILC[key]={w:im.width,c};return c}
 
 /* ---------- 연결 ---------- */

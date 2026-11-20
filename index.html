@@ -2266,12 +2266,14 @@ function suOctDraw(e){const S=e.oc;if(!S){S2D_FB(e);return}const A=S.act,R=SUC.R
 const SUR={PEN:.55,COL:['#35d6ff','#ff5ac8','#b07aff','#ffd23a'],CN:['하늘','분홍','보라','금']};
 function suRdSeq(n,m){const q=[];while(q.length<n){const v=Math.random()*m|0;if(v!==q[q.length-1])q.push(v)}return q}
 /* 11-20 사용자: 보스가 멈춰서 문제만 내면 쉬움 → ① 패턴 중에도 보스가 평소 공격의 절반 빈도로 공격 ③ 체력이 줄수록 보여 주는 시간 단축(3초→2초), 마지막 15%는 패턴 겹침 */
-const SURP={SP:[1,1.15,1.3,1.5],HT:[2.6,2.2],HZ:1.4,HZT:1.1,HZR:75};
-function suRaid(e,k,lv,st){const p=G.p,c=suSafe(p.x,p.y);st=st||0;const R={k,lv:lv||0,t:0,ph:0,cx:c[0],cy:c[1],e,st,sp:SURP.SP[st],cb:st>=3,ht:1.2,hzt:.8,hz:[]};
+const SURP={MEM:[2,1.67,1.33,1],SP:[1,1.15,1.3,1.5],HT:[2.6,2.2],HZ:1.4,HZT:1.1,HZR:75};
+function suRaid(e,k,lv,st){const p=G.p,c=suSafe(p.x,p.y);st=st||0;const R={k,lv:lv||0,t:0,ph:0,cx:c[0],cy:c[1],e,st,sp:SURP.SP[st],hs:SURP.SP[st],cb:st>=3,ht:1.2,hzt:.8,hz:[]};
   if(k===10){R.seq=suRdSeq(lv?5:4,4);R.i=0;R.on=-1;R.T=R.seq.length*2.4+2}
   else if(k===11){R.dark=lv?[Math.random()*8|0]:(()=>{const a=Math.random()*8|0;return[a,(a+3+(Math.random()*3|0))%8]})();R.a=rnd(0,6.283);R.dir=Math.random()<.5?-1:1}
   else if(k===20){R.seq=suRdSeq(lv?6:4,4);R.i=0;R.bt=lv?.8:.95}
   else{R.rounds=[3,4,5];R.r=0;R.show=lv?2.2:3;suRdGrid(R)}
+  /* 11-20 사용자: 스피드 게임 — 기억할 시간(보여 주는 구간 전체)을 처음 2초 → 마지막 1초 */
+  {const B=k===10?1+R.seq.length*.75:k===20?1.4+R.seq.length*.6:k===21?R.show:0;if(B)R.sp=B/SURP.MEM[st]}
   e.rd=R;G.suRd=R;e.fmInv=1;if(!G.bot){SND.p('boss');G.rflash=.4;const T={10:['색의 서약','보석이 빛나는 순서를 외워, 같은 순서로 발판을 밟아요'],11:['어두운 면','고리가 멈추면 꺼진 조각 쪽 부채꼴만 안전해요'],20:['여왕의 시선','드론이 눈을 뜨는 순서를 외워요. 같은 순서로 터져요'],21:['기억의 타일','조준점이 없는 칸을 외워요. 표시가 꺼진 뒤 조준됐던 칸에 사격이 떨어져요']}[k];toast('⚠ '+e.name+' — '+T[0],T[1],true);if(R.cb)setTimeout(()=>{if(G.suRd===R)toast('⚠ 공격이 겹쳐요',e.oc?'바닥에 꽂히는 레이저 문양도 피하세요':'하늘에서 떨어지는 조준 사격도 피하세요',true)},900)}return R}
 function suRdGrid(R){const n=R.rounds[R.r],N=n*n,S=new Set();while(S.size<n)S.add(Math.random()*N|0);R.n=n;R.safe=S;R.ph=0;R.t=0}
 function suRaidDue(e,TH,K){const i=e.ri||0;if(i<TH.length&&e.hp<e.max*TH[i]){e.ri=i+1;suRaid(e,K[i],i>>1,i);return true}return false}
@@ -2280,7 +2282,7 @@ function suRdEnd(R,ok){const e=R.e;e.rd=null;e.fmInv=0;if(G.suRd===R)G.suRd=null
   if(ok&&!G.bot){SND.p('clear');G.texts.push({x:G.p.x,y:G.p.y-56,v:'파훼 성공!',life:1.6,big:1,col:'#8fe6ff'});sparks(e.x,e.y-60,30,['#ffffff','#8fe6ff','#ffc8e6'],260,.7,3)}}
 function suRdPad(R,i){const a=-1.5708+i*1.5708;return[R.cx+Math.cos(a)*175,R.cy+Math.sin(a)*130]}
 function suRdPress(R,dt){const e=R.e,p=G.p,oc=!!e.oc;if(R.sp==null)return;R.ht-=dt;
-  if(R.ht<=0){R.ht=SURP.HT[oc?0:1]/R.sp;
+  if(R.ht<=0){R.ht=SURP.HT[oc?0:1]/R.hs;
     if(oc){const N=R.st>=2?12:10,o=rnd(0,6.283);for(let i=0;i<N;i++){const a=o+i*6.2832/N;G.eb.push({x:e.x,y:e.y-70,vx:Math.cos(a)*125,vy:Math.sin(a)*125,r:6,dmg:e.dmg*.5,life:7,c:SUC.C[i%8],src:e})}if(!G.bot)sparks(e.x,e.y-70,10,['#ffffff','#7df3ff','#ff6ad5'],160,.35,2)}
     else{const q=suOksDr(e,Math.random()*4|0),a=Math.atan2(p.y-q[1],p.x-q[0]);for(let s2=-1;s2<=1;s2++)G.eb.push({x:q[0],y:q[1],vx:Math.cos(a+s2*.22)*190,vy:Math.sin(a+s2*.22)*190,r:6,dmg:e.dmg*.5,life:6,c:'#ff3a4a',src:e});if(!G.bot)sparks(q[0],q[1],6,['#ff3a4a','#ffd27a'],120,.3,2)}}
   if(R.cb){R.hzt-=dt;if(R.hzt<=0){R.hzt=SURP.HZ;R.hz.push({x:p.x+rnd(-40,40),y:p.y+rnd(-30,30),t:0})}}

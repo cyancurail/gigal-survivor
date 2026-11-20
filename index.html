@@ -1459,6 +1459,7 @@ function hurt(e,amt,key,opts={}){
   if((G.ultOn&&G.ultOn.lucky)||Math.random()<G.S.crit*(opts.critMul||1)){d*=opts.critDmg||2;crit=true}
   if(e.frog>0)d*=2;
   if(e.frz>0)d*=1.3;
+  if(G.map==='su'&&!e.boss&&d>0){/* 11-20: 수원 방어장갑+어둠방어 */d*=e.elite?.9:.8;if(d>20){const A=FM_AR[G.t<240?0:G.t<540?1:2];d=20+(Math.min(d,100)-20)*(1-A[0])+Math.max(0,d-100)*(1-A[1])}}
   if(G.map==='farm'||G.map==='mg'){if(e.mgSh>0)d*=.5;if(G.fmVz&&!e.boss&&!fmSeen(e))d*=1-(G.map==='mg'?.2:.4)*(1-(window.SN?SN.v('moon'):0)/100);if(d>20)d=fmArmor(e,d)}
   e.hp-=d;G.stats.dmg+=d;G.stats.k=G.stats.k||{};G.stats.k[key]=(G.stats.k[key]||0)+Math.min(d,e.hp+d);if(G.bh)G.bh[key]=(G.bh[key]||0)+1;G._hk=key;
   if(e.boss&&G.map==='mg'&&G.hard){const k0=opts.kb||0;opts.kb=(k0&&window.SN&&SN.v('kb'))?k0*SN.v('kb')/100:0;if(k0>0&&!opts.kb&&opts.force&&!G.bot&&G.t>(e.mgKbT||0)){e.mgKbT=G.t+6;G.texts.push({x:e.x,y:e.y-e.r-44,v:'어딜 들이미노? 그게 되겠노?',life:1.5,col:'#ffb0e0'})}if(G.hell&&!opts.force)opts.stun=0}
@@ -1959,12 +1960,12 @@ function drawChestGuide(){const p=G.p;for(const k of G.pickups){if(k.k!=='chest'
    아직 없음: 방향 웨이브·게이트 내구(③) · 우주선(④) · 보스(⑤) · 지원 기믹·함선(⑥) · 헥스터(⑦). SU_OPEN=0이면 테스트 페이지(__devAll)에서만 보임. */
 /* 11-19 사용자: 수원 = 물량전. 기본 무기 만렙+진화 상태로 레벨 1 시작, 평소 스폰 ×SU_SP(1.3과 1.5를 비교 중 — 테스트 콘솔 __suSp(1.5)), 시작 물량 = 다른 맵 5분대,
    대군 ×1.5 + 엘리트(상자 없음, 경험치 평범, 게이트 판정에서 5마리 몫) 게이트당 6마리·10분 뒤 8마리, 동시 적 상한 PC 700 · 모바일 560, 경험치 ×1.3 */
-const SU_OPEN=0,SU_XP=1.3,SU_LEN=900;let SU_SP=1.3;window.__suSp=v=>{SU_SP=+v||1.3;return SU_SP};const suCap=()=>isPCDev()?700:560;
-function suStart(){const w=G.weapons[0];if(!w||!WP[w.k])return;w.lvl=8;const it=WP[w.k].evo;if(it&&IT[it]){G.items[it]=IT[it].max||5;w.evo=true/* 11-19 사용자: 쥬은 보석도 수원에서는 해금 여부와 상관없이 진화 */}recalc();G.p.hp=G.S.maxHp}
+const SU_OPEN=0,SU_XP=1.3,SU_LEN=900;let SU_SP=.8;const SU_HPM=2.2;window.__suSp=v=>{SU_SP=+v||.8;return SU_SP};const suCap=()=>isPCDev()?700:560;
+function suStart(){const w=G.weapons[0];if(!w||!WP[w.k])return;w.lvl=8;const it=WP[w.k].evo;if(it&&IT[it]){G.items[it]=1;w.evo=true/* 11-19 사용자: 쥬은 보석도 수원에서는 해금 여부와 상관없이 진화 */}recalc();G.p.hp=G.S.maxHp}
 function suU(){if(window.__devAll)return true;if(!SU_OPEN)return false;return !!(SAVE.suU||(SAVE.ach&&SAVE.ach.mgX))}
 const SU={H:1500,ER:165,GW:280,im:null,pat:null,k:0,pad:null,
   pads:[[0,-1250,1.5],[0,1250,1.5],[-1250,0,1.5],[1250,0,1.5],[-1250,-1250,1.1],[1250,-1250,1.1],[-1250,1250,1.1],[1250,1250,1.1]]};
-const SU_PH=[[0,['fm_mu_spider']],[2,['fm_mu_spider','fm_mu_ray']],[4,['fm_mu_ray','fm_mu_spider','fm_mu_beetle']],
+const SU_PH=[[0,['fm_mu_spider','fm_mu_spider','mg_egg','sb_germ']],[2,['fm_mu_spider','fm_mu_ray','mg_egg','mg_fly','sb_lamp']],[4,['fm_mu_ray','fm_mu_spider','fm_mu_beetle','mg_fly','sb_trash','mg_eye']],
   [6.6,['fm_mu_beetle','fm_mu_scorp','fm_mu_swarm','mg_egg','mg_fly']],[10,['fm_mu_scorp','fm_mu_rock','mg_jelly','mg_fly','mg_shell','mg_eye']],
   [13.3,['fm_mu_rock','fm_mu_blob','fm_mu_star','mg_shell','mg_jelly','mg_medusa']],[17,['fm_mu_rock','fm_mu_star','fm_mu_blob','mg_shell','mg_ghost','mg_medusa','mg_eye']]];
 /* 보스는 ⑤단계 — 지금은 등장하지 않는 자리 표시(코드가 「마지막 보스 이름」을 찾는 곳이 있어서) */
@@ -2047,11 +2048,14 @@ function suRoads(){const p=G.p,R=SURD,x0=p.x-VW/2-80,x1=p.x+VW/2+80,y0=p.y-VH/2-
   const vt=(x)=>{if(x+HW<x0||x-HW>x1)return;const a=Math.max(-R,y0),b=Math.min(R,y1);if(a>=b)return;ctx.fillStyle='#d5dbe6';ctx.fillRect(x-HW,a,HW*2,b-a);ctx.fillStyle='#3a56aa';ctx.fillRect(x-HW,a,3,b-a);ctx.fillRect(x+HW-3,a,3,b-a);
     ctx.fillStyle='#aab4c8';for(let y=Math.ceil(a/56)*56;y<b;y+=56)ctx.fillRect(x-HW+3,y,HW*2-6,2);ctx.fillStyle='#18a8ea';for(let y=Math.ceil(a/56)*56+18;y<b;y+=56)ctx.fillRect(x-2,y,4,20);ctx.fillStyle='#ffc23a';for(let y=Math.ceil(a/168)*168;y<b;y+=168){ctx.fillRect(x-HW+6,y+5,5,12);ctx.fillRect(x+HW-11,y+5,5,12)}};
   vt(-R);vt(R);hz(-R);hz(R)}
+/* 11-20 사용자: 패드 위에서 무기 이펙트가 가려짐 → 바닥(줄기·길·패드)은 아이템/무기보다 먼저 */
+function suGround(){const p=G.p,H=SU.H,ER=SU.ER,vx0=p.x-VW/2-60,vx1=p.x+VW/2+60,vy0=p.y-VH/2-120,vy1=p.y+VH/2+120;const sm=ctx.imageSmoothingEnabled;ctx.imageSmoothingEnabled=true;
+  suTrunk(0,-ER*.6,0,-H+10,0);suTrunk(0,ER*.6,0,H-10,1);suTrunk(-ER,0,-H+10,0,2);suTrunk(ER,0,H-10,0,3);
+  suRoads();{const pd=suIm2('pad3d'),m=SUPD;if(pd.complete&&pd.width){const dp=(x,y,k)=>{const w=m.w*k,h=m.h*k;if(x+w/2<vx0-40||x-w/2>vx1+40||y+h<vy0||y-h>vy1)return;ctx.drawImage(pd,x-m.ox*k,y-m.oy*k,w,h)};for(const q of SU.pads)dp(q[0],q[1],q[2]/2.5);dp(0,6,1)}}
+  ctx.imageSmoothingEnabled=sm}
 function suDraw(front){const p=G.p,H=SU.H,ER=SU.ER,vx0=p.x-VW/2-60,vx1=p.x+VW/2+60,vy0=p.y-VH/2-120,vy1=p.y+VH/2+120;
   const sm=ctx.imageSmoothingEnabled;ctx.imageSmoothingEnabled=true;
   if(!front){
-    suTrunk(0,-ER*.6,0,-H+10,0);suTrunk(0,ER*.6,0,H-10,1);suTrunk(-ER,0,-H+10,0,2);suTrunk(ER,0,H-10,0,3);
-    suRoads();{const pd=suIm2('pad3d'),m=SUPD;if(pd.complete&&pd.width){const dp=(x,y,k)=>{const w=m.w*k,h=m.h*k;if(x+w/2<vx0-40||x-w/2>vx1+40||y+h<vy0||y-h>vy1)return;ctx.drawImage(pd,x-m.ox*k,y-m.oy*k,w,h)};for(const q of SU.pads)dp(q[0],q[1],q[2]/2.5);dp(0,6,1)}}
     suBurnDraw();suSyncDraw();suRaidDraw();suHexFx(0);suVBombDraw();suAidDraw(0);suWalls(0);suDefDraw(0);suTuDraw(0);
     if(Math.abs(p.x)<VW/2+200&&Math.abs(p.y)<VH/2+200)suElev(0);
   }else{
@@ -2466,12 +2470,12 @@ function suCollapse(gi){const W=G.suW,g=suGP(gi),pool=SUW.INV.filter(q=>!W.used.
   try{const e=mkEnemy(iv[0],g[0],g[1],{hp:9000,max:9000,name:'침공 '+iv[1],xp:60,suInv:1});e.r=Math.max(e.r,30);e.esz=1}catch(err){console.warn('suInv',err)}
   if(!G.bot){G.rflash=.7;G.shk=Math.max(G.shk||0,.5);toast('💥 '+SUW.GN[gi]+'쪽 게이트 붕괴','예전의 적 「'+iv[1]+'」가 밀고 들어와요',true);sparks(g[0],g[1],40,['#ff5a3a','#ffd27a','#ffffff'],320,.8,4)}}
 /* ---- 11-20 사용자: 대군은 「성벽 밖」에서 온다. 게이트가 문 — 문에 붙은 대군이 체력(내구 칸)을 깎고, 다 깨지면 쏟아져 들어온다. 평소 몬스터는 성벽 근처 출현분이 성벽을 넘어 들어온다 ---- */
-const SUGT={NH:1400,EL:5,HOLD:52,ATK:270,CL:420};/* NH: 내구 한 칸 = 붙은 몬스터 1마리 1초 기준 1400 (엘리트 ×5) */
+const SUGT={RG:['sb_lamp','sb_germ','sb_trash','mg_eye','mg_medusa','mg_ghost'],WD:40,NH:2200,EL:5,HOLD:52,ATK:270,CL:420};/* NH: 내구 한 칸 = 붙은 몬스터 1마리 1초 기준 1400 (엘리트 ×5) */
 function suGOut(gi){return[[0,-1],[0,1],[-1,0],[1,0]][gi]}
 function suGO(gi,d){const H=SU.H+SUGT.HOLD+(gi===1?10:0)+(d||0),o=suGOut(gi);return[o[0]*H,o[1]*H]}
 function suWallSide(x,y){const H=SU.H,d=[y+H,H-y,x+H,H-x];let b=0;for(let i=1;i<4;i++)if(d[i]<d[b])b=i;return[b,d[b]]}
 function suGateTick(dt){if(!G.suGH)G.suGH=[3,3,3,3];if(!G.suGD)G.suGD=[0,0,0,0];const GH=G.suGH,GD=G.suGD,A=G.suGA=G.suGA||[0,0,0,0],SP=G.suGS=G.suGS||[0,0,0,0];A.fill(0);
-  for(const e of G.enemies){if(e.dead||!e.suOut)continue;const gi=e.suOut-1;if(GH[gi]<=0)continue;const P=suGO(gi);if(Math.hypot(e.x-P[0],e.y-P[1])<SUGT.ATK)A[gi]+=e.suEl?SUGT.EL:1}
+  for(const e of G.enemies){if(e.dead||!e.suOut)continue;const gi=e.suOut-1;if(GH[gi]<=0)continue;const P=suGO(gi);if(Math.hypot(e.x-P[0],e.y-P[1])<SUGT.ATK)A[gi]+=e.suEl?SUGT.EL:(e.ranged||e.mgR)?2:1}
   for(let gi=0;gi<4;gi++){if(GH[gi]<=0||A[gi]<=0)continue;GD[gi]+=A[gi]*dt/SUGT.NH;SP[gi]-=dt;
     if(SP[gi]<=0&&!G.bot){SP[gi]=.3;const P=suGO(gi),o=suGOut(gi),pp=[-o[1],o[0]],l=rnd(-120,120);SND.p('hit');sparks(P[0]-o[0]*34+pp[0]*l,P[1]-o[1]*34+pp[1]*l,6,['#ffd27a','#ffffff','#ff8a4a'],130,.3,2)}
     if(GD[gi]>=1){GD[gi]=0;GH[gi]--;const g=suGP(gi);if(!G.bot){SND.p('boom');G.shk=Math.max(G.shk||0,.4);sparks(g[0],g[1],24,['#ffd27a','#ffffff','#ff8a4a'],260,.6,3)}
@@ -2498,21 +2502,21 @@ function suGateBar(){const GH=G.suGH,GD=G.suGD,A=G.suGA;if(!GH||!GD)return;const
     const x=bx-60,y=hz?by-(gi===0?200:-26):by-W/2-208;if(Math.abs(bx-p.x)>VW/2+120||Math.abs(y-p.y)>VH/2+120)continue;
     const f=Math.max(0,(gh-1+(1-GD[gi]))/3);ctx.save();ctx.globalAlpha=.9;ctx.fillStyle='#10131c';ctx.fillRect(x-2,y-2,124,15);ctx.fillStyle=f>.5?'#6fe3ff':f>.25?'#ffc84a':'#ff5a4a';ctx.fillRect(x,y,120*f,11);ctx.fillStyle='#ffffff';ctx.globalAlpha=.55;for(let i=1;i<3;i++)ctx.fillRect(x+40*i-1,y,2,11);
     if(a>0){ctx.globalAlpha=1;ctx.font='800 12px "Noto Sans KR",sans-serif';ctx.textAlign='center';ctx.lineWidth=3;ctx.strokeStyle='#2a0c08';ctx.fillStyle='#ffe0c0';const tx='⚔ '+Math.round(a)+' 몰려있어요';ctx.strokeText(tx,x+60,y-6);ctx.fillText(tx,x+60,y-6)}ctx.restore()}}
-function suWaveTick(dt){if(!G.suGH)G.suGH=[3,3,3,3];const W=G.suW||(G.suW={next:150,cur:null,n:0,used:[]}),GH=G.suGH;
+function suWaveTick(dt){if(!G.suGH)G.suGH=[3,3,3,3];const W=G.suW||(G.suW={next:22,cur:null,n:0,used:[]}),GH=G.suGH;
   if(!W.cur){if(G.t>=W.next&&G.t<SU_LEN-25){const t=G.t,ord=[0,1,2,3].sort(()=>Math.random()-.5),gs=(t>=780?ord:t>=600?ord.slice(0,2):ord.slice(0,1)).map((gi,k)=>({gi,off:t>=780?k*6:0,sp:0,acc:0,g0:GH[gi]}));
       W.cur={gs,t:-8,id:++W.n};suRelay(gs[0].gi);if(!G.bot){SND.p('boss');toast('📡 아리아드네','사령관님, '+gs.map(g=>SUW.GN[g.gi]).join('·')+'쪽 성벽 밖에 대군이 모입니다. 게이트가 부서지기 전에 막아 주세요.',true)}}return}
   const C=W.cur;C.t+=dt;let last=0;const m=em();
-  for(const g of C.gs){const lt=C.t-g.off;last=Math.max(last,g.off);if(lt<0||lt>=15)continue;const open=GH[g.gi]<=0;g.acc+=(G.suRd?0:dt)*(8+m*.5)*1.5*(open?1.3:.85);const o=suGOut(g.gi),pp=[-o[1],o[0]],P=suGO(g.gi),EN=G.t>=600?8:6,
+  for(const g of C.gs){const lt=C.t-g.off;last=Math.max(last,g.off);if(lt<0||lt>=SUGT.WD)continue;const open=GH[g.gi]<=0;g.acc+=(G.suRd?0:dt)*(8+m*.5)*1.5*.5*(open?1.3:.85);const o=suGOut(g.gi),pp=[-o[1],o[0]],P=suGO(g.gi),EN=G.t>=600?8:6,
       at=(dep,lat)=>[P[0]+o[0]*dep+pp[0]*lat,P[1]+o[1]*dep+pp[1]*lat];
-    if((g.el||0)<EN&&lt>=((g.el||0)+1)*14/(EN+1)){g.el=(g.el||0)+1;const tp=pick(phaseTypes()),q=at(rnd(60,200),rnd(-200,200)),e=mkEnemy(tp,q[0],q[1],{elite:1,suEl:1,r:ENT[tp].r*1.7,hpMul:12,spd:ENT[tp].spd*.8,dmg:ENT[tp].dmg*1.1*(1+m*.1),name:'엘리트 '+ENT[tp].name});e.suW=C.id*10+g.gi;e.suOut=g.gi+1;e.tl=rnd(-130,130);g.sp+=5}
-    while(g.acc>=1){g.acc--;if(G.enemies.length>suCap())continue;const q=at(rnd(60,520),rnd(-300,300)),e=mkEnemy(pick(phaseTypes()),q[0],q[1]);e.suW=C.id*10+g.gi;e.suOut=g.gi+1;e.tl=rnd(-130,130);g.sp++}}
-  if(C.t>=last+15+8){for(const g of C.gs){if(!g.sp)continue;const tag=C.id*10+g.gi;let al=0;for(const e of G.enemies)if(!e.dead&&e.suW===tag)al+=e.suEl?5:1;
+    if((g.el||0)<EN&&lt>=((g.el||0)+1)*(SUGT.WD-2)/(EN+1)){g.el=(g.el||0)+1;const tp=pick(phaseTypes()),q=at(rnd(60,200),rnd(-200,200)),e=mkEnemy(tp,q[0],q[1],{elite:1,suEl:1,r:ENT[tp].r*1.7,hpMul:12,spd:ENT[tp].spd*.8,dmg:ENT[tp].dmg*1.1*(1+m*.1),name:'엘리트 '+ENT[tp].name});e.suW=C.id*10+g.gi;e.suOut=g.gi+1;e.tl=rnd(-130,130);g.sp+=5}
+    while(g.acc>=1){g.acc--;if(G.enemies.length>suCap())continue;const q=at(rnd(60,520),rnd(-300,300)),e=mkEnemy(Math.random()<.32?pick(SUGT.RG):pick(phaseTypes()),q[0],q[1]);e.suW=C.id*10+g.gi;e.suOut=g.gi+1;e.tl=rnd(-130,130);g.sp++}}
+  if(C.t>=last+SUGT.WD+8){for(const g of C.gs){if(!g.sp)continue;const tag=C.id*10+g.gi;let al=0;for(const e of G.enemies)if(!e.dead&&e.suW===tag)al+=e.suEl?5:1;
       /* 11-20: 내구는 실시간으로 깎임(suGateTick). 한 칸도 안 잃고 대군의 65% 이상을 쓰러뜨리면 사수 성공 */
       if(GH[g.gi]>0&&GH[g.gi]>=g.g0&&al/g.sp<=.35)suMorale(g.gi)}
-    W.cur=null;W.next=G.t+rnd(38,52)}}
-function suWaveGate(gi){const C=G.suW&&G.suW.cur;if(!C)return 0;for(const g of C.gs)if(g.gi===gi)return C.t-g.off<0?1:C.t-g.off<15?2:0;return 0}
+    W.cur=null;W.next=G.t+rnd(30,42)}}
+function suWaveGate(gi){const C=G.suW&&G.suW.cur;if(!C)return 0;for(const g of C.gs)if(g.gi===gi)return C.t-g.off<0?1:C.t-g.off<SUGT.WD?2:0;return 0}
 function suWaveDraw(){const C=G.suW&&G.suW.cur;if(!C)return;const p=G.p;ctx.save();
-  for(const g of C.gs){const lt=C.t-g.off;if(lt>=15)continue;const P=suGP(g.gi),dx=P[0]-p.x,dy=P[1]-p.y,hw=VW/2-46,hh=VH/2-70;if(Math.abs(dx)<hw&&Math.abs(dy)<hh)continue;
+  for(const g of C.gs){const lt=C.t-g.off;if(lt>=SUGT.WD)continue;const P=suGP(g.gi),dx=P[0]-p.x,dy=P[1]-p.y,hw=VW/2-46,hh=VH/2-70;if(Math.abs(dx)<hw&&Math.abs(dy)<hh)continue;
     const k=Math.min(hw/Math.abs(dx||1e-6),hh/Math.abs(dy||1e-6)),x=p.x+dx*k,y=p.y+dy*k,a=Math.atan2(dy,dx);ctx.globalAlpha=.65+.35*Math.sin(G.t*9);ctx.fillStyle=lt<0?'#ffb23a':'#ff3a2a';
     ctx.save();ctx.translate(x,y);ctx.rotate(a);ctx.beginPath();ctx.moveTo(22,0);ctx.lineTo(-10,-15);ctx.lineTo(-4,0);ctx.lineTo(-10,15);ctx.closePath();ctx.fill();ctx.restore();
     ctx.font='800 13px "Noto Sans KR",sans-serif';ctx.textAlign='center';ctx.fillStyle='#ffffff';ctx.strokeStyle='#5a1408';ctx.lineWidth=3;const tx=lt<0?'대군 '+Math.ceil(-lt)+'초':'대군!';ctx.strokeText(tx,x-Math.cos(a)*40,y-Math.sin(a)*40+4);ctx.fillText(tx,x-Math.cos(a)*40,y-Math.sin(a)*40+4)}
@@ -2586,7 +2590,7 @@ function suRelay(gi){if(!SU_RELAY||!suSolo())return;const gh=G.suGH?G.suGH[gi]:3
     d.innerHTML='<iframe src="ag/fleet.html?embed=1&relay=1" style="width:100%;height:100%;border:0;display:block" tabindex="-1"></iframe><div style="position:absolute;left:0;right:0;top:0;padding:3px 8px;font:800 11px \'Noto Sans KR\',sans-serif;color:#fff;background:linear-gradient(#06223acc,#06223a00);letter-spacing:.04em"><span style="color:#ff5a5a">●</span> LIVE <b></b></div>';
     document.body.appendChild(d);R.box=d;R.fr=d.querySelector('iframe');R.lb=d.querySelector('b');R.fr.addEventListener('load',()=>{R.ok=1;if(R.q){R.fr.contentWindow.postMessage(R.q,'*')}})}
   const msg={su:'relay',on:1,st,tu:st<2?1:0};R.q=msg;R.lb.textContent=SUW.GN[gi]+'쪽 게이트 · 내구 '+'●'.repeat(Math.max(0,gh))+'○'.repeat(3-Math.max(0,gh));R.box.style.display='block';R.box.style.left='10px';
-  try{if(R.ok)R.fr.contentWindow.postMessage(msg,'*')}catch(e){}clearTimeout(R.to);R.to=setTimeout(()=>{R.box.style.display='none';R.box.style.left='-9999px';R.q=null;try{R.fr.contentWindow.postMessage({su:'relay',on:0},'*')}catch(e){}},4300)}
+  try{if(R.ok)R.fr.contentWindow.postMessage(msg,'*')}catch(e){}clearTimeout(R.to);R.to=setTimeout(()=>{try{R.fr.contentWindow.postMessage({su:'relay',on:0},'*')}catch(e){}try{R.box.remove()}catch(e){}R.box=null;R.ok=0;R.q=null},4300)}
 /* ---- 함선 동기화 이벤트 · 호출 버튼 (11-19) ----
    SAVE.suS = 동기화한 수원 함선 수(0~2: 탈로스 → 다이달로스, 계정 영구). 판마다 3:20쯤 엘리베이터 남쪽 패드 위에 동기화 원 → 60초 버티면(밖에서 3초 뒤부터 줄어듦) 다음 1척 동기화.
    호출은 화면 오른쪽 아래 버튼(통신기 없이 바로). 탈로스 재정비 150초 / 다이달로스 한 판 2회 + 재정비 45초. */
@@ -2740,7 +2744,7 @@ for(const b of MG_BOSSES)ENT[b.type]={hp:b.hp,spd:b.spd,dmg:b.dmg,xp:b.xp,r:b.r,
 function mgSpawnOne(x,y,em){const O=em?{mgEm:1}:{};const t=G.hell&&Math.random()<.15?pick(['mg_eye','mg_medusa','mg_ghost']):pick(phaseTypes());
   if(t==='mg_egg'||t==='mg_fly'){G.mgPk=(G.mgPk||0)+1;if(G.mgPk<4)return;G.mgPk=0;for(let i=0;i<4;i++){const a=i/4*6.283+rnd(-.4,.4),r=rnd(8,34);mkEnemy(t,x+Math.cos(a)*r,y+Math.sin(a)*r,O)}return}
   mkEnemy(t,x,y,O)}
-function mgInit(e,b,o){if(b.arm)e.mgA=1;if(b.rg&&!o.boss&&G.enemies.reduce((n,q)=>n+(q.mgR?1:0),0)<(G.hell?12:G.hard?9:6)){e.mgR=b.rg;e.sh=rnd(.8,2.2);e.shcd=(b.rg==='snipe'?2.6:b.rg==='fan'?3.4:3)*(G.hell?.8:1);e.sd=Math.random()<.5?-1:1}}
+function mgInit(e,b,o){if(b.arm)e.mgA=1;if(b.rg&&!o.boss&&G.enemies.reduce((n,q)=>n+(q.mgR?1:0),0)<(G.map==='su'?16:G.hell?12:G.hard?9:6)){e.mgR=b.rg;e.sh=rnd(.8,2.2);e.shcd=(b.rg==='snipe'?2.6:b.rg==='fan'?3.4:3)*(G.hell?.8:1);e.sd=Math.random()<.5?-1:1}}
 // 원거리 도망 패턴: 선호 거리 220~320 · 물러날 땐 플레이어 속도의 75%로 비스듬히 · 2.5초 쫓기면 1초 지침 · 발사 0.4초 전 반짝
 function mgRanged(e,dt,dx,dy,d,sf){const ps=G.S.speed,ux=dx/d,uy=dy/d;
   if(e.wu>0){e.wu-=dt;if(e.wu<=0){const a=Math.atan2(dy,dx),dm=G.hell?.8:.6,c=ENT[e.type].bc;if(e.mgR==='fan')for(let i=-1;i<=1;i++)ebShot(e,a+i*.28,150,5,dm*.8,c);else ebShot(e,a,e.mgR==='snipe'?200:160,5,dm,c)}return}
@@ -4262,7 +4266,8 @@ function spawnPos(){if(G.map==='su'&&!G.suSP)return suSpawnPos();const side=Math
 function mkEnemy(type,x,y,o={}){
   const b=ENT[type]||ENT.unread,m=em(),hs=(1+m*.3+Math.pow(m/6.3,2.65))*1.25;
   const e={type,x,y,r:b.r,hp:b.hp*hs,max:b.hp*hs,spd:b.spd*rnd(.9,1.1)*(1+m*.012),dmg:b.dmg*(1+m*.15+Math.pow(m/15,3)),xp:b.xp,h:{},kx:0,ky:0,slow:0,stun:0,frog:0,flash:0,name:b.name};
-  Object.assign(e,o);if(G.map==='farm'&&G.hard){e.xp*=1.45;if(!o.boss&&!o.elite){const k=G.hell?2:1.5;e.hp*=k;e.max*=k}/* 11-09: 장수 어려움 ×1.5·헬 ×2 체력 */}/* 11-09: 과일 비선공은 취소(사용자) — fmCalm 안 씀 */if(b.ranged&&(type.slice(0,3)==='sb_'||type.slice(0,3)==='fm_')&&!o.boss&&G.enemies.reduce((n,q)=>n+(q.ranged&&!q.boss?1:0),0)<(G.hell?10:G.hard?8:6)){e.ranged=1;e.shcd=G.hell?2.4:3.2;e.bdm=G.hell?.8:.6}if(type.slice(0,3)==='mg_')mgInit(e,b,o);if(o.hpMul){e.hp*=o.hpMul;e.max=e.hp}
+  Object.assign(e,o);if(G.map==='farm'&&G.hard){e.xp*=1.45;if(!o.boss&&!o.elite){const k=G.hell?2:1.5;e.hp*=k;e.max*=k}/* 11-09: 장수 어려움 ×1.5·헬 ×2 체력 */}/* 11-09: 과일 비선공은 취소(사용자) — fmCalm 안 씀 */if(b.ranged&&(type.slice(0,3)==='sb_'||type.slice(0,3)==='fm_')&&!o.boss&&G.enemies.reduce((n,q)=>n+(q.ranged&&!q.boss?1:0),0)<(G.map==='su'?16:G.hell?10:G.hard?8:6)){e.ranged=1;e.shcd=G.hell?2.4:3.2;e.bdm=G.hell?.8:.6}if(type.slice(0,3)==='mg_')mgInit(e,b,o);if(o.hpMul){e.hp*=o.hpMul;e.max=e.hp}
+  if(G.map==='su'&&!o.boss&&!o.elite&&!o.suEl&&!o.hpMul){e.hp*=SU_HPM;e.max=e.hp}/* 11-20 사용자: 수원 초반 몬스터가 너무 금방 죽음 → 단단하게 */
   if(G.hell){const et=ET();e.hp*=(et<300?HARD.hp*1.3:HARD.hp*1.3+(5-HARD.hp*1.3)*Math.min(1,(et-300)/300))*(e.elite?3:1);e.max=e.hp;e.dmg*=2;e.spd*=HARD.spd}
   else if(G.hard){const hm=(e.boss?HARD.boss:HARD.hp)*(G.hph||1);e.hp*=hm;e.max=e.hp;e.dmg*=HARD.dmg;e.spd*=HARD.spd}
   G.enemies.push(e);return e;
@@ -4450,6 +4455,7 @@ function draw(){
     else if(h%7===0){const [sx,sy]=W2S(tx*T+(h>>4)%40,ty*T+(h>>9)%40);ctx.globalAlpha=.25+.35*Math.abs(Math.sin(G.t*1.5+h));ctx.fillStyle=h&1?'#cfe0ff':'#ffd6f5';ctx.fillRect(sx,sy,2*Z,2*Z);ctx.globalAlpha=1;ctx.fillStyle=c2}}}
   {const g=ctx.createRadialGradient(innerWidth/2,innerHeight/2,0,innerWidth/2,innerHeight/2,170*Z);g.addColorStop(0,'rgba(140,170,255,.16)');g.addColorStop(1,'rgba(140,170,255,0)');ctx.fillStyle=g;ctx.fillRect(0,0,innerWidth,innerHeight)}
   ctx.save();ctx.translate(innerWidth/2,innerHeight/2);ctx.scale(Z,Z);{const sk=G.shk>0?G.shk:0;ctx.translate(-G.p.x+(sk?rnd(-sk,sk):0),-G.p.y+(sk?rnd(-sk,sk):0))}
+  if(G.map==='su')suGround();
   const GEV=achOn('goldevo');
   const dZ=()=>{
   hxFloor();

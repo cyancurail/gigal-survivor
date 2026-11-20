@@ -8901,7 +8901,7 @@ const wrap=()=>{const T=window.TD;if(!T||T.__lk)return setTimeout(wrap,500);T.__
 (()=>{'use strict';
 const W=450,H=800,SLOTX=[57,141,225,309,393];
 const arcY=x=>653+59*((x-225)/225)**2,LINE=653,SLOTY=692;const slotY=i=>arcY(SLOTX[i])+38;
-/* 11-20 사용자: 한 판 13분 → 7~8분. 웨이브 21 → 15(보스 5·10·15), 웨이브 1~10은 14초. 난이도 곡선은 예전 21단계를 그대로 써서(DW: 새 웨이브 → 예전 난이도 단계, 보스 5·10·15 = 예전 7·14·21) 건너뛴 6단계만 빠짐 */const WAVES=15,BOSSW=[5,10,15],WDUR=22,BDUR=40,WDUR0=14,DW=w=>Math.round(w*1.4),BOSSD=[7,14,21],WCLR=22,HPX=.8,HPB=.8/* 레벨업 20 → 15번으로 줄어든 화력만큼 체력 ×0.8 (봇 승률을 단축 전과 맞춤) */;/* 11-07: 34·50초 → 25·40초 (몬스터가 쌓이게) */
+/* 11-20 사용자: 한 판 13분 → 7~8분. 웨이브 21 → 15(보스 5·10·15), 웨이브 1~10은 14초. 난이도 곡선은 예전 21단계를 그대로 써서(DW: 새 웨이브 → 예전 난이도 단계, 보스 5·10·15 = 예전 7·14·21) 건너뛴 6단계만 빠짐 */const WAVES=15,BOSSW=[5,10,15],WDUR=22,BDUR=40,WDUR0=14,DW=w=>Math.round(w*1.4),BOSSD=[7,14,21],WCLR=22,PKR=.7/* 11-20 사용자: 웨이브가 15개로 줄어도 레벨업 20번 유지 — 웨이브당 요구량 ×0.7, 웨이브당 최대 약 1.4번 */,HPX=1,HPB=1/* 레벨업 20번으로 되돌려서 체력 ×0.8 보정도 없앰 */;/* 11-07: 34·50초 → 25·40초 (몬스터가 쌓이게) */
 /* 스테이지 23개: 보통 10 · 어려움 10 · 헬 3 (사용자 승인 2026-11-05). mix = 나오는 종류(1·5·9·13웨이브부터 하나씩), rot = 웨이브마다 그중 3종씩 교대, mut = 귀염 변이체 확률 */
 const ALL9=['n','f','t','r','p','d','a','s','e'];
 /* 60스테이지 (11-07 2단계): 보통 20·어려움 20·헬 20. 체력 B안: 땡땡 환산 n=2s−1, n≤41이면 1+0.0034(n−1)^2.38, 이후 스테이지당 +2.63.
@@ -9092,7 +9092,7 @@ const ETY={n:{s:1,nm:'거미',r:13,spd:36,hp:1,dmg:3,xp:1,col:'#c46bff'},f:{s:2,
  a:{s:4,nm:'바위 핵',r:20,spd:18,hp:4,dmg:10,xp:4,col:'#9aa',arm:.5},r:{s:5,nm:'대포 벌레',r:16,spd:30,hp:1.8,dmg:3,xp:3,col:'#f66',rng:1},e:{s:6,nm:'전갈',r:22,spd:26,hp:10,dmg:12,xp:8,col:'#f4a',elite:1},
  s:{s:7,nm:'알 덩어리',r:20,spd:20,hp:3,dmg:6,xp:4,col:'#6c9',lay:1},p:{s:8,nm:'무리 덩어리',r:19,spd:28,hp:2.2,dmg:5,xp:3,col:'#99f',split:1},d:{s:9,nm:'제트',r:14,spd:30,hp:1.2,dmg:4,xp:2,col:'#fc6',dash:1},
  sm:{s:1,nm:'새끼',r:7,spd:50,hp:.25,dmg:1,xp:0,col:'#c9f',small:1},b:{s:10,nm:'가시 별',r:38,spd:13,hp:0,dmg:40,xp:20,col:'#ff3b6b',boss:1}};
-let BOSSF=80;const RPB=[2,3,4],RPG=100;const PKMAX=15,PKF=.6,ENTY=150;
+let BOSSF=80;const RPB=[2,3,4],RPG=100;const PKMAX=20,PKF=.6,ENTY=150;
 /* 11-07: 몬스터 번쩍임·빛 테두리는 한 번만 그려 두고 다시 씀 (필터·그림자를 매 프레임 쓰면 관통 공격 때 렉) */
 
 /* ===== 🎞️ 픽셀 이펙트 (11-07, pixelfx github patch-gg/pixelfx MIT를 무기 색으로 고쳐 구움 → td/fx2) — 터지는 순간·상태이상·보스 연출. PXV=0이면 끔 ===== */
@@ -9135,7 +9135,7 @@ function planWave(w){if(T.tut)return tutPlan(w);const w0=w;if(!T.lab)w=DW(w);con
   for(let i=0;i<n-nP;i++)q.push({at:(i+Math.random())/(n-nP)*dur*.92,k:rk()})
   if(V2&&!T.lab&&!boss&&!T.tut&&ELW.includes(w)){const kk=ks.filter(k=>k!=='e'&&k!=='r');q.push({at:dur*.45,k:kk.includes('t')?'t':kk[0]||'n',g:1})}
   if(V2&&!T.lab&&!T.tut&&!boss&&dI>=1&&w>=3){const kk=ks.filter(k=>k!=='r'&&k!=='e'),ne=w<8?2:Math.random()<.5?2:3;for(let j=0;j<ne;j++)q.push({at:dur*(.2+.55*j/(ne-1)+rnd(-.04,.04)),k:kk.includes('t')?'t':kk[0]||'n',el:1})}
-  T.wxp=q.reduce((a,o)=>a+(ETY[o.k]?ETY[o.k].xp:0),0)*T.cntX/MCNT;if(V2&&!T.lab){T.need=Math.max(4,(w===1?.35:PKF)*T.wxp);if(w===1)T.need0=T.need;else if(T.picks===0&&T.need0)T.need=Math.min(T.need,T.need0)}/* 11-11 버그: 첫 레벨업 전엔 요구량이 웨이브마다 올라가지 않게 *//* 11-07: 레벨업은 한 판 20번, 웨이브마다 1번까지 — 이번 웨이브 몬스터 경험치의 PKF만큼 잡으면 1번 */
+  T.wxp=q.reduce((a,o)=>a+(ETY[o.k]?ETY[o.k].xp:0),0)*T.cntX/MCNT;if(V2&&!T.lab){T.need=Math.max(4,(w===1?.35:PKF*(window.__pkr||PKR))*T.wxp);if(w===1)T.need0=T.need;else if(T.picks===0&&T.need0)T.need=Math.min(T.need,T.need0)}/* 11-11 버그: 첫 레벨업 전엔 요구량이 웨이브마다 올라가지 않게 *//* 11-07: 레벨업은 한 판 20번, 웨이브마다 1번까지 — 이번 웨이브 몬스터 경험치의 PKF만큼 잡으면 1번 */
   if(boss)q.push({at:1,k:'b'});q.sort((a,b)=>a.at-b.at);if(w===1&&V2)q.slice(0,3).forEach((o,i)=>{o.at=i*.4;o.y0=170+Math.random()*70});/* 11-07: 첫 웨이브 3마리는 화면 안에서 시작 */if(V2&&!T.lab&&!T.tut){const S2=SOF(T.stg),ii=+S2.id.split('-')[1],sw=q.reduce((a,o)=>a+(o.warn||o.g||o.k==='b'||!ETY[o.k]?0:ETY[o.k].hp*(o.el?ELX:1)),0);T.whu=sw?(window.__hpx||HPX)*(boss?1:dur/WDUR)*wTot(S2.d,ii,w)/sw/(1+1.5*(S2.mut||0)*Math.min(1,w/8)):0}T.spawnQ=q;T.wt=0;T.wdur=dur}
 function spawn(k,x0,y0,mu,gd,el){if(V2&&k==='sm'&&T.en.length>160)return;const w=T.tut||T.lab?T.wave:DW(T.wave),S=SOF(T.stg),bt=k==='b'?S.mix[0]:null,y=bt?ETY[bt]:ETY[k],hp=(T.tut||T.lab?1:window.__hpb||HPB)*(k==='b'?waveHp(w)*(w>=21?BOSSF:w>=14?400:70):waveHp(w)*y.hp*MHP*(k==='sm'?1:(T.cntH||1)))*(1+(S.hpm-1)*(.15+.85*Math.pow(w/21,1.3)))/(V2&&S.hdv||1);
   const e={id:T.eid++,k,s:y.s,x:x0!=null?cl(x0+rnd(-14,14),16,W-16):rnd(30,W-30),y:y0!=null?y0+rnd(-8,8):-20,r:y.r,spd:y.spd*(1+w*.012),hp,max:hp,dmg:y.dmg,xp:y.xp,xk:k==='b'?1:(T.cntX||1),col:y.col,boss:!!y.boss,elite:!!y.elite,arm:y.arm||1,
@@ -9435,7 +9435,7 @@ function update(dt){if(!T||T.paused||T.over)return;T.t+=dt;if(T.lab)labTick(dt);
   if(T.wave>=WAVES&&!T.spawnQ.length&&!T.en.length){finish(true);return}
   if(V2&&!T.lab&&(T.ll||0)>=20){T.iwT=(T.iwT==null?0:T.iwT)-dt;if(T.iwT<=0&&T.en.some(e=>!e.dead&&e.y>440)){T.iwT=45;for(const e of T.en)if(!e.dead&&e.y>380)frz(e,2.5);T.fx.push({k:'flash',t:.35,col:'#bfefff'});banner('🧊 마음의 선 · 얼음 벽');snd('glass')}}
   if(V2&&!T.lab&&!T.bot)tutTick();
-  if(V2&&!T.lab){if(T.picks===0&&T.wave===1&&!T.paused&&!T.over)T.en_+=dt*T.need/10;/* 11-11 버그: 웨이브1은 못 잡아도 16초면 첫 레벨업 */if(T.picks>=PKMAX)T.en_=0;else{const xpOk=T.picks-(T.bpk||0)<T.wave;if(T.en_>=T.need&&xpOk){T.en_-=T.need;T.en_=Math.min(T.en_,T.need*.5);T.picks++;openCards()}else if(!xpOk)T.en_=Math.min(T.en_,T.need)}
+  if(V2&&!T.lab){if(T.picks===0&&T.wave===1&&!T.paused&&!T.over)T.en_+=dt*T.need/10;/* 11-11 버그: 웨이브1은 못 잡아도 16초면 첫 레벨업 */if(T.picks>=PKMAX)T.en_=0;else{const xpOk=T.picks-(T.bpk||0)<DW(T.wave);if(T.en_>=T.need&&xpOk){T.en_-=T.need;T.en_=Math.min(T.en_,T.need*.5);T.picks++;openCards()}else if(!xpOk)T.en_=Math.min(T.en_,T.need)}
     if(T.goldPick&&!T.paused&&!T.over){T.goldPick--;openFlip()}
     if(T.bossPick&&!T.paused&&!T.over){T.bossPick=0;if(T.picks<PKMAX){T.picks++;T.bpk=(T.bpk||0)+1;openCards('🎁 보스 보상 · 카드를 골라요')}}}
   else if(T.en_>=T.need){T.en_-=T.need;T.picks++;T.need=8+1.3*(T.picks+1);openCards()}}
@@ -10675,7 +10675,7 @@ const ARI={
  t_sim:[['s','언니를 위해 시뮬레이션을 준비했어요.'],['o','어머 자꾸 언니라 그러네. 사령관님을 위해 홀로그램 무수리들을 준비할게요.']],
  t_w1:[['n','대원들은 사거리 안에 들어온 적을 알아서 쏴요.'],['w','언니는 우아하게 지켜보다가 고르기만 하면 돼요.']],
  t_hit:[['o','어머!!! 언니, 제정신이에요?'],['c','선에 닿기 전에 잡아야죠. 밑에 체력, 그게 마음의 선이에요.']],
- t_lv:[['s','레벨업이에요! 카드 한 장 골라서 짱재를 키워 봐요.'],['w','한 판에 레벨업은 딱 15번이에요. 아껴 쓰는 여자가 아름다워요.']],
+ t_lv:[['s','레벨업이에요! 카드 한 장 골라서 짱재를 키워 봐요.'],['w','한 판에 레벨업은 딱 20번이에요. 아껴 쓰는 여자가 아름다워요.']],
  t_lv2:[['w','한 번 더요. 이번엔 「분열 강화」. 짱재 탄이 더 잘게 찢어져요.']],
  t_new:[['s','이번엔 특별한 카드예요. 🆕 카드로 새 대원을 불러요.'],['n','최대 다섯 명까지 데려갈 수 있어요. 마녀 언니를 불러 볼까요?']],
  t_sq:[['s','바닥에 있는 대원은 끌어서 자리를 바꿀 수 있어요. 손가락 따라 해 봐요.']],

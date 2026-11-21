@@ -4772,7 +4772,7 @@ function draw(){
   drawArena();drawHellWorld();if(G.map==='sangbong')s2World();
   // player
   if(auraOn()){const p0=G.p;ctx.globalAlpha=.32+.1*Math.sin(G.t*8);ctx.fillStyle='#ff4a10';ctx.beginPath();ctx.ellipse(p0.x,p0.y+16,22,7,0,0,7);ctx.fill();ctx.globalAlpha=1;if(!G.bot){for(let k=0;k<2;k++)px(p0.x+rnd(-14,14),p0.y+rnd(4,16),rnd(-10,10),-rnd(60,130),rnd(.4,.8),pick(['#ff3a1a','#ff8a1a','#ffd34d','#fff0a0']),pick([2,3]),1,1)}}
-  const p=G.p,spr=SPRF(CHAR[G.ci].id,G.fancy?'fancy':'plain',p.frame),ps=G.id==='쥬은'||(G.fancy&&(mskCur(CHAR[G.ci].id)||MSK_IMG[G.id+'|0']))?60:48;
+  const p=G.p,spr=SPRF(CHAR[G.ci].id,G.fancy?'fancy':'plain',p.frame),ps=G.id==='쥬은'||G.id==='응빈'||(G.fancy&&(mskCur(CHAR[G.ci].id)||MSK_IMG[G.id+'|0']))?60:48;
   if(G.ultOn&&G.ultOn.inv){ctx.font='22px serif';ctx.fillText('👑',p.x,p.y-ps/2-6)}
   if(HELLFX&&!G.bot&&Math.random()<.6&&G.projs.length){const q=G.projs[Math.random()*G.projs.length|0];px(q.x,q.y,rnd(-15,15),-rnd(20,50),.5,pick(['#ff3a1a','#ff8a1a','#ffd34d']),2,1,1)}
   drawWings();
@@ -5600,7 +5600,7 @@ function skinSpr(id,skin,f){if(!skin)return SPR.draw(id,'fancy',f);const k=id+'|
   if(!p||!(p.kind==='color'||(OUT[p.kind]&&OUT[p.kind][p.owner])))cv=SPR.draw(id,'fancy',f);else if(p.kind==='color')cv=gmapCv(SPR.draw(id,'fancy',f),COLORS[p.owner][+skin.split(':')[2]][1]);
   else cv=outfitCv(id,OUT[p.kind][p.owner],f);return SKC[k]=cv}
 function curSkin(id){const s=SAVE.skin[id],p=s&&PBY[s];return p&&SAVE.inv[s]&&['color','swim','hanbok','wed','god'].includes(p.kind)?s:null}
-function SPRF(id,form,f){if(id==='쥬은'){const ms=mskCur(id);return ms?mskSpr(id,ms,f||0):juSpr(f||0)}if(form==='fancy'){const ms=mskCur(id);if(ms)return mskSpr(id,ms,f||0);if(MSK_IMG[id+'|0'])return mskSpr(id,0,f||0)}return form==='fancy'?skinSpr(id,curSkin(id),f):SPR.draw(id,form,f)}
+function SPRF(id,form,f){if(id==='응빈'&&typeof ubSpr==='function')return ubSpr(f||0);if(id==='쥬은'){const ms=mskCur(id);return ms?mskSpr(id,ms,f||0):juSpr(f||0)}if(form==='fancy'){const ms=mskCur(id);if(ms)return mskSpr(id,ms,f||0);if(MSK_IMG[id+'|0'])return mskSpr(id,0,f||0)}return form==='fancy'?skinSpr(id,curSkin(id),f):SPR.draw(id,form,f)}
 const SKINK=['color','swim','hanbok','wed','god'];function wearables(){return POOL.filter(p=>SKINK.includes(p.kind)&&SAVE.inv[p.id])}
 // ---- gold ----
 const ATT_G=5,CHEST_G=20;function hardBonus(){if(!G.hard||G.hell||G.t<600)return 0;const base=(Math.floor(G.t/20)+5*(G.bossKills||0))*2*3;return Math.floor(base*.2*(G.t-600)/G.t)}
@@ -6152,6 +6152,11 @@ Object.assign(WU,{uzi(w,dt){hdUzi(w,dt)},drone(w,dt){hdDrone(w,dt)}});
    기본무기 「옥타비아」: 진화 전 = 레이저만(푸른 실 레이저, 맞은 적에 취약), 진화(짝 아이템 우정) = 옥타비아 미니 위성 3기 + 패턴 4종. 추가무기 = 기존 끼순이의 진심. */
 const UB={id:'응빈',nick:'응빈',w:'octavia',x2:1,lock:1,bg:'linear-gradient(160deg,#07101f,#2a5fb8 55%,#dfe9ff)',perk:'상태이상·취약 지속시간 +20%',pk:s=>s.sdur+=.2};
 CHAR.push(UB);
+const UB_IM=Object.assign(new Image(),{src:'ub/ub.png'}),UB_C={};
+function ubFrame(i){if(UB_C[i])return UB_C[i];const F=256,c=document.createElement('canvas');c.width=c.height=F;if(!(UB_IM.complete&&UB_IM.width))return c;c._hq=1;const g=c.getContext('2d');g.drawImage(UB_IM,i*F,0,F,F,0,0,F,F);return UB_C[i]=c}
+UB_IM.onload=()=>{for(const k in UB_C)delete UB_C[k]};
+/* 0·1 대기 · 2·3 공격 · 4~7 걷기(대기 반복) · 8 흩어짐 · 9 팔 뻗기 · 10 보석 들기 · 11 분노 */
+function ubSpr(f){const p=typeof G!=='undefined'&&G&&G.running&&G.id==='응빈'?G.p:null;if(p){if(G.ultOn&&G.ultOn.oc)return ubFrame(11);if(p.dead)return ubFrame(8);if(p.mv)return ubFrame(4+((f||0)%4));if(G.mAtk>0)return ubFrame(2+(Math.floor(G.t*6)&1))}return ubFrame(Math.floor(performance.now()/500)&1)}
 function ubUnl(){return !!SAVE.ungbin||location.hash==='#unlockall'||!!window.__devAll}
 Object.assign(WP,{octavia:{name:'옥타비아',icon:'🔷',evo:'friend',evoName:'옥타비아 미니',d:'푸른 실이 이어진 레이저를 쏴요. 맞은 적은 취약 (받는 피해 증가)',ed:'미니 옥타비아 위성 3기가 곁을 돌며 4가지 패턴으로 쏘고, 맞은 적은 계속 취약해요'}});
 Object.assign(KC,{octavia:'#6fb1ff'});

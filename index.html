@@ -2313,7 +2313,7 @@ function suRdGrid(R){const n=R.rounds[R.r],N=n*n,S=new Set(),K=[3,3,4][R.r];whil
 function suRaidDue(e,TH,K){const i=e.ri||0;if(i<TH.length&&e.hp<e.max*TH[i]){e.ri=i+1;suRaid(e,K[i],i>>1,i);return true}return false}
 function suRdFail(R,msg){const p=G.p;if(!(p.inv>1e6)){p.hp-=G.S.maxHp*SUR.PEN;p.inv=Math.max(p.inv,1);G.hurtFlash=.6}if(!G.bot){SND.p('hurt');G.shk=Math.max(G.shk||0,.5);G.rflash=.6;G.texts.push({x:p.x,y:p.y-56,v:(msg||'실패')+' −33%',life:1.6,big:1,col:'#ff4a4a'})}R.res=-1}
 function suRdEnd(R,ok){const e=R.e;e.rd=null;e.fmInv=0;if(G.suRd===R)G.suRd=null;if(e.oc){e.oc.act=null;e.oc.cd=ok?4:1.5}if(e.so){e.so.act=null;e.so.cb=ok?5:2}
-  if(ok&&!G.bot){SND.p('clear');G.texts.push({x:G.p.x,y:G.p.y-56,v:'파훼 성공!',life:1.6,big:1,col:'#8fe6ff'});sparks(e.x,e.y-60,30,['#ffffff','#8fe6ff','#ffc8e6'],260,.7,3)}}
+  if(ok&&!G.bot){SND.p('clear');sparks(e.x,e.y-60,30,['#ffffff','#8fe6ff','#ffc8e6'],260,.7,3)}}
 function suRdPad(R,i){const a=-1.5708+i*1.5708;return[R.cx+Math.cos(a)*175,R.cy+Math.sin(a)*130]}
 function suRdPress(R,dt){const e=R.e,p=G.p,oc=!!e.oc;if(R.sp==null)return;R.ht-=dt;
   if(R.ht<=0){R.ht=SURP.HT[oc?0:1]/R.hs;
@@ -2404,7 +2404,7 @@ function suHexBlob(){if(SUX.sp)return SUX.sp;const c=document.createElement('can
 /* 11-21 사용자 그림 「별밤을 먹는 자, 헥스터」 등장 장면: 전체 화면 그림 → 터치로 넘김 → 헥스터 등장 + 아리아드네 한마디 */
 function suHexIntro(cb){if(G.bot||window.__suNoIntro){cb();return}const o=document.createElement('div');o.id='hexIntro';o.innerHTML='<img src="su/hex_intro.jpg" alt=""><p>별밤을 먹는 자,<b>헥스터</b></p>';document.body.appendChild(o);const was=G.paused;G.paused=true;try{SND.p('boss')}catch(e){}let dn=0;const fin=()=>{if(dn)return;dn=1;o.classList.add('out');setTimeout(()=>{o.remove();G.paused=was;cb()},750)};o.addEventListener('pointerdown',()=>{if(o.dataset.ok)fin()});requestAnimationFrame(()=>requestAnimationFrame(()=>o.classList.add('on')));setTimeout(()=>{o.dataset.ok=1},1200);setTimeout(fin,5200)}
 function suHexCall(after){const r=[null];suHexIntro(()=>{r[0]=suHexSpawn();if(!G.bot)toast('📡 아리아드네','사령관님...저건 처음 보는 존재에요. 조심하세요....',true);if(after)after()});return r[0]}
-function suHexSpawn(){if(G.map!=='su')return null;suReg();const e=mkEnemy('su_hex',0,330,{boss:1,hp:SUX.HPB,max:SUX.HPB,name:'헥스터'});e.spd=.001;e.hx={ph:1,th:0,a:1.57,in:0};if(G.suW)G.suW.next=1e9;if(!G.bot){SND.p('boss');G.rflash=.8;toast('⚠ 헥스터','끝없는 밤이 엘리베이터를 감으며 내려와요')}return e}
+function suHexSpawn(){if(G.map!=='su')return null;suReg();const e=mkEnemy('su_hex',0,330,{boss:1,hp:SUX.HPB,max:SUX.HPB,name:'헥스터'});e.spd=.001;e.hx={ph:1,th:0,a:1.57,in:0};if(G.suW)G.suW.next=1e9;if(!G.bot){SND.p('boss');G.rflash=.8}return e}
 /* 1페이즈 공격(11-19 승인): 0 별똥 숨결 · 3 머리 강하 · 1 삼킴 · 2 몸통 쓸기 순으로 돎. 머리는 평소 무적, 입이 벌어졌을 때와 강하 뒤 땅에 박힌 동안만 맞음. 수치 임시 */
 /* 헥스터전 함선 자폭 (11-20 사용자): 헥스터 체력이 구간에 닿으면 함선이 스스로 날아와 자폭. ★ 실제 체력은 안 깎음 — 화면의 체력통에만 함선 몫 「보너스 칸」이 얹혀 있다가 자폭 때 그만큼 줄어드는 연출. 해금한 함선만 나옴(해금을 많이 할수록 유리). 원래 설명: 순서 = 아르고 → 다이달로스 → 탈로스 → 파나케이아+테미스(함께) → 팔라스(가장 먼저 해금되는 함선이 마지막).
    [발동 체력(실제 체력 기준), 보너스 칸 크기(최대 체력 대비, 원래 「깎인 뒤」 값과의 차), 함선(SUBS 번호), 아리아드네 대사]. 수치·대사 임시. */

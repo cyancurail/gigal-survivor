@@ -2313,7 +2313,7 @@ function suRdGrid(R){const n=R.rounds[R.r],N=n*n,S=new Set(),K=[1,2,3][R.r];whil
 function suRaidDue(e,TH,K){const i=e.ri||0;if(i<TH.length&&e.hp<e.max*TH[i]){e.ri=i+1;suRaid(e,K[i],i>>1,i);return true}return false}
 function suRdFail(R,msg,pen){const p=G.p;pen=pen||SUR.PEN;if(!(p.inv>1e6)){p.hp-=G.S.maxHp*pen;p.inv=Math.max(p.inv,1);G.hurtFlash=.6}if(!G.bot){SND.p('hurt');G.shk=Math.max(G.shk||0,.5);G.rflash=.6;G.texts.push({x:p.x,y:p.y-56,v:(msg||'실패')+' −'+Math.round(pen*100)+'%',life:1.6,big:1,col:'#ff4a4a'})}R.res=-1}
 function suRdEnd(R,ok){const e=R.e;e.rd=null;e.fmInv=0;if(G.suRd===R)G.suRd=null;if(e.oc){e.oc.act=null;e.oc.cd=ok?3:.6}if(e.so){e.so.act=null;e.so.cb=ok?3:.6;if(!ok)e.so.ct=e.so.cl=.6}
-  if(ok){hurt(e,e.max*SUR.RW,'x',{force:1});e.flash=.5;if(!G.bot){SND.p('boom');sparks(e.x,e.y-60,30,['#ffe08a','#ffffff'],300,.6,3)}}
+  if(ok){hurt(e,e.max*SUR.RW,'x',{force:1});e.flash=.5;if(!G.bot){SND.p('boom');G.shk=Math.max(G.shk||0,.4);sparks(e.x,e.y-60,30,['#ffe08a','#ffffff'],300,.6,3)}}
   if(ok&&!G.bot){SND.p('clear');sparks(e.x,e.y-60,30,['#ffffff','#8fe6ff','#ffc8e6'],260,.7,3)}}
 function suRdPad(R,i){const a=-1.5708+i*1.5708;return[R.cx+Math.cos(a)*SUR.PX,R.cy+Math.sin(a)*SUR.PY]}
 function suRdPress(R,dt){const e=R.e,p=G.p,oc=!!e.oc;if(R.sp==null)return;R.ht-=dt;
@@ -2465,7 +2465,7 @@ function suHexGo(e){const S=e.hx,p=G.p,k=[0,1,2][(S.p2=(S.p2||0)+1)%3];S.act={k,
   if(k===2){const dir=Math.random()<.5?-1:1,sh=rnd(-100,100);Object.assign(S.act,{hz:2,dir,c:[p.x,p.y],off:-1000*dir,ln:[-260+sh+rnd(-30,30),sh,260+sh+rnd(-30,30)],LB:1100,hit:0})}}
 function suMazeStart(e){const S=e.hx,p=G.p,c=suSafe(p.x,p.y),C=Math.floor(Math.random()*4),cols=[];
   for(let i=0;i<4;i++){const a=[0,1,2,3,4,5].map(()=>{let k;do{k=Math.floor(Math.random()*4)}while(k===C);return k}),s1=Math.floor(Math.random()*6);a[s1]=C;a[(s1+2+Math.floor(Math.random()*3))%6]=C;cols.push(a)}
-  p.x=c[0];p.y=c[1];S.mz={x:c[0],y:c[1],t:0,C,cols,rot:[0,1,2,3].map(()=>Math.random()*6.2832),bt:0};S.ga=null;S.gc=99;if(!G.bot){SND.p('boom');sparks(c[0],c[1],24,['#35d6ff','#ff5ac8','#ffd23a','#ffffff'],260,.5,3)}}
+  p.x=c[0];p.y=c[1];S.mz={x:c[0],y:c[1],t:0,C,cols,rot:[0,1,2,3].map(()=>Math.random()*6.2832),bt:0};S.ga=null;S.gc=99;if(!G.bot){SND.p('boom');G.shk=Math.max(G.shk||0,.3);sparks(c[0],c[1],24,['#35d6ff','#ff5ac8','#ffd23a','#ffffff'],260,.5,3)}}
 function suMazeTick(e,dt){const S=e.hx,m=S.mz,p=G.p,Q=SUMZ;m.t+=dt;for(let i=0;i<4;i++)m.rot[i]+=Q.SP[i]*dt;
   const dx=p.x-m.x,dy=(p.y-m.y)/Q.K,r=Math.hypot(dx,dy);
   if(m.t>=Q.TEL&&m.t<Q.T){m.bt-=dt;if(r>=Q.RI[0]&&r<Q.RO[3]){let i=-1;for(let k=0;k<4;k++)if(r>=Q.RI[k]&&r<Q.RO[k])i=k;
@@ -2641,7 +2641,7 @@ function suGateTick(dt){if(!G.suGH)G.suGH=[3,3,3,3];if(!G.suGD)G.suGD=[0,0,0,0];
   /* 공성 포격(11-21 사용자: 게이트 침공 강화): 침공 중 6초마다 성벽 밖에서 게이트로 포탄. 예고 1초 → 폭발 시 내구 ⅕칸(사령관이 사수 범위 안이면 ⅒칸) */
   {const SH=G.suSg=G.suSg||[],ST=G.suSt=G.suSt||[0,0,0,0];for(let gi=0;gi<4;gi++){if(GH[gi]<=0||A[gi]<=0){ST[gi]=0;continue}ST[gi]+=dt;if(ST[gi]>=SUGT.SH){ST[gi]=0;const P=suGO(gi,-40),pp=[-suGOut(gi)[1],suGOut(gi)[0]],l=rnd(-150,150);SH.push({gi,x:P[0]+pp[0]*l,y:P[1]+pp[1]*l,t:0})}}
     for(let i=SH.length-1;i>=0;i--){const q=SH[i];q.t+=dt;if(q.t<1)continue;SH.splice(i,1);const gi=q.gi;if(GH[gi]<=0)continue;const g=suGP(gi),near=Math.hypot(G.p.x-g[0],G.p.y-g[1])<SUD.HR;GD[gi]+=near?SUGT.SB:SUGT.SD;A[gi]+=1e-9;
-      if(!G.bot){SND.p('boom');sparks(q.x,q.y,30,['#ffd27a','#ffffff','#ff8a4a','#ff3a2a'],300,.6,4);sparks(g[0],g[1],14,['#ffd27a','#ffffff'],200,.4,3)}}}
+      if(!G.bot){SND.p('boom');G.shk=Math.max(G.shk||0,near?.25:.45);sparks(q.x,q.y,30,['#ffd27a','#ffffff','#ff8a4a','#ff3a2a'],300,.6,4);sparks(g[0],g[1],14,['#ffd27a','#ffffff'],200,.4,3)}}}
   for(let gi=0;gi<4;gi++){if(GH[gi]<=0||A[gi]<=0)continue;GD[gi]+=A[gi]*dt/SUGT.NH;SP[gi]-=dt;
     if(SP[gi]<=0&&!G.bot){SP[gi]=.3;const P=suGO(gi),o=suGOut(gi),pp=[-o[1],o[0]],l=rnd(-120,120);SND.p('hit');sparks(P[0]-o[0]*34+pp[0]*l,P[1]-o[1]*34+pp[1]*l,6,['#ffd27a','#ffffff','#ff8a4a'],130,.3,2)}
     if(GD[gi]>=1){GD[gi]=0;GH[gi]--;const g=suGP(gi);if(!G.bot){SND.p('boom');G.shk=Math.max(G.shk||0,.4);sparks(g[0],g[1],24,['#ffd27a','#ffffff','#ff8a4a'],260,.6,3)}
@@ -4623,7 +4623,7 @@ function draw(){
     const h=((tx*73856093)^(ty*19349663))>>>0;if(h%17===0){const [sx,sy]=W2S(tx*T+18,ty*T+18);ctx.globalAlpha=.1;ctx.fillStyle='#9fb4ff';ctx.fillRect(sx,sy,10*Z,7*Z);ctx.fillRect(sx+2*Z,sy+7*Z,2*Z,2*Z);ctx.globalAlpha=1;ctx.fillStyle=c2}
     else if(h%7===0){const [sx,sy]=W2S(tx*T+(h>>4)%40,ty*T+(h>>9)%40);ctx.globalAlpha=.25+.35*Math.abs(Math.sin(G.t*1.5+h));ctx.fillStyle=h&1?'#cfe0ff':'#ffd6f5';ctx.fillRect(sx,sy,2*Z,2*Z);ctx.globalAlpha=1;ctx.fillStyle=c2}}}
   {const g=ctx.createRadialGradient(innerWidth/2,innerHeight/2,0,innerWidth/2,innerHeight/2,170*Z);g.addColorStop(0,'rgba(140,170,255,.16)');g.addColorStop(1,'rgba(140,170,255,0)');ctx.fillStyle=g;ctx.fillRect(0,0,innerWidth,innerHeight)}
-  ctx.save();ctx.translate(innerWidth/2,innerHeight/2);ctx.scale(Z,Z);{const sk=G.shk>0&&G.map!=='su'?G.shk:0;/* 11-21 사용자: 수원에서는 화면 흔들림 없음(예전 흔들림 버그) */ctx.translate(-G.p.x+(sk?rnd(-sk,sk):0),-G.p.y+(sk?rnd(-sk,sk):0))}
+  ctx.save();ctx.translate(innerWidth/2,innerHeight/2);ctx.scale(Z,Z);{const sk=G.shk>0?G.shk:0;ctx.translate(-G.p.x+(sk?rnd(-sk,sk):0),-G.p.y+(sk?rnd(-sk,sk):0))}
   if(G.map==='su')suGround();
   const GEV=achOn('goldevo');
   const dZ=()=>{

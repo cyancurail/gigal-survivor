@@ -2001,7 +2001,7 @@ function suFloor(){if(!SU.im){const im=new Image();im.src='su/floor.jpg';SU.im=i
   ctx.restore();return true}
 /* 하늘색 전자흐름 줄기: 엘리베이터 → 게이트 4곳 */
 function suTrunk(x0,y0,x1,y1,gi){const wv=suWaveGate(gi);ctx.lineCap='round';ctx.strokeStyle='#b39a6c';ctx.lineWidth=16;ctx.beginPath();ctx.moveTo(x0,y0);ctx.lineTo(x1,y1);ctx.stroke();
-  ctx.strokeStyle='#e9eef4';ctx.lineWidth=11;ctx.stroke();ctx.strokeStyle=wv?(Math.sin(G.t*10)>0?'#ff3a2a':'#ff9a5a'):'#18a8ea';ctx.lineWidth=4;ctx.stroke();ctx.strokeStyle=wv?'#ffd0c0':'#b4efff';ctx.lineWidth=1.5;ctx.stroke();
+  ctx.strokeStyle='#e9eef4';ctx.lineWidth=11;ctx.stroke();const ec=G.suEk>.6;ctx.strokeStyle=ec?'#ff2a4a':wv?(Math.sin(G.t*10)>0?'#ff3a2a':'#ff9a5a'):'#18a8ea';ctx.lineWidth=4;ctx.stroke();ctx.strokeStyle=ec?'#ffc0cc':wv?'#ffd0c0':'#b4efff';ctx.lineWidth=1.5;ctx.stroke();
   const L=Math.hypot(x1-x0,y1-y0),ux=(x1-x0)/L,uy=(y1-y0)/L;ctx.fillStyle='#ffffff';for(let s=(G.t*140)%160;s<L;s+=160){const x=x0+ux*s,y=y0+uy*s;if(Math.abs(x-G.p.x)>VW/2+20||Math.abs(y-G.p.y)>VH/2+20)continue;ctx.globalAlpha=.9;ctx.fillRect(x-(ux?7:2),y-(uy?7:2),ux?14:4,uy?14:4)}ctx.globalAlpha=1}
 const SUWM={"gateH0":{"w":510,"h":180,"ox":255.0,"oy":159.0},"gateH1":{"w":510,"h":180,"ox":255.0,"oy":159.0},"gateH2":{"w":499,"h":186,"ox":255.0,"oy":153.0},"gateV0":{"w":104,"h":518,"ox":52.0,"oy":258.0},"gateV1":{"w":104,"h":518,"ox":52.0,"oy":258.0},"gateV2":{"w":114,"h":453,"ox":57.0,"oy":193.0},"wallH":{"w":226,"h":92,"ox":113.0,"oy":78.0},"wallV":{"w":54,"h":177,"ox":27.0,"oy":108.0}};
 /* 11-19: 성벽·게이트는 3D로 구운 그림(su/wallH·wallV·gateH0~2·gateV0~2, 1px = 월드 1). 에너지 문·내구 칸은 코드로 덧그림. */
@@ -2403,6 +2403,7 @@ const SUX={N:190,HPB:20000,sp:null,TK:1.4,IM:2.6,RS:4.65,HX:112,HY:84};/* 머리
 function suHexBlob(){if(SUX.sp)return SUX.sp;const c=document.createElement('canvas');c.width=c.height=128;const x=c.getContext('2d'),g=x.createRadialGradient(64,64,4,64,64,64);g.addColorStop(0,'#04020c');g.addColorStop(.55,'#120830');g.addColorStop(.82,'rgba(64,36,150,.92)');g.addColorStop(1,'rgba(110,70,230,0)');x.fillStyle=g;x.fillRect(0,0,128,128);return SUX.sp=c}
 /* 11-21 사용자 그림 「별밤을 먹는 자, 헥스터」 등장 장면: 전체 화면 그림 → 터치로 넘김 → 헥스터 등장 + 아리아드네 한마디 */
 function suHexIntro(cb){if(G.bot||window.__suNoIntro){cb();return}const o=document.createElement('div');o.id='hexIntro';o.innerHTML='<img src="su/hex_intro.jpg" alt=""><p>별밤을 먹는 자,<b>헥스터</b></p>';document.body.appendChild(o);const was=G.paused;G.paused=true;try{SND.p('boss')}catch(e){}let dn=0;const fin=()=>{if(dn)return;dn=1;o.classList.add('out');setTimeout(()=>{o.remove();G.paused=was;cb()},750)};o.addEventListener('pointerdown',()=>{if(o.dataset.ok)fin()});requestAnimationFrame(()=>requestAnimationFrame(()=>o.classList.add('on')));setTimeout(()=>{o.dataset.ok=1},1200);setTimeout(fin,5200)}
+function suEclStart(){const e=suHexSpawn();if(!e)return null;e.hx.in=1;e.hp=e.max*.49;e.hx.si=9;if(!G.bot){const p=G.p;p.x=0;p.y=170}return e}/* 시험: 일식의 밤(2페이즈)만 바로 시작 */
 function suHexCall(after){const r=[null];suHexIntro(()=>{r[0]=suHexSpawn();if(!G.bot)toast('📡 아리아드네','사령관님...저건 처음 보는 존재에요. 조심하세요....',true);if(after)after()});return r[0]}
 function suHexSpawn(){if(G.map!=='su')return null;suReg();const e=mkEnemy('su_hex',0,330,{boss:1,hp:SUX.HPB,max:SUX.HPB,name:'헥스터'});e.spd=.001;e.hx={ph:1,th:0,a:1.57,in:0};if(G.suW)G.suW.next=1e9;if(!G.bot){SND.p('boss');G.rflash=.8}return e}
 /* 1페이즈 공격(11-19 승인): 0 별똥 숨결 · 3 머리 강하 · 1 삼킴 · 2 몸통 쓸기 순으로 돎. 머리는 평소 무적, 입이 벌어졌을 때와 강하 뒤 땅에 박힌 동안만 맞음. 수치 임시 */
@@ -2431,8 +2432,8 @@ function suHexTick(dt){for(const e of G.enemies){if(e.dead||e.type!=='su_hex')co
   {const B=suHexBonus(e),ev=B[S.si||0];if(ev&&e.hp<=e.max*ev.at){S.si=(S.si||0)+1;S.sd={t:0,b:ev,n:ev.sh.length};const hy=e.y-78,L=ev.sh.length;ev.sh.forEach((si,k)=>{suIm(SUBS[si][0]);(G.suSd=G.suSd||[]).push({i:si,x:0,y:0,t:-2.3-k*.3,alt:0,dn:0,fly:{T:2.3+k*.3,x0:e.x-(k?-1:1)*1000,y0:hy-260-k*80,x1:e.x+(k?70:-70)*(L>1?1:0),y1:hy+(k?30:-10)}})});
       if(!G.bot){SND.p('boss');toast('📡 아리아드네',ev.line,true)}continue}}
   S.nt=Math.min(S.ph>1?1:.35,(S.nt||0)+dt*.4);
-  if(S.ph===1&&e.hp<=e.max*.5){S.ph=1.5;S.tr=0;S.act=null;if(!G.bot){SND.p('boss');G.rflash=.7;toast('🌑 일식의 눈','헥스터의 입이 하늘로 올라가요 — 땅에 내려앉은 금빛 조각을 때려요',true)}}
-  if(S.ph>1){suHex2(e,dt);continue}
+  if(S.ph===1&&e.hp<=e.max*.5){S.ph=1.5;S.tr=0;S.act=null;if(!G.bot){SND.p('boss');G.rflash=.7}}
+  if(S.ph>1){S.ek=Math.min(1,(S.ek||0)+dt*.35);suHex2(e,dt);continue}
   const A=S.act;let opT=0,mv=1,hzT=0;const end=()=>{S.act=null;S.cd=1.2;S.pat=((S.pat||0)+1)%4};
   if(A){A.t+=dt;
     if(A.k===0){opT=1;const hy=e.y-78,aim=Math.atan2(p.y-20-hy,p.x-e.x);if(A.a===undefined)A.a=aim;let da=aim-A.a;da=Math.atan2(Math.sin(da),Math.cos(da));A.a+=Math.max(-1.1*dt,Math.min(1.1*dt,da));
@@ -2475,14 +2476,35 @@ function suHex2Ground(e){const S=e.hx;if(!S.sh)return;const t=G.t;ctx.save();
   const g=S.ga;if(g){const u=Math.min(1,g.t/SUX2.TEL);ctx.globalAlpha=.9;ctx.strokeStyle='#ff3a5a';ctx.lineWidth=2.5;ctx.setLineDash([8,6]);ctx.beginPath();ctx.ellipse(g.x,g.y,72,54,0,0,7);ctx.stroke();ctx.setLineDash([]);ctx.globalAlpha=.25*u;ctx.fillStyle='#ff3a5a';ctx.beginPath();ctx.ellipse(g.x,g.y,72*u,54*u,0,0,7);ctx.fill()}
   ctx.restore()}
 function suHexSky(){const e=G.enemies.find(q=>!q.dead&&q.type==='su_hex'),p=G.p,t=G.t;
+  {const hk=e&&e.hx&&e.hx.ph>1?e.hx.ek||0:0;G.suEk=hk>(G.suEk||0)?hk:Math.max(hk,(G.suEk||0)-1/150);if(G.suEk>.003)suEclSky(G.suEk)}
   if(e){const S=e.hx;if(false&&S.nt>0){/* 11-20 사용자: 어두워지는 연출 없음 */ctx.save();ctx.globalAlpha=.42*S.nt;ctx.fillStyle='#06031a';ctx.fillRect(p.x-VW,p.y-VH,VW*2,VH*2);ctx.restore()}
-    if(S.ph>1&&S.ey>0){const ex=p.x,ey=p.y-VH/2+178,a=S.ey,HI=suIm2('hex_head'),g=S.ga;ctx.save();ctx.globalAlpha=a;
+    if(S.ph>1&&S.ey>0){const ex=p.x,ey=p.y-VH/2+178,a=S.ey,HI=suIm2('hex_head'),g=S.ga;suEclCorona(ex,ey,G.suEk*a);ctx.save();ctx.globalAlpha=a;
       if(g&&g.t>=SUX2.TEL&&g.t<SUX2.TEL+.4){const w=1-(g.t-SUX2.TEL)/.4;ctx.globalCompositeOperation='lighter';ctx.globalAlpha=w;ctx.fillStyle='#ffe08a';ctx.beginPath();ctx.moveTo(ex-10,ey+30);ctx.lineTo(ex+10,ey+30);ctx.lineTo(g.x+42,g.y);ctx.lineTo(g.x-42,g.y);ctx.closePath();ctx.fill();ctx.fillStyle='#ffffff';ctx.beginPath();ctx.moveTo(ex-3,ey+30);ctx.lineTo(ex+3,ey+30);ctx.lineTo(g.x+12,g.y);ctx.lineTo(g.x-12,g.y);ctx.closePath();ctx.fill();ctx.globalCompositeOperation='source-over';ctx.globalAlpha=a}
       const EI=suIm2('hex_eye');if(EI.complete&&EI.width){/* 11-20 사용자 그림: 4×2 칸(219×294) 0~2 대기 · 3 붉은 눈동자 · 4 충전 · 5 광선 · 6 금감 · 7 부서짐 */const f=g?(g.t<SUX2.TEL?3:4):(e.flash>0?6:Math.floor(t*4)%3),W=300,H2=W*294/219;ctx.drawImage(EI,(f%4)*219,Math.floor(f/4)*294,219,294,ex-W*108/219,ey-H2*123/294,W,H2)}
       else{ctx.beginPath();ctx.arc(ex,ey,54,0,7);ctx.fillStyle='#05030c';ctx.fill();ctx.lineWidth=6;ctx.strokeStyle='#f3d98a';ctx.stroke()}
       ctx.restore();S.eyP=[ex,ey]}}
   const D=G.suDawn;if(D&&D.eye&&D.t<1.4){const EI=suIm2('hex_eye'),W=300,H2=W*294/219,ex=p.x,ey=p.y-VH/2+178;ctx.save();ctx.globalAlpha=Math.max(0,1-D.t/1.4);ctx.drawImage(EI,3*219,294,219,294,ex-W*108/219,ey-H2*123/294,W*(1+D.t*.3),H2*(1+D.t*.3));ctx.restore()}if(D){D.t+=1/60;const u=Math.min(1,D.t/2);ctx.save();ctx.globalAlpha=(D.t<4?u:Math.max(0,1-(D.t-4)/2))*.45;ctx.fillStyle='#ffd27a';ctx.fillRect(p.x-VW,p.y-VH,VW*2,VH*2);ctx.globalCompositeOperation='lighter';
     for(const q of D.pts){const y=q[1]-D.t*q[3]*60,al=Math.max(0,1-D.t/(2.5+q[3]));if(al<=0)continue;ctx.globalAlpha=al;ctx.fillStyle=q[2]?'#ffffff':'#c8a8ff';ctx.fillRect(q[0]+Math.sin(D.t*2+q[3]*9)*12,y,3,3)}ctx.restore();if(D.t>6)G.suDawn=null}}
+/* 「일식의 밤」(11-21 사용자): 헥스터 2페이즈 환경. 등장 그림의 하늘 조각 + 코드로 그린 별. 화면은 어둡게 하지 않고 윗가장자리만 별밤으로 덮음. 전자 줄기는 붉게 재점등(suTrunk의 G.suEk) */
+function suEclSky(k){const p=G.p,x0=p.x-VW/2,y0=p.y-VH/2,W=VW,H=VH,t=G.t;
+  const im=SUX.ei||(SUX.ei=(()=>{const i=new Image();i.src='su/hex_intro.jpg';return i})());
+  if(!SUX.ec&&im.complete&&im.width){const c=document.createElement('canvas');c.width=1280;c.height=520;const x=c.getContext('2d');for(let i=0;i<4;i++){x.save();x.translate(i*320+(i&1?320:0),0);if(i&1)x.scale(-1,1);x.drawImage(im,200,0,320,260,0,0,320,520);x.restore()}
+    x.globalCompositeOperation='destination-in';const g=x.createLinearGradient(0,0,0,520);g.addColorStop(0,'rgba(0,0,0,1)');g.addColorStop(.4,'rgba(0,0,0,.72)');g.addColorStop(1,'rgba(0,0,0,0)');x.fillStyle=g;x.fillRect(0,0,1280,520);SUX.ec=c}
+  if(!SUX.st){SUX.st=[];let r=7;const R=()=>{r=(r*16807)%2147483647;return r/2147483647};for(let i=0;i<90;i++)SUX.st.push([R(),Math.pow(R(),1.5)*.36,R()<.16?3.6:R()<.5?2.4:1.8,R()*6.3,1+R()*3])}
+  ctx.save();ctx.globalAlpha=k;
+  {const g=ctx.createLinearGradient(0,y0,0,y0+H*.4);g.addColorStop(0,'rgba(6,3,24,.96)');g.addColorStop(.5,'rgba(12,6,40,.72)');g.addColorStop(1,'rgba(14,8,44,0)');ctx.fillStyle=g;ctx.fillRect(x0-4,y0-4,W+8,H*.4+4)}
+  if(SUX.ec){const sx=(t*5)%320;ctx.globalCompositeOperation='lighter';ctx.globalAlpha=k*.8;ctx.drawImage(SUX.ec,sx,0,960,520,x0,y0,W,H*.4);ctx.globalCompositeOperation='source-over';ctx.globalAlpha=k}
+  /* 가장자리 보랏빛 어둠(가운데는 그대로) + 달빛 톤 */
+  {const g=ctx.createRadialGradient(p.x,p.y,Math.min(W,H)*.38,p.x,p.y,Math.max(W,H)*.72);g.addColorStop(0,'rgba(40,14,90,0)');g.addColorStop(1,'rgba(40,14,90,.58)');ctx.fillStyle=g;ctx.fillRect(x0-4,y0-4,W+8,H+8);ctx.globalAlpha=k*.07;ctx.fillStyle='#7a50e0';ctx.fillRect(x0-4,y0-4,W+8,H+8);ctx.globalAlpha=k}
+  /* 별 */
+  for(const q of SUX.st){const a=k*(.35+.65*Math.abs(Math.sin(t*q[4]*.7+q[3]))),x=x0+q[0]*W,y=y0+q[1]*H,z=q[2];ctx.globalAlpha=a;ctx.fillStyle=z>=3?'#ffffff':'#d8ccff';ctx.fillRect(x-z/2,y-z/2,z,z);if(z>=3){ctx.globalAlpha=a*.6;ctx.fillRect(x-6,y-.5,12,1);ctx.fillRect(x-.5,y-6,1,12)}}
+  /* 유성 */
+  {const ph=(t*.8)%5;if(ph<.55){const u=ph/.55,n=Math.floor(t*.8/5),sx=x0+W*(.15+((n*.37)%1)*.7)+u*W*.18,sy=y0+H*(.03+((n*.23)%1)*.12)+u*H*.1;ctx.globalCompositeOperation='lighter';ctx.globalAlpha=k*(1-u)*.9;ctx.strokeStyle='#ffffff';ctx.lineWidth=2;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(sx,sy);ctx.lineTo(sx-W*.07,sy-H*.045);ctx.stroke()}}
+  ctx.restore()}
+function suEclCorona(ex,ey,k){if(!(k>.003))return;const t=G.t,R0=86;ctx.save();ctx.globalCompositeOperation='lighter';
+  const g=ctx.createRadialGradient(ex,ey,R0*.7,ex,ey,R0*2.8);g.addColorStop(0,'rgba(255,214,120,'+(.6*k)+')');g.addColorStop(.35,'rgba(255,150,70,'+(.22*k)+')');g.addColorStop(1,'rgba(255,120,60,0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(ex,ey,R0*2.8,0,7);ctx.fill();
+  ctx.lineCap='round';for(let i=0;i<28;i++){const a=i*.2244+t*.1,L=R0*(1.35+.55*Math.abs(Math.sin(t*1.7+i*1.9)));ctx.globalAlpha=k*.3;ctx.strokeStyle='#ffd98a';ctx.lineWidth=i%3?1.5:3;ctx.beginPath();ctx.moveTo(ex+Math.cos(a)*R0*.98,ey+Math.sin(a)*R0*.98);ctx.lineTo(ex+Math.cos(a)*L,ey+Math.sin(a)*L);ctx.stroke()}
+  ctx.globalAlpha=k*(.75+.15*Math.sin(t*3));ctx.strokeStyle='#ffe9a8';ctx.lineWidth=3;ctx.beginPath();ctx.arc(ex,ey,R0,0,7);ctx.stroke();ctx.restore()}
 function suHexDie(e){const S=e.hx,pts=[];if(!S)return;for(let i=0;i<SUX.N;i+=2){const q=suHexSeg(e,i);for(let k=0;k<3;k++)pts.push([q[0]+rnd(-q[3],q[3]),q[1]+rnd(-q[3]*.5,q[3]*.5),Math.random()<.3,rnd(.6,2.2)])}G.suDawn={t:0,pts,eye:S.ph>1};
   if(!G.bot){SND.p('clear');G.rflash=1;G.shk=.8;toast('🌅 끝없는 밤이 걷혔어요','헥스터 처치 — 새 대원 「응빈」이 사령관님 곁으로 와요',true);SAVE.suHx=1;SAVE.ungbin=1;try{persist()}catch(x){}}}
 function suHexFx(front){for(const e of G.enemies){if(e.dead||e.type!=='su_hex')continue;if(!front&&e.hx.ph>1)suHex2Ground(e);const A=e.hx.act;if(!A)continue;const t=G.t;ctx.save();
@@ -2692,7 +2714,7 @@ function suHud(dt){if(!suSolo()){if(SU.hud)SU.hud.style.display='none';return}
   const st=(b,show,busy,txt)=>{b.style.display=show?'block':'none';b.style.opacity=busy?.45:1;b.querySelector('b').textContent=txt};
   st(B[0],n>=1,!!G.suT||G.t<D.t,G.suT?'출격 중':G.t<D.t?Math.ceil(D.t-G.t)+'초':'탈로스');
   st(B[1],n>=2,!!G.suDd||G.t<D.d||D.dn<=0,G.suDd?'수리 중':D.dn<=0?'소진':G.t<D.d?Math.ceil(D.d-G.t)+'초':'수리 '+D.dn)}
-window.__suBoss=k=>k==='than'?suThSpawn():k==='oct'?suOctSpawn():k==='hex'?suHexCall():suOksSpawn();
+window.__suBoss=k=>k==='ecl'?suEclStart():k==='than'?suThSpawn():k==='oct'?suOctSpawn():k==='hex'?suHexCall():suOksSpawn();
 /* ---- 수원 함선 (11-18): 탈로스 = 패드에 착지해 ㄷ자 레일건 전개 → 충전 3초·관통 한 발 / 다이달로스 = 게이트 위에서 수리 연출 ----
    그림 ag/talos_tf(비행→착지→전개 24장) · talos_hull(선체) · talos_gun(레일건 24방향) · daedalus(12장), 칸 320px.
    SUT.PHI = 레일건 각 장이 화면에서 가리키는 각도(구운 그림에서 잰 값), SUT.L = 회전 중심~포구 거리(px).

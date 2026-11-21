@@ -2297,7 +2297,7 @@ function suOctDraw(e){const S=e.oc;if(!S){S2D_FB(e);return}const A=S.act,R=SUC.R
    옥타비아  10 색의 서약: 보석이 색을 차례로 보여 줌 → 같은 순서로 색 발판 밟기 / 11 어두운 면: 조각 8개 고리가 돌다 멈춤 → 꺼진 조각 방향 부채꼴만 안전
    옥산느    20 여왕의 시선: 드론 넷이 차례로 눈을 뜸 → 같은 순서로 그 구역 폭발 / 21 기억의 타일: 3×3 → 4×4 → 5×5, 3초 보여 준 뒤 가리고 비안전 칸에 공격
    발동: 체력 구간(suRaidDue). lv 0 = 첫 번째, 1 = 두 번째(더 길고 빠름). 수치 임시. 시험: __suRaid(종류, lv) */
-const SUR={PEN:.33,COL:['#35d6ff','#ff5ac8','#b07aff','#ffd23a'],CN:['하늘','분홍','보라','금']};
+const SUR={RW:.08,TO:.15,GW:900,PEN:.33,COL:['#35d6ff','#ff5ac8','#b07aff','#ffd23a'],CN:['하늘','분홍','보라','금']};
 function suRdSeq(n,m){const q=[];while(q.length<n){const v=Math.random()*m|0;if(v!==q[q.length-1])q.push(v)}return q}
 /* 11-20 사용자: 보스가 멈춰서 문제만 내면 쉬움 → ① 패턴 중에도 보스가 평소 공격의 절반 빈도로 공격 ③ 체력이 줄수록 보여 주는 시간 단축(3초→2초), 마지막 15%는 패턴 겹침 */
 const SURP={MEM:[2,1.67,1.33,1],SP:[1,1.15,1.3,1.5],HT:[2.6,2.2],HZ:1.4,HZT:1.1,HZR:75};
@@ -2309,10 +2309,11 @@ function suRaid(e,k,lv,st){const p=G.p,c=suSafe(p.x,p.y);st=st||0;const R={k,lv:
   /* 11-20 사용자: 스피드 게임 — 기억할 시간(보여 주는 구간 전체)을 처음 2초 → 마지막 1초 */
   {const B=k===10?1+R.seq.length*.75:k===20?1.4+R.seq.length*.6:k===21?R.show:0;if(B)R.sp=B/SURP.MEM[st]}
   e.rd=R;G.suRd=R;e.fmInv=1;if(!G.bot){SND.p('boss');G.rflash=.4;const T={10:['색의 서약','보석이 빛나는 순서를 외워, 같은 순서로 발판을 밟아요'],11:['어두운 면','고리가 멈추면 꺼진 조각 쪽 부채꼴만 안전해요'],20:['여왕의 시선','드론이 눈을 뜨는 순서를 외워요. 같은 순서로 그 방향 전체가 터져요'],21:['기억의 타일','조준점이 없는 칸을 외워요. 표시가 꺼진 뒤 조준됐던 칸에 사격이 떨어져요']}[k];toast('⚠ '+e.name+' — '+T[0],T[1],true);if(R.cb)setTimeout(()=>{if(G.suRd===R)toast('⚠ 공격이 겹쳐요',e.oc?'바닥에 꽂히는 레이저 문양도 피하세요':'하늘에서 떨어지는 조준 사격도 피하세요',true)},900)}return R}
-function suRdGrid(R){const n=R.rounds[R.r],N=n*n,S=new Set(),K=[3,3,4][R.r];while(S.size<K)S.add(Math.random()*N|0);R.n=n;R.safe=S;R.ph=0;R.t=0}
+function suRdGrid(R){const n=R.rounds[R.r],N=n*n,S=new Set(),K=[1,2,3][R.r];while(S.size<K)S.add(Math.random()*N|0);R.n=n;R.safe=S;R.ph=0;R.t=0}
 function suRaidDue(e,TH,K){const i=e.ri||0;if(i<TH.length&&e.hp<e.max*TH[i]){e.ri=i+1;suRaid(e,K[i],i>>1,i);return true}return false}
-function suRdFail(R,msg){const p=G.p;if(!(p.inv>1e6)){p.hp-=G.S.maxHp*SUR.PEN;p.inv=Math.max(p.inv,1);G.hurtFlash=.6}if(!G.bot){SND.p('hurt');G.shk=Math.max(G.shk||0,.5);G.rflash=.6;G.texts.push({x:p.x,y:p.y-56,v:(msg||'실패')+' −33%',life:1.6,big:1,col:'#ff4a4a'})}R.res=-1}
-function suRdEnd(R,ok){const e=R.e;e.rd=null;e.fmInv=0;if(G.suRd===R)G.suRd=null;if(e.oc){e.oc.act=null;e.oc.cd=ok?4:1.5}if(e.so){e.so.act=null;e.so.cb=ok?5:2}
+function suRdFail(R,msg,pen){const p=G.p;pen=pen||SUR.PEN;if(!(p.inv>1e6)){p.hp-=G.S.maxHp*pen;p.inv=Math.max(p.inv,1);G.hurtFlash=.6}if(!G.bot){SND.p('hurt');G.shk=Math.max(G.shk||0,.5);G.rflash=.6;G.texts.push({x:p.x,y:p.y-56,v:(msg||'실패')+' −'+Math.round(pen*100)+'%',life:1.6,big:1,col:'#ff4a4a'})}R.res=-1}
+function suRdEnd(R,ok){const e=R.e;e.rd=null;e.fmInv=0;if(G.suRd===R)G.suRd=null;if(e.oc){e.oc.act=null;e.oc.cd=ok?3:.6}if(e.so){e.so.act=null;e.so.cb=ok?3:.6;if(!ok)e.so.ct=e.so.cl=.6}
+  if(ok){hurt(e,e.max*SUR.RW,'x',{force:1});e.flash=.5;if(!G.bot){SND.p('boom');G.shk=Math.max(G.shk||0,.4);sparks(e.x,e.y-60,30,['#ffe08a','#ffffff'],300,.6,3)}}
   if(ok&&!G.bot){SND.p('clear');sparks(e.x,e.y-60,30,['#ffffff','#8fe6ff','#ffc8e6'],260,.7,3)}}
 function suRdPad(R,i){const a=-1.5708+i*1.5708;return[R.cx+Math.cos(a)*175,R.cy+Math.sin(a)*130]}
 function suRdPress(R,dt){const e=R.e,p=G.p,oc=!!e.oc;if(R.sp==null)return;R.ht-=dt;
@@ -2330,15 +2331,15 @@ function suRaidTick(dt){for(const e of G.enemies){const R=e.rd;if(!R)continue;if
   if(k===10){const n=R.seq.length,TS=1+n*.75;if(R.ph===0){if(R.t>=TS){R.ph=1;R.t=0}}
     else{let on=-1;for(let i=0;i<4;i++){const q=suRdPad(R,i);if(Math.hypot(p.x-q[0],(p.y-q[1])*1.3)<46)on=i}
       if(on>=0&&on!==R.on){if(on===R.seq[R.i]){R.i++;R.fl=.3;if(!G.bot)SND.p('gem');if(R.i>=n){suRdEnd(R,R.res!==-1);continue}}else suRdFail(R,'순서가 틀렸어요')}R.on=on;R.fl=Math.max(0,(R.fl||0)-dt);
-      if(R.t>=R.T){suRdFail(R,'시간 초과');suRdEnd(R,0);continue}}}
+      if(R.t>=R.T){suRdFail(R,'남은 문양 '+(n-R.i),Math.min(.75,(n-R.i)*SUR.TO));suRdEnd(R,0);continue}}}
   else if(k===11){const TS=R.lv?2.2:2.8;if(R.t<TS){const u=R.t/TS;R.a+=R.dir*dt*(R.lv?9.5:7.5)*(1-u)*(1-u)+R.dir*dt*.25}
     if(!R.hit&&R.t>=TS+.7){R.hit=1;const dx=p.x-e.x,dy=p.y-(e.y-70)+70,d=Math.hypot(dx,dy);let sc=Math.floor((((Math.atan2(dy,dx)-R.a)%6.2832)+6.2832)%6.2832/.7854);if(d<70||!R.dark.includes(sc))suRdFail(R,d<70?'너무 가까워요':'밝은 면이에요')}
     if(R.t>=TS+1.3){suRdEnd(R,R.res!==-1);continue}}
   else if(k===20){const n=R.seq.length,TS=.8+n*.6;if(R.ph===0){if(R.t>=TS+.6){R.ph=1;R.t=0;R.i=0}}
     else{if(R.t>=R.bt){R.t-=R.bt;const q=R.seq[R.i],dx=p.x-R.cx,dy=p.y-R.cy,d=Math.hypot(dx,dy),sc=Math.floor((((Math.atan2(dy,dx)+2.3562)%6.2832)+6.2832)%6.2832/1.5708);R.bl={q,t:0};if(!G.bot)SND.p('boom');
-        if(sc===q)suRdFail(R,'시선에 걸렸어요');R.i++;if(R.i>=n){suRdEnd(R,R.res!==-1);continue}}
+        if(sc!==q)suRdFail(R,'시선에 걸렸어요');R.i++;if(R.i>=n){suRdEnd(R,R.res!==-1);continue}}
       if(R.bl)R.bl.t+=dt}}
-  else{const n=R.n,W=700,ts=W/n;if(R.ph===0){if(R.t>=R.show){R.ph=1;R.t=0}}
+  else{const n=R.n,W=SUR.GW,ts=W/n;if(R.ph===0){if(R.t>=R.show){R.ph=1;R.t=0}}
     else if(R.ph===1){if(R.t>=1.3){R.ph=2;R.t=0;const gx=Math.floor((p.x-(R.cx-W/2))/ts),gy=Math.floor((p.y-(R.cy-W/2))/ts);if(!G.bot)SND.p('boom');if(gx<0||gy<0||gx>=n||gy>=n||!R.safe.has(gy*n+gx))suRdFail(R,'붉은 칸이에요')}}
     else if(R.t>=.7){R.r++;if(R.r>=R.rounds.length){suRdEnd(R,R.res!==-1);continue}suRdGrid(R)}}}
   if(G.suRd&&(G.suRd.e.dead||!G.enemies.includes(G.suRd.e)))G.suRd=null}
@@ -2376,16 +2377,16 @@ function suRaidDraw(){const R=G.suRd;if(!R)return;const e=R.e,p=G.p,t=G.t,k=R.k;
     const n=R.seq.length,cx=R.cx,cy=R.cy,im=suIm2('oks_drone');let lit=-1,shown=0;if(R.ph===0){const j=Math.floor((R.t-.8)/.6),u=(R.t-.8)-j*.6;if(R.t>=.8&&j<n&&u<.45)lit=R.seq[j];shown=R.t<.8?0:Math.min(n,j+1)}
     ctx.save();ctx.strokeStyle='#ff1a30';ctx.globalAlpha=.3;ctx.lineWidth=10;ctx.beginPath();ctx.arc(cx,cy,300,0,7);ctx.stroke();ctx.globalAlpha=.75+.25*Math.sin(t*18);ctx.lineWidth=3;ctx.stroke();
     ctx.globalAlpha=.5;ctx.lineWidth=1.5;for(let i=0;i<4;i++){const a0=-2.3562+i*1.5708;ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+Math.cos(a0)*1400,cy+Math.sin(a0)*1400);ctx.stroke()}ctx.restore();
-    for(let i=0;i<4;i++){const a0=-2.3562+i*1.5708,am=a0+.7854,ex=cx+Math.cos(am)*300,ey=cy+Math.sin(am)*300,blq=R.bl&&R.bl.q===i&&R.bl.t<.55,qx=cx+Math.cos(am)*150,qy=cy+Math.sin(am)*150;
-      if(lit===i){ctx.save();ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,1400,a0,a0+1.5708);ctx.closePath();ctx.clip();ctx.globalCompositeOperation='lighter';const g=ctx.createRadialGradient(cx,cy,30,cx,cy,1400);g.addColorStop(0,'rgba(255,60,80,.7)');g.addColorStop(.35,'rgba(255,40,70,.28)');g.addColorStop(1,'rgba(255,30,60,.14)');ctx.fillStyle=g;ctx.fillRect(cx-1400,cy-1400,2800,2800);
+    for(let i=0;i<4;i++){const a0=-2.3562+i*1.5708,am=a0+.7854,ex=cx+Math.cos(am)*300,ey=cy+Math.sin(am)*300,blq=R.bl&&R.bl.q!==i&&R.bl.t<.55,aim=lit>=0&&lit!==i,qx=cx+Math.cos(am)*150,qy=cy+Math.sin(am)*150;
+      if(aim){ctx.save();ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,1400,a0,a0+1.5708);ctx.closePath();ctx.clip();ctx.globalCompositeOperation='lighter';const g=ctx.createRadialGradient(cx,cy,30,cx,cy,1400);g.addColorStop(0,'rgba(255,60,80,.7)');g.addColorStop(.35,'rgba(255,40,70,.28)');g.addColorStop(1,'rgba(255,30,60,.14)');ctx.fillStyle=g;ctx.fillRect(cx-1400,cy-1400,2800,2800);
         ctx.strokeStyle='rgba(255,120,130,.55)';ctx.lineWidth=1.5;const px2=Math.cos(am+1.5708),py2=Math.sin(am+1.5708);for(let s2=0;s2<20;s2++){const d=((t*300+s2*70)%1400),bx=cx+Math.cos(am)*d,by=cy+Math.sin(am)*d;ctx.beginPath();ctx.moveTo(bx-px2*1400,by-py2*1400);ctx.lineTo(bx+px2*1400,by+py2*1400);ctx.stroke()}ctx.restore();
         ctx.save();ctx.strokeStyle='#ff1a30';ctx.lineWidth=2.5;const rr=34+6*Math.sin(t*20);ctx.beginPath();ctx.arc(qx,qy,rr,0,7);ctx.moveTo(qx-rr-14,qy);ctx.lineTo(qx-rr+10,qy);ctx.moveTo(qx+rr-10,qy);ctx.lineTo(qx+rr+14,qy);ctx.moveTo(qx,qy-rr-14);ctx.lineTo(qx,qy-rr+10);ctx.moveTo(qx,qy+rr-10);ctx.lineTo(qx,qy+rr+14);ctx.stroke();ctx.restore();suRdBeam(ex,ey,qx,qy,'#ff2a3a',2,.7)}
       if(blq){const u=R.bl.t/.55,al=1-u;ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=al*.7;ctx.fillStyle='#ff2a3a';ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,1400,a0,a0+1.5708);ctx.closePath();ctx.fill();ctx.restore();
         for(let s2=0;s2<5;s2++){const b=a0+.16+s2*.31,L=160+((s2*137)%520);suRdBeam(ex,ey,cx+Math.cos(b)*L,cy+Math.sin(b)*L,'#ff2a3a',9,al);suRdGlow(cx+Math.cos(b)*L,cy+Math.sin(b)*L,50,'#ffd0c0',al*.8)}}
-      if(lit===i||blq)suRdGlow(ex,ey,80,'#ff2a3a',.8);if(im.complete&&im.width)ctx.drawImage(im,(blq?2:lit===i?3:0)*150,0,150,150,ex-44,ey-44+Math.sin(t*2+i)*4,88,88)}
-    suRdCap(R.ph===0?'드론이 조준하는 순서를 보세요':'같은 순서로 사격해요',R.ph===0?(shown+' / '+n):((R.i+1)+' / '+n+' · 조준된 방향에서 벗어나세요'),'#ffb0b8')}
+      if(aim||blq)suRdGlow(ex,ey,80,'#ff2a3a',.8);else if(lit===i)suRdGlow(ex,ey,70,'#7affd8',.7);if(im.complete&&im.width)ctx.drawImage(im,(blq?2:aim?3:0)*150,0,150,150,ex-44,ey-44+Math.sin(t*2+i)*4,88,88)}
+    suRdCap(R.ph===0?'쉬는 드론의 순서':'세 방향 동시 사격',R.ph===0?(shown+' / '+n):((R.i+1)+' / '+n),'#ffb0b8')}
   else{/* ── 기억의 타일: 드론이 바닥에 조준 격자를 비춤. 조준점이 찍힌 칸을 보여 준 뒤 표시를 끄고 사격 ── */
-    const n=R.n,W=700,ts=W/n,x0=R.cx-W/2,y0=R.cy-W/2,top=p.y-VH/2-40,fk=.6+.3*Math.sin(t*20);
+    const n=R.n,W=SUR.GW,ts=W/n,x0=R.cx-W/2,y0=R.cy-W/2,top=p.y-VH/2-40,fk=.6+.3*Math.sin(t*20);
     for(let gy=0;gy<n;gy++)for(let gx=0;gx<n;gx++){const sf=R.safe.has(gy*n+gx),x=x0+gx*ts,y=y0+gy*ts,mx=x+ts/2,my=y+ts/2;if(sf&&R.ph!==0)continue;ctx.save();
       if(R.ph===0){if(sf){ctx.strokeStyle='rgba(235,245,255,.9)';ctx.lineWidth=2;const c2=ts*.2;ctx.beginPath();for(const [ax,ay,dx,dy] of [[x+7,y+7,1,1],[x+ts-7,y+7,-1,1],[x+7,y+ts-7,1,-1],[x+ts-7,y+ts-7,-1,-1]]){ctx.moveTo(ax+dx*c2,ay);ctx.lineTo(ax,ay);ctx.lineTo(ax,ay+dy*c2)}ctx.stroke()}
         else{ctx.globalAlpha=.3;ctx.fillStyle='#ff1a30';ctx.fillRect(x+2,y+2,ts-4,ts-4);ctx.globalAlpha=1;ctx.strokeStyle='#ff1a30';ctx.lineWidth=2.5;const rr=ts*.24+2*Math.sin(t*10+gx+gy);ctx.beginPath();ctx.arc(mx,my,rr,0,7);ctx.moveTo(mx-rr-8,my);ctx.lineTo(mx-rr+7,my);ctx.moveTo(mx+rr-7,my);ctx.lineTo(mx+rr+8,my);ctx.moveTo(mx,my-rr-8);ctx.lineTo(mx,my-rr+7);ctx.moveTo(mx,my+rr-7);ctx.lineTo(mx,my+rr+8);ctx.stroke();ctx.fillStyle='#ffd0d0';ctx.fillRect(mx-2,my-2,4,4)}}

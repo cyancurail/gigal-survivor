@@ -2212,22 +2212,60 @@ function suThDraw(e){const S=e.th,im=suIm2(S&&S.i?'than_b':'than');if(!S||!im.co
 const SUA={BT:[240,540,780],HOLD:5,R:90,CD:.6,RNG:380,DM:.35,SUP0:120,SUPT:150};
 /* 대원 합류 대사 (11-22 언니 확정): [대원의 한마디, 2초 뒤 아리아드네(전술 어드바이저)] */
 SUA.LN={"무룩": ["여신의 도움이 필요하신가요?", "여신이 강림했어요!"], "쁘니": ["언니 도착. 이 게임 분석 끝났어. 잘 버티고 있었구나.", "최강 언니 등장. 이제 승리는 우리의 것이에요."], "태태영": ["폴라리스 총사령관, 지상 지원 개시. 버텨 줘서 고마워.", "오퍼레이션 프로즌 하트. 전장의 여신이 왔어요."], "맘터": ["맘터 요원 합류 완료. 련깨비 하다 넘어왔어. 못생긴 것들은 다 죽이겠어.", "네, 사령관님. 보여 주세요!"], "람쥐": ["시크릿 코드 접속 완료. 팀장님 오기 전에 끝내요!", "전술 어드바이저 합류 완료. 이번 작전은 승리할 거예요."], "세나": ["음악 켜 줘! 무대가 넓어서 좋네요.", "세나 디센딩. 게임 오버예요."], "K1": ["등불 점화 완료노. 쓰러진 영혼은 내가 안식처로 인도하노.", "후방 구호 라인 확보. 이제 아무도 길을 잃지 않아요."], "영애": ["영애 출격. 오늘 확률은 내 편이야. 크리티컬로 끝낸다.", "치명타 지원 확인. 지금부터 화력 집중 구간이에요."], "마녀": ["마녀 합류. 가게 마감은 끝났어. 이제 무수리를 갈아 줄 차례야.", "분쇄 화력 도착. 적 밀도가 빠르게 떨어져요."], "잔느": ["잔느, 오늘도 개근. 등 뒤는 내가 지킬게.", "후방 경계 확보. 사령관님은 앞만 보세요."], "힐블": ["힐블 도착! 시간의 틈, 열어 둘게.", "시공간 지원 확인. 적 진형이 흐트러졌어요, 지금이에요."], "짱재": ["검사 짱재, 전열 합류. 길은 내 칼끝이 연다.", "근접 돌파 개시. 전열이 열리면 바로 밀고 들어가요."], "하도": ["사격 위치 확보. 헤드샷은 내가 다 가져간다.", "저격 엄호 개시. 사격 교관님 사선 안은 안전 지대예요."], "밍키": ["수워니 공무원 밍키, 관할 지역 지키러 왔어.", "현지 지원 확인. 여긴 밍키님 관할이에요, 한 마리도 못 넘어와요."], "쥬은": ["보석 정령, 공명 시작. 저도 함께 싸울게요.", "보석 공명 안정. 사령관 쥬은님은 혼자 싸운 적 없어요."]};
+/* ---- 대원 무기 (11-22 언니 확정): 합류 대원은 자기 기본무기 진화형(만렙)을 들고 10분간 싸움. 패시브 없음(baseStats만). 지원 화력은 낮게 ----
+   무기는 대원 자신의 위치에서 따로 돌림(대원마다 G를 복제한 g로 교체해 실행 — 멀티 고스트와 같은 방식). 공통 제한:
+   ① 사거리: 대원 둘레 RNG 안의 적만 피해(화면 전체 공격 방지) ② 피해 배율 KS[무기] ②' 초당 피해 총량 상한 RATE(대원 1명당, 무리가 많아도 넘지 못함) ③ 저항: 한 적이 대원에게서 초당 받는 피해 상한(최대 체력 비율, 보스는 낮게)
+   ④ 회복·소리·알림 끔, 딜 집계 제외(g.stats 별도) */
+const SUCW={RNG:420,LEASH:260,DUR:600,CAP:.10,CAPE:.05,CAPB:.02,RATE:45,KS:{heart:2.2,pachinko:0.073,veil:2.2,laser:0.065,cotton:0.269,pillar:0.252,poison:0.118,bolt:0.051,lipstick:0.093,docs:0.032,rose:0.08,fairy:1.047,emerald:0.609,cblade:0.666,uzi:1.378}};/* KS: 90초 봇 시뮬로 대원 1명당 약 30 DPS가 되게 맞춘 피해 배율 */
+function suCrewMake(c){const ch=CHAR[c.ci],k=ch.w;c.wk=k;if(!WU[k]){c.off=1;return}
+  const g=Object.create(G);g.projs=[];g.zones=[];g.fx=[];g.texts=[];g.eb=[];g.blz=[];g.weapons=[{k,lvl:8,evo:true,t:0,t0:G.t,st:{}}];
+  g.p={x:c.x,y:c.y,hp:1e9,fx:1,fy:0,inv:1e9,walk:0,frame:0,mv:false,dead:false};g.S=baseStats();g.items={};g.ci=c.ci;g.id=ch.id;g.stats={k:{},dmg:0};g.sealed=null;g.ultOn=null;g.ultReady=false;g.freeze=0;
+  c.g=g;c.tm=[]}
+function suCrewTick(c,dt){const g=c.g;if(!g||c.off)return;const real=G;Object.setPrototypeOf(g,real);
+  for(const k of Object.keys(real)){if(Array.isArray(real[k])&&!Object.prototype.hasOwnProperty.call(g,k)&&k!=='enemies')g[k]=[]}
+  const sv={hurt,kill,healP,setTimeoutG,canHit,sp:SND.p,toast},KS=SUCW.KS[c.wk]||1;c.bk=Math.min(SUCW.RATE*.5,(c.bk===undefined?SUCW.RATE*.5:c.bk)+SUCW.RATE*dt);
+  const wh=(e,amt,key,opts)=>{if(!e||e.dead)return 0;c.raw+=amt;if(Math.hypot(e.x-c.x,e.y-c.y)>SUCW.RNG){c.cl++;return 0}c.rin=(c.rin||0)+amt;
+    let d=amt*KS;const cap=(e.boss?SUCW.CAPB:e.elite?SUCW.CAPE:SUCW.CAP)*(e.max||e.hp||1),X=e._cw||(e._cw={t:-9,a:0});if(real.t-X.t>=1){X.t=real.t;X.a=0}
+    const room=cap-X.a;if(room<=0)return 0;if(d>room)d=room;if(c.bk<=0)return 0;if(d>c.bk)d=c.bk;c.bk-=d;X.a+=d;c.dmg+=d;return sv.hurt(e,d,key,opts)};
+  hurt=wh;kill=(e,k)=>{G=real;try{return sv.kill(e,k)}finally{G=g}};healP=()=>{};setTimeoutG=(f,d)=>{c.tm.push({t:d,fn:f})};canHit=(e,key,cd)=>sv.canHit(e,key+'@c'+c.id,cd);SND.p=()=>{};toast=()=>{};G=g;
+  try{const p=g.p;p.x=c.x;p.y=c.y;p.fx=c.fl?-1:1;p.fy=0;p.mv=!!c.mv;p.walk=c.w;p.dead=false;p.inv=1e9;p.hp=1e9;
+    for(const w of g.weapons){g._hk=w.k;try{WU[w.k](w,dt)}catch(e){c.bad=(c.bad||0)+1;if(c.bad>=3){c.off=1;console.warn('crew weapon off',w.k,e)}}}
+    try{juQTick(dt)}catch(e){}
+    for(let i=c.tm.length-1;i>=0;i--){const T=c.tm[i];T.t-=dt;if(T.t<=0){c.tm.splice(i,1);try{T.fn()}catch(e){}}}
+    try{projZoneStep(dt)}catch(e){c.bad=(c.bad||0)+1;if(c.bad>=3)c.off=1}
+    for(const f of g.fx){f.life-=dt;if(f.vx!==undefined){f.x+=f.vx*dt;f.y+=f.vy*dt}if(f.ring)f.r=f.R*(1-f.life/f.L)}g.fx=g.fx.filter(f=>f.life>0);g.texts=[];
+    try{jrTick(dt)}catch(e){}try{juAllyTick(dt)}catch(e){}
+    if(g.projs.length>200)g.projs.splice(0,g.projs.length-200);if(g.fx.length>260)g.fx.splice(0,g.fx.length-260)}
+  finally{G=real;hurt=sv.hurt;kill=sv.kill;healP=sv.healP;setTimeoutG=sv.setTimeoutG;canHit=sv.canHit;SND.p=sv.sp;toast=sv.toast}}
+window.suCrewDraw=fns=>{const A=G&&G.suA;if(!A||!A.cr.length)return;const real=G;
+  for(const c of A.cr){if(!c.g||c.off||c.lv)continue;try{Object.setPrototypeOf(c.g,real);const p=c.g.p;p.x=c.x;p.y=c.y;p.fx=c.fl?-1:1;G=c.g;ctx.save();for(const f of fns){try{f()}catch(e){}}ctx.restore()}finally{G=real}}};
 function suAidTick(dt){const p=G.p,A=G.suA||(G.suA={bi:0,bc:null,cr:[],sup:null,st:SUA.SUP0});G.suLn=(Math.abs(p.x)<28||Math.abs(p.y)<28)&&suEll(p.x,p.y,SU.ER+10)>1;
   if(!A.sup&&G.t>=A.st){A.sup={x:0,y:150,t:0};if(!G.bot)toast('📦 엘리베이터 보급 도착','지휘본부가 내려보낸 상자 — 엘리베이터 앞에서 받아요')}
   if(A.sup){A.sup.t+=dt;if(Math.hypot(p.x-A.sup.x,p.y-A.sup.y)<42){const hv=Math.round(G.S.maxHp*.25);healP(hv,'su_sup');for(let i=0;i<6;i++)G.gems.push({x:p.x+rnd(-40,40),y:p.y+rnd(-30,30),v:Math.max(2,Math.round(G.next*.04)),big:1});if(!G.bot){G.texts.push({x:p.x,y:p.y-46,v:'보급 +'+hv,life:1.2,col:'#8fe6ff'});SND.p('heal')}A.sup=null;A.st=G.t+SUA.SUPT}}
   if(!A.bc&&A.bi<SUA.BT.length&&G.t>=SUA.BT[A.bi]&&A.cr.length<3){const q=pick(SU.pads);A.bc={x:q[0],y:q[1],pr:0};A.bi++;if(!G.bot){G.suBcT=G.t;toast('📡 아리아드네','사령관님, 대원이 합류 신호를 보냈어요! 기지 기준 '+suBcDir(q[0],q[1])+'쪽 금빛 기둥이 선 패드에서 5초만 서 계세요.',true);G.rflash=.35}}
-  if(A.bc){const B=A.bc,near=Math.hypot(p.x-B.x,(p.y-B.y)*1.5)<SUA.R;B.pr=near?B.pr+dt:Math.max(0,B.pr-dt*.5);if(B.pr>=SUA.HOLD){const used=A.cr.map(c=>c.ci),pool=CHAR.map((c,i)=>i).filter(i=>i!==G.ci&&!used.includes(i)&&CHAR[i].nick!=='응빈'),ci=pool.length?pick(pool):0;A.cr.push({ci,x:B.x,y:B.y-200,cd:1,sl:A.cr.length,w:0,fl:0,sh:0});A.bc=null;if(!G.bot){const nk=CHAR[ci].nick||CHAR[ci].id,L=SUA.LN[nk];toast('🤝 '+nk+' 합류',L?'「'+L[0]+'」':'끝까지 곁에서 싸워요',true);if(L)A.ln={t:G.t+2,s:L[1]};SND.p('heal')}}}
+  if(A.bc){const B=A.bc,near=Math.hypot(p.x-B.x,(p.y-B.y)*1.5)<SUA.R;B.pr=near?B.pr+dt:Math.max(0,B.pr-dt*.5);if(B.pr>=SUA.HOLD){const used=A.cr.map(c=>c.ci),pool=CHAR.map((c,i)=>i).filter(i=>i!==G.ci&&!used.includes(i)&&CHAR[i].nick!=='응빈'),ci=pool.length?pick(pool):0;const nc={ci,x:B.x,y:B.y-200,sl:A.cr.length,w:0,fl:0,id:(A.nid=(A.nid||0)+1),until:G.t+SUCW.DUR,lv:0,mv:false,dmg:0,raw:0,cl:0};A.cr.push(nc);try{suCrewMake(nc)}catch(e){nc.off=1}if(!G.bot){pring(B.x,B.y-40,140,['#ffe08a','#ffffff','#9ad8ff'],28,.6);sparks(B.x,B.y-60,10,['#ffe08a','#fff'],200,.5,3)}A.bc=null;if(!G.bot){const nk=CHAR[ci].nick||CHAR[ci].id,L=SUA.LN[nk];toast('🤝 '+nk+' 합류',L?'「'+L[0]+'」':'끝까지 곁에서 싸워요',true);if(L)A.ln={t:G.t+2,s:L[1]};SND.p('heal')}}}
   if(A.ln&&G.t>=A.ln.t){toast('📡 아리아드네',A.ln.s);A.ln=null}
-  for(const c of A.cr){const a=2.2+c.sl*1.0,tx=p.x+Math.cos(a)*62,ty=p.y+Math.sin(a)*46,dx=tx-c.x,dy=ty-c.y,d=Math.hypot(dx,dy);if(d>6){const v=Math.min(d,(d>400?900:G.S.speed*1.15)*dt);c.x+=dx/d*v;c.y+=dy/d*v;c.w+=dt;if(Math.abs(dx)>2)c.fl=dx<0}c.cd-=dt;c.sh=Math.max(0,c.sh-dt);
-    if(c.cd<=0){let b=null,bd=SUA.RNG;for(const e of G.enemies){if(e.dead)continue;const q=Math.hypot(e.x-c.x,e.y-c.y);if(q<bd){bd=q;b=e}}if(b){c.cd=SUA.CD;c.sh=.1;c.tx=b.x;c.ty=b.y-b.r*.4;c.fl=b.x<c.x;const sd=G.stats.dmg,sk=G.stats.k&&G.stats.k.su_crew;hurt(b,(G.fmSpD||60)*SUA.DM,'su_crew',{});G.stats.dmg=sd;if(G.stats.k){if(sk===undefined)delete G.stats.k.su_crew;else G.stats.k.su_crew=sk}}else c.cd=.2}}}
+  for(let ci=A.cr.length-1;ci>=0;ci--){const c=A.cr[ci];c.sl=ci;
+    if(!c.lv&&G.t>=c.until){c.lv=1.4;if(!G.bot){const nk=CHAR[c.ci].nick||CHAR[c.ci].id;toast('📡 아리아드네',nk+'님 작전 시간 종료예요. 후방으로 복귀시킬게요, 지원 감사합니다.');pring(c.x,c.y-10,90,['#ffe08a','#ffffff'],18,.5)}}
+    if(c.lv){c.lv-=dt;if(c.lv<=0){A.cr.splice(ci,1);continue}}
+    /* 자율 이동: 사령관 반경(LEASH) 안에서 가까운 적과 거리 ~170을 유지하며 옆으로 비켜 걸음. 적이 없으면 곁의 자리로 */
+    const a=2.2+ci*1.0,sx=p.x+Math.cos(a)*62,sy=p.y+Math.sin(a)*46;let b=null,bd=SUCW.RNG*.9;
+    for(const e of G.enemies){if(e.dead)continue;const q=Math.hypot(e.x-c.x,e.y-c.y);if(q<bd){bd=q;b=e}}
+    let tx=sx,ty=sy;const pd=Math.hypot(c.x-p.x,c.y-p.y);
+    if(b&&pd<SUCW.LEASH+60&&!c.lv){const dx=c.x-b.x,dy=c.y-b.y,l=Math.hypot(dx,dy)||1,ux=dx/l,uy=dy/l,st=Math.sin(G.t*.9+ci*2.1)*50;tx=b.x+ux*170-uy*st;ty=b.y+uy*170+ux*st;const lx=tx-p.x,ly=ty-p.y,ll=Math.hypot(lx,ly);if(ll>SUCW.LEASH){tx=p.x+lx/ll*SUCW.LEASH;ty=p.y+ly/ll*SUCW.LEASH}}
+    for(const o of A.cr){if(o===c)continue;const dx=c.x-o.x,dy=c.y-o.y,l=Math.hypot(dx,dy);if(l<70&&l>.1){tx+=dx/l*(70-l)*.8;ty+=dy/l*(70-l)*.8}}
+    const dx=tx-c.x,dy=ty-c.y,d=Math.hypot(dx,dy);c.mv=false;
+    if(d>6){const v=Math.min(d,(pd>400?900:G.S.speed*1.15)*dt);c.x+=dx/d*v;c.y+=dy/d*v;c.w+=dt;c.mv=true}
+    c.fl=b?b.x<c.x:(Math.abs(dx)>2?dx<0:c.fl);
+    if(!c.lv&&!c.off)suCrewTick(c,dt)}}
 function suAidDraw(front){const A=G.suA;if(!A)return;const t=G.t;
   if(!front){if(A.bc){const B=A.bc;ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=.35+.2*Math.sin(t*5);ctx.fillStyle='#ffe08a';ctx.beginPath();ctx.ellipse(B.x,B.y,SUA.R,SUA.R/1.5,0,0,7);ctx.fill();ctx.globalAlpha=.6;const g=ctx.createLinearGradient(0,B.y-420,0,B.y);g.addColorStop(0,'rgba(255,224,138,0)');g.addColorStop(1,'rgba(255,224,138,.9)');ctx.fillStyle=g;ctx.fillRect(B.x-14,B.y-420,28,420);ctx.restore();
       if(B.pr>0){ctx.save();ctx.strokeStyle='#ffffff';ctx.lineWidth=5;ctx.beginPath();ctx.ellipse(B.x,B.y,SUA.R,SUA.R/1.5,0,-1.57,-1.57+6.283*B.pr/SUA.HOLD);ctx.stroke();ctx.restore()}}
     if(A.sup){const S=A.sup,by=S.y+Math.sin(t*3)*3,dr=Math.max(0,1-S.t/1.2);ctx.save();ctx.globalAlpha=.3;ctx.fillStyle='#2a1408';ctx.beginPath();ctx.ellipse(S.x,S.y+16,24,8,0,0,7);ctx.fill();ctx.globalAlpha=1;ctx.translate(S.x,by-dr*300);ctx.fillStyle='#eef2f7';ctx.fillRect(-18,-18,36,32);ctx.fillStyle='#3a56aa';ctx.fillRect(-18,-18,36,6);ctx.fillRect(-18,8,36,6);ctx.fillStyle='#18a8ea';ctx.fillRect(-3,-12,6,20);ctx.fillRect(-10,-5,20,6);ctx.globalCompositeOperation='lighter';ctx.globalAlpha=.4+.3*Math.sin(t*6);ctx.strokeStyle='#8fe6ff';ctx.lineWidth=3;ctx.strokeRect(-22,-22,44,40);ctx.restore()}
     if(G.suLn&&!G.bot&&Math.random()<.4)px(G.p.x+rnd(-8,8),G.p.y+16,rnd(-10,10),rnd(-50,-20),.4,'#8fe6ff',2,1,2)}
   else for(const c of A.cr){let sp;try{sp=SPRF(CHAR[c.ci].id,'plain',Math.floor(c.w*8)%4)}catch(e){continue}if(!sp)continue;const s=44;ctx.save();ctx.globalAlpha=.25;ctx.fillStyle='#2a1408';ctx.beginPath();ctx.ellipse(c.x,c.y+20,14,5,0,0,7);ctx.fill();ctx.globalAlpha=1;
-    if(c.sh>0){ctx.globalCompositeOperation='lighter';ctx.strokeStyle='#ffe9a8';ctx.lineWidth=2.5;ctx.globalAlpha=c.sh*9;ctx.beginPath();ctx.moveTo(c.x,c.y-4);ctx.lineTo(c.tx,c.ty);ctx.stroke();ctx.globalCompositeOperation='source-over';ctx.globalAlpha=1}
-    ctx.translate(c.x,c.y);if(c.fl)ctx.scale(-1,1);const sm=ctx.imageSmoothingEnabled;ctx.imageSmoothingEnabled=false;ctx.drawImage(sp,-s/2,-s/2,s,s);ctx.imageSmoothingEnabled=sm;ctx.restore()}}
+    if(c.lv)ctx.globalAlpha=Math.max(0,c.lv/1.4);
+    ctx.translate(c.x,c.y);if(c.fl)ctx.scale(-1,1);const sm=ctx.imageSmoothingEnabled;ctx.imageSmoothingEnabled=false;ctx.drawImage(sp,-s/2,-s/2,s,s);ctx.imageSmoothingEnabled=sm;ctx.restore();if(c.wk&&WP[c.wk]&&!c.lv){ctx.save();ctx.globalAlpha=.9;ctx.font='13px sans-serif';ctx.textAlign='center';ctx.fillText(WP[c.wk].icon,c.x,c.y-30);ctx.restore()}}}
 /* ---- 무수리 우주선 3종 (11-19, 코드로 그림 · 수치 임시): 
    폭격정 su_bm(3:00~): 사령관 위를 가로지르며 폭탄 5발(1.1초 예고 원) · 강하정 su_dp(4:00~): 근처에 내려앉아 무수리 10마리를 풀고 떠남(떠나기 전에 잡으면 덜 풂)
    모함 su_cv(8:00~, 동시에 1척): 느리고 단단함, 6초마다 무수리 3마리 사출. 모두 처치 가능. */
@@ -4838,7 +4876,7 @@ function draw(){
   gf(false);};dF();
   pxDraw();skDraw();bfDraw();
   const dS=()=>{drawSummons();juDraw();juDraw2();if(window.jgDraw2)jgDraw2();jgDraw();hdDraw();jgNailDraw();kkDraw();jrDraw();drawDust();drawPhoto();hxDraw()};dS();
-  if(window.ghDraw)ghDraw([dZ,dW,dP,dF,dS]);if(window.lbPetDraw)lbPetDraw();
+  if(window.ghDraw)ghDraw([dZ,dW,dP,dF,dS]);if(window.suCrewDraw)suCrewDraw([dZ,dW,dP,dF,dS]);if(window.lbPetDraw)lbPetDraw();
   drawArena();drawHellWorld();if(G.map==='sangbong')s2World();
   // player
   if(auraOn()){const p0=G.p;ctx.globalAlpha=.32+.1*Math.sin(G.t*8);ctx.fillStyle='#ff4a10';ctx.beginPath();ctx.ellipse(p0.x,p0.y+16,22,7,0,0,7);ctx.fill();ctx.globalAlpha=1;if(!G.bot){for(let k=0;k<2;k++)px(p0.x+rnd(-14,14),p0.y+rnd(4,16),rnd(-10,10),-rnd(60,130),rnd(.4,.8),pick(['#ff3a1a','#ff8a1a','#ffd34d','#fff0a0']),pick([2,3]),1,1)}}

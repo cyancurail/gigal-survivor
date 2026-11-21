@@ -2454,16 +2454,16 @@ function suHexTick(dt){for(const e of G.enemies){if(e.dead||e.type!=='su_hex')co
    광장에 육각 조각 6개가 내려앉고 금빛으로 열린 조각 하나만 맞음(7초마다 바뀜). 눈은 시선 광선 3연발 → 조각 탄막 순으로 공격. 수치 임시 */
 const suHxL=(x,ly)=>30*Math.sin(x*.011+G.t*2.2+ly*.01);/* 몸통 쓸기: 가로로 누운 몸통 세 줄이 구불거리며 옆으로 지나감(줄 사이 빈 곳이 안전) */
 const SUX2={TR:3,OPEN:5,R:470,TEL:.8,EX:0,EY:-40};
-/* 「색깔미로」(11-21 사용자): 일식의 밤 전용. 동심원 4겹×6칸, 겹마다 반대로 돌고 정답색 칸만 안전. 걸어서 중심까지 들어가야 함(끝났을 때 중심 밖이면 −33%) */
-const SUMZ={RI:[84,150,216,282],RO:[142,208,274,340],K:.75,T:9,TEL:1.2,SP:[.5,-.42,.34,-.28]};
+/* 「색깔미로」(11-21 사용자): 일식의 밤 전용. 동심원 4겹×6칸, 겹마다 반대로 돌고 정답색 칸만 안전. 중심에서 시작해 걸어서 바깥으로 빠져나가야 함(시간 끝날 때 안에 있으면 −33%) */
+const SUMZ={RI:[100,190,280,370],RO:[180,270,360,450],K:.68,T:10,TEL:1.2,SP:[.5,-.42,.34,-.28]};
 function suMazeStart(e){const S=e.hx,p=G.p,c=suSafe(p.x,p.y),C=Math.floor(Math.random()*4),cols=[];
   for(let i=0;i<4;i++){const a=[0,1,2,3,4,5].map(()=>{let k;do{k=Math.floor(Math.random()*4)}while(k===C);return k}),s1=Math.floor(Math.random()*6);a[s1]=C;a[(s1+2+Math.floor(Math.random()*3))%6]=C;cols.push(a)}
-  S.mz={x:c[0],y:c[1],t:0,C,cols,rot:[0,1,2,3].map(()=>Math.random()*6.2832),bt:0};S.ga=null;S.gc=99;if(!G.bot){SND.p('boom');G.shk=Math.max(G.shk||0,.3);sparks(c[0],c[1],24,['#35d6ff','#ff5ac8','#ffd23a','#ffffff'],260,.5,3)}}
+  p.x=c[0];p.y=c[1];S.mz={x:c[0],y:c[1],t:0,C,cols,rot:[0,1,2,3].map(()=>Math.random()*6.2832),bt:0};S.ga=null;S.gc=99;if(!G.bot){SND.p('boom');G.shk=Math.max(G.shk||0,.3);sparks(c[0],c[1],24,['#35d6ff','#ff5ac8','#ffd23a','#ffffff'],260,.5,3)}}
 function suMazeTick(e,dt){const S=e.hx,m=S.mz,p=G.p,Q=SUMZ;m.t+=dt;for(let i=0;i<4;i++)m.rot[i]+=Q.SP[i]*dt;
   const dx=p.x-m.x,dy=(p.y-m.y)/Q.K,r=Math.hypot(dx,dy);
   if(m.t>=Q.TEL&&m.t<Q.T){m.bt-=dt;if(r>=Q.RI[0]&&r<Q.RO[3]){let i=-1;for(let k=0;k<4;k++)if(r>=Q.RI[k]&&r<Q.RO[k])i=k;
       if(i>=0){const f=(((Math.atan2(dy,dx)-m.rot[i])/6.2832)%1+1)%1,col=m.cols[i][Math.floor(f*6)%6];if(col!==m.C&&m.bt<=0){m.bt=.6;hitP(e.dmg*.5)}}}}
-  if(m.t>=Q.T){const ok=r<Q.RI[0];if(ok){if(!G.bot){SND.p('boom');G.rflash=.5;sparks(m.x,m.y,30,['#ffe08a','#ffffff'],300,.6,3)}}else suRdFail({},'색깔미로');S.mz=null;S.gc=ok?2.8:1.6}}
+  if(m.t>=Q.TEL&&r>=Q.RO[3]||m.t>=Q.T){const ok=r>=Q.RO[3];if(ok){if(!G.bot){SND.p('boom');G.rflash=.5;sparks(m.x,m.y,30,['#ffe08a','#ffffff'],300,.6,3)}}else suRdFail({},'색깔미로');S.mz=null;S.gc=ok?2.8:1.6}}
 function suMazeDraw(m){const Q=SUMZ,t=G.t,u=Math.min(1,m.t/Q.TEL),live=m.t>=Q.TEL;ctx.save();
   for(let i=0;i<4;i++)for(let j=0;j<6;j++){const col=m.cols[i][j],a0=m.rot[i]+j*1.0472+.05,a1=a0+1.0472-.1,safe=col===m.C,c=SUR.COL[col];
     ctx.beginPath();ctx.ellipse(m.x,m.y,Q.RO[i],Q.RO[i]*Q.K,0,a0,a1);ctx.ellipse(m.x,m.y,Q.RI[i],Q.RI[i]*Q.K,0,a1,a0,true);ctx.closePath();

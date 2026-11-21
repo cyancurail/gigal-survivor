@@ -2632,12 +2632,16 @@ function suCollapse(gi){const W=G.suW,g=suGP(gi),pool=SUW.INV.filter(q=>!W.used.
   try{const e=mkEnemy(iv[0],g[0],g[1],{hp:9000,max:9000,name:'침공 '+iv[1],xp:60,suInv:1});e.r=Math.max(e.r,30);e.esz=1}catch(err){console.warn('suInv',err)}
   if(!G.bot){G.rflash=.7;G.shk=Math.max(G.shk||0,.5);toast('💥 '+SUW.GN[gi]+'쪽 게이트 붕괴','예전의 적 「'+iv[1]+'」가 밀고 들어와요',true);sparks(g[0],g[1],40,['#ff5a3a','#ffd27a','#ffffff'],320,.8,4)}}
 /* ---- 11-20 사용자: 대군은 「성벽 밖」에서 온다. 게이트가 문 — 문에 붙은 대군이 체력(내구 칸)을 깎고, 다 깨지면 쏟아져 들어온다. 평소 몬스터는 성벽 근처 출현분이 성벽을 넘어 들어온다 ---- */
-const SUGT={RG:['sb_lamp','sb_germ','sb_trash','mg_eye','mg_medusa','mg_ghost'],WD:40,NH:2200,EL:5,HOLD:52,ATK:270,CL:420};/* NH: 내구 한 칸 = 붙은 몬스터 1마리 1초 기준 1400 (엘리트 ×5) */
+const SUGT={RG:['sb_lamp','sb_germ','sb_trash','mg_eye','mg_medusa','mg_ghost'],WD:40,NH:1400,EL:8,SH:6,SD:.2,SB:.1,HOLD:52,ATK:270,CL:420};/* NH: 내구 한 칸 = 붙은 몬스터 1마리 1초 기준 1400 (엘리트 ×5) */
 function suGOut(gi){return[[0,-1],[0,1],[-1,0],[1,0]][gi]}
 function suGO(gi,d){const H=SU.H+SUGT.HOLD+(gi===1?10:0)+(d||0),o=suGOut(gi);return[o[0]*H,o[1]*H]}
 function suWallSide(x,y){const H=SU.H,d=[y+H,H-y,x+H,H-x];let b=0;for(let i=1;i<4;i++)if(d[i]<d[b])b=i;return[b,d[b]]}
 function suGateTick(dt){if(!G.suGH)G.suGH=[3,3,3,3];if(!G.suGD)G.suGD=[0,0,0,0];const GH=G.suGH,GD=G.suGD,A=G.suGA=G.suGA||[0,0,0,0],SP=G.suGS=G.suGS||[0,0,0,0];A.fill(0);
   for(const e of G.enemies){if(e.dead||!e.suOut)continue;const gi=e.suOut-1;if(GH[gi]<=0)continue;const P=suGO(gi);if(Math.hypot(e.x-P[0],e.y-P[1])<SUGT.ATK)A[gi]+=e.suEl?SUGT.EL:(e.ranged||e.mgR)?2:1}
+  /* 공성 포격(11-21 사용자: 게이트 침공 강화): 침공 중 6초마다 성벽 밖에서 게이트로 포탄. 예고 1초 → 폭발 시 내구 ⅕칸(사령관이 사수 범위 안이면 ⅒칸) */
+  {const SH=G.suSg=G.suSg||[],ST=G.suSt=G.suSt||[0,0,0,0];for(let gi=0;gi<4;gi++){if(GH[gi]<=0||A[gi]<=0){ST[gi]=0;continue}ST[gi]+=dt;if(ST[gi]>=SUGT.SH){ST[gi]=0;const P=suGO(gi,-40),pp=[-suGOut(gi)[1],suGOut(gi)[0]],l=rnd(-150,150);SH.push({gi,x:P[0]+pp[0]*l,y:P[1]+pp[1]*l,t:0})}}
+    for(let i=SH.length-1;i>=0;i--){const q=SH[i];q.t+=dt;if(q.t<1)continue;SH.splice(i,1);const gi=q.gi;if(GH[gi]<=0)continue;const g=suGP(gi),near=Math.hypot(G.p.x-g[0],G.p.y-g[1])<SUD.HR;GD[gi]+=near?SUGT.SB:SUGT.SD;A[gi]+=1e-9;
+      if(!G.bot){SND.p('boom');G.shk=Math.max(G.shk||0,near?.25:.45);sparks(q.x,q.y,30,['#ffd27a','#ffffff','#ff8a4a','#ff3a2a'],300,.6,4);sparks(g[0],g[1],14,['#ffd27a','#ffffff'],200,.4,3)}}}
   for(let gi=0;gi<4;gi++){if(GH[gi]<=0||A[gi]<=0)continue;GD[gi]+=A[gi]*dt/SUGT.NH;SP[gi]-=dt;
     if(SP[gi]<=0&&!G.bot){SP[gi]=.3;const P=suGO(gi),o=suGOut(gi),pp=[-o[1],o[0]],l=rnd(-120,120);SND.p('hit');sparks(P[0]-o[0]*34+pp[0]*l,P[1]-o[1]*34+pp[1]*l,6,['#ffd27a','#ffffff','#ff8a4a'],130,.3,2)}
     if(GD[gi]>=1){GD[gi]=0;GH[gi]--;const g=suGP(gi);if(!G.bot){SND.p('boom');G.shk=Math.max(G.shk||0,.4);sparks(g[0],g[1],24,['#ffd27a','#ffffff','#ff8a4a'],260,.6,3)}
@@ -2666,7 +2670,7 @@ function suGateBar(){const GH=G.suGH,GD=G.suGD,A=G.suGA;if(!GH||!GD)return;const
     if(a>0){ctx.globalAlpha=1;ctx.font='800 12px "Noto Sans KR",sans-serif';ctx.textAlign='center';ctx.lineWidth=3;ctx.strokeStyle='#2a0c08';ctx.fillStyle='#ffe0c0';const tx='⚔ '+Math.round(a)+' 몰려있어요';ctx.strokeText(tx,x+60,y-6);ctx.fillText(tx,x+60,y-6)}ctx.restore()}}
 function suWaveTick(dt){if(!G.suGH)G.suGH=[3,3,3,3];const W=G.suW||(G.suW={next:22,cur:null,n:0,used:[]}),GH=G.suGH;
   if(!W.cur){if(G.t>=W.next&&G.t<SU_LEN-25){const t=G.t,ord=[0,1,2,3].sort(()=>Math.random()-.5),gs=(t>=780?ord:t>=600?ord.slice(0,2):ord.slice(0,1)).map((gi,k)=>({gi,off:t>=780?k*6:0,sp:0,acc:0,g0:GH[gi]}));
-      W.cur={gs,t:-8,id:++W.n};suRelay(gs[0].gi);if(!G.bot){SND.p('boss');toast('📡 아리아드네','사령관님, '+gs.map(g=>SUW.GN[g.gi]).join('·')+'쪽 성벽 밖에 대군이 모입니다. 게이트가 부서지기 전에 막아 주세요.',true)}}return}
+      W.cur={gs,t:-8,id:++W.n};suRelay(gs[0].gi);if(!G.bot){SND.p('boss');toast('📡 아리아드네','사령관님, '+gs.map(g=>SUW.GN[g.gi]).join('·')+'쪽 성벽 밖에서 게이트 침공이 시작됩니다. 게이트가 부서지기 전에 막아 주세요.',true)}}return}
   const C=W.cur;C.t+=dt;let last=0;const m=em();
   for(const g of C.gs){const lt=C.t-g.off;last=Math.max(last,g.off);if(lt<0||lt>=SUGT.WD)continue;const open=GH[g.gi]<=0;g.acc+=(G.suRd?0:dt)*(8+m*.5)*1.5*.5*(open?1.3:.85);const o=suGOut(g.gi),pp=[-o[1],o[0]],P=suGO(g.gi),EN=G.t>=600?8:6,
       at=(dep,lat)=>[P[0]+o[0]*dep+pp[0]*lat,P[1]+o[1]*dep+pp[1]*lat];
@@ -2681,7 +2685,7 @@ function suWaveDraw(){const C=G.suW&&G.suW.cur;if(!C)return;const p=G.p;ctx.save
   for(const g of C.gs){const lt=C.t-g.off;if(lt>=SUGT.WD)continue;const P=suGP(g.gi),dx=P[0]-p.x,dy=P[1]-p.y,hw=VW/2-46,hh=VH/2-70;if(Math.abs(dx)<hw&&Math.abs(dy)<hh)continue;
     const k=Math.min(hw/Math.abs(dx||1e-6),hh/Math.abs(dy||1e-6)),x=p.x+dx*k,y=p.y+dy*k,a=Math.atan2(dy,dx);ctx.globalAlpha=.65+.35*Math.sin(G.t*9);ctx.fillStyle=lt<0?'#ffb23a':'#ff3a2a';
     ctx.save();ctx.translate(x,y);ctx.rotate(a);ctx.beginPath();ctx.moveTo(22,0);ctx.lineTo(-10,-15);ctx.lineTo(-4,0);ctx.lineTo(-10,15);ctx.closePath();ctx.fill();ctx.restore();
-    ctx.font='800 13px "Noto Sans KR",sans-serif';ctx.textAlign='center';ctx.fillStyle='#ffffff';ctx.strokeStyle='#5a1408';ctx.lineWidth=3;const tx=lt<0?'대군 '+Math.ceil(-lt)+'초':'대군!';ctx.strokeText(tx,x-Math.cos(a)*40,y-Math.sin(a)*40+4);ctx.fillText(tx,x-Math.cos(a)*40,y-Math.sin(a)*40+4)}
+    ctx.font='800 13px "Noto Sans KR",sans-serif';ctx.textAlign='center';ctx.fillStyle='#ffffff';ctx.strokeStyle='#5a1408';ctx.lineWidth=3;const tx=lt<0?'침공 '+Math.ceil(-lt)+'초':'게이트 침공!';ctx.strokeText(tx,x-Math.cos(a)*40,y-Math.sin(a)*40+4);ctx.fillText(tx,x-Math.cos(a)*40,y-Math.sin(a)*40+4)}
   ctx.restore()}
 /* ---- 연출 모음 (11-20 사용자): 함선 자폭(후반 연출용, 지금은 시험 훅 __suBoom) · 미션 실패 시 궤도 엘리베이터 붕괴 ---- */
 const SUBS=[['pallas',144,12,230,0],['panacea',220,10,260,6],['argo',300,10,320,0],['themis',256,8,300,0],['talos_tf',320,6,440,0],['daedalus',320,6,420,0]];/* [그림, 칸 크기, 열 수, 그리는 폭, 프레임] */
@@ -2726,7 +2730,7 @@ function suDefTick(dt){if(!G.suGd)suDefInit();G.suMo=Math.max(0,(G.suMo||0)-dt);
   for(let gi=0;gi<4;gi++){if(GH[gi]<=0)continue;const P=suGP(gi),fast=G.suMo>0||(suWaveGate(gi)===2&&suHold(gi));let T=null;
     for(const g of G.suGd){if(g.gi!==gi)continue;g.cd-=dt;g.fl=Math.max(0,g.fl-dt);if(g.cd>0)continue;
       if(!T){T=[];for(const e of G.enemies){if(e.dead||e.fmInv>0)continue;if(Math.hypot(e.x-P[0],e.y-P[1])<SUD.GR)T.push(e);if(T.length>24)break}}
-      if(!T.length){g.cd=.4;continue}const e=pick(T);g.cd=SUD.GCD*(fast?.45:1)*rnd(.8,1.2);g.fl=.12;hurt(e,e.boss?Math.min(D,e.max*.0003):D,'fmsup',{});if(!G.bot&&G.suGt.length<40)G.suGt.push({x0:g.x,y0:g.y-8,x1:e.x,y1:e.y-e.r*.4,t:0})}}
+      if(!T.length){g.cd=.4;continue}const e=pick(T);g.cd=SUD.GCD*(fast?.45:1)*rnd(.8,1.2);g.fl=.12;g.face=e.x<g.x?-1:1;hurt(e,e.boss?Math.min(D,e.max*.0003):D,'fmsup',{});if(!G.bot&&G.suGt.length<40)G.suGt.push({x0:g.x,y0:g.y-8,x1:e.x,y1:e.y-e.r*.4,t:0})}}
   for(const q of G.suGt)q.t+=dt;if(G.suGt.length)G.suGt=G.suGt.filter(q=>q.t<.12);
   const O=G.suOb;if(O)for(let i=O.length-1;i>=0;i--){const b=O[i];b.t+=dt;if(b.t>=1.2&&!b.hit){b.hit=1;const sd=G.stats.dmg,sk=G.stats.k&&G.stats.k.su_orb;
       for(const e of G.enemies){if(e.dead)continue;if(Math.hypot(e.x-b.x,(e.y-b.y)*1.3)<SUD.ORB)hurt(e,e.boss?e.max*.03:e.max*3+50,'su_orb',{force:1})}
@@ -2734,9 +2738,12 @@ function suDefTick(dt){if(!G.suGd)suDefInit();G.suMo=Math.max(0,(G.suMo||0)-dt);
       if(Math.hypot(G.p.x-b.x,(G.p.y-b.y)*1.3)<SUD.ORB*.5)hitP(20);if(!G.bot){G.rflash=.6;G.shk=Math.max(G.shk||0,.6);sparks(b.x,b.y,50,['#ffffff','#9fe8ff','#ffe9a8'],420,.8,4)}}
     if(b.t>2.4)O.splice(i,1)}}
 function suDefDraw(front){const L=G.suGd;if(!L)return;const p=G.p,GH=G.suGH||[3,3,3,3],t=G.t;
-  for(const g of L){if((g.gi===1)!==!!front||GH[g.gi]<=0)continue;if(Math.abs(g.x-p.x)>VW/2+30||Math.abs(g.y-p.y)>VH/2+40)continue;const j=G.suMo>0?Math.abs(Math.sin(t*9+g.x))*5:0,x=0,y=0;ctx.save();ctx.translate(g.x,g.y-j);ctx.scale(1.9,1.9);
-    ctx.fillStyle='#23305a';ctx.fillRect(x-3,y-2,6,9);ctx.fillStyle='#eef2f7';ctx.fillRect(x-4,y-8,8,8);ctx.fillStyle='#58c8ff';ctx.beginPath();ctx.arc(x,y-11,4.2,0,7);ctx.fill();ctx.fillStyle='#1a2440';ctx.fillRect(x-1,y-6,g.gi===2?9:g.gi===3?-9:2,2);
-    if(g.fl>0){ctx.fillStyle='#fff3b0';ctx.beginPath();ctx.arc(x+(g.gi===2?9:g.gi===3?-9:0),y-5+(g.gi<2?(g.gi?-6:8):0),4,0,7);ctx.fill()}ctx.restore()}
+  for(const g of L){if((g.gi===1)!==!!front||GH[g.gi]<=0)continue;if(Math.abs(g.x-p.x)>VW/2+30||Math.abs(g.y-p.y)>VH/2+40)continue;const j=G.suMo>0?Math.abs(Math.sin(t*9+g.x))*5:0,fc=g.face||(g.gi===2?-1:1);
+    if(typeof dmFr==='function'&&typeof DMI!=='undefined'&&DMI.trooper&&DMI.trooper.complete&&DMI.trooper.width){ctx.save();ctx.globalAlpha=.3;ctx.fillStyle='#000';ctx.beginPath();ctx.ellipse(g.x,g.y+22,16,6,0,0,7);ctx.fill();ctx.restore();dmFr('trooper',104,88,g.fl>0||G.suMo>0&&Math.sin(t*12+g.x)>0?3:2,g.x,g.y-j-6,.6,0,fc<0);
+      if(g.fl>0){ctx.save();ctx.globalCompositeOperation='lighter';ctx.fillStyle='#fff3b0';ctx.beginPath();ctx.arc(g.x+fc*32,g.y-j-14,5,0,7);ctx.fill();ctx.restore()}}
+    else{ctx.save();ctx.translate(g.x,g.y-j);ctx.scale(1.9,1.9);ctx.fillStyle='#eef2f7';ctx.fillRect(-4,-8,8,8);ctx.restore()}}
+  if(!front&&G.suSg)for(const q of G.suSg){if(Math.abs(q.x-p.x)>VW/2+120||Math.abs(q.y-p.y)>VH/2+120)continue;const u=Math.min(1,q.t);ctx.save();ctx.globalAlpha=.3+.2*Math.sin(t*30);ctx.fillStyle='#ff3a2a';ctx.beginPath();ctx.ellipse(q.x,q.y,90*u,60*u,0,0,7);ctx.fill();ctx.globalAlpha=.9;ctx.strokeStyle='#ffd27a';ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(q.x,q.y,90,60,0,0,7);ctx.stroke();
+    ctx.globalCompositeOperation='lighter';const hh=(1-u)*(1-u)*900;ctx.globalAlpha=.9;ctx.strokeStyle='#fff3b0';ctx.lineWidth=6;ctx.beginPath();ctx.moveTo(q.x,q.y-hh-70);ctx.lineTo(q.x,q.y-hh);ctx.stroke();ctx.globalAlpha=.6;ctx.strokeStyle='#ff8a4a';ctx.lineWidth=14;ctx.beginPath();ctx.moveTo(q.x,q.y-hh-30);ctx.lineTo(q.x,q.y-hh);ctx.stroke();ctx.restore()}
   if(!front){ /* 사수 범위·상태 */
     for(let gi=0;gi<4;gi++){const w=suWaveGate(gi);if(!w||GH[gi]<=0)continue;const P=suGP(gi),h=suHold(gi);if(Math.abs(P[0]-p.x)>VW/2+SUD.HR||Math.abs(P[1]-p.y)>VH/2+SUD.HR)continue;ctx.save();ctx.lineWidth=h?5:3;ctx.strokeStyle=h?'#8fe6ff':'#ffffff';ctx.globalAlpha=h?.8:.35+.15*Math.sin(t*6);ctx.setLineDash(h?[]:[14,12]);ctx.beginPath();ctx.ellipse(P[0],P[1],SUD.HR,SUD.HR*.62,0,0,7);ctx.stroke();ctx.setLineDash([]);
       ctx.globalAlpha=1;ctx.font='800 17px "Noto Sans KR",sans-serif';ctx.textAlign='center';ctx.lineWidth=4;ctx.strokeStyle='#0a2a4a';ctx.fillStyle=h?'#bff3ff':'#ffffff';const tx=h?'🛡️ 게이트 사수 중 — 통과 40%':'이 안에서 버티면 함께 막아요',k=1-200/Math.hypot(P[0],P[1]);ctx.strokeText(tx,P[0]*k,P[1]*k);ctx.fillText(tx,P[0]*k,P[1]*k);ctx.restore()}

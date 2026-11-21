@@ -2352,7 +2352,7 @@ function suplDraw(x,y,wd,ht,op,hex){const f=typeof FXQ!=='number'||FXQ>=.75?0:FX
   gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
   ctx.save();ctx.setTransform(DPR,0,0,DPR,0,0);ctx.globalCompositeOperation='lighter';ctx.globalAlpha=1;ctx.imageSmoothingEnabled=true;ctx.drawImage(c,0,0,innerWidth,innerHeight);ctx.restore();
   SUPL.ema=SUPL.ema*.9+(performance.now()-t0)*.1;SUPL.n++;if(SUPL.n>45&&SUPL.ema>5&&SUPL.lv<2){SUPL.lv++;SUPL.ema=0;SUPL.n=0}}
-function suRdPillarDraw(){for(const e of G.enemies){const R=e.rd;if(!R||e.dead||R.k!==10||R.ph!==0||R.t<1)continue;const n=R.seq.length,j=Math.floor((R.t-1)/.75),u=(R.t-1)-j*.75;if(j>=n||u>=.55)continue;const i=R.seq[j],q=suRdPad(R,i),op=Math.min(1,u/.1)*(1-Math.max(0,(u-.4)/.15));
+function suRdPillarDraw(){for(const e of G.enemies)if(!e.dead&&e.type==='su_hex'&&e.hx.mz)suMazeDraw(e.hx.mz);for(const e of G.enemies){const R=e.rd;if(!R||e.dead||R.k!==10||R.ph!==0||R.t<1)continue;const n=R.seq.length,j=Math.floor((R.t-1)/.75),u=(R.t-1)-j*.75;if(j>=n||u>=.55)continue;const i=R.seq[j],q=suRdPad(R,i),op=Math.min(1,u/.1)*(1-Math.max(0,(u-.4)/.15));
     suplDraw(q[0],q[1],SUR.PR*1.1,VH*.95,op,SUR.COL[i])}}
 function suRdPad(R,i){const a=-1.5708+i*1.5708;return[R.cx+Math.cos(a)*SUR.PX,R.cy+Math.sin(a)*SUR.PY]}
 function suRdPress(R,dt){const e=R.e,p=G.p,oc=!!e.oc;if(R.sp==null)return;R.ht-=dt;
@@ -2499,7 +2499,7 @@ function suHexTick(dt){for(const e of G.enemies){if(e.dead||e.type!=='su_hex')co
 const suHxL=(x,ly)=>30*Math.sin(x*.011+G.t*2.2+ly*.01);/* 몸통 쓸기: 가로로 누운 몸통 세 줄이 구불거리며 옆으로 지나감(줄 사이 빈 곳이 안전) */
 const SUX2={TR:3,OPEN:5,R:470,TEL:.8,EX:0,EY:-40};
 /* 「색깔미로」(11-21 사용자): 일식의 밤 전용. 동심원 4겹×6칸, 겹마다 반대로 돌고 정답색 칸만 안전. 중심에서 시작해 걸어서 바깥으로 빠져나가야 함(시간 끝날 때 안에 있으면 −33%) */
-const SUMZ={RI:[100,190,280,370],RO:[180,270,360,450],K:.68,T:10,TEL:1.2,SP:[.5,-.42,.34,-.28]};
+const SUMZ={RI:[120,250,380,510],RO:[235,365,495,625],K:.68,T:12,TEL:1.2,SP:[.5,-.42,.34,-.28]};
 function suHexGo(e){const S=e.hx,p=G.p,k=[0,1,2][(S.p2=(S.p2||0)+1)%3];S.act={k,t:0};S.gc=99;
   if(k===2){const dir=Math.random()<.5?-1:1,sh=rnd(-100,100);Object.assign(S.act,{hz:2,dir,c:[p.x,p.y],off:-1000*dir,ln:[-260+sh+rnd(-30,30),sh,260+sh+rnd(-30,30)],LB:1100,hit:0})}}
 function suMazeStart(e){const S=e.hx,p=G.p,c=suSafe(p.x,p.y),C=Math.floor(Math.random()*4),cols=[];
@@ -2513,7 +2513,7 @@ function suMazeTick(e,dt){const S=e.hx,m=S.mz,p=G.p,Q=SUMZ;m.t+=dt;for(let i=0;i
 function suMazeDraw(m){const Q=SUMZ,t=G.t,u=Math.min(1,m.t/Q.TEL),live=m.t>=Q.TEL;ctx.save();
   for(let i=0;i<4;i++)for(let j=0;j<6;j++){const col=m.cols[i][j],a0=m.rot[i]+j*1.0472+.05,a1=a0+1.0472-.1,safe=col===m.C,c=SUR.COL[col];
     ctx.beginPath();ctx.ellipse(m.x,m.y,Q.RO[i],Q.RO[i]*Q.K,0,a0,a1);ctx.ellipse(m.x,m.y,Q.RI[i],Q.RI[i]*Q.K,0,a1,a0,true);ctx.closePath();
-    ctx.globalAlpha=u*(safe?.3+.12*Math.sin(t*6):.16);ctx.fillStyle=c;ctx.fill();ctx.globalAlpha=u*(live?(safe?1:.55):.5);ctx.strokeStyle=c;ctx.lineWidth=safe?4.5:3;ctx.stroke()}
+    ctx.globalAlpha=u*(safe?.62+.16*Math.sin(t*6):.42);ctx.fillStyle=c;ctx.fill();ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=u*(safe?.35:.18);ctx.fill();ctx.restore();ctx.globalAlpha=u;ctx.strokeStyle=safe?'#ffffff':c;ctx.lineWidth=safe?7:4.5;ctx.stroke();if(safe){ctx.strokeStyle=c;ctx.lineWidth=3;ctx.stroke()}}
   const cc=SUR.COL[m.C],rem=Math.max(0,1-(m.t-Q.TEL)/(Q.T-Q.TEL));ctx.globalAlpha=u*(.55+.25*Math.sin(t*6));ctx.fillStyle=cc;ctx.beginPath();ctx.ellipse(m.x,m.y,Q.RI[0]-16,(Q.RI[0]-16)*Q.K,0,0,7);ctx.fill();
   ctx.globalAlpha=u;ctx.strokeStyle='#ffffff';ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(m.x,m.y,Q.RI[0]-6,(Q.RI[0]-6)*Q.K,-1.5708,0,rem*6.2832);ctx.stroke();ctx.restore()}
 function suHex2(e,dt){const S=e.hx,p=G.p;
@@ -2538,7 +2538,6 @@ function suHex2Ground(e){const S=e.hx;if(!S.sh)return;const t=G.t;ctx.save();
     suHexHex(q.x,fy-18,30);ctx.fillStyle=op?'rgba(255,224,138,'+(.55+.35*Math.sin(t*7))+')':(q.fl>0?'#c8a8ff':'#1c1440');ctx.fill();
     if(op&&L>=1){ctx.globalAlpha=.4+.3*Math.sin(t*5);ctx.strokeStyle='#ffe08a';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(q.x,q.y,70+8*Math.sin(t*4),50,0,0,7);ctx.stroke()}}
   const g=S.ga;if(g){const u=Math.min(1,g.t/SUX2.TEL);ctx.globalAlpha=.9;ctx.strokeStyle='#ff3a5a';ctx.lineWidth=2.5;ctx.setLineDash([8,6]);ctx.beginPath();ctx.ellipse(g.x,g.y,72,54,0,0,7);ctx.stroke();ctx.setLineDash([]);ctx.globalAlpha=.25*u;ctx.fillStyle='#ff3a5a';ctx.beginPath();ctx.ellipse(g.x,g.y,72*u,54*u,0,0,7);ctx.fill()}
-  if(S.mz)suMazeDraw(S.mz);
   ctx.restore()}
 function suHexSky(){const e=G.enemies.find(q=>!q.dead&&q.type==='su_hex'),p=G.p,t=G.t;
   {const hk=e&&e.hx&&e.hx.ph>1?e.hx.ek||0:0;G.suEk=hk>(G.suEk||0)?hk:Math.max(hk,(G.suEk||0)-1/150);if(G.suEk>.003)suEclSky(G.suEk)}

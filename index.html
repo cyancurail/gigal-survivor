@@ -2857,16 +2857,30 @@ function suSyncDraw(){const Y=G.suSy;if(!Y)return;const x=SUS.X,y=SUS.Y,R=SUS.R;
   ctx.globalAlpha=.16+.05*Math.sin(G.t*4);ctx.fillStyle='#8fe6ff';ctx.beginPath();ctx.ellipse(x,y,R,R*.45,0,0,7);ctx.fill();
   ctx.globalAlpha=1;ctx.lineWidth=7;ctx.lineCap='round';ctx.strokeStyle='#ffffff';ctx.beginPath();ctx.ellipse(x,y,R+10,(R+10)*.45,0,-1.57,-1.57+6.2832*(Y.pr/SUS.T));ctx.stroke();ctx.restore();
   ctx.save();ctx.font='800 15px "Noto Sans KR",sans-serif';ctx.textAlign='center';ctx.lineWidth=4;ctx.strokeStyle='#0a2a44';ctx.fillStyle='#ffffff';const s='사령관님의 접속 코드와 동기화 중입니다 '+Math.floor(Y.pr/SUS.T*100)+'%';ctx.strokeText(s,x,y-R*.45-14);ctx.fillText(s,x,y-R*.45-14);ctx.restore()}
+/* ---- 수원 출격 단축키 (11-22 사용자): 필드에서 1~4 아이기스(팔라스·파나케이아·아르고·테미스) · 5 탈로스 · 6 다이달로스. 통신기 없이 — 지휘본부가 바로 위라서. 화면 아래 칩 6개(누르거나 터치도 됨) ---- */
+const SUKN=['팔라스','파나케이아','아르고','테미스','탈로스','다이달로스'];
+function suKeySt(i){if(i<4){const a=window.AG&&AG.st(i);if(!a)return{show:0};return{show:a.un,busy:a.act||a.cd>0||a.once,txt:a.act?'출격 중':a.once?'소진':a.cd>0?(a.cd>=60?Math.floor(a.cd/60)+':'+String(a.cd%60).padStart(2,'0'):a.cd+'초'):''}}
+  const D=G.suCd||(G.suCd={t:0,d:0,dn:SUS.DN}),n=suSN();
+  if(i===4)return{show:n>=1,busy:!!G.suT||G.t<D.t,txt:G.suT?'출격 중':G.t<D.t?Math.ceil(D.t-G.t)+'초':''};
+  return{show:n>=2,busy:!!G.suDd||G.t<D.d||D.dn<=0,txt:G.suDd?'수리 중':D.dn<=0?'소진':G.t<D.d?Math.ceil(D.d-G.t)+'초':'×'+D.dn}}
+function suKeyUse(i){if(!G||!G.running||G.map!=='su'||G.paused||!suSolo())return false;const st=suKeySt(i);if(!st.show||st.busy)return false;
+  if(i<4){if(window.AG)AG.approve(i)}else suCall(i===4?'talos':'daed');return true}
+function suKeys(dt){let d=SU.kb;if(!d){d=document.createElement('div');d.id='suKeys';d.style.cssText='position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 8px);display:none;gap:6px;z-index:30;pointer-events:auto';
+    d.innerHTML=SUKN.map((n,i)=>`<button type="button" data-i="${i}" style="min-width:52px;padding:3px 5px 4px;border-radius:10px;border:2px solid #8fe6ff;background:rgba(8,30,52,.8);color:#fff;font:800 10px/1.15 'Noto Sans KR',sans-serif;box-shadow:0 0 10px #58c8ff77"><span style="display:block;font:900 15px/1 'Noto Sans KR',sans-serif;color:#ffe08a">${i+1}</span>${n}<em style="display:block;font-style:normal;font-size:10px;color:#9fe8ff;min-height:12px"></em></button>`).join('');
+    document.body.appendChild(d);d.querySelectorAll('button').forEach(b=>b.onclick=ev=>{ev.stopPropagation();suKeyUse(+b.dataset.i)});SU.kb=d;setInterval(()=>{if(SU.kb&&!(G&&G.running&&G.map==='su'))SU.kb.style.display='none'},500);
+    addEventListener('keydown',e=>{if(e.repeat||e.ctrlKey||e.metaKey||e.altKey)return;if(!/^[1-6]$/.test(e.key))return;const t=e.target;if(t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA'))return;const lv=document.getElementById('lvov');if(lv&&!lv.hidden)return;if(suKeyUse(+e.key-1))e.preventDefault()})}
+  SU.kt=(SU.kt||0)-dt;if(SU.kt>0)return;SU.kt=.2;const on=G.running&&!G.paused&&suSolo();let any=0;
+  d.querySelectorAll('button').forEach((b,i)=>{const st=suKeySt(i);b.style.display=st.show?'block':'none';if(st.show)any=1;b.style.opacity=st.busy?.45:1;b.querySelector('em').textContent=st.txt||''});d.style.display=on&&any?'flex':'none'}
 function suCall(k){if(!G||!G.running||G.map!=='su')return;const D=G.suCd||(G.suCd={t:0,d:0,dn:SUS.DN});
   if(k==='talos'){if(suSN()<1||G.suT||G.t<D.t)return;if(suTalos())D.t=1e9}
   else{if(suSN()<2||G.suDd||G.t<D.d||D.dn<=0)return;if(suDaed()){D.dn--;D.d=1e9}}}
-function suHud(dt){if(!suSolo()){if(SU.hud)SU.hud.style.display='none';return}
+function suHud(dt){if(!suSolo()){if(SU.hud)SU.hud.style.display='none';if(SU.kb)SU.kb.style.display='none';return}suKeys(dt);
   if(!SU.hud){const d=document.createElement('div');d.id='suHud';d.style.cssText='position:fixed;right:12px;bottom:calc(env(safe-area-inset-bottom,0px) + 170px);display:none;flex-direction:column;gap:10px;z-index:30';
     d.innerHTML=['talos','daed'].map((k,i)=>`<button type="button" data-k="${k}" style="width:64px;height:64px;border-radius:50%;border:2px solid #8fe6ff;background:rgba(8,30,52,.78);color:#fff;font:800 11px/1.15 'Noto Sans KR',sans-serif;box-shadow:0 0 12px #58c8ff88;padding:0"><span style="font-size:20px;display:block">${i?'🔧':'🛰️'}</span><b></b></button>`).join('');
     document.body.appendChild(d);d.querySelectorAll('button').forEach(b=>b.onclick=ev=>{ev.stopPropagation();suCall(b.dataset.k)});SU.hud=d}
   const D=G.suCd||(G.suCd={t:0,d:0,dn:SUS.DN}),n=suSN(),h=SU.hud;
   if(D.t>=1e9&&!G.suT)D.t=G.t+SUS.CDT;if(D.d>=1e9&&!G.suDd)D.d=G.t+SUS.CDD;
-  SU.ht=(SU.ht||0)-dt;if(SU.ht>0)return;SU.ht=.25;h.style.display=n>=1&&G.running&&!G.paused?'flex':'none';const B=h.querySelectorAll('button');
+  SU.ht=(SU.ht||0)-dt;if(SU.ht>0)return;SU.ht=.25;h.style.display='none';/* 11-22: 아래 단축키 칩으로 통합 */const B=h.querySelectorAll('button');
   const st=(b,show,busy,txt)=>{b.style.display=show?'block':'none';b.style.opacity=busy?.45:1;b.querySelector('b').textContent=txt};
   st(B[0],n>=1,!!G.suT||G.t<D.t,G.suT?'출격 중':G.t<D.t?Math.ceil(D.t-G.t)+'초':'탈로스');
   st(B[1],n>=2,!!G.suDd||G.t<D.d||D.dn<=0,G.suDd?'수리 중':D.dn<=0?'소진':G.t<D.d?Math.ceil(D.d-G.t)+'초':'수리 '+D.dn)}
@@ -12771,7 +12785,7 @@ function panel(){if(PN)return;if(!document.getElementById('agPCss')){const s=doc
 {const oL=window.__ariLb,oH=window.__ariLbHit;
  window.__ariLb=(cx,o,ph)=>{if(ph==='body'){try{lbDraw(cx,o)}catch(e){}}if(oL)return oL(cx,o,ph)};
  window.__ariLbHit=(x,y)=>{const b=LB.box;if(b&&lbOn()&&x>b.x-10&&x<b.x+b.w+10&&y>b.y-10&&y<b.y+b.h+10){try{SND.p('pop')}catch(e){}panel();return true}return oH?oH(x,y):false}}
-window.AG={SHIPS,menu,approve,launch,agU,panel,fast:()=>{window.__agFast=1}};
+window.AG={SHIPS,menu,approve,launch,agU,panel,fast:()=>{window.__agFast=1},st:i=>{const q=SHIPS[i];if(!q)return null;return{un:!!window.__devAll||i<agU(),act:isAct(q.k),cd:Math.ceil(cdLeft(q.k)*60),once:q.k==='argo'&&!!(G.agCd&&G.agCd.argo),n:q.n}}};
 })();
 </script>
 </body></html>

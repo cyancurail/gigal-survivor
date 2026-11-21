@@ -2454,6 +2454,22 @@ function suHexTick(dt){for(const e of G.enemies){if(e.dead||e.type!=='su_hex')co
    광장에 육각 조각 6개가 내려앉고 금빛으로 열린 조각 하나만 맞음(7초마다 바뀜). 눈은 시선 광선 3연발 → 조각 탄막 순으로 공격. 수치 임시 */
 const suHxL=(x,ly)=>30*Math.sin(x*.011+G.t*2.2+ly*.01);/* 몸통 쓸기: 가로로 누운 몸통 세 줄이 구불거리며 옆으로 지나감(줄 사이 빈 곳이 안전) */
 const SUX2={TR:3,OPEN:5,R:470,TEL:.8,EX:0,EY:-40};
+/* 「색깔미로」(11-21 사용자): 일식의 밤 전용. 동심원 4겹×6칸, 겹마다 반대로 돌고 정답색 칸만 안전. 걸어서 중심까지 들어가야 함(끝났을 때 중심 밖이면 −33%) */
+const SUMZ={RI:[84,150,216,282],RO:[142,208,274,340],K:.75,T:9,TEL:1.2,SP:[.5,-.42,.34,-.28]};
+function suMazeStart(e){const S=e.hx,p=G.p,c=suSafe(p.x,p.y),C=Math.floor(Math.random()*4),cols=[];
+  for(let i=0;i<4;i++){const a=[0,1,2,3,4,5].map(()=>{let k;do{k=Math.floor(Math.random()*4)}while(k===C);return k}),s1=Math.floor(Math.random()*6);a[s1]=C;a[(s1+2+Math.floor(Math.random()*3))%6]=C;cols.push(a)}
+  S.mz={x:c[0],y:c[1],t:0,C,cols,rot:[0,1,2,3].map(()=>Math.random()*6.2832),bt:0};S.ga=null;S.gc=99;if(!G.bot){SND.p('boom');G.shk=Math.max(G.shk||0,.3);sparks(c[0],c[1],24,['#35d6ff','#ff5ac8','#ffd23a','#ffffff'],260,.5,3)}}
+function suMazeTick(e,dt){const S=e.hx,m=S.mz,p=G.p,Q=SUMZ;m.t+=dt;for(let i=0;i<4;i++)m.rot[i]+=Q.SP[i]*dt;
+  const dx=p.x-m.x,dy=(p.y-m.y)/Q.K,r=Math.hypot(dx,dy);
+  if(m.t>=Q.TEL&&m.t<Q.T){m.bt-=dt;if(r>=Q.RI[0]&&r<Q.RO[3]){let i=-1;for(let k=0;k<4;k++)if(r>=Q.RI[k]&&r<Q.RO[k])i=k;
+      if(i>=0){const f=(((Math.atan2(dy,dx)-m.rot[i])/6.2832)%1+1)%1,col=m.cols[i][Math.floor(f*6)%6];if(col!==m.C&&m.bt<=0){m.bt=.6;hitP(e.dmg*.5)}}}}
+  if(m.t>=Q.T){const ok=r<Q.RI[0];if(ok){if(!G.bot){SND.p('boom');G.rflash=.5;sparks(m.x,m.y,30,['#ffe08a','#ffffff'],300,.6,3)}}else suRdFail({},'색깔미로');S.mz=null;S.gc=ok?2.8:1.6}}
+function suMazeDraw(m){const Q=SUMZ,t=G.t,u=Math.min(1,m.t/Q.TEL),live=m.t>=Q.TEL;ctx.save();
+  for(let i=0;i<4;i++)for(let j=0;j<6;j++){const col=m.cols[i][j],a0=m.rot[i]+j*1.0472+.05,a1=a0+1.0472-.1,safe=col===m.C,c=SUR.COL[col];
+    ctx.beginPath();ctx.ellipse(m.x,m.y,Q.RO[i],Q.RO[i]*Q.K,0,a0,a1);ctx.ellipse(m.x,m.y,Q.RI[i],Q.RI[i]*Q.K,0,a1,a0,true);ctx.closePath();
+    ctx.globalAlpha=u*(safe?.3+.12*Math.sin(t*6):.16);ctx.fillStyle=c;ctx.fill();ctx.globalAlpha=u*(live?(safe?1:.55):.5);ctx.strokeStyle=c;ctx.lineWidth=safe?4.5:3;ctx.stroke()}
+  const cc=SUR.COL[m.C],rem=Math.max(0,1-(m.t-Q.TEL)/(Q.T-Q.TEL));ctx.globalAlpha=u*(.55+.25*Math.sin(t*6));ctx.fillStyle=cc;ctx.beginPath();ctx.ellipse(m.x,m.y,Q.RI[0]-16,(Q.RI[0]-16)*Q.K,0,0,7);ctx.fill();
+  ctx.globalAlpha=u;ctx.strokeStyle='#ffffff';ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(m.x,m.y,Q.RI[0]-6,(Q.RI[0]-6)*Q.K,-1.5708,0,rem*6.2832);ctx.stroke();ctx.restore()}
 function suHex2(e,dt){const S=e.hx,p=G.p;
   if(S.ph===1.5){S.tr+=dt;e.fmInv=1;S.hz=(S.hz||0)+(1500-(S.hz||0))*Math.min(1,dt*1.6);S.op=Math.max(0,(S.op||0)-dt*2);S.nb=Math.min(1,Math.max(0,(S.tr-1.2)/1.6));
     if(S.tr>=SUX2.TR){S.ph=2;S.sh=[];for(let k=0;k<6;k++){const a=k/6*6.2832+.5236,q=suSafe(Math.cos(a)*SUX2.R,40+Math.sin(a)*SUX2.R*.72);S.sh.push({x:q[0],y:q[1],land:-k*.18,cd:0})}S.oi=Math.floor(Math.random()*6);S.ot=SUX2.OPEN;S.ga=null;S.gc=2.5;S.gn=0;S.ey=0;
@@ -2463,8 +2479,9 @@ function suHex2(e,dt){const S=e.hx,p=G.p;
   S.ot-=dt;if(S.ot<=0){S.ot=SUX2.OPEN;let n;do{n=Math.floor(Math.random()*6)}while(n===S.oi);S.oi=n;if(!G.bot)sparks(S.sh[n].x,S.sh[n].y,16,['#ffe08a','#ffffff'],200,.4,3)}
   const c=S.sh[S.oi];e.x=c.x;e.y=c.y;e.fmInv=c.land>=1?0:1;
   /* 공격: 시선 3연발(빨간 점선 원 1.1초 → 금빛 광선) → 쉼 → 닫힌 조각 탄막 */
+  if(S.mz)suMazeTick(e,dt);
   if(S.ga){const g=S.ga;g.t+=dt;if(g.t>=SUX2.TEL&&!g.f){g.f=1;if(Math.hypot(p.x-g.x,(p.y-g.y)/.75)<72)hitP(e.dmg*1.6);if(!G.bot){SND.p('boom');sparks(g.x,g.y,20,['#ffe08a','#ffffff','#ff4a6a'],260,.4,3);G.shk=Math.max(G.shk||0,.25)}}if(g.t>=SUX2.TEL+.4)S.ga=null}
-  else{S.gc-=dt;if(S.gc<=0){if(S.gn<5){if(S.gn===0||S.gn===3)S.sh.forEach((q,k)=>{if(k===S.oi)return;q.cd=.2*k+.01});S.gn++;S.ga={x:p.x,y:p.y,t:0};S.gc=.25}else{S.gn=0;S.gc=1.8}}}
+  else if(!S.mz){S.gc-=dt;if(S.gc<=0){if(S.gn<5){if(S.gn===0||S.gn===3)S.sh.forEach((q,k)=>{if(k===S.oi)return;q.cd=.2*k+.01});S.gn++;S.ga={x:p.x,y:p.y,t:0};S.gc=.25}else{S.gn=0;S.gc=1.8;if((S.mzc=(S.mzc||0)+1)%2===0)suMazeStart(e)}}}
   for(const q of S.sh){if(q.cd>0){q.cd-=dt;if(q.cd<=0){q.cd=0;q.fl=.4;for(let i=0;i<10;i++){const a=i/10*6.2832+G.t;G.eb.push({x:q.x,y:q.y-20,vx:Math.cos(a)*170,vy:Math.sin(a)*170,r:6,dmg:e.dmg*.5,life:5,c:pick(['#b48aff','#ffffff']),src:e})}}}if(q.fl>0)q.fl-=dt}}
 function suHexHex(x,y,R,k){ctx.beginPath();for(let i=0;i<6;i++){const a=i/6*6.2832+.5236;ctx.lineTo(x+Math.cos(a)*R,y+Math.sin(a)*R*(k||.72))}ctx.closePath()}
 function suHex2Ground(e){const S=e.hx;if(!S.sh)return;const t=G.t;ctx.save();
@@ -2474,6 +2491,7 @@ function suHex2Ground(e){const S=e.hx;if(!S.sh)return;const t=G.t;ctx.save();
     suHexHex(q.x,fy-18,30);ctx.fillStyle=op?'rgba(255,224,138,'+(.55+.35*Math.sin(t*7))+')':(q.fl>0?'#c8a8ff':'#1c1440');ctx.fill();
     if(op&&L>=1){ctx.globalAlpha=.4+.3*Math.sin(t*5);ctx.strokeStyle='#ffe08a';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(q.x,q.y,70+8*Math.sin(t*4),50,0,0,7);ctx.stroke()}}
   const g=S.ga;if(g){const u=Math.min(1,g.t/SUX2.TEL);ctx.globalAlpha=.9;ctx.strokeStyle='#ff3a5a';ctx.lineWidth=2.5;ctx.setLineDash([8,6]);ctx.beginPath();ctx.ellipse(g.x,g.y,72,54,0,0,7);ctx.stroke();ctx.setLineDash([]);ctx.globalAlpha=.25*u;ctx.fillStyle='#ff3a5a';ctx.beginPath();ctx.ellipse(g.x,g.y,72*u,54*u,0,0,7);ctx.fill()}
+  if(S.mz)suMazeDraw(S.mz);
   ctx.restore()}
 function suHexSky(){const e=G.enemies.find(q=>!q.dead&&q.type==='su_hex'),p=G.p,t=G.t;
   {const hk=e&&e.hx&&e.hx.ph>1?e.hx.ek||0:0;G.suEk=hk>(G.suEk||0)?hk:Math.max(hk,(G.suEk||0)-1/150);if(G.suEk>.003)suEclSky(G.suEk)}
@@ -2714,7 +2732,7 @@ function suHud(dt){if(!suSolo()){if(SU.hud)SU.hud.style.display='none';return}
   const st=(b,show,busy,txt)=>{b.style.display=show?'block':'none';b.style.opacity=busy?.45:1;b.querySelector('b').textContent=txt};
   st(B[0],n>=1,!!G.suT||G.t<D.t,G.suT?'출격 중':G.t<D.t?Math.ceil(D.t-G.t)+'초':'탈로스');
   st(B[1],n>=2,!!G.suDd||G.t<D.d||D.dn<=0,G.suDd?'수리 중':D.dn<=0?'소진':G.t<D.d?Math.ceil(D.d-G.t)+'초':'수리 '+D.dn)}
-window.__suBoss=k=>k==='ecl'?suEclStart():k==='than'?suThSpawn():k==='oct'?suOctSpawn():k==='hex'?suHexCall():suOksSpawn();
+window.__suBoss=k=>k==='mz'?(()=>{const e=suEclStart();if(e){const iv=setInterval(()=>{if(e.dead||!G.running)clearInterval(iv);else if(e.hx.ph===2){clearInterval(iv);suMazeStart(e)}},200)}return e})():k==='ecl'?suEclStart():k==='than'?suThSpawn():k==='oct'?suOctSpawn():k==='hex'?suHexCall():suOksSpawn();
 /* ---- 수원 함선 (11-18): 탈로스 = 패드에 착지해 ㄷ자 레일건 전개 → 충전 3초·관통 한 발 / 다이달로스 = 게이트 위에서 수리 연출 ----
    그림 ag/talos_tf(비행→착지→전개 24장) · talos_hull(선체) · talos_gun(레일건 24방향) · daedalus(12장), 칸 320px.
    SUT.PHI = 레일건 각 장이 화면에서 가리키는 각도(구운 그림에서 잰 값), SUT.L = 회전 중심~포구 거리(px).

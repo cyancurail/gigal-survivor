@@ -2439,7 +2439,7 @@ window.__suRaid=(k,lv,st)=>{const e=G.enemies.find(q=>!q.dead&&(k<20?q.type==='s
 /* ---- 헥스터 (11-19 사용자: 1페이즈 = 별밤의 뱀(시안 A), 2페이즈 = 일식의 눈(시안 C). 코드로 그림. 머리·조각이 땅으로 내려왔을 때만 맞음.
    헥스터전에는 모든 대군 정지, 본체와의 싸움에만 집중(게이트·포탑을 건드리는 패턴 없음, 탈로스 마무리 기믹 없음).
    지금은 1페이즈 모습만: 몸통이 엘리베이터를 나선으로 감고 돌고, 머리가 사령관 쪽으로 내려와 떠 있음. 공격·2페이즈·등장 일정은 아직 없음. 시험: __suBoss('hex') ---- */
-const SUX={N:190,HPB:20000,sp:null,TK:1.4,IM:2.6,RS:4.65,HX:112,HY:84};/* 머리 강하: 추적 TK초 → 조준 고정(TK~IM, 회피 구간) → IM에 착지 → RS에 상승 */
+const SUX={N:190,HPB:113000,/*11-22 사용자: 실효 합계 약 25만(보스 보정 ×2.21 적용 후)*/ sp:null,TK:1.4,IM:2.6,RS:4.65,HX:112,HY:84};/* 머리 강하: 추적 TK초 → 조준 고정(TK~IM, 회피 구간) → IM에 착지 → RS에 상승 */
 function suHexBlob(){if(SUX.sp)return SUX.sp;const c=document.createElement('canvas');c.width=c.height=128;const x=c.getContext('2d'),g=x.createRadialGradient(64,64,4,64,64,64);g.addColorStop(0,'#04020c');g.addColorStop(.55,'#120830');g.addColorStop(.82,'rgba(64,36,150,.92)');g.addColorStop(1,'rgba(110,70,230,0)');x.fillStyle=g;x.fillRect(0,0,128,128);return SUX.sp=c}
 /* 11-21 사용자 그림 「별밤을 먹는 자, 헥스터」 등장 장면: 전체 화면 그림 → 터치로 넘김 → 헥스터 등장 + 아리아드네 한마디 */
 function suHexIntro(cb){if(G.bot||window.__suNoIntro){cb();return}const o=document.createElement('div');o.id='hexIntro';o.innerHTML='<img src="su/hex_intro.jpg" alt=""><p>별밤을 먹는 자,<b>헥스터</b></p>';document.body.appendChild(o);const was=G.paused;G.paused=true;try{SND.p('boss')}catch(e){}let dn=0;const fin=()=>{if(dn)return;dn=1;o.classList.add('out');setTimeout(()=>{o.remove();G.paused=was;cb()},750)};o.addEventListener('pointerdown',()=>{if(o.dataset.ok)fin()});requestAnimationFrame(()=>requestAnimationFrame(()=>o.classList.add('on')));setTimeout(()=>{o.dataset.ok=1},1200);setTimeout(fin,5200)}

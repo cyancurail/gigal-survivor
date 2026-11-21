@@ -6233,7 +6233,7 @@ UB_IM.onload=()=>{for(const k in UB_C)delete UB_C[k]};
 /* 0·1 대기 · 2·3 공격 · 4~7 걷기(대기 반복) · 8 흩어짐 · 9 팔 뻗기 · 10 보석 들기 · 11 분노 */
 function ubSpr(f){const p=typeof G!=='undefined'&&G&&G.running&&G.id==='응빈'?G.p:null;if(p){if(G.ultOn&&G.ultOn.oc)return ubFrame(11);if(p.dead)return ubFrame(8);if(p.mv)return ubFrame(4+((f||0)%4));if(G.mAtk>0)return ubFrame(2+(Math.floor(G.t*6)&1))}return ubFrame(Math.floor(performance.now()/500)&1)}
 function ubUnl(){return !!SAVE.ungbin||location.hash==='#unlockall'||!!window.__devAll}
-Object.assign(WP,{octavia:{name:'옥타비아',icon:'🔷',evo:'friend',evoName:'옥타비아 미니',d:'푸른 실이 이어진 레이저를 쏴요. 맞은 적은 취약 (받는 피해 증가)',ed:'미니 옥타비아 위성 3기가 곁을 돌며 4가지 패턴으로 쏘고, 맞은 적은 계속 취약해요'}});
+Object.assign(WP,{octavia:{name:'옥타비아',icon:'🔷',evo:'friend',evoName:'옥타비아 미니',d:'푸른 실을 따라 레이저가 닿아요, 맞은 적은 한동안 더 아파해요 (취약)',lu:'피해 · 취약↑, 간격↓, 4 · 7레벨에 줄기+1',ed:'옥타비아가 본래의 모습으로 공격해요.'}});
 Object.assign(KC,{octavia:'#6fb1ff'});
 ULT['응빈']={n:'아리아드네의 푸른 실',type:'지속 12초',d:'푸른 실이 화면의 적을 모두 묶어요. 12초 동안 적 전체가 취약(받는 피해 +30%)이 되고 옥타비아가 1.5배 빨라져요'};
 LINES['응빈']={hit:['아파요… 그래도 괜찮아요.','제가 맞을게요. 언니는 괜찮죠?','실이 당겨져요…'],h75:['아직 괜찮아요. 실이 버텨 줘요.','이 정도는 착하게 참을게요.'],h50:['실이 풀리려고 해요…','제가… 나쁜 아이가 되지 않게 해 주세요.'],h25:['언니, 실이 너무 팽팽해요.','도와 주세요… 끊어지면 안 돼요.'],die:['착하게… 살았죠?','실이 끊어져도 기억은 남을 거예요.']};
@@ -6256,29 +6256,36 @@ WU.octavia=function(w,dt){const L=w.lvl,S=G.S,ev=w.evo,st=w.st,ul=G.ultOn&&G.ult
     let tg=null,bd=(520*S.area)**2;for(const e of G.enemies){if(e.dead)continue;const d=(e.x-px0)**2+(e.y-py0)**2;if(d<bd){bd=d;tg=e}}
     if(!tg){st.cd=.2;return}
     st.tg=tg;st.aim=Math.atan2(tg.y-py0,tg.x-px0);st.ch=.34;st.cd=(2.3-.12*L)*S.cd/(S.aspd||1);return}
-  /* 진화: 옥타비아 미니 위성 */
-  const n=Math.min(5,3+(S.amount||0)),D=(19+2.2*L)*S.might;st.oa=(st.oa||0)+1.6*dt;st.pt=(st.pt||0)+dt;
-  const PL=5,pat=Math.floor(st.pt/PL)%4;if(pat!==st.pat){st.pat=pat;st.pu=0;st.sh=[];st.rg=st.rg||[];if(!G.bot)G.texts.length<70&&G.texts.push({x:G.p.x,y:G.p.y-64,v:['회전','쌍빔','링','그물'][pat],life:.9,col:'#9cc8ff'})}
-  st.pu+=dt;const [cx,cy]=ocPlayerXY(),R=86;st.sat=[];for(let i=0;i<n;i++){const a=st.oa+i*Math.PI*2/n;st.sat.push([cx+Math.cos(a)*R,cy+Math.sin(a)*R*.7,a])}
-  st.bms=[];const sat=st.sat,len=300*S.area;st.sh=st.sh||[];st.rg=st.rg||[];
-  if(pat===0){st.ba=(st.ba||0)+1.5*dt;sat.forEach(([x,y],i)=>{const a=st.ba+i*Math.PI*2/n,x1=x+Math.cos(a)*len,y1=y+Math.sin(a)*len;st.bms.push([x,y,x1,y1,1]);ocSeg(w,'ob'+i,x,y,x1,y1,9,D,.4,vu)})}
-  else if(pat===1){let tg=null,bd=1e12;for(const e of G.enemies){if(e.dead)continue;const d=(e.x-cx)**2+(e.y-cy)**2;if(d<bd){bd=d;tg=e}}const base=tg?Math.atan2(tg.y-cy,tg.x-cx):st.oa;const sw=base+Math.sin(st.pu*1.8)*1.1;
-    for(let i=0;i<n;i+=2){const [x,y]=sat[i],j=sat[i+1]||sat[0];[[x,y,sw],[j[0],j[1],sw+Math.PI]].forEach(([bx,by,a],k)=>{const l2=len*1.15,x1=bx+Math.cos(a)*l2,y1=by+Math.sin(a)*l2;st.bms.push([bx,by,x1,y1,1.3]);ocSeg(w,'oc2'+i+k,bx,by,x1,y1,10,D,.4,vu)})}}
-  else if(pat===2){st.rt=(st.rt||0)-dt;if(st.rt<=0){st.rt=.9;sat.forEach(([x,y])=>st.rg.push({x,y,r:6,v:250,mx:330*S.area,h:new Set()}))}}
-  else{const tri=[];for(let i=0;i<n;i++){const A=sat[i],B=sat[(i+1)%n];tri.push([A[0],A[1],B[0],B[1],.8]);ocSeg(w,'on'+i,A[0],A[1],B[0],B[1],7,D*.7,.4,vu)}st.bms.push(...tri);
-    st.rt=(st.rt||0)-dt;if(st.rt<=0){st.rt=.45;sat.forEach(([x,y,a0])=>{const a=a0+rnd(-.9,.9),x1=x+Math.cos(a)*240*S.area,y1=y+Math.sin(a)*240*S.area;st.sh.push({x0:x,y0:y,x1,y1,t:0});ocSeg(w,'os'+Math.random(),x,y,x1,y1,9,D*1.1,99,vu)})}}
-  for(const q of st.sh)q.t+=dt;st.sh=st.sh.filter(q=>q.t<.3);
-  for(let i=st.rg.length-1;i>=0;i--){const g=st.rg[i];g.r+=g.v*dt;for(const e of G.enemies){if(e.dead||g.h.has(e))continue;const d=Math.hypot(e.x-g.x,e.y-g.y);if(Math.abs(d-g.r)<e.r+9){g.h.add(e);hurt(e,D*1.2,'octavia',{});ocVul(e,vu,4)}}if(g.r>g.mx)st.rg.splice(i,1)}
-  if(pat!==2&&st.rg.length&&pat!==st.pat)st.rg.length=0}
+  /* 진화: 옥타비아 미니 = 보스 「옥타비아」(정팔면체 보석)의 작은 버전. 보스와 같은 순서로 모양이 바뀌며 같은 공격 (닫힘 → 쪼개짐 → 펼침 → 흩어짐) */
+  const n=Math.min(6,4+(S.amount||0)),D=(19+2.2*L)*S.might,PL=5,fy=G.t;st.pt=(st.pt||0)+dt;st.yaw=(st.yaw||0)+dt*1.3;st.pu=(st.pu||0)+dt;
+  const pat=Math.floor(st.pt/PL)%4,[cx,cy]=ocPlayerXY();st.mx=cx+Math.cos(fy*.5)*64;st.my=cy-52+Math.sin(fy*1.4)*7;const mx=st.mx,my=st.my;
+  if(pat!==st.pat){st.pat=pat;st.pu=0;st.sh=null;if(pat===3){let tg=null,bd=1e12;for(const e of G.enemies){if(e.dead)continue;const d=(e.x-cx)**2+(e.y-cy)**2;if(d<bd){bd=d;tg=e}}st.c3=tg?[tg.x,tg.y]:[cx+Math.cos(st.yaw)*160,cy+Math.sin(st.yaw)*120];const o=rnd(0,6.283);st.sh=[];for(let i=0;i<8;i++)st.sh.push({a:o+i*6.2832/8,x:mx,y:my,o:(i%2?.5:-.5)*1.1})}
+    if(!G.bot)G.texts.length<70&&G.texts.push({x:G.p.x,y:G.p.y-64,v:['닫힘','쪼개짐','펼침','흩어짐'][pat],life:.9,col:'#9cc8ff'})}
+  const sm=Math.min(1,dt*5);st.sp=(st.sp||0)+((pat===1?1:0)-(st.sp||0))*sm;st.op=(st.op||0)+((pat===2?1:0)-(st.op||0))*sm;st.sc=(st.sc||0)+((pat===3?1:0)-(st.sc||0))*Math.min(1,dt*4);
+  st.bms=[];st.rg=st.rg||[];const len=440*S.area;
+  if(pat===0){st.ba=(st.ba||0)+.9*dt;for(let i=0;i<n;i++){const a=st.ba+i*6.2832/n,x1=mx+Math.cos(a)*len,y1=my+Math.sin(a)*len;st.bms.push([mx,my,x1,y1,1]);ocSeg(w,'ob'+i,mx,my,x1,y1,9,D*.8,.4,vu)}}
+  else if(pat===1){let tg=null,bd=1e12;for(const e of G.enemies){if(e.dead)continue;const d=(e.x-mx)**2+(e.y-my)**2;if(d<bd){bd=d;tg=e}}const base=tg?Math.atan2(tg.y-my,tg.x-mx):st.yaw,sw=base+Math.sin(st.pu*1.8)*1.1;
+    [sw,sw+Math.PI].forEach((a,k)=>{const l2=len*1.2,x1=mx+Math.cos(a)*l2,y1=my+Math.sin(a)*l2;st.bms.push([mx,my,x1,y1,1.4]);ocSeg(w,'oc2'+k,mx,my,x1,y1,11,D*1.05,.4,vu)})}
+  else if(pat===2){st.rt=(st.rt||0)-dt;if(st.rt<=0){st.rt=.5;st.rg.push({x:mx,y:my,r:10,v:240,mx:340*S.area,h:new Set(),o:rnd(0,6.283)})}}
+  else if(st.sh){const c=st.c3,u=Math.min(1,st.pu/.7),bk=st.pu>PL-.5?Math.min(1,(st.pu-(PL-.5))/.5):0,live=st.pu>=.7&&st.pu<PL-.4;
+    for(let i=0;i<st.sh.length;i++){const h=st.sh[i],tx=c[0]+Math.cos(h.a)*150*S.area,ty=c[1]+Math.sin(h.a)*110*S.area;h.x=mx+(tx-mx)*u*(1-bk);h.y=my+(ty-my)*u*(1-bk);
+      if(live){const a=Math.atan2(c[1]-h.y,c[0]-h.x)+h.o,x1=h.x+Math.cos(a)*260*S.area,y1=h.y+Math.sin(a)*260*S.area;st.bms.push([h.x,h.y,x1,y1,.8]);ocSeg(w,'on'+i,h.x,h.y,x1,y1,8,D*.6,.4,vu)}}}
+  for(let i=st.rg.length-1;i>=0;i--){const g=st.rg[i];g.r+=g.v*dt;for(const e of G.enemies){if(e.dead||g.h.has(e))continue;const d=Math.hypot(e.x-g.x,(e.y-g.y)/.7);if(Math.abs(d-g.r)<e.r+9){g.h.add(e);hurt(e,D*1.1,'octavia',{});ocVul(e,vu,4)}}if(g.r>g.mx)st.rg.splice(i,1)}}
 function ocDraw(w){const st=w.st,t=G.t;ctx.save();ctx.globalCompositeOperation='lighter';
   const line=(x0,y0,x1,y1,wd,al)=>{ctx.globalAlpha=.22*al;ctx.strokeStyle='#2f7bff';ctx.lineWidth=wd*3.4;ctx.beginPath();ctx.moveTo(x0,y0);ctx.lineTo(x1,y1);ctx.stroke();ctx.globalAlpha=.8*al;ctx.strokeStyle='#8cc4ff';ctx.lineWidth=wd*1.5;ctx.stroke();ctx.globalAlpha=al;ctx.strokeStyle='#ffffff';ctx.lineWidth=wd*.6;ctx.stroke()};
   if(!w.evo){const [px0,py0]=ocPlayerXY();
     if(st.ch>0){const u=1-st.ch/.34,a=st.aim;ctx.globalAlpha=.25+.5*u;ctx.strokeStyle='#8cc4ff';ctx.lineWidth=1;ctx.setLineDash([6,8]);ctx.beginPath();ctx.moveTo(px0,py0);ctx.lineTo(px0+Math.cos(a)*220,py0+Math.sin(a)*220);ctx.stroke();ctx.setLineDash([]);ctx.globalAlpha=.4+.6*u;ctx.fillStyle='#cfe6ff';ctx.beginPath();ctx.arc(px0,py0,3+5*u,0,7);ctx.fill()}
     for(const b of st.bm||[]){const al=1-b.t/.28;line(b.x0,b.y0,b.x1,b.y1,5*(.5+.5*al),al);if(!G.bot&&Math.random()<.5)px(b.x0+(b.x1-b.x0)*Math.random(),b.y0+(b.y1-b.y0)*Math.random(),rnd(-40,40),rnd(-40,40),.3,'#9cc8ff',2,1,3)}}
-  else{for(const [x0,y0,x1,y1,k] of st.bms||[])line(x0,y0,x1,y1,5*k,1);for(const q of st.sh||[])line(q.x0,q.y0,q.x1,q.y1,4,1-q.t/.3);
-    for(const g of st.rg||[]){const al=Math.max(0,1-g.r/g.mx);ctx.globalAlpha=.7*al;ctx.strokeStyle='#8cc4ff';ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(g.x,g.y,g.r,g.r*.7,0,0,7);ctx.stroke();ctx.globalAlpha=.25*al;ctx.lineWidth=8;ctx.stroke()}
-    ctx.globalCompositeOperation='source-over';for(const [x,y,a] of st.sat||[]){const sp=t*2.2+a;ctx.save();ctx.translate(x,y);ctx.globalAlpha=1;
-      ctx.fillStyle='#2f7bff';ctx.beginPath();ctx.moveTo(0,-19);ctx.lineTo(12*Math.cos(sp),0);ctx.lineTo(0,19);ctx.lineTo(-12*Math.cos(sp),0);ctx.closePath();ctx.fill();ctx.fillStyle='#cfe6ff';ctx.beginPath();ctx.moveTo(0,-19);ctx.lineTo(6*Math.cos(sp),0);ctx.lineTo(0,19);ctx.lineTo(-6*Math.cos(sp),0);ctx.closePath();ctx.fill();ctx.strokeStyle='#0a1a3a';ctx.lineWidth=1;ctx.stroke();ctx.restore()}
+  else{for(const [x0,y0,x1,y1,k] of st.bms||[])line(x0,y0,x1,y1,5*k,1);
+    for(const g of st.rg||[]){const al=Math.max(0,1-g.r/g.mx);for(let i=0;i<16;i++){const a=g.o+i*6.2832/16;ctx.globalAlpha=.9*al;ctx.fillStyle=SUC.C[i%8];ctx.beginPath();ctx.arc(g.x+Math.cos(a)*g.r,g.y+Math.sin(a)*g.r*.7,4,0,7);ctx.fill();ctx.globalAlpha=.3*al;ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(g.x+Math.cos(a)*g.r,g.y+Math.sin(a)*g.r*.7,8,0,7);ctx.fill()}}
+    ctx.globalCompositeOperation='source-over';
+    if(st.mx!==undefined){const R=22,mx=st.mx,my=st.my,fl=((st.pt||0)%5)>4.65?1:0;
+      ctx.save();ctx.globalCompositeOperation='lighter';const gg=ctx.createRadialGradient(mx,my,0,mx,my,R*2.1);gg.addColorStop(0,'rgba(110,230,255,.45)');gg.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=gg;ctx.beginPath();ctx.arc(mx,my,R*2.1,0,7);ctx.fill();ctx.restore();
+      ctx.save();ctx.globalAlpha=.25;ctx.fillStyle='#2a1408';ctx.beginPath();ctx.ellipse(mx,G.p.y+8,R*.9,5,0,0,7);ctx.fill();ctx.restore();
+      if(st.sh&&(st.sc||0)>.05){for(let i=0;i<st.sh.length;i++){const h=st.sh[i];suOctGem(h.x,h.y,R*.5,(st.yaw||0)*2+i,0,0,1,i)}ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=.8;ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(mx,my,4+1.5*Math.sin(t*9),0,7);ctx.fill();ctx.restore()}
+      else suOctGem(mx,my,R,st.yaw||0,st.sp||0,st.op||0,1);
+      if((st.sp||0)>.1||(st.op||0)>.1){ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=.9*Math.max(st.sp||0,st.op||0);ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(mx,my,4+1.5*Math.sin(t*11),0,7);ctx.fill();ctx.restore()}
+      if(fl){ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=.55;ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(mx,my,R*1.1,0,7);ctx.fill();ctx.restore()}}
     ctx.globalCompositeOperation='lighter'}
   /* 취약 표식 */
   ctx.globalCompositeOperation='source-over';let c=0;for(const e of G.enemies){if(e.dead||!(e.ocV>G.t))continue;if(Math.abs(e.x-G.p.x)>VW/2+40||Math.abs(e.y-G.p.y)>VH/2+40)continue;if(++c>60)break;ctx.globalAlpha=.55;ctx.strokeStyle='#8cc4ff';ctx.lineWidth=1.5;ctx.beginPath();ctx.ellipse(e.x,e.y+e.r*.5,e.r*.9,e.r*.3,0,0,7);ctx.stroke();ctx.globalAlpha=.85;ctx.fillStyle='#cfe6ff';const hy=e.y-e.r-6;ctx.beginPath();ctx.moveTo(e.x,hy-4);ctx.lineTo(e.x+3,hy);ctx.lineTo(e.x,hy+4);ctx.lineTo(e.x-3,hy);ctx.closePath();ctx.fill()}

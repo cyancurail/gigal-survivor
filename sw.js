@@ -11,7 +11,7 @@ self.addEventListener('fetch', e => {
   const r = e.request; if (r.method !== 'GET') return;
   const u = new URL(r.url); if (u.origin !== location.origin) return; // 폰트 등 외부는 브라우저에 맡김
   if (r.headers.has('range') || /\.mp4$/.test(u.pathname)) return; // 영상은 부분 요청(206)이라 캐시하지 않고 그대로 받는다
-  if (/\/(bgm|td|songs)\/[^/]+\.mp3$/.test(u.pathname)) { e.respondWith(caches.open(BGM).then(c => c.match(r).then(hit => hit || fetch(r).then(res => { if (res.ok) c.put(r, res.clone()); return res; })))); return; }
+  if (/\/(bgm|td|songs|sfx)\/[^/]+\.mp3$/.test(u.pathname)) { e.respondWith(caches.open(BGM).then(c => c.match(r).then(hit => hit || fetch(r).then(res => { if (res.ok) c.put(r, res.clone()); return res; })))); return; }
   const wk = /\/wiki\.html$/.test(u.pathname); // 위키는 ?ingame=1 같은 쿼리가 붙어도 wiki.html로 (V127)
   const rw = /\/runway\/(index\.html)?$/.test(u.pathname); // 련의 웨이 iframe (V236)
   const fl = /\/ag\/fleet\.html$/.test(u.pathname); // 로비 전투지휘패널 iframe(아이기스 3D)도 navigate라 index.html로 빠지던 버그 (V262)

@@ -2737,39 +2737,33 @@ function suDefTick(dt){if(!G.suGd)suDefInit();G.suMo=Math.max(0,(G.suMo||0)-dt);
       G.stats.dmg=sd;if(G.stats.k){if(sk===undefined)delete G.stats.k.su_orb;else G.stats.k.su_orb=sk}
       if(Math.hypot(G.p.x-b.x,(G.p.y-b.y)*1.3)<SUD.ORB*.5)hitP(20);if(!G.bot){G.rflash=.6;G.shk=Math.max(G.shk||0,.6);sparks(b.x,b.y,50,['#ffffff','#9fe8ff','#ffe9a8'],420,.8,4)}}
     if(b.t>2.4)O.splice(i,1)}}
-/* 「둠스데이 공중 지원」(11-21 사용자 승인): 게이트 침공이 시작되면 둠스데이 요격 전투기 편대(3대 삼각 / 5대 V자)가 그 게이트 바깥을 이글쇼 기동으로 훑으며 기총 사격.
-   기동 4종: 직진 통과(+배럴롤) · 브레이크(좌우로 갈라짐) · 루프 · 크로스(두 무리가 X자로 엇갈림). 침공 한 번에 최대 2회 출격. 화력은 수비대 기준값(G.fmSpD) 기반, 보스는 한 발당 상한. 수치 임시.
-   함선 비행: 60~90초마다 둠스데이 항공모함·건쉽·스텔스 폭격기가 높은 하늘을 천천히 가로지름(그림자만 지면에 비침, 공격 없음) */
-const SUJ={V:420,N:[3,5],FORM3:[[0,0],[-62,-52],[-62,52]],FORM5:[[0,0],[-58,-48],[-58,48],[-116,-96],[-116,96]],DUR:7.5,SH:.34,DM:6};
-function suJetLaunch(gi,mv){const o=suGOut(gi),pp=[-o[1],o[0]],P=suGO(gi),dir=Math.random()<.5?-1:1,n=pick(SUJ.N),F=n===3?SUJ.FORM3:SUJ.FORM5,V=SUJ.V,
-    at=(a,b)=>[P[0]+o[0]*a+pp[0]*b,P[1]+o[1]*a+pp[1]*b],base=Math.atan2(pp[1]*dir,pp[0]*dir),jets=[];
-  const mk=(f,h,sx,sy,grp)=>{const c=Math.cos(h),sn=Math.sin(h);return{x:sx+c*f[0]-sn*f[1],y:sy+sn*f[0]+c*f[1],a:h,w:0,grp,tl:[],fc:rnd(0,.3),bk:0,roll:-1}};
-  if(mv==='cross'){const M=at(170,0),h0=base+.6*dir,h1=base-.6*dir,T=2.6,L=n===3?[0,1,2]:[0,1,2,3,4];L.forEach((i,k)=>{const g=k%2,h=g?h1:h0,sx=M[0]-Math.cos(h)*V*T,sy=M[1]-Math.sin(h)*V*T;jets.push(mk(F[Math.floor(k/2)*2+(g?1:0)]||F[k],h,sx,sy,g))})}
-  else{const st=at(170,-1150*dir);F.forEach(f=>jets.push(mk(f,base,st[0],st[1],0)))}
-  (G.suJ=G.suJ||{sq:[],fb:[],nx:40}).sq.push({gi,mv,t:0,jets,sd:Math.random()});if(!G.bot)SND.p('whoosh')}
-function suJetTick(dt){if(G.map!=='su')return;const J=G.suJ=G.suJ||{sq:[],fb:[],nx:40},W=G.suW,p=G.p;
-  /* 출격 트리거: 침공 라이브 중 2초·9초 시점 */
-  if(W&&W.cur&&!G.bot){const C=W.cur;for(const g of C.gs){const lt=C.t-g.off;g.jl=g.jl||0;if(g.jl<2&&lt>=(g.jl?9:2)&&lt<SUGT.WD){g.jl++;suJetLaunch(g.gi,pick(['pass','break','loop','cross']))}}}
-  for(let i=J.sq.length-1;i>=0;i--){const q=J.sq[i];q.t+=dt;const gi=q.gi,P=suGO(gi,170),T=q.t;
-    for(const j of q.jets){let w=0,roll=-1;
-      if(q.mv==='loop'){if(T>1.9&&T<3.9)w=SUJ.V/134}
-      else if(q.mv==='break'){if(T>2&&T<3.4)w=(j.grp?1:-1)*(1.0+.5*((j.tl.length)%3))*(j===q.jets[0]?0:1)}
-      else if(q.mv==='pass'){if(T>1.2&&T<1.9)roll=Math.floor((T-1.2)/.7*8)%8}
-      if(q.mv==='break'&&j!==q.jets[0]){const k=q.jets.indexOf(j);w=(k%2?1:-1)*(T>2&&T<3.4?1.15:0)}
-      j.w+=(w-j.w)*Math.min(1,dt*6);j.a+=j.w*dt;j.x+=Math.cos(j.a)*SUJ.V*dt;j.y+=Math.sin(j.a)*SUJ.V*dt;j.bk=j.w;j.roll=roll;
-      j.tl.push(j.x,j.y);if(j.tl.length>28)j.tl.splice(0,2);
-      /* 기총: 침공 구역(그 게이트 P 주변 560) 적에게 */
-      j.fc-=dt;if(j.fc<=0&&Math.hypot(j.x-P[0],j.y-P[1])<760){j.fc=SUJ.SH*rnd(.8,1.2);let b=null,bd=520;for(const e of G.enemies){if(e.dead||e.fmInv>0)continue;const d=Math.hypot(e.x-j.x,e.y-j.y);if(d<bd&&(e.suOut===gi+1||Math.hypot(e.x-P[0],e.y-P[1])<460)){bd=d;b=e}}
-        if(b){const D=(G.fmSpD||60)*.05*SUJ.DM;hurt(b,b.boss?Math.min(D,b.max*.0004):D,'fmsup',{});if(!G.bot&&(G.suGt=G.suGt||[]).length<48)G.suGt.push({x0:j.x+Math.cos(j.a)*20,y0:j.y+Math.sin(j.a)*20,x1:b.x,y1:b.y-b.r*.4,t:0})}}}
-    if(T>SUJ.DUR||q.jets.every(j=>Math.hypot(j.x-p.x,j.y-p.y)>1800&&T>3))J.sq.splice(i,1)}
-  /* 함선 비행 */
-  J.nx-=dt;if(J.nx<=0&&!G.bot){J.nx=rnd(60,90);const k=pick(['carrier','gunship','stealth']),dir=Math.random()<.5?-1:1;J.fb.push({k,dir,x:p.x-dir*(VW/2+520),y:p.y+rnd(-VH*.3,VH*.3),t:0,s:k==='carrier'?.7:k==='gunship'?.55:.5})}
-  for(let i=J.fb.length-1;i>=0;i--){const f=J.fb[i];f.t+=dt;f.x+=f.dir*(f.k==='stealth'?150:f.k==='gunship'?95:62)*dt;if(f.t>40||Math.abs(f.x-p.x)>VW/2+900&&f.t>8)J.fb.splice(i,1)}}
-function suJetDraw(){const J=G.suJ;if(!J||typeof dmFr!=='function'||!dmOk('fighter'))return;const p=G.p,t=G.t;
-  if(G.suGt&&G.suGt.length){ctx.save();ctx.globalCompositeOperation='lighter';for(let i=G.suGt.length-1;i>=0;i--){const q=G.suGt[i];q.t+=1/60;if(q.t>.12){G.suGt.splice(i,1);continue}ctx.globalAlpha=1-q.t/.12;ctx.strokeStyle='#ff9be0';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(q.x0,q.y0);ctx.lineTo(q.x1,q.y1);ctx.stroke()}ctx.restore()}
-  /* 함선 비행: 지면 그림자 + 기체(약간 어둡게 가라앉혀 높이를 줌) */
-  for(const f of J.fb){if(Math.abs(f.x-p.x)>VW/2+420||Math.abs(f.y-p.y)>VH/2+300)continue;const a=Math.min(1,f.t/3)*Math.min(1,(40-f.t)/3);dmShadow(f.x+60,f.y+230,f.k==='carrier'?170:110);ctx.save();ctx.globalAlpha=a;dmImg(f.k,f.x,f.y+Math.sin(t*.8+f.x*.002)*3,f.s,f.dir>0,0);dmFlame(f.x-f.dir*(f.k==='carrier'?190:110),f.y,f.dir>0?Math.PI:0,f.k==='carrier'?70:46,'#ff7ad0');ctx.restore()}
-  for(const q of J.sq)for(const j of q.jets){if(Math.abs(j.x-p.x)>VW/2+260||Math.abs(j.y-p.y)>VH/2+260){continue}dmTrailLine(j.tl,1);dmShadow(j.x+22,j.y+62,18);const bk=j.bk,fr=j.roll>=0?j.roll:(bk<-1.5?8:bk<-.4?9:bk>1.5?11:bk>.4?10:0);dmFr('fighter',82,127,fr,j.x,j.y,.55,j.a+Math.PI/2)}}
+/* 「둠스데이 공중전」(11-21 사용자 확정): 둠스데이 요격 전투기 편대가 수원 적 함선(무수리함선)과 하늘에서 교전하는 순수 연출. 피해·지원·판정 없음.
+   60~90초마다 화면 위쪽 하늘에서 약 9초: 적 함선 2~3척이 가로지르고 전투기 3대가 뒤쫓아 예광탄 → 함선 폭발·추락. 봇 판 제외. */
+const SUJ={V:300,EV:230,DUR:9.5};
+function suJetStart(){const p=G.p,dir=Math.random()<.5?-1:1,y0=p.y-VH*rnd(.12,.3),n=Math.random()<.5?2:3,ev=[],jt=[],k0=['ship_a','ship_b','ship_c'];
+  for(let i=0;i<n;i++)ev.push({k:pick(k0),x:p.x-dir*(VW/2+260+i*170),y:y0+rnd(-70,70)+(i-1)*60,w:rnd(100,140),dieT:3.4+i*1.5+rnd(0,.5),dead:0,hp:1,sd:rnd(0,6)});
+  const F=[[0,0],[-70,-46],[-70,46]];F.forEach(f=>jt.push({x:p.x-dir*(VW/2+640)+(-dir)*f[0]*-1,y:y0+f[1],a:dir>0?0:Math.PI,tl:[],fc:rnd(0,.2),bk:0,roll:-1,dx:f[0],dy:f[1],tg:0}));
+  (G.suJ=G.suJ||{ev:[],jt:[],fx:[],tr:[],nx:40}).run={t:0,dir,ev,jt,y0}}
+function suJetTick(dt){if(G.map!=='su')return;const J=G.suJ=G.suJ||{run:null,fx:[],tr:[],nx:40},p=G.p;
+  J.nx-=dt;if(!J.run&&J.nx<=0&&!G.bot){J.nx=rnd(60,90);suJetStart()}
+  const R=J.run;if(R){R.t+=dt;const T=R.t,dir=R.dir;
+    for(const e of R.ev){if(e.dead)continue;e.x+=dir*SUJ.EV*dt;e.y+=Math.sin(T*1.3+e.sd)*18*dt;if(T>=e.dieT){e.dead=1;e.dt=0;for(let i=0;i<14;i++)J.fx.push({x:e.x,y:e.y,vx:rnd(-90,90)+dir*60,vy:rnd(-90,60),t:0,l:rnd(.5,1.1),r:rnd(6,16)});J.fx.push({x:e.x,y:e.y,vx:dir*SUJ.EV*.7,vy:30,t:0,l:2.2,r:0,wr:1,w:e.w,k:e.k,dir})}}
+    const lead=R.ev.find(e=>!e.dead)||R.ev[R.ev.length-1];
+    R.jt.forEach((j,i)=>{const tx=lead.x-dir*(150+Math.abs(j.dx)*.6)+dir*(-j.dx)*-.0,ty=lead.y+j.dy*1.2+Math.sin(T*2+i)*14;
+      const ex=tx+dir*0-j.x,ey=ty-j.y,sp=SUJ.V*(T<1?1.5:1)+(T>R.ev[0].dieT-1?50:0);const d=Math.hypot(ex,ey)||1,want=Math.atan2(ey,ex+dir*SUJ.EV*.5);let da=want-j.a;while(da>3.14)da-=6.283;while(da<-3.14)da+=6.283;const w=Math.max(-1.8,Math.min(1.8,da*3));j.a+=w*dt;j.bk=w;j.x+=Math.cos(j.a)*(d>40?sp:SUJ.EV)*dt;j.y+=Math.sin(j.a)*(d>40?sp:SUJ.EV)*dt;
+      j.roll=(T>6&&T<6.7&&i===0)?Math.floor((T-6)/.7*8)%8:-1;j.tl.push(j.x,j.y);if(j.tl.length>28)j.tl.splice(0,2);
+      j.fc-=dt;const tg=R.ev.find(e=>!e.dead&&Math.hypot(e.x-j.x,e.y-j.y)<520&&T>1.2);if(j.fc<=0&&tg){j.fc=.22;J.tr.push({x:j.x+Math.cos(j.a)*20,y:j.y+Math.sin(j.a)*20,x1:tg.x+rnd(-24,24),y1:tg.y+rnd(-14,14),t:0})}});
+    if(T>SUJ.DUR){J.run=null}}
+  for(let i=J.fx.length-1;i>=0;i--){const f=J.fx[i];f.t+=dt;f.x+=f.vx*dt;f.y+=f.vy*dt;if(f.t>f.l)J.fx.splice(i,1)}
+  for(let i=J.tr.length-1;i>=0;i--){J.tr[i].t+=dt;if(J.tr[i].t>.14)J.tr.splice(i,1)}}
+function suJetDraw(){const J=G.suJ;if(!J||typeof dmFr!=='function'||!dmOk('fighter'))return;const p=G.p,R=J.run;
+  const near=(x,y)=>Math.abs(x-p.x)<VW/2+300&&Math.abs(y-p.y)<VH/2+300;
+  /* 적 함선(코드 시트 ship_a/b/c, 프레임 0) */
+  const shipDraw=(k,x,y,w,dir,sc,al,rot)=>{const im=suIm2(k);if(!im.complete||!im.width)return;const sw=w,sh=sw*196/146;ctx.save();ctx.globalAlpha=al;ctx.translate(x,y);if(rot)ctx.rotate(rot);if(dir<0)ctx.scale(-1,1);ctx.scale(sc,sc);ctx.drawImage(im,0,0,146,196,-sw/2,-sh/2,sw,sh);ctx.restore()};
+  if(R){for(const e of R.ev){if(e.dead||!near(e.x,e.y))continue;shipDraw(e.k,e.x,e.y,e.w,-R.dir,1,.95,0);ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=.4;ctx.fillStyle='#ff9b5f';ctx.beginPath();ctx.ellipse(e.x-R.dir*e.w*.5,e.y,e.w*.22,5,0,0,7);ctx.fill();ctx.restore()}
+    for(const j of R.jt){if(!near(j.x,j.y))continue;dmTrailLine(j.tl,1);const bk=j.bk,fr=j.roll>=0?j.roll:(bk<-1.5?8:bk<-.4?9:bk>1.5?11:bk>.4?10:0);dmFr('fighter',82,127,fr,j.x,j.y,.55,j.a+Math.PI/2)}}
+  ctx.save();ctx.globalCompositeOperation='lighter';for(const f of J.fx){if(!near(f.x,f.y))continue;const u=f.t/f.l;if(f.wr){ctx.restore();ctx.save();shipDraw(f.k,f.x,f.y,f.w,-f.dir,1-u*.45,1-u,f.dir*u*.9);ctx.globalCompositeOperation='lighter';ctx.globalAlpha=(1-u)*.6;ctx.fillStyle='#ff7a30';ctx.beginPath();ctx.arc(f.x,f.y,f.w*.2*(1-u),0,7);ctx.fill();continue}ctx.globalAlpha=(1-u)*.9;ctx.fillStyle=u<.35?'#fff2c0':'#ff8a3a';ctx.beginPath();ctx.arc(f.x,f.y,f.r*(.5+u),0,7);ctx.fill()}
+  ctx.globalAlpha=1;ctx.strokeStyle='#ff9be0';ctx.lineWidth=2;for(const q of J.tr){ctx.globalAlpha=1-q.t/.14;ctx.beginPath();ctx.moveTo(q.x,q.y);ctx.lineTo(q.x+(q.x1-q.x)*Math.min(1,q.t/.07+.3),q.y+(q.y1-q.y)*Math.min(1,q.t/.07+.3));ctx.stroke()}ctx.restore()}
 function suDefDraw(front){const L=G.suGd;if(!L)return;const p=G.p,GH=G.suGH||[3,3,3,3],t=G.t;
   for(const g of L){if((g.gi===1)!==!!front||GH[g.gi]<=0)continue;if(Math.abs(g.x-p.x)>VW/2+30||Math.abs(g.y-p.y)>VH/2+40)continue;const j=G.suMo>0?Math.abs(Math.sin(t*9+g.x))*5:0,fc=g.face||(g.gi===2?-1:1);
     if(typeof dmFr==='function'&&typeof DMI!=='undefined'&&DMI.trooper&&DMI.trooper.complete&&DMI.trooper.width){ctx.save();ctx.globalAlpha=.3;ctx.fillStyle='#000';ctx.beginPath();ctx.ellipse(g.x,g.y+22,16,6,0,0,7);ctx.fill();ctx.restore();dmFr('trooper',104,88,g.fl>0||G.suMo>0&&Math.sin(t*12+g.x)>0?3:2,g.x,g.y-j-6,.6,0,fc<0);

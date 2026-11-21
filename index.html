@@ -1962,7 +1962,7 @@ function drawChestGuide(){const p=G.p;for(const k of G.pickups){if(k.k!=='chest'
    아직 없음: 방향 웨이브·게이트 내구(③) · 우주선(④) · 보스(⑤) · 지원 기믹·함선(⑥) · 헥스터(⑦). SU_OPEN=0이면 테스트 페이지(__devAll)에서만 보임. */
 /* 11-19 사용자: 수원 = 물량전. 기본 무기 만렙+진화 상태로 레벨 1 시작, 평소 스폰 ×SU_SP(1.3과 1.5를 비교 중 — 테스트 콘솔 __suSp(1.5)), 시작 물량 = 다른 맵 5분대,
    대군 ×1.5 + 엘리트(상자 없음, 경험치 평범, 게이트 판정에서 5마리 몫) 게이트당 6마리·10분 뒤 8마리, 동시 적 상한 PC 700 · 모바일 560, 경험치 ×1.3 */
-const SU_OPEN=0,SU_XP=1.3,SU_LEN=900;let SU_SP=.8;const SU_HPM=2.2;window.__suSp=v=>{SU_SP=+v||.8;return SU_SP};const suCap=()=>isPCDev()?700:560;
+const SU_OPEN=0,SU_XP=1.3,SU_LEN=900;let SU_SP=1.3,SU_SPL=1.1;/* 11-22 사용자: 평소 스폰 기본 ×1.3, 7:30(게이트 침공 2회차)부터 30초에 걸쳐 ×1.1 */const suSpNow=()=>{const t=G.t;return t<450?SU_SP:t>=480?SU_SPL:SU_SP+(SU_SPL-SU_SP)*(t-450)/30};const SU_HPM=2.2;window.__suSp=v=>{SU_SP=+v||1.3;SU_SPL=Math.max(.5,SU_SP-.2);return SU_SP};const suCap=()=>isPCDev()?700:560;
 function suStart(){const w=G.weapons[0];if(!w||!WP[w.k])return;w.lvl=8;const it=WP[w.k].evo;if(it&&IT[it]){G.items[it]=1;w.evo=true/* 11-19 사용자: 쥬은 보석도 수원에서는 해금 여부와 상관없이 진화 */}recalc();G.p.hp=G.S.maxHp}
 function suU(){if(window.__devAll)return true;if(!SU_OPEN)return false;return !!(SAVE.suU||(SAVE.ach&&SAVE.ach.mgX))}
 const SU={H:1500,ER:165,GW:280,im:null,pat:null,k:0,pad:null,
@@ -2626,7 +2626,7 @@ function suEclCorona(ex,ey,k){if(!(k>.003))return;const t=G.t,R0=86;ctx.save();c
   ctx.lineCap='round';for(let i=0;i<28;i++){const a=i*.2244+t*.1,L=R0*(1.35+.55*Math.abs(Math.sin(t*1.7+i*1.9)));ctx.globalAlpha=k*.3;ctx.strokeStyle='#ffd98a';ctx.lineWidth=i%3?1.5:3;ctx.beginPath();ctx.moveTo(ex+Math.cos(a)*R0*.98,ey+Math.sin(a)*R0*.98);ctx.lineTo(ex+Math.cos(a)*L,ey+Math.sin(a)*L);ctx.stroke()}
   ctx.globalAlpha=k*(.75+.15*Math.sin(t*3));ctx.strokeStyle='#ffe9a8';ctx.lineWidth=3;ctx.beginPath();ctx.arc(ex,ey,R0,0,7);ctx.stroke();ctx.restore()}
 function suHexDie(e){const S=e.hx,pts=[];if(!S)return;for(let i=0;i<SUX.N;i+=2){const q=suHexSeg(e,i);for(let k=0;k<3;k++)pts.push([q[0]+rnd(-q[3],q[3]),q[1]+rnd(-q[3]*.5,q[3]*.5),Math.random()<.3,rnd(.6,2.2)])}G.suDawn={t:0,pts,eye:S.ph>1};
-  if(!G.bot){SND.p('clear');G.rflash=1;G.shk=.8;toast('🌅 끝없는 밤이 걷혔어요','헥스터 처치 — 새 대원 「응빈」이 사령관님 곁으로 와요',true);SAVE.suHx=1;SAVE.ungbin=1;try{persist()}catch(x){}}}
+  if(!G.bot){SND.p('clear');G.rflash=1;G.shk=.8;toast('🌅 끝없는 밤이 걷혔어요','헥스터 처치 — 새 대원 「응빈」이 사령관님 곁으로 와요',true);SAVE.suHx=1;SAVE.ungbin=1;try{persist();achGet('ungbinQ')}catch(x){}}}
 /* 「삼킴」 VFX 셰이더(11-21 사용자): 위험지역 = 별밤처럼 검고 깊은 우주(별 2겹·성운 소용돌이·가장자리 렌즈빛), 바깥 기운 = 나선으로 빨려듦.
    전용 WebGL 캔버스(화면 ½, 느려지면 ¼) · 알파 합성 · 없거나 느리면 캔버스 그라데이션으로 대체. 판정은 코드(타원 164×131), 셰이더는 그리기만 */
 const SUVD={c:null,gl:null,ok:null,U:{},lv:0,ema:0,n:0};
@@ -4603,8 +4603,8 @@ function drawArena(){const A=G.arena;if(!A)return;const t=G.t,w=A.hw,h=A.hh,rr=2
   ctx.globalAlpha=1;ctx.restore();
   if(!G.bot&&Math.random()<.8){const q=arenaPt(A,Math.random()*4);px(q[0],q[1],0,-rnd(20,60),.7,pick([c1,c2,'#ffffff']),2,1,1)}}
 function spawnTick(dt){
-  const SUm=G.map==='su',m=SUm?Math.max(em(),5):em(),hs=G.hard?HARD.spawn:1,target=SUm?Math.min((15+m*11)*hs*SU_SP,suCap()-120):Math.min((15+m*11)*hs,340*hs);
-  G.spawnAcc+=dt*Math.min(52,2+m*2)*hs*(G.map==='farm'&&G.hard?.24:SUm?(G.suBs&&G.suBs.st>=4.5&&G.suBs.st<5?0:G.t>=SU_LEN?.2:SU_SP):1);
+  const SUm=G.map==='su',m=SUm?Math.max(em(),5):em(),hs=G.hard?HARD.spawn:1,target=SUm?Math.min((15+m*11)*hs*suSpNow(),suCap()-120):Math.min((15+m*11)*hs,340*hs);
+  G.spawnAcc+=dt*Math.min(52,2+m*2)*hs*(G.map==='farm'&&G.hard?.24:SUm?(G.suBs&&G.suBs.st>=4.5&&G.suBs.st<5?0:G.t>=SU_LEN?.2:suSpNow()):1);
   if(SUm&&(G.suRd||suHexOn()))G.spawnAcc=0;
   if(G.arena){G.spawnAcc=0;arenaTick(dt);return}/* 11-14 사용자: 인천도 결계 안 잡몹 없음 */
   while(G.spawnAcc>=1){G.spawnAcc--;if(G.enemies.length<target){const [x,y]=spawnPos();if(G.map==='farm'){if(!(G.fmSil>0))fmSpawnOne(x,y)}else if(G.map==='mg'){if(!G.mgT){const q=mgSpawnPos();mgSpawnOne(q[0],q[1],q[2])}}else if(G.map==='su')suSpawnOne(x,y);else mkEnemy(G.hell&&Math.random()<.15?pick(G.map==='sangbong'?['sb_lamp','sb_germ','sb_trash']:['queen','kisoo']):pick(phaseTypes()),x,y)}}
@@ -5296,7 +5296,7 @@ const ACH_V32=ACH.length;/* v33: 인천 업적은 이 뒤 */
 ACH.push({id:'mgH',n:'브리트니 퇴치반',c:'인천 어려움 이상에서 「브리트니」 처치',r:'📿 신화 목걸이 확정권 1장 + 👑 신화 스킨 확정권 1장',tix:{NK:1,MS:1},pub:1},{id:'mgX',n:'마계 탈환',c:'인천 헬모드에서 「브리트니」 처치',r:'📿 신화 목걸이 선택권 1장 + 👑 신화 스킨 선택권 1장',tix:{NS:1,S:1},pub:1});/* 11-14 사용자 */
 const ACH_V35=ACH.length;/* v36: 크로니클 아츠 갈래 업적 (숨김, 11-16) — 옛 hx_chron(gone)은 저장 비트 때문에 자리만 남김 */
 ACH.push({id:'hx_chb',hx:'chron_bloom',n:'황혼 뒤에 오는 봄',c:'크로니클 아츠 「이다볼의 봄」 제작',r:'👑 잔느 신화 스킨 「잔느의 이다볼」',inv:'mx:송기호|13'},{id:'hx_chv',hx:'chron_verdandi',n:'어제도 내일도 아닌 오늘',c:'크로니클 아츠 「베르단디 블룸」 제작',r:'👑 잔느 신화 스킨 「잔느의 베르단디」',inv:'mx:송기호|14'},{id:'hx_chl',hx:'chron_leaf',n:'세상이 끝나도 우리 둘은',c:'크로니클 아츠 「리프와 리프트라시르」 제작',r:'👑 잔느 신화 스킨 「잔느의 호드미미르」',inv:'mx:송기호|15'});
-ACH.push({id:'ungbinQ',n:'?',c:'?',r:'?'});
+ACH.push({id:'ungbinQ',n:'응빈 해금',c:'수원을 지키고 「헥스터」 처치하기',r:'새 대원 「응빈」 (보상 없음)',nr:1});/* 11-22: 히든(pub 없음 → 달성 전엔 ❓❓❓). 보상 없는 달성 표시용이라 받기 버튼 없이 자동 수령 처리 */
 const ACHV=()=>ACH.filter(a=>!a.gone);
 /* 옛 업적 「동시성의 상대성」 달성 후 미수령이면 로즈 그리고 너는 그냥 지급 */try{if(SAVE.ach&&SAVE.ach.hx_chron&&SAVE.inv&&!SAVE.inv['mx:송기호|10'])SAVE.inv['mx:송기호|10']=true}catch(e){}
 function achHx(k){for(const a of ACH)if(a.hx&&(!k||a.hx===k)&&SAVE.hxMade&&SAVE.hxMade[a.hx])achGet(a.id);
@@ -5309,10 +5309,10 @@ function achOn(k){const a=ACH.find(q=>q.fx&&q.fx.includes(k));return !!(a&&SAVE.
 const achUnclaimed=()=>ACHV().filter(a=>SAVE.ach[a.id]&&!SAVE.achC[a.id]).length;
 function achClaim(id){if(!SAVE.ach[id]||SAVE.achC[id])return;const a=ACH.find(q=>q.id===id);SAVE.achC[id]=Date.now();if(a.gold)SAVE.gold+=a.gold;if(a.tix)for(const t in a.tix)SAVE.tix[t]=(SAVE.tix[t]||0)+a.tix[t];if(a.inv)SAVE.inv[a.inv]=true;if(a.inv2)SAVE.inv[a.inv2]=true;if(a.lb){SAVE.lbOwn=SAVE.lbOwn||{};SAVE.lbOwn[a.lb]=1}persist();SKC_ACH();try{window.lbBadges&&lbBadges()}catch(e){}SND.p('coin');achBadge()}
 function achBadge(){const n=achUnclaimed();document.querySelectorAll('#achBtn,#selAch').forEach(b=>{b.innerHTML='🏆 업적'+(n?` <span class="achdot">${n}</span>`:'')})}
-function achGet(id){if(SAVE.ach[id])return;if(G&&G.tw&&G.running)return;const a=ACH.find(q=>q.id===id);if(!a)return;SAVE.ach[id]=Date.now();persist();achBadge();
-  SND.p('ach');if(!(G&&G.bot))toast('🏆 업적 달성!','업적 창에서 보상을 받으세요',true)}
+function achGet(id){if(SAVE.ach[id])return;if(G&&G.tw&&G.running)return;const a=ACH.find(q=>q.id===id);if(!a)return;SAVE.ach[id]=Date.now();if(a.nr)SAVE.achC[id]=1;persist();achBadge();
+  SND.p('ach');if(!(G&&G.bot))toast('🏆 업적 달성!',a.nr?'히든 업적 「'+a.n+'」':'업적 창에서 보상을 받으세요',true)}
 function achCheck(){
-  achGet('enter');achGet('hellev');achGet('s2ev');try{const T=SAVE.td;if(T&&((T.tut&&T.tut.done)||Object.keys(T.best||{}).length))achGet('aegis')}catch(e){}try{achHx()}catch(e){}
+  achGet('enter');if(SAVE.ungbin)achGet('ungbinQ');achGet('hellev');achGet('s2ev');try{const T=SAVE.td;if(T&&((T.tut&&T.tut.done)||Object.keys(T.best||{}).length))achGet('aegis')}catch(e){}try{achHx()}catch(e){}
   if(fancyCount()>=CH12().length)achGet('fancy12');
   if(CH12().every(c=>SAVE.cine[c.id]))achGet('cine12');
   if(anyMyth())achGet('myth');if((SAVE.mdup||0)>=1)achGet('mdup1');if((SAVE.mdup||0)>=2)achGet('mdup2');

@@ -2453,7 +2453,7 @@ function suHexTick(dt){for(const e of G.enemies){if(e.dead||e.type!=='su_hex')co
 /* ---- 헥스터 2페이즈 「일식의 눈」 (11-20 사용자 승인, 새 그림 없이 코드로): 체력 50%에서 입이 하늘로 올라가 일식의 눈이 됨, 맵은 밤.
    광장에 육각 조각 6개가 내려앉고 금빛으로 열린 조각 하나만 맞음(7초마다 바뀜). 눈은 시선 광선 3연발 → 조각 탄막 순으로 공격. 수치 임시 */
 const suHxL=(x,ly)=>30*Math.sin(x*.011+G.t*2.2+ly*.01);/* 몸통 쓸기: 가로로 누운 몸통 세 줄이 구불거리며 옆으로 지나감(줄 사이 빈 곳이 안전) */
-const SUX2={TR:3,OPEN:5,R:470,TEL:.8};
+const SUX2={TR:3,OPEN:5,R:470,TEL:.8,EX:0,EY:-40};
 function suHex2(e,dt){const S=e.hx,p=G.p;
   if(S.ph===1.5){S.tr+=dt;e.fmInv=1;S.hz=(S.hz||0)+(1500-(S.hz||0))*Math.min(1,dt*1.6);S.op=Math.max(0,(S.op||0)-dt*2);S.nb=Math.min(1,Math.max(0,(S.tr-1.2)/1.6));
     if(S.tr>=SUX2.TR){S.ph=2;S.sh=[];for(let k=0;k<6;k++){const a=k/6*6.2832+.5236,q=suSafe(Math.cos(a)*SUX2.R,40+Math.sin(a)*SUX2.R*.72);S.sh.push({x:q[0],y:q[1],land:-k*.18,cd:0})}S.oi=Math.floor(Math.random()*6);S.ot=SUX2.OPEN;S.ga=null;S.gc=2.5;S.gn=0;S.ey=0;
@@ -2478,12 +2478,12 @@ function suHex2Ground(e){const S=e.hx;if(!S.sh)return;const t=G.t;ctx.save();
 function suHexSky(){const e=G.enemies.find(q=>!q.dead&&q.type==='su_hex'),p=G.p,t=G.t;
   {const hk=e&&e.hx&&e.hx.ph>1?e.hx.ek||0:0;G.suEk=hk>(G.suEk||0)?hk:Math.max(hk,(G.suEk||0)-1/150);if(G.suEk>.003)suEclSky(G.suEk)}
   if(e){const S=e.hx;if(false&&S.nt>0){/* 11-20 사용자: 어두워지는 연출 없음 */ctx.save();ctx.globalAlpha=.42*S.nt;ctx.fillStyle='#06031a';ctx.fillRect(p.x-VW,p.y-VH,VW*2,VH*2);ctx.restore()}
-    if(S.ph>1&&S.ey>0){const ex=p.x,ey=p.y-VH/2+178,a=S.ey,HI=suIm2('hex_head'),g=S.ga;suEclCorona(ex,ey,G.suEk*a);ctx.save();ctx.globalAlpha=a;
+    if(S.ph>1&&S.ey>0){const ex=SUX2.EX,ey=SUX2.EY,a=S.ey,HI=suIm2('hex_head'),g=S.ga;suEclCorona(ex,ey,G.suEk*a);ctx.save();ctx.globalAlpha=a;
       if(g&&g.t>=SUX2.TEL&&g.t<SUX2.TEL+.4){const w=1-(g.t-SUX2.TEL)/.4;ctx.globalCompositeOperation='lighter';ctx.globalAlpha=w;ctx.fillStyle='#ffe08a';ctx.beginPath();ctx.moveTo(ex-10,ey+30);ctx.lineTo(ex+10,ey+30);ctx.lineTo(g.x+42,g.y);ctx.lineTo(g.x-42,g.y);ctx.closePath();ctx.fill();ctx.fillStyle='#ffffff';ctx.beginPath();ctx.moveTo(ex-3,ey+30);ctx.lineTo(ex+3,ey+30);ctx.lineTo(g.x+12,g.y);ctx.lineTo(g.x-12,g.y);ctx.closePath();ctx.fill();ctx.globalCompositeOperation='source-over';ctx.globalAlpha=a}
       const EI=suIm2('hex_eye');if(EI.complete&&EI.width){/* 11-20 사용자 그림: 4×2 칸(219×294) 0~2 대기 · 3 붉은 눈동자 · 4 충전 · 5 광선 · 6 금감 · 7 부서짐 */const f=g?(g.t<SUX2.TEL?3:4):(e.flash>0?6:Math.floor(t*4)%3),W=300,H2=W*294/219;ctx.drawImage(EI,(f%4)*219,Math.floor(f/4)*294,219,294,ex-W*108/219,ey-H2*123/294,W,H2)}
       else{ctx.beginPath();ctx.arc(ex,ey,54,0,7);ctx.fillStyle='#05030c';ctx.fill();ctx.lineWidth=6;ctx.strokeStyle='#f3d98a';ctx.stroke()}
       ctx.restore();S.eyP=[ex,ey]}}
-  const D=G.suDawn;if(D&&D.eye&&D.t<1.4){const EI=suIm2('hex_eye'),W=300,H2=W*294/219,ex=p.x,ey=p.y-VH/2+178;ctx.save();ctx.globalAlpha=Math.max(0,1-D.t/1.4);ctx.drawImage(EI,3*219,294,219,294,ex-W*108/219,ey-H2*123/294,W*(1+D.t*.3),H2*(1+D.t*.3));ctx.restore()}if(D){D.t+=1/60;const u=Math.min(1,D.t/2);ctx.save();ctx.globalAlpha=(D.t<4?u:Math.max(0,1-(D.t-4)/2))*.45;ctx.fillStyle='#ffd27a';ctx.fillRect(p.x-VW,p.y-VH,VW*2,VH*2);ctx.globalCompositeOperation='lighter';
+  const D=G.suDawn;if(D&&D.eye&&D.t<1.4){const EI=suIm2('hex_eye'),W=300,H2=W*294/219,ex=SUX2.EX,ey=SUX2.EY;ctx.save();ctx.globalAlpha=Math.max(0,1-D.t/1.4);ctx.drawImage(EI,3*219,294,219,294,ex-W*108/219,ey-H2*123/294,W*(1+D.t*.3),H2*(1+D.t*.3));ctx.restore()}if(D){D.t+=1/60;const u=Math.min(1,D.t/2);ctx.save();ctx.globalAlpha=(D.t<4?u:Math.max(0,1-(D.t-4)/2))*.45;ctx.fillStyle='#ffd27a';ctx.fillRect(p.x-VW,p.y-VH,VW*2,VH*2);ctx.globalCompositeOperation='lighter';
     for(const q of D.pts){const y=q[1]-D.t*q[3]*60,al=Math.max(0,1-D.t/(2.5+q[3]));if(al<=0)continue;ctx.globalAlpha=al;ctx.fillStyle=q[2]?'#ffffff':'#c8a8ff';ctx.fillRect(q[0]+Math.sin(D.t*2+q[3]*9)*12,y,3,3)}ctx.restore();if(D.t>6)G.suDawn=null}}
 /* 「일식의 밤」(11-21 사용자): 헥스터 2페이즈 환경. 등장 그림의 하늘 조각 + 코드로 그린 별. 화면은 어둡게 하지 않고 윗가장자리만 별밤으로 덮음. 전자 줄기는 붉게 재점등(suTrunk의 G.suEk) */
 function suEclSky(k){const p=G.p,x0=p.x-VW/2,y0=p.y-VH/2,W=VW,H=VH,t=G.t;

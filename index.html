@@ -1,4 +1,4 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}.vh{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}section#title.scr{justify-content:flex-start}section#title.scr>:first-child{margin-top:auto}section#title.scr>:last-child{margin-bottom:auto}.s2ban{width:min(100%,680px);margin:0 auto}.s2ban img{display:block;width:100%;border-radius:16px;box-shadow:0 10px 40px rgba(255,190,120,.25),0 0 0 1px rgba(255,230,180,.35)}.s2tag{margin:12px 0 0;font-weight:900;font-size:clamp(18px,4.6vw,26px);letter-spacing:.12em;background:linear-gradient(90deg,#ffd6f5,#ffe9a8,#bfefff,#ffd6f5);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shine 4s linear infinite;filter:drop-shadow(0 2px 10px rgba(255,200,140,.45))}
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}.vh{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}section#title.scr{justify-content:flex-start}section#title.scr>:first-child{margin-top:auto}section#title.scr>:last-child{margin-bottom:auto}.s2ban{width:min(100%,680px);margin:0 auto}.s2ban img.v{width:auto;max-width:100%;max-height:60vh;margin:0 auto}#hexIntro{position:fixed;inset:0;z-index:99999;background:#000;opacity:0;transition:opacity .8s;overflow:hidden;touch-action:manipulation}#hexIntro.on{opacity:1}#hexIntro.out{opacity:0}#hexIntro img{width:100%;height:100%;object-fit:cover;animation:hxz 5.2s ease-out forwards}@keyframes hxz{from{transform:scale(1)}to{transform:scale(1.12)}}#hexIntro p{position:absolute;left:0;right:0;bottom:11%;margin:0;text-align:center;color:#fff;font-weight:900;font-size:clamp(20px,5vw,40px);letter-spacing:.14em;line-height:1.35;text-shadow:0 0 14px #b48aff,0 2px 12px #000,0 0 40px #000;opacity:0;animation:hxt 1.6s 1.2s ease-out forwards}#hexIntro p b{display:block;font-size:1.5em;letter-spacing:.2em;color:#ffe9a8}@keyframes hxt{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}.s2ban img{display:block;width:100%;border-radius:16px;box-shadow:0 10px 40px rgba(255,190,120,.25),0 0 0 1px rgba(255,230,180,.35)}.s2tag{margin:12px 0 0;font-weight:900;font-size:clamp(18px,4.6vw,26px);letter-spacing:.12em;background:linear-gradient(90deg,#ffd6f5,#ffe9a8,#bfefff,#ffd6f5);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shine 4s linear infinite;filter:drop-shadow(0 2px 10px rgba(255,200,140,.45))}
 #cutin img.jutall{position:absolute;left:4%;bottom:0;height:min(94vh,150vw);image-rendering:pixelated;filter:drop-shadow(0 0 22px rgba(255,211,77,.65)) drop-shadow(0 8px 0 rgba(0,0,0,.35));animation:juIn 2s cubic-bezier(.2,.9,.2,1) forwards}@keyframes juIn{0%{opacity:0;transform:translateX(-30%) scale(.92)}20%{opacity:1;transform:none}85%{opacity:1}100%{opacity:0;transform:translateX(6%)}}.pc.jlock{filter:saturate(.3);opacity:.85}
 .lbZoom{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:4px 0}.lbZoom .on{background:#ffd76a;color:#2a1a00;border-color:#ffd76a}
 .volrow{display:grid;gap:6px;margin-top:8px;width:100%}.vol{display:flex;align-items:center;gap:8px;font:700 13px 'Noto Sans KR',sans-serif;color:#fff}.vol .vn{min-width:66px}.vol input{flex:1;accent-color:#ff7ac8;min-width:0}.vol b{min-width:40px;text-align:right;font-variant-numeric:tabular-nums}
@@ -2401,6 +2401,9 @@ window.__suRaid=(k,lv,st)=>{const e=G.enemies.find(q=>!q.dead&&(k<20?q.type==='s
    지금은 1페이즈 모습만: 몸통이 엘리베이터를 나선으로 감고 돌고, 머리가 사령관 쪽으로 내려와 떠 있음. 공격·2페이즈·등장 일정은 아직 없음. 시험: __suBoss('hex') ---- */
 const SUX={N:190,HPB:20000,sp:null,TK:1.4,IM:2.6,RS:4.65,HX:112,HY:84};/* 머리 강하: 추적 TK초 → 조준 고정(TK~IM, 회피 구간) → IM에 착지 → RS에 상승 */
 function suHexBlob(){if(SUX.sp)return SUX.sp;const c=document.createElement('canvas');c.width=c.height=128;const x=c.getContext('2d'),g=x.createRadialGradient(64,64,4,64,64,64);g.addColorStop(0,'#04020c');g.addColorStop(.55,'#120830');g.addColorStop(.82,'rgba(64,36,150,.92)');g.addColorStop(1,'rgba(110,70,230,0)');x.fillStyle=g;x.fillRect(0,0,128,128);return SUX.sp=c}
+/* 11-21 사용자 그림 「별밤을 먹는 자, 헥스터」 등장 장면: 전체 화면 그림 → 터치로 넘김 → 헥스터 등장 + 아리아드네 한마디 */
+function suHexIntro(cb){if(G.bot||window.__suNoIntro){cb();return}const o=document.createElement('div');o.id='hexIntro';o.innerHTML='<img src="su/hex_intro.jpg" alt=""><p>별밤을 먹는 자,<b>헥스터</b></p>';document.body.appendChild(o);const was=G.paused;G.paused=true;try{SND.p('boss')}catch(e){}let dn=0;const fin=()=>{if(dn)return;dn=1;o.classList.add('out');setTimeout(()=>{o.remove();G.paused=was;cb()},750)};o.addEventListener('pointerdown',()=>{if(o.dataset.ok)fin()});requestAnimationFrame(()=>requestAnimationFrame(()=>o.classList.add('on')));setTimeout(()=>{o.dataset.ok=1},1200);setTimeout(fin,5200)}
+function suHexCall(after){const r=[null];suHexIntro(()=>{r[0]=suHexSpawn();if(!G.bot)toast('📡 아리아드네','사령관님...저건 처음 보는 존재에요. 조심하세요....',true);if(after)after()});return r[0]}
 function suHexSpawn(){if(G.map!=='su')return null;suReg();const e=mkEnemy('su_hex',0,330,{boss:1,hp:SUX.HPB,max:SUX.HPB,name:'헥스터'});e.spd=.001;e.hx={ph:1,th:0,a:1.57,in:0};if(G.suW)G.suW.next=1e9;if(!G.bot){SND.p('boss');G.rflash=.8;toast('⚠ 헥스터','끝없는 밤이 엘리베이터를 감았어요')}return e}
 /* 1페이즈 공격(11-19 승인): 0 별똥 숨결 · 3 머리 강하 · 1 삼킴 · 2 몸통 쓸기 순으로 돎. 머리는 평소 무적, 입이 벌어졌을 때와 강하 뒤 땅에 박힌 동안만 맞음. 수치 임시 */
 /* 헥스터전 함선 자폭 (11-20 사용자): 헥스터 체력이 구간에 닿으면 함선이 스스로 날아와 자폭. ★ 실제 체력은 안 깎음 — 화면의 체력통에만 함선 몫 「보너스 칸」이 얹혀 있다가 자폭 때 그만큼 줄어드는 연출. 해금한 함선만 나옴(해금을 많이 할수록 유리). 원래 설명: 순서 = 아르고 → 다이달로스 → 탈로스 → 파나케이아+테미스(함께) → 팔라스(가장 먼저 해금되는 함선이 마지막).
@@ -2524,7 +2527,7 @@ function suBossTick(dt){const B=G.suBs||(G.suBs={st:0,t2:0,fin:0}),alive=t=>G.en
   else if(B.st===2.5&&!alive('su_oct')){B.st=3;B.t2=G.t;if(!G.bot)toast('📡 아리아드네','사령관님, 큰 반응이 하나 더 다가와요. 3분 남았습니다.')}
   else if(B.st===3&&G.t>=B.t2+180){suOksSpawn();B.st=4}
   else if(B.st===4&&!alive('su_oks')){B.fin+=dt;if(B.fin>4){B.st=4.5;B.fin=0;if(G.suW){G.suW.cur=null;G.suW.next=1e9}if(!G.bot){G.rflash=.9;toast('📡 아리아드네','언니… 하늘이 꺼져요. 대군이 멈췄어요 — 끝없는 밤이 와요.',true)}}}
-  else if(B.st===4.5){B.fin+=dt;if(B.fin>3&&!alive('su_hex')){suHexSpawn();B.st=4.6}}
+  else if(B.st===4.5){B.fin+=dt;if(!B.pre){B.pre=1;try{(new Image).src='su/hex_intro.jpg'}catch(x){}}if(B.fin>3&&!alive('su_hex')){B.st=4.55;suHexCall(()=>{B.st=4.6})}}
   else if(B.st===4.6&&!alive('su_hex')){B.fin+=dt;if(B.fin>9)B.st=5}}
 /* ---- 방향 웨이브 · 게이트 내구 (11-19) ----
    2:30부터 60~75초마다 한 방향 대군(8초 예고 → 15초 쏟아짐). 10분 뒤 두 방향 동시, 13분 뒤 네 방향 차례로.
@@ -2685,7 +2688,7 @@ function suHud(dt){if(!suSolo()){if(SU.hud)SU.hud.style.display='none';return}
   const st=(b,show,busy,txt)=>{b.style.display=show?'block':'none';b.style.opacity=busy?.45:1;b.querySelector('b').textContent=txt};
   st(B[0],n>=1,!!G.suT||G.t<D.t,G.suT?'출격 중':G.t<D.t?Math.ceil(D.t-G.t)+'초':'탈로스');
   st(B[1],n>=2,!!G.suDd||G.t<D.d||D.dn<=0,G.suDd?'수리 중':D.dn<=0?'소진':G.t<D.d?Math.ceil(D.d-G.t)+'초':'수리 '+D.dn)}
-window.__suBoss=k=>k==='than'?suThSpawn():k==='oct'?suOctSpawn():k==='hex'?suHexSpawn():suOksSpawn();
+window.__suBoss=k=>k==='than'?suThSpawn():k==='oct'?suOctSpawn():k==='hex'?suHexCall():suOksSpawn();
 /* ---- 수원 함선 (11-18): 탈로스 = 패드에 착지해 ㄷ자 레일건 전개 → 충전 3초·관통 한 발 / 다이달로스 = 게이트 위에서 수리 연출 ----
    그림 ag/talos_tf(비행→착지→전개 24장) · talos_hull(선체) · talos_gun(레일건 24방향) · daedalus(12장), 칸 320px.
    SUT.PHI = 레일건 각 장이 화면에서 가리키는 각도(구운 그림에서 잰 값), SUT.L = 회전 중심~포구 거리(px).
@@ -6798,6 +6801,9 @@ requestAnimationFrame(t=>{last=t;loop(t)});
 try{if(!SAVE.fmU&&SAVE.ach&&(SAVE.ach.hellboss||SAVE.hellC&&Object.keys(SAVE.hellC).length)){SAVE.fmU=1;persist()}}catch(e){}/* 11-15 소급: 헬 보스 클리어 기록이 있으면 장수 해금 */
 try{if(SAVE.fmU&&sbAllHell(0))persist()}catch(e){}
 try{if(acctSync()||!SAVE._as){SAVE._as=1;persist()}}catch(e){}
+/* 시즌5 타이틀 배너(11-21): 수원 오픈(SU_OPEN) 또는 테스트 페이지에서만 시즌5 배너, 세로 화면이면 세로 버전 */
+window.s5Ban=()=>{const im=document.querySelector('.s2ban img'),tg=document.querySelector('.s2ban .s2tag');if(!im)return;const on=SU_OPEN||window.__devAll,por=innerHeight>innerWidth*1.05,src=on?(por?'img/s5_banner_v.jpg':'img/s5_banner.jpg'):'img/s3_banner.jpg';if(im.getAttribute('src')!==src)im.setAttribute('src',src);im.classList.toggle('v',on&&por);im.alt=on?'기갈 서바이버 시즌5 수원 - 최종 방어선, 인류의 수호자':'기갈 서바이버 시즌3 Act.1 아스가르드 디펜스';if(tg)tg.textContent=on?'시즌5. 최종 방어선':'시즌3. 새로운 세상'};
+addEventListener('resize',s5Ban);addEventListener('load',s5Ban);try{s5Ban()}catch(e){}
 titleScreen();
 
 /* ================= test hooks ================= */
@@ -6820,10 +6826,10 @@ window.GS={
 let seen=false;try{seen=localStorage.getItem('gs_boot')==='1';localStorage.setItem('gs_boot','1')}catch(e){}
 const TIPS=['진화하려면 무기 8레벨 + 짝 아이템, 그리고 보스 상자.','🧬 레벨업 카드 아래 노란 줄이 진화 짝이에요.','상봉의 밤, 보석의 마녀를 만나면 쥬은이 깨어나요.','📈 캐릭터 선택 화면의 강화 버튼으로 스탯을 올릴 수 있어요.','다른 기기로 옮길 땐 저장 코드를 잊지 마세요.','🔀 다시 섞기는 한 판에 8번까지.','테슬라는 언제나 하나 더.'];
 let ti=Math.random()*TIPS.length|0;const nt=()=>{tip.style.opacity=0;setTimeout(()=>{tip.textContent=TIPS[ti++%TIPS.length];tip.style.opacity=1},380)};
-const kv=document.querySelector('.s2ban img');if(kv)ld.style.backgroundImage='url('+kv.src+')';
+const setBg=()=>{try{s5Ban()}catch(e){}const kv=document.querySelector('.s2ban img');if(kv)ld.style.backgroundImage='url('+kv.src+')'};setBg();
 let ph=0,prog=0,ready=false,tt=null;
 const imgs=()=>{const a=[...document.images];return a.length?a.filter(i=>i.complete).length/a.length:1};
-const loading=()=>{ph=2;bl.style.opacity=0;ld.classList.add('on');nt();tt=setInterval(nt,3200);
+const loading=()=>{ph=2;setBg();bl.style.opacity=0;ld.classList.add('on');nt();tt=setInterval(nt,3200);
   const step=()=>{const tgt=ready?1:Math.min(.92,.25+.67*imgs());prog+=(tgt-prog)*.12+(ready?.02:0);if(prog>=.995){prog=1;bar.style.width='100%';ph=3;tap.classList.add('on');return}bar.style.width=(prog*100).toFixed(1)+'%';requestAnimationFrame(step)};step()};
 const done=()=>{if(ph!==3)return;ph=4;try{SND.bell()}catch(e){}clearInterval(tt);B.classList.add('out');setTimeout(()=>B.remove(),800)};
 const go=()=>{ready=true};if(document.readyState==='complete')setTimeout(go,900);else addEventListener('load',()=>setTimeout(go,900));

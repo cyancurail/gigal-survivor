@@ -1518,7 +1518,7 @@ const JU={id:'쥬은',nick:'쥬은',w:'emerald',ju:1,bg:'linear-gradient(160deg,
 const CH12=()=>CHAR.filter(c=>!c.ju&&!c.x2);const CHX=()=>CHAR.filter(c=>c.x2);
 function juJ(){return SAVE.ju||{}}
 function juUnl(k){const J=juJ(),A=SAVE.ach||{};return k==='emerald'?!!J.n:k==='sapphire'?!!J.h:(k==='diamond'||k==='pearl')?!!J.x:k==='ruby'?!!(J.r||A.jangsuX):k==='amethyst'?!!(J.a||A.mgX):true}
-function juAllow(k,id){const w=WP[k];if(w&&w.hid)return false;if(k==='octavia'&&!ubUnl())return false;/* 11-22: 응빈 해금 전엔 옥타비아가 다른 캐릭터 레벨업·선택지에 나오면 안 됨 */if(k==='emerald')return juUnl('emerald');if(w&&w.ju)return id==='쥬은'&&juUnl(k);if(IT[k]&&IT[k].ju)return id==='쥬은'||!!(typeof G!=='undefined'&&G&&G.running&&G.weapons&&G.weapons.some(x=>x.k==='emerald'));return true}
+function juAllow(k,id){const w=WP[k];if(w&&w.hid)return false;if(k==='octavia'&&id!=='응빈')return false;/* 11-22 사용자: 옥타비아는 응빈 전용 무기 — 다른 캐릭터 레벨업·상자·선택지에는 나오지 않음 */if(k==='emerald')return juUnl('emerald');if(w&&w.ju)return id==='쥬은'&&juUnl(k);if(IT[k]&&IT[k].ju)return id==='쥬은'||!!(typeof G!=='undefined'&&G&&G.running&&G.weapons&&G.weapons.some(x=>x.k==='emerald'));return true}
 Object.assign(WP,{
  emerald:{name:'해방하는 5월',icon:'💚',evo:'love',evoName:'해방하라, 5월이여',ju:1,col:'#3aff8a',d:'에메랄드 정령기사가 주인을 지키며 근처의 적을 베어요',ed:'보석에 담긴 힘을 더욱 해방하여 강력한 정령을 소환한다.'},
  sapphire:{name:'추억하는 9월',icon:'💧',evo:'love',evoName:'추억하는 9월',ju:1,col:'#5aa8ff',d:'물방울 정령이 날아다니며 물폭탄을 던져요 (둔화)',ed:'보석에 담긴 추억이 사파이어 정령이 되어 파도와 소용돌이를 다뤄요.'}});
@@ -2164,13 +2164,18 @@ function suTuTick(dt){if(!G.suTu)suTuInit();const p=G.p,D=(G.fmSpD||60)*SUU.DM;
     if((e&&(e.x-o.x)**2+(e.y-o.y)**2<(e.r+12)**2)||o.l<=0){for(const q of G.enemies){if(q.dead)continue;const R=50+q.r*.6;if((q.x-o.x)**2+(q.y-o.y)**2<R*R)hurt(q,q.boss?Math.min(o.D,q.max*.0005):o.D,'fmsup',{kb:q.boss?0:6})}
       if(!G.bot){sparks(o.x,o.y,9,['#ffffff','#ffc8e6','#9fe8ff'],170,.35,3);(G.suBm=G.suBm||[]).push({x:o.x,y:o.y,t:0})}M.splice(i,1)}}
   if(G.suBm){for(const b of G.suBm)b.t+=dt;G.suBm=G.suBm.filter(b=>b.t<.3)}}
+/* 11-22 사용자: 동기화 전(휴면) 진주포탑은 위에 회색 원을 씌우지 않고 포탑 색 자체를 회색으로. 시트를 한 번만 흑백으로 구움(saturation 합성 → 픽셀을 읽지 않아 오염 문제 없음) */
+function suGrayIm(im){if(SU.grayT!==undefined&&SU.grayT)return SU.grayT;if(SU.grayT===0)return null;try{const c=document.createElement('canvas');c.width=im.width;c.height=im.height;const x=c.getContext('2d');x.drawImage(im,0,0);x.globalCompositeOperation='saturation';x.fillStyle='#808080';x.fillRect(0,0,c.width,c.height);x.globalCompositeOperation='destination-in';x.drawImage(im,0,0);SU.grayT=c;return c}catch(e){SU.grayT=0;return null}}
 function suTuDraw(front){const L=G.suTu;if(!L)return;const im=suIm2('turret'),p=G.p,C=SUU.C,K=SUU.K;if(!im.complete||!im.width)return;
   for(const T of L){if((T.y>p.y+12)!==!!front)continue;if(Math.abs(T.x-p.x)>VW/2+260||Math.abs(T.y-p.y)>VH/2+380)continue;
     ctx.save();ctx.globalAlpha=.3;ctx.fillStyle='#2a1c0c';ctx.beginPath();ctx.ellipse(T.x,T.y+8,112,38,0,0,7);ctx.fill();ctx.restore();
     let f=0,bd=9;for(let i=0;i<24;i++){const d=Math.abs(suAd(SUT.PHI[i]-T.a));if(d<bd){bd=d;f=i}}
-    const dx=T.x-100*K,dy=T.y-140*K,DS=200*K;ctx.drawImage(im,0,0,C,C,dx,dy,DS,DS);
-    ctx.save();ctx.globalAlpha=.5+.5*T.k;const g=f+1;ctx.drawImage(im,(g%5)*C,Math.floor(g/5)*C,C,C,dx,dy,DS,DS);ctx.restore();
-    if(T.k<.6){ctx.save();ctx.globalAlpha=.28*(1-T.k);ctx.fillStyle='#283444';ctx.beginPath();ctx.ellipse(T.x,T.y-104,80,120,0,0,7);ctx.fill();ctx.restore()}
+    const dx=T.x-100*K,dy=T.y-140*K,DS=200*K,gm=T.k<.995?suGrayIm(im):null,g=f+1,fa=.5+.5*T.k;
+    if(gm){ctx.drawImage(gm,0,0,C,C,dx,dy,DS,DS);ctx.save();ctx.globalAlpha=fa;ctx.drawImage(gm,(g%5)*C,Math.floor(g/5)*C,C,C,dx,dy,DS,DS);ctx.restore();
+      if(T.k>.01){ctx.save();ctx.globalAlpha=T.k;ctx.drawImage(im,0,0,C,C,dx,dy,DS,DS);ctx.globalAlpha=fa*T.k;ctx.drawImage(im,(g%5)*C,Math.floor(g/5)*C,C,C,dx,dy,DS,DS);ctx.restore()}}
+    else{ctx.drawImage(im,0,0,C,C,dx,dy,DS,DS);
+    ctx.save();ctx.globalAlpha=fa;ctx.drawImage(im,(g%5)*C,Math.floor(g/5)*C,C,C,dx,dy,DS,DS);ctx.restore()}
+    if(!gm&&T.k<.6){ctx.save();ctx.globalAlpha=.28*(1-T.k);ctx.fillStyle='#283444';ctx.beginPath();ctx.ellipse(T.x,T.y-104,80,120,0,0,7);ctx.fill();ctx.restore()}
     if(T.gi<0){ctx.save();ctx.lineWidth=4;ctx.lineCap='round';
       if(T.on){ctx.globalAlpha=.75;ctx.strokeStyle='#8fe6ff';ctx.beginPath();ctx.ellipse(T.x,T.y+8,132,48,0,-1.57,-1.57+6.2832*(T.t/SUU.ON));ctx.stroke()}
       else{ctx.globalAlpha=.35;ctx.strokeStyle='#ffffff';ctx.setLineDash([6,8]);ctx.beginPath();ctx.ellipse(T.x,T.y+4,SUU.NEAR,SUU.NEAR*.4,0,0,7);ctx.stroke();ctx.setLineDash([]);

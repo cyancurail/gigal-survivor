@@ -1962,7 +1962,7 @@ function drawChestGuide(){const p=G.p;for(const k of G.pickups){if(k.k!=='chest'
    아직 없음: 방향 웨이브·게이트 내구(③) · 우주선(④) · 보스(⑤) · 지원 기믹·함선(⑥) · 헥스터(⑦). SU_OPEN=0이면 테스트 페이지(__devAll)에서만 보임. */
 /* 11-19 사용자: 수원 = 물량전. 기본 무기 만렙+진화 상태로 레벨 1 시작, 평소 스폰 ×SU_SP(1.3과 1.5를 비교 중 — 테스트 콘솔 __suSp(1.5)), 시작 물량 = 다른 맵 5분대,
    대군 ×1.5 + 엘리트(상자 없음, 경험치 평범, 게이트 판정에서 5마리 몫) 게이트당 6마리·10분 뒤 8마리, 동시 적 상한 PC 700 · 모바일 560, 경험치 ×1.3 */
-const SU_OPEN=1,SU_XP=1.3,SU_LEN=900;let SU_SP=1.3,SU_SPL=1.1;/* 11-22 사용자: 평소 스폰 기본 ×1.3, 7:30(게이트 침공 2회차)부터 30초에 걸쳐 ×1.1 */const suSpNow=()=>{const t=G.t;return t<450?SU_SP:t>=480?SU_SPL:SU_SP+(SU_SPL-SU_SP)*(t-450)/30};const SU_HPM=2.2;window.__suSp=v=>{SU_SP=+v||1.3;SU_SPL=Math.max(.5,SU_SP-.2);return SU_SP};const suCap=()=>isPCDev()?700:560;
+const SU_OPEN=1,SU_XP=1.3,SU_LEN=900;let SU_SP=1.3,SU_SPL=1.1;/* 11-22 사용자: 평소 스폰 기본 ×1.3, 7:30(게이트 침공 2회차)부터 30초에 걸쳐 ×1.1 */const suSpNow=()=>{const t=G.t;return t<450?SU_SP:t>=480?SU_SPL:SU_SP+(SU_SPL-SU_SP)*(t-450)/30};const SU_HPM=2.2;/* 11-24 사용자: 5~10분 구간이 너무 힘듦 → 일반 몬스터 체력 완화(5분 ×.55 → 10분 ×.8 → 12분 ×1) */const suHpRamp=()=>{const t=G.t;return t<300?1:t<600?.55+(t-300)/300*.25:t<720?.8+(t-600)/120*.2:1};const suXpMul=()=>G.t>=300&&G.t<600?1.6:SU_XP;window.__suSp=v=>{SU_SP=+v||1.3;SU_SPL=Math.max(.5,SU_SP-.2);return SU_SP};const suCap=()=>isPCDev()?700:560;
 function suStart(){const w=G.weapons[0];if(!w||!WP[w.k])return;w.lvl=8;const it=WP[w.k].evo;if(it&&IT[it]){G.items[it]=1;w.evo=true/* 11-19 사용자: 쥬은 보석도 수원에서는 해금 여부와 상관없이 진화 */}recalc();G.p.hp=G.S.maxHp}
 function suU(){if(window.__devAll)return true;if(!SU_OPEN)return false;return !!(SAVE.suU||(SAVE.ach&&SAVE.ach.mgX))}
 const SU={H:1500,ER:165,GW:280,im:null,pat:null,k:0,pad:null,
@@ -2144,7 +2144,7 @@ function suOksDraw(e){const S=e.so,A=S&&S.act,IA=suIm2('oks_a'),IB=suIm2('oks_b'
    그림 su/turret.webp (칸 200px, 5×5: 0번 받침 + 머리 24방향). 머리 방향표는 같은 카메라로 구운 탈로스 레일건(SUT.PHI)과 같음.
    진주 유도 미사일: 작은 범위 폭발, 집계 키 fmsup, 보스는 한 발당 최대 체력 0.05% 상한. 포탑은 부서지지 않음. */
 /* 11-19 사용자: 포탑 2배 크기 · 16기 · 화력은 감소(기지가 함께 싸워 주는 느낌). 게이트마다 쌍 8기(항상 가동) + 모서리 4기 + 안쪽 4기(동기화식). 한 기 피해 .5→.13 */
-const SUU={C:400,K:2.3,R:520,CD:2,DM:.13,ACT:20,ON:90,NEAR:170,
+const SUU={C:400,K:2.3,R:520,CD:2,DM:.13,ACT:12,ON:90,NEAR:230,
   P:[[-420,-1350,0],[420,-1350,0],[-420,1385,1],[420,1385,1],[-1350,-380,2],[-1350,400,2],[1350,-380,3],[1350,400,3],[1000,1000,-1],[-1000,1000,-1],[1000,-1000,-1],[-1000,-1000,-1],[170,-640,-1],[-170,640,-1],[-640,170,-1],[640,-170,-1]]};
 function suTuInit(){G.suTu=SUU.P.map((q,i)=>({x:q[0],y:q[1],gi:q[2],on:q[2]>=0,t:0,pr:0,a:rnd(-3.14,3.14),cd:rnd(.3,1.4),sw:rnd(0,6),k:0}));G.suMs=[]}
 function suTuTick(dt){if(!G.suTu)suTuInit();const p=G.p,D=(G.fmSpD||60)*SUU.DM;
@@ -4583,7 +4583,7 @@ function mkEnemy(type,x,y,o={}){
   const b=ENT[type]||ENT.unread,m=em(),hs=(1+m*.3+Math.pow(m/6.3,2.65))*1.25;
   const e={type,x,y,r:b.r,hp:b.hp*hs,max:b.hp*hs,spd:b.spd*rnd(.9,1.1)*(1+m*.012),dmg:b.dmg*(1+m*.15+Math.pow(m/15,3)),xp:b.xp,h:{},kx:0,ky:0,slow:0,stun:0,frog:0,flash:0,name:b.name};
   Object.assign(e,o);if(G.map==='farm'&&G.hard){e.xp*=1.45;if(!o.boss&&!o.elite){const k=G.hell?2:1.5;e.hp*=k;e.max*=k}/* 11-09: 장수 어려움 ×1.5·헬 ×2 체력 */}/* 11-09: 과일 비선공은 취소(사용자) — fmCalm 안 씀 */if(b.ranged&&(type.slice(0,3)==='sb_'||type.slice(0,3)==='fm_')&&!o.boss&&G.enemies.reduce((n,q)=>n+(q.ranged&&!q.boss?1:0),0)<(G.map==='su'?16:G.hell?10:G.hard?8:6)){e.ranged=1;e.shcd=G.hell?2.4:3.2;e.bdm=G.hell?.8:.6}if(type.slice(0,3)==='mg_')mgInit(e,b,o);if(o.hpMul){e.hp*=o.hpMul;e.max=e.hp}
-  if(G.map==='su'&&!o.boss&&!o.elite&&!o.suEl&&!o.hpMul){e.hp*=SU_HPM;e.max=e.hp}/* 11-20 사용자: 수원 초반 몬스터가 너무 금방 죽음 → 단단하게 */
+  if(G.map==='su'&&!o.boss&&!o.elite&&!o.suEl&&!o.hpMul){e.hp*=SU_HPM*suHpRamp();e.max=e.hp}/* 11-20 사용자: 수원 초반 몬스터가 너무 금방 죽음 → 단단하게 */
   if(G.hell){const et=ET();e.hp*=(et<300?HARD.hp*1.3:HARD.hp*1.3+(5-HARD.hp*1.3)*Math.min(1,(et-300)/300))*(e.elite?3:1);e.max=e.hp;e.dmg*=2;e.spd*=HARD.spd}
   else if(G.hard){const hm=(e.boss?HARD.boss:HARD.hp)*(G.hph||1);e.hp*=hm;e.max=e.hp;e.dmg*=HARD.dmg;e.spd*=HARD.spd}
   G.enemies.push(e);return e;
@@ -4723,7 +4723,7 @@ function update(dt){
   gf(false);if(window.lbPetTick)lbPetTick(dt);
   // gems & pickups
   const mag=S.magnet;
-  for(const g of G.gems){const dx=p.x-g.x,dy=p.y-g.y,d=Math.hypot(dx,dy);if(g.pull||d<mag){g.pull=1;const v=Math.max(260,d*4);g.x+=dx/d*v*dt;g.y+=dy/d*v*dt}if(d<14){g.got=1;G.xp+=g.v*S.growth*G.xpMul*(G.map==='su'?SU_XP:1);SND.p('gem');if(!G.bot&&Math.random()<.4)sparks(p.x,p.y-4,2,'#9fc2ff',90,.3)}}
+  for(const g of G.gems){const dx=p.x-g.x,dy=p.y-g.y,d=Math.hypot(dx,dy);if(g.pull||d<mag){g.pull=1;const v=Math.max(260,d*4);g.x+=dx/d*v*dt;g.y+=dy/d*v*dt}if(d<14){g.got=1;G.xp+=g.v*S.growth*G.xpMul*(G.map==='su'?suXpMul():1);SND.p('gem');if(!G.bot&&Math.random()<.4)sparks(p.x,p.y-4,2,'#9fc2ff',90,.3)}}
   G.gems=G.gems.filter(g=>!g.got);
   if(G.gems.length>450){const keep=G.gems.slice(-300),rest=G.gems.slice(0,-300);const v=rest.reduce((a,g)=>a+g.v,0);G.gems=keep;G.gems.push({x:rest[0].x,y:rest[0].y,v,big:1})}
   for(const k of G.pickups){const d=Math.hypot(p.x-k.x,p.y-k.y);if(d<20){k.got=1;if(k.k==='chest'){setTimeoutG(openChest,.05)}if(k.k==='fmradio')fmSupport();if(k.k==='mgstar')mgStar();if(k.k==='gukbap'){SND.p('heal');{const hv=Math.round(G.S.maxHp*(G.hell?.08:.15));healP(hv,'_food');toast('🍲 순대국','체력 +'+hv)}}if(k.k==='orb')healP(15,'pillar');if(k.k==='magnet'){SND.p('magnet');G.gems.forEach(g=>g.pull=1);toast('🧲 출석 체크!','경험치 전부 흡수')}}}

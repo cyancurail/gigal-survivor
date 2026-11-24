@@ -2148,20 +2148,23 @@ const SUU={C:400,K:2.3,R:520,CD:2,DM:.13,ACT:20,ON:90,NEAR:170,
   P:[[-420,-1350,0],[420,-1350,0],[-420,1385,1],[420,1385,1],[-1350,-380,2],[-1350,400,2],[1350,-380,3],[1350,400,3],[1000,1000,-1],[-1000,1000,-1],[1000,-1000,-1],[-1000,-1000,-1],[170,-640,-1],[-170,640,-1],[-640,170,-1],[640,-170,-1]]};
 function suTuInit(){G.suTu=SUU.P.map((q,i)=>({x:q[0],y:q[1],gi:q[2],on:q[2]>=0,t:0,pr:0,a:rnd(-3.14,3.14),cd:rnd(.3,1.4),sw:rnd(0,6),k:0}));G.suMs=[]}
 function suTuTick(dt){if(!G.suTu)suTuInit();const p=G.p,D=(G.fmSpD||60)*SUU.DM;
+  /* 11-24 사용자: 포탑마다 서로 다른 적을 노림 — 다른 포탑·날아가는 진주가 이미 잡은 적은 감점(보스는 공유) */
+  for(const e of G.enemies)e._tc=0;for(const T of G.suTu)if(T.tg&&!T.tg.dead)T.tg._tc=(T.tg._tc||0)+1;
   for(const T of G.suTu){
     if(T.gi>=0)T.on=!(G.suGH&&G.suGH[T.gi]<=0);
     else{const near=Math.hypot(p.x-T.x,p.y-T.y)<SUU.NEAR;if(T.on){T.t-=dt;if(T.t<=0){T.on=false;T.pr=0;if(!G.bot)G.texts.push({x:T.x,y:T.y-220,v:'포탑 휴면',life:1,col:'#9fb6c8'})}}
       else{T.pr=near?T.pr+dt:Math.max(0,T.pr-dt*.5);if(T.pr>=SUU.ACT){T.on=true;T.t=SUU.ON;if(!G.bot){SND.p('clear');toast('🌸 꽃부채 포탑 가동','90초 동안 곁을 지켜 줘요');sparks(T.x,T.y-120,24,['#ffffff','#ffc8e6','#9fe8ff'],200,.5,3)}}}}
     {const dx=p.x-T.x,dy=p.y-(T.y-6),d=Math.hypot(dx,dy*1.6);if(d<32&&d>.1){p.x=T.x+dx/d*32;p.y=T.y-6+dy/d*32/1.6}}
     T.k+=((T.on?1:0)-T.k)*Math.min(1,dt*3);if(!T.on){T.a=suAd(T.a+dt*.15);continue}
-    let b=null,bs=1e9;for(const e of G.enemies){if(e.dead||e.fmInv>0)continue;const d=Math.hypot(e.x-T.x,e.y-T.y);if(d>SUU.R)continue;const sc=d*(e.boss?.4:e.elite?.7:1);if(sc<bs){bs=sc;b=e}}
+    let b=T.tg;if(b&&(b.dead||b.fmInv>0||Math.hypot(b.x-T.x,b.y-T.y)>SUU.R)){if(b._tc>0)b._tc--;b=T.tg=null}
+    if(!b){let bs=1e9;for(const e of G.enemies){if(e.dead||e.fmInv>0)continue;const d=Math.hypot(e.x-T.x,e.y-T.y);if(d>SUU.R)continue;const sc=d*(e.boss?.4:e.elite?.7:1)+(e.boss?0:(e._tc||0)*420);if(sc<bs){bs=sc;b=e}}if(b){b._tc=(b._tc||0)+1;T.tg=b}}
     T.cd-=dt;if(!b){T.sw+=dt;T.a=suAd(T.a+Math.sin(T.sw*.7)*dt*.9);continue}
     const want=Math.atan2(b.y-T.y,b.x-T.x),da=suAd(want-T.a),m=3.2*dt;T.a=suAd(T.a+Math.max(-m,Math.min(m,da)));
     if(T.cd<=0&&Math.abs(da)<.35){T.cd=SUU.CD*(G.suMo>0?.5:1);if(!G.bot){const dd=Math.hypot(T.x-G.p.x,T.y-G.p.y);if(dd<VW*.8)SND.fx('su_pearl',{v:.34*(1-dd/(VW*.9)),gap:.5,key:'su_pearl'})}[-.95,.95,-.33,.33].forEach((o,i)=>{const a=T.a+o;G.suMs.push({x:T.x+Math.cos(a)*84,y:T.y-150+Math.sin(a)*34,a:T.a+o*1.25,v:150,tg:b,l:2.6,D:D*.5,w:i*.1+.001})})}/* 11-20 사용자: 꽃자락 4곳에서 차례로(진주 한 발 피해는 절반 → 합은 그대로) */}
   const M=G.suMs;for(let i=M.length-1;i>=0;i--){const o=M[i];if(o.w>0){o.w-=dt;if(o.w<=0&&!G.bot){SND.p('pop');(G.suBm=G.suBm||[]).push({x:o.x,y:o.y,t:0,k:.45});sparks(o.x,o.y,5,['#ffffff','#ffc8e6'],120,.25,2)}continue}o.l-=dt;let e=o.tg;if(!e||e.dead){e=null;let bd=260*260;for(const q of G.enemies){if(q.dead)continue;const d2=(q.x-o.x)**2+(q.y-o.y)**2;if(d2<bd){bd=d2;e=q}}o.tg=e}
     o.v=Math.min(430,o.v+520*dt);if(e){const want=Math.atan2(e.y-o.y,e.x-o.x),da=suAd(want-o.a),m=7*dt;o.a+=Math.max(-m,Math.min(m,da))}
     o.x+=Math.cos(o.a)*o.v*dt;o.y+=Math.sin(o.a)*o.v*dt;if(!G.bot&&Math.random()<.6)px(o.x,o.y,rnd(-12,12),rnd(-12,12),.35,pick(['#ffffff','#ffc8e6','#bfeaff']),2,1,1);
-    if((e&&(e.x-o.x)**2+(e.y-o.y)**2<(e.r+12)**2)||o.l<=0){for(const q of G.enemies){if(q.dead)continue;const R=50+q.r*.6;if((q.x-o.x)**2+(q.y-o.y)**2<R*R)hurt(q,q.boss?Math.min(o.D,q.max*.0005):o.D,'fmsup',{kb:q.boss?0:6})}
+    if((e&&(e.x-o.x)**2+(e.y-o.y)**2<(e.r+12)**2)||o.l<=0){for(const q of G.enemies){if(q.dead)continue;const R=50+q.r*.6;if((q.x-o.x)**2+(q.y-o.y)**2<R*R)hurt(q,q.boss?Math.min(o.D,q.max*.0005):(q===e&&!q.elite)?Math.max(o.D,q.hp*2+1):o.D,'fmsup',{kb:q.boss?0:6})/* 11-24 사용자: 일반 몬스터는 진주 한 발에 처치 */}
       if(!G.bot){sparks(o.x,o.y,9,['#ffffff','#ffc8e6','#9fe8ff'],170,.35,3);(G.suBm=G.suBm||[]).push({x:o.x,y:o.y,t:0})}M.splice(i,1)}}
   if(G.suBm){for(const b of G.suBm)b.t+=dt;G.suBm=G.suBm.filter(b=>b.t<.3)}}
 /* 11-22 사용자: 동기화 전(휴면) 진주포탑은 위에 회색 원을 씌우지 않고 포탑 색 자체를 회색으로. 시트를 한 번만 흑백으로 구움(saturation 합성 → 픽셀을 읽지 않아 오염 문제 없음) */

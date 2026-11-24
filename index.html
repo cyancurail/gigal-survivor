@@ -314,7 +314,7 @@ button:focus-visible{outline:3px solid var(--cyan);outline-offset:2px}
 <section class="scr gut" id="title">
   <div class="parade" id="parade"></div>
   <h1 class="logo vh">기갈<br>서바이버</h1>
-  <div class="s2ban"><img src="img/s3_banner.jpg" alt="기갈 서바이버 시즌3 Act.1 아스가르드 디펜스"><p class="s2tag">시즌3. 새로운 세상</p></div>
+  <div class="s2ban"><img src="img/s5_banner.jpg" alt="기갈 서바이버 시즌5 수원 - 최종 방어선, 인류의 수호자"><p class="s2tag">시즌5. 최종 방어선</p></div>
   <div class="how">
     <div>🕹 <b>이동만</b> 하세요. 공격은 자동이에요. (폰: 화면 드래그 · PC: 방향키)</div>
     <div>⭐ 레벨업마다 카드 1장: 다른 멤버 무기나 아이템을 얻어요.</div>
@@ -5365,9 +5365,12 @@ function mselPreview(pid,back){const it=PBY[pid];if(!it)return;const sk=mselSkin
 function cyGift(){if(SAVE.cyev||$('#cyGift')||$('#notice'))return;const ov=document.createElement('div');ov.className='ov';ov.id='cyGift';ov.innerHTML=`<div class="gcard tM" style="max-width:320px;text-align:center"><div class="gtier">🎁 선물 도착</div><h3>사이퍼즈 콜라보레이션<br>스킨 출시</h3><p>출시 기념으로 <b>👑 신화 확정 선택권 1장</b>을 드려요.<br>상점에서 갖고 싶은 신화를 골라요!</p><button class="big" type="button" id="cyOk">🎁 받기</button></div>`;document.body.appendChild(ov);
   $('#cyOk').onclick=()=>{if(!SAVE.cyev){SAVE.cyev=1;SAVE.tix=SAVE.tix||{};SAVE.tix.S=(SAVE.tix.S||0)+1;persist();SND.p('ach');toast('👑 신화 확정 선택권 1장!','상점에서 갖고 싶은 신화를 골라요',true)}ov.remove()}}
 /* ================= 패치 공지 ================= */
-const NOTICE_VER=8;
-function showNotice(){if($('#notice'))return;const ov=document.createElement('div');ov.className='ov';ov.id='notice';const got=!!SAVE.s3ev;ov.innerHTML=`<div class="ntc"><div class="nban"><img src="img/ear_banner.webp" alt=""><div class="nbt"><small>Gigal Survival · New Equipment</small><b>귀걸이 장비가 추가되었습니다.</b></div></div>
-<span class="ntag">📢 PATCH NOTE</span><h2>🎧 세이렌즈 썸띵 · 귀걸이 장비</h2>
+const NOTICE_VER=9;
+function showNotice(){if($('#notice'))return;const ov=document.createElement('div');ov.className='ov';ov.id='notice';const got=!!SAVE.s3ev;ov.innerHTML=`<div class="ntc"><div class="nban"><img src="img/s5_banner.jpg" alt=""><div class="nbt"><small>Gigal Survival · Season 5</small><b>시즌5 「수원」 · 최종 방어선</b></div></div>
+<span class="ntag">📢 PATCH NOTE</span><h2>🛰️ 시즌5 · 수원 — 인류의 수호자</h2>
+<div class="nhi">안녕하세요. 인디게임 <b>기갈 서바이버</b> 개발자 <b>은방울꽃</b>🌸입니다.<br><b>시즌5이자 마지막 맵</b>이 추가되었어요. 기갈 서바이버즈의 마지막은 어떻게 될까요?<br>장수, 그리고 마계 인천 탈환까지. 남은 무수리들이 최후의 침공을 시작했어요. 이상하게도 공격이라기보다, 무언가에게 쫓겨 달아나는 모습이었죠.</div>
+<div class="nsec">🆕 이번 업데이트</div><div class="nit"><div class="nnum">01</div><div><h4>🛰️ 새 맵 「수원」 · 최종 방어선</h4><p>행성 트와일라잇의 궤도 엘리베이터 아래, 성벽과 네 개의 게이트를 지켜요. 끝없는 밤에서 올라온 거대한 그림자가 무수리들을 쫓고 있어요.<br>🌸 꽃부채 포탑을 가동하고, 아이기스 함선을 불러 함께 싸워요.<br>🔓 열리는 조건: <em>인천 헬모드 클리어</em></p></div></div><div class="nit"><div class="nnum">02</div><div><h4>⌨️ 함선 출격 · 조작</h4><p>함선 출격은 <b>Q · W · E · R · T · Y</b> 키, 레벨업 선택은 <b>숫자 키 1~4</b>예요. 이동은 PC는 방향키, 폰은 화면 드래그예요.</p></div></div><div class="nit"><div class="nnum">03</div><div><h4>🎵 전용 배경음 · 효과음 · ❓ 비밀 보상</h4><p>수원만의 배경음과 효과음이 들어갔어요. 끝까지 지켜 낸 분께는 비밀 보상이 기다려요.</p></div></div>
+<div class="nsec">📜 지난 공지 · 세이렌즈 썸띵 · 귀걸이 장비</div>
 <div class="nhi">안녕하세요. 인디게임 <b>기갈 서바이버</b> 개발자 <b>은방울꽃</b>🌸입니다.<br>아이기스 함선들의 <b>통신기</b>가 <b>귀걸이 장비</b>로 추가되었어요. 장비 탭의 <b>🎧 귀걸이</b>에서 확인해 보세요.<br>🛰️ 아리아드네 : 귓가에 제 목소리가 닿게 해 둘게요, 언니.</div>
 <div class="ngift">🎁 귀걸이 업데이트 선물<br>📿 <b>신화 목걸이 확정권 1장</b><br>👑 <b>신화 스킨 확정권 1장</b><br><b>🚀 시즌5 업데이트 임박!</b><br><button class="big" type="button" id="ntcGiftE" ${SAVE.earGift?'disabled':''}>${SAVE.earGift?'✔ 받았어요 · 상점 확정권에서 써요':'선물 받기'}</button></div>
 <div class="nsec">📜 지난 공지 · 시즌3 Act.2 위기의 토마토 농장</div>
@@ -7297,7 +7300,7 @@ try{if(!SAVE.fmU&&SAVE.ach&&(SAVE.ach.hellboss||SAVE.hellC&&Object.keys(SAVE.hel
 try{if(SAVE.fmU&&sbAllHell(0))persist()}catch(e){}
 try{if(acctSync()||!SAVE._as){SAVE._as=1;persist()}}catch(e){}
 /* 시즌5 타이틀 배너(11-21): 수원 오픈(SU_OPEN) 또는 테스트 페이지에서만 시즌5 배너, 세로 화면이면 세로 버전 */
-window.s5Ban=()=>{const im=document.querySelector('.s2ban img'),tg=document.querySelector('.s2ban .s2tag');if(!im)return;const on=SU_OPEN||window.__devAll,por=innerHeight>innerWidth*1.05,src=on?(por?'img/s5_banner_v.jpg':'img/s5_banner.jpg'):'img/s3_banner.jpg';if(im.getAttribute('src')!==src)im.setAttribute('src',src);im.classList.toggle('v',on&&por);im.alt=on?'기갈 서바이버 시즌5 수원 - 최종 방어선, 인류의 수호자':'기갈 서바이버 시즌3 Act.1 아스가르드 디펜스';if(tg)tg.textContent=on?'시즌5. 최종 방어선':'시즌3. 새로운 세상'};
+window.s5Ban=()=>{const im=document.querySelector('.s2ban img'),tg=document.querySelector('.s2ban .s2tag');if(!im)return;const on=SU_OPEN||window.__devAll,por=false,src=on?'img/s5_banner.jpg':'img/s3_banner.jpg';/* 11-24 사용자: 게임 시작 전 배너는 가로 버전만 */if(im.getAttribute('src')!==src)im.setAttribute('src',src);im.classList.toggle('v',on&&por);im.alt=on?'기갈 서바이버 시즌5 수원 - 최종 방어선, 인류의 수호자':'기갈 서바이버 시즌3 Act.1 아스가르드 디펜스';if(tg)tg.textContent=on?'시즌5. 최종 방어선':'시즌3. 새로운 세상'};
 addEventListener('resize',s5Ban);addEventListener('load',s5Ban);try{s5Ban()}catch(e){}
 titleScreen();
 

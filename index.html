@@ -4944,10 +4944,15 @@ function toast(t,sub,pri){if(G&&G.bot)return;if(pri)TQ.unshift([t,sub]);else TQ.
 function nextToast(){const it=TQ.shift();if(!it){TQbusy=false;return}TQbusy=true;const el=document.createElement('div');el.className='toast';el.innerHTML=`${esc(it[0])}${it[1]?`<small>${esc(it[1])}</small>`:''}`;$('#toasts').innerHTML='';$('#toasts').appendChild(el);setTimeout(()=>{el.remove();nextToast()},TQ.length?1400:1800)}
 
 /* ================= pause / end ================= */
+/* 11-26 람쥐: 수원 레이드(보스 생존) 중에는 히든 무기 피날레의 화면 연출(암전·섬광)만 숨김 — 피해·무적·기절 등 판정은 그대로. 일시정지 메뉴 토글, 기기별 저장(기본 숨김) */
+let HXQ=(()=>{try{return localStorage.getItem('gs_hxq')!=='0'}catch(e){return true}})();
+function hxQuiet(){return HXQ&&G&&G.map==='su'&&typeof suOBoss==='function'&&suOBoss()}
+function hxQBtn(){return G&&G.map==='su'?`<div class="sndrow"><button type="button" class="sndb" id="hxqB" aria-pressed="${HXQ}">✨ 레이드 중 피날레 연출 ${HXQ?'숨김':'표시'}</button></div>`:''}
+document.addEventListener('click',e=>{const b=e.target.closest('#hxqB');if(!b)return;HXQ=!HXQ;try{localStorage.setItem('gs_hxq',HXQ?'1':'0')}catch(x){}b.setAttribute('aria-pressed',HXQ);b.textContent='✨ 레이드 중 피날레 연출 '+(HXQ?'숨김':'표시');try{SND.p('click')}catch(x){}});
 function togglePause(){if(!G||!G.running||!$('#lvov').hidden||G.escOpen)return;G.paused=!G.paused;$('#pauseov').hidden=!G.paused;if(G.paused){
   $('#pausemodal').innerHTML=`<h3>일시정지</h3><div class="stats3"><div><b>${fmt(G.t)}</b><span>생존</span></div><div><b>${G.kills}</b><span>처치</span></div><div><b>${G.lvl}</b><span>레벨</span></div></div>
   ${G.weapons.map(w=>`<div class="opt" style="cursor:default"><span class="ic">${wIco(w.k,0,w.st&&w.st.mode)}</span><span class="tx"><b>${esc((w.evo?WP[w.k].evoName:WP[w.k].name)+wsfx(w.k,w.st&&w.st.mode))} ${w.evo?'★':'Lv'+w.lvl}</b><small>진화: 8레벨 + ${IT[WP[w.k].evo].icon}${esc(IT[WP[w.k].evo].name)} ${G.items[WP[w.k].evo]?'✔':'✖'}</small></span></div>`).join('')}
-  ${sndBtns()}<div class="btns"><button class="big" type="button" id="resumeB">계속하기</button><button class="ghost" type="button" id="quitB">${G.cleared?'🚪 탈출하기 (골드 정산)':'포기하기'}</button></div>`;
+  ${hxQBtn()}${sndBtns()}<div class="btns"><button class="big" type="button" id="resumeB">계속하기</button><button class="ghost" type="button" id="quitB">${G.cleared?'🚪 탈출하기 (골드 정산)':'포기하기'}</button></div>`;
   $('#resumeB').onclick=togglePause;$('#quitB').onclick=()=>{$('#pauseov').hidden=true;endGame(!!G.cleared)}}}
 function escapePrompt(){G.paused=true;G.escOpen=true;SND.p('clear');$('#pauseov').hidden=false;
   $('#pausemodal').innerHTML=`<h3>🎉 단톡방 탈출 완료!</h3><p class="c">「${esc(GB()[GB().length-1].name)}」을 물리쳤어요!</p><div class="stats3"><div><b>${fmt(G.t)}</b><span>생존</span></div><div><b>${G.kills}</b><span>처치</span></div><div><b>${G.lvl}</b><span>레벨</span></div></div>
@@ -8860,7 +8865,7 @@ function raLine(s,ox,oy,hold,so){const pts=s.pts,t=s.t,dur=s.dur,w=s.w,n=pts.len
   ctx.globalAlpha=1}
 function raDraw(w){const st=w.st,p=G.p;if(!st.dr)return;
   // 피날레 캔버스: 밤처럼 어둡게 깔아 네온이 살아나게
-  if(st.F){const F=st.F,a=Math.min(1,F.t/.4)*(F.kt?Math.max(0,1-(F.t-F.kt)/.3):1);if(a>0){ctx.save();ctx.globalAlpha=a*.62;ctx.fillStyle='#0a0516';ctx.fillRect(F.x0,F.y0,F.W,F.H);ctx.restore()}}
+  if(st.F&&!hxQuiet()){const F=st.F,a=Math.min(1,F.t/.4)*(F.kt?Math.max(0,1-(F.t-F.kt)/.3):1);if(a>0){ctx.save();ctx.globalAlpha=a*.62;ctx.fillStyle='#0a0516';ctx.fillRect(F.x0,F.y0,F.W,F.H);ctx.restore()}}
   ctx.save();ctx.globalCompositeOperation='lighter';
   for(const s of st.dr){if(s.t<0)continue;let hold=s.hold;if(s.bar&&st.bar)hold=999;const ox=s.ox||0,oy=s.oy||0;
     if(s.bar&&st.bar){ctx.save();ctx.globalAlpha=.08+.04*Math.sin(G.t*6);ctx.fillStyle=RA.C.glow;ctx.beginPath();ctx.arc(p.x,p.y,st.bar.R,0,6.283);ctx.fill();ctx.restore()}
@@ -8869,7 +8874,7 @@ function raDraw(w){const st=w.st,p=G.p;if(!st.dr)return;
   // 손거울이 지키는 범위: 은빛 물결
   if(st.mir&&st.mir.t>.4){const M=st.mir,R=150*G.S.area,a=Math.min(1,(M.t-.4)*3)*Math.min(1,(RA.MD-M.t)*2);ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=a*.1;ctx.fillStyle='#7fe9ff';ctx.beginPath();ctx.arc(p.x,p.y,R,0,6.283);ctx.fill();ctx.globalAlpha=a*.7;ctx.strokeStyle='#d8f8ff';ctx.lineWidth=3;ctx.lineCap='round';for(let i=0;i<3;i++){const b=G.t*2.2+i*2.094;ctx.beginPath();ctx.arc(p.x,p.y,R,b,b+.9);ctx.stroke()}ctx.restore()}
   // 액자: 테두리 바깥을 하얗게
-  const F=st.F;if(F&&F.fr){const u=Math.min(1,(F.t-F.ft)/.75),out=F.kt?Math.max(0,1-(F.t-F.kt)/.3):1,i=F.in;if(u>0&&out>0){ctx.save();ctx.globalAlpha=out;ctx.fillStyle='#fffaf6';ctx.beginPath();const E=60;ctx.rect(F.x0-E,F.y0-E,F.W+E*2,F.H+E*2);
+  const F=st.F;if(F&&F.fr&&!hxQuiet()){const u=Math.min(1,(F.t-F.ft)/.75),out=F.kt?Math.max(0,1-(F.t-F.kt)/.3):1,i=F.in;if(u>0&&out>0){ctx.save();ctx.globalAlpha=out;ctx.fillStyle='#fffaf6';ctx.beginPath();const E=60;ctx.rect(F.x0-E,F.y0-E,F.W+E*2,F.H+E*2);
       const x0=F.x0+i,y0=F.y0+i,x1=F.x0+F.W-i,y1=F.y0+F.H-i,ww=i*u;ctx.rect(x0-i+ww,y0-i+ww,x1-x0+(i-ww)*2,y1-y0+(i-ww)*2);ctx.fill('evenodd');
       ctx.strokeStyle='rgba(60,0,30,.35)';ctx.lineWidth=5;ctx.globalAlpha=out*u;ctx.strokeRect(x0+3,y0+3,x1-x0-6,y1-y0-6);ctx.restore()}}
   ctx.save();for(const s of st.dr){if(s.t<0||!s.so)continue;raLine(s,s.ox||0,s.oy||0,s.hold,1)}ctx.restore();
@@ -13347,5 +13352,15 @@ function panel(){if(PN)return;if(!document.getElementById('agPCss')){const s=doc
  window.__ariLbHit=(x,y)=>{const b=LB.box;if(b&&lbOn()&&x>b.x-10&&x<b.x+b.w+10&&y>b.y-10&&y<b.y+b.h+10){try{SND.p('pop')}catch(e){}panel();return true}return oH?oH(x,y):false}}
 window.AG={SHIPS,menu,approve,launch,emerg,agU,panel,fast:()=>{window.__agFast=1},st:i=>{const q=SHIPS[i];if(!q)return null;return{un:!!window.__devAll||i<agU(),act:isAct(q.k),cd:Math.ceil(cdLeft(q.k)*60),once:q.k==='argo'&&!!(G.agCd&&G.agCd.argo>=900),n:q.n}}};
 })();
+/* 11-26: 히든 무기 피날레 화면 연출 가드 (hxQuiet) */
+try{const _o_glFinDraw=glFinDraw;glFinDraw=function(){if(hxQuiet())return;return _o_glFinDraw.apply(this,arguments)}}catch(e){}
+try{const _o_chFinDraw=chFinDraw;chFinDraw=function(){if(hxQuiet())return;return _o_chFinDraw.apply(this,arguments)}}catch(e){}
+try{const _o_dmFinDraw=dmFinDraw;dmFinDraw=function(){if(hxQuiet())return;return _o_dmFinDraw.apply(this,arguments)}}catch(e){}
+try{const _o_dsFinBg=dsFinBg;dsFinBg=function(){if(hxQuiet())return;return _o_dsFinBg.apply(this,arguments)}}catch(e){}
+try{const _o_dsFinFg=dsFinFg;dsFinFg=function(){if(hxQuiet())return;return _o_dsFinFg.apply(this,arguments)}}catch(e){}
+try{const _o_nkFinBg=nkFinBg;nkFinBg=function(){if(hxQuiet())return;return _o_nkFinBg.apply(this,arguments)}}catch(e){}
+try{const _o_nkFinFg=nkFinFg;nkFinFg=function(){if(hxQuiet())return;return _o_nkFinFg.apply(this,arguments)}}catch(e){}
+try{const _o_fqFinBg=fqFinBg;fqFinBg=function(){if(hxQuiet())return;return _o_fqFinBg.apply(this,arguments)}}catch(e){}
+try{const _o_fqFinFg=fqFinFg;fqFinFg=function(){if(hxQuiet())return;return _o_fqFinFg.apply(this,arguments)}}catch(e){}
 </script>
 </body></html>
